@@ -105,9 +105,9 @@ class FirebaseInitVM: ObservableObject {
             for change in snapshot.documentChanges {
                 if change.type == .added {
                     print("Received new document: \(change.document.data())")
-//                    if self.users.filter({$0.userId == change.document.documentID}).isEmpty {
-//                        self.users.append(User(userId: change.document.documentID, username: change.document.data()["username"] as? String ?? "No username", phoneNumber: change.document.data()["phoneNumber"] as? String ?? "No phone number"))
-//                    }
+                    if self.users.filter({$0.userId == change.document.documentID}).isEmpty {
+                        self.users.append(User(userId: change.document.documentID, username: change.document.data()["username"] as? String ?? "No username", phoneNumber: change.document.data()["phoneNumber"] as? String ?? "No phone number"))
+                    }
                 } else if change.type == .modified {
                     print("Received updated document: \(change.document.data())")
                 } else if change.type == .removed {
