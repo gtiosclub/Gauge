@@ -8,12 +8,8 @@
 import Foundation
 
 class User: Equatable, Identifiable {
-    static func == (lhs: User, rhs: User) -> Bool {
-        lhs.id == rhs.id && lhs.username == rhs.username && lhs.phoneNumber == rhs.phoneNumber
-    }
-    
     // MANDATORY
-    var id: String { userId }
+    var id: String { userId } // Derived attribute from userId to conform to Equatable, does NOT need to be in init
     var userId: String
     var username: String
     var phoneNumber: String
@@ -50,5 +46,9 @@ class User: Equatable, Identifiable {
         self.myComments = myComments
         self.myCategories = myCategories
         self.badges = badges
+    }
+    
+    static func == (lhs: User, rhs: User) -> Bool {
+        lhs.id == rhs.id && lhs.username == rhs.username && lhs.phoneNumber == rhs.phoneNumber
     }
 }
