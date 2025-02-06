@@ -10,11 +10,12 @@ import Foundation
 protocol Post {
     var postId: String {get set}
     var userId: String {get set}
-    var comments: [String] {get set}
-    var category: Category {get set} // (String Firebase)
+    var comments: [Comment] {get set}
+    var responses: [Response] {get set}
+    var category: Category {get set} // String in Firebase
     var viewCounter: Int {get set}
     var responseCounter: Int {get set}
-    var postDateAndTime: Date {get set} // (String Firebase)
+    var postDateAndTime: Date {get set} // String in Firebase
 }
 
 enum Category {
@@ -22,9 +23,20 @@ enum Category {
 }
 
 struct Comment {
-    var commentType: String
+    var commentType: CommentType // enum (text, GIF), String in Firebase
     var userId: String
     var commentId: String
-    var likeCount: Int
-    var dislikeCount: Int
+    var likes: [String] // userIds
+    var dislikes: [String] // userIds
+    var content: String
+}
+
+enum CommentType {
+    case text, GIF
+}
+
+struct Response {
+    var responseId: String
+    var userId: String
+    var responseOption: String
 }

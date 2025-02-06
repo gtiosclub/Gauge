@@ -10,7 +10,8 @@ import Foundation
 class SliderPost: Post {
     var postId: String
     var userId: String
-    var comments: [String]
+    var comments: [Comment]
+    var responses: [Response]
     var category: Category
     var viewCounter: Int
     var responseCounter: Int
@@ -23,10 +24,11 @@ class SliderPost: Post {
     var upperBoundLabel: String
     var responseResults: [Double]
     
-    init(postId: String, userId: String, comments: [String], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double]) {
+    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double]) {
         self.postId = postId
         self.userId = userId
         self.comments = comments
+        self.responses = responses
         self.category = category
         self.viewCounter = viewCounter
         self.responseCounter = responseCounter

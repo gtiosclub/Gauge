@@ -5,7 +5,6 @@
 //  Created by Datta Kansal on 2/6/25.
 //
 
-import Firebase
 import FirebaseAuth
 
 class AuthenticationVM: ObservableObject {
@@ -14,7 +13,6 @@ class AuthenticationVM: ObservableObject {
     @Published var currentUser: User?
     
     let auth = Auth.auth()
-    let db = Firestore.firestore()
     
     init() {
         auth.addStateDidChangeListener { [weak self] _, user in
@@ -39,7 +37,7 @@ class AuthenticationVM: ObservableObject {
             try await changeRequest.commitChanges()
             
             let userData = ["email": email, "name": username]
-            try await db.collection("USERS").document(user.uid).setData(userData)
+            try await Firebase.db.collection("USERS").document(user.uid).setData(userData)
             
             DispatchQueue.main.async {
                 self.currentUser = User(userId: user.uid, username: username, email: email)
@@ -76,13 +74,13 @@ class AuthenticationVM: ObservableObject {
     private func fetchUser(userId: String, email: String, username: String) {
         Task {
             do {
-                let document = try await db.collection("USERS").document(userId).getDocument()
+                let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
                 DispatchQueue.main.async {
                     if document.exists {
                         self.currentUser = User(userId: userId, username: username, email: email)
                     } else {
                         self.errorMessage = "User not found. Creating record."
-                        Task { try await self.db.collection("USERS").document(userId).setData(["email": email, "name": username]) }
+                        Task { try await Firebase.db.collection("USERS").document(userId).setData(["email": email, "name": username]) }
                     }
                 }
             } catch {
