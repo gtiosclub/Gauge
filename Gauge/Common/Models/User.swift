@@ -8,39 +8,42 @@
 import Foundation
 
 class User: Equatable, Identifiable {
-    // MANDATORY
+    // MARK: MANDATORY
     var id: String { userId } // Derived attribute from userId to conform to Equatable, does NOT need to be in init
     var userId: String
     var username: String
-    var phoneNumber: String = ""
     var email: String
-    // MANDATORY
+    var lastLogin: Date
+    var lastFeedRefresh: Date
+    var streak: Int
+    // MARK: MANDATORY
     
-    var friendIn: [User] = []
-    var friendOut: [User] = []
-    var friends: [User] = []
+    var friendIn: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
+    var friendOut: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
+    var friends: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
+    var badges: [String] = []
+    var profilePhoto: String = ""
+    var phoneNumber: String = ""
+    var myCategories: [String] = []
+    
+    // MARK: AI Algorithm Variables - Ignore for now
     var myPosts: [String] = []
     var myResponses: [String] = []
     var myReactions: [String] = []
     var mySearches: [String] = []
     var myComments: [String] = []
-    var myCategories: [String] = []
-    var badges: [String] = []
-    
-    init(userId: String, username: String, phoneNumber: String) {
-        self.userId = userId
-        self.username = username
-        self.phoneNumber = phoneNumber
-        self.email = ""
-    }
+    // MARK: AI Algorithm Variables - Ignore for now
     
     init(userId: String, username: String, email: String) {
         self.userId = userId
         self.username = username
         self.email = email
+        self.lastLogin = Date()
+        self.streak = 0
+        self.lastFeedRefresh = Date()
     }
     
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [User], friendOut: [User], friends: [User], myPosts: [String], myResponses: [String], myReactions: [String], mySearches: [String], myComments: [String], myCategories: [String], badges: [String]) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myPosts: [String], myResponses: [String], myReactions: [String], mySearches: [String], myComments: [String], myCategories: [String], badges: [String], streak: Int) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -55,6 +58,12 @@ class User: Equatable, Identifiable {
         self.myComments = myComments
         self.myCategories = myCategories
         self.badges = badges
+        
+        // Add function to update last login + last feed refresh in Firebase
+        self.lastLogin = Date()
+        self.lastFeedRefresh = Date()
+        // Add logic to add one to streak if it is maintained, update in Firebase
+        self.streak = streak
     }
     
     static func == (lhs: User, rhs: User) -> Bool {
