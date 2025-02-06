@@ -8,7 +8,7 @@
 import Foundation
 import Firebase
 
-class FirebaseInitVM: ObservableObject {
+class FirebaseDemoVM: ObservableObject {
     let db = Firestore.firestore()
     @Published var users: [User] = []
     
