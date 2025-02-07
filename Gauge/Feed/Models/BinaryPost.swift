@@ -7,7 +7,8 @@
 
 import Foundation
 
-class BinaryPost: Post {
+class BinaryPost: Post, Identifiable {
+    var id: String { postId }
     var postId: String
     var userId: String
     var comments: [Comment]
