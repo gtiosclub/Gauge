@@ -7,7 +7,7 @@
 
 import Foundation
 
-class PostFirebase {
+class PostFirebase: ObservableObject {
     
     func createBinaryPost(userId: String, category: Category, question: String, responseOption1: String, responseOption2: String) {
         // Create post instance
@@ -76,7 +76,7 @@ class PostFirebase {
         )
         
         // Create document in Firebase
-        let documentRef = Firebase.db.collection("POSTS").addDocument(data: [:])
+        let documentRef = Firebase.db.collection("POSTS").document(post.postId)
 
         documentRef.setData([
             "type": PostType.SliderPost.rawValue,
