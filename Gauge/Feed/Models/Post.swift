@@ -18,8 +18,12 @@ protocol Post {
     var postDateAndTime: Date {get set} // String in Firebase
 }
 
-enum Category {
+enum Category: String {
     case food, fashion, travel, sports, entertainment, tech, arts, other
+}
+
+enum PostType: String {
+    case BinaryPost, SliderPost, RankPost
 }
 
 struct Comment {
