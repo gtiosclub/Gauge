@@ -44,7 +44,8 @@ struct DemoView: View {
                         lowerBoundValue: 1,
                         upperBoundValue: 10,
                         lowerBoundLabel: "Terrible 🤮",
-                        upperBoundLabel: "Goated 🐐")
+                        upperBoundLabel: "Goated 🐐"
+                    )
                 }
             }
             
