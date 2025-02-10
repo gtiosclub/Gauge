@@ -7,6 +7,9 @@
 
 import Foundation
 
-class PostFirebase {
+class PostFirebase: ObservableObject {
+    @Published var feedPosts: [Post] = []
+    @Published var allQueriedPosts: [Post] = []
+    
     
 }

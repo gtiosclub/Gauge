@@ -16,12 +16,13 @@ class RankPost: Post {
     var viewCounter: Int
     var responseCounter: Int
     var postDateAndTime: Date
+    var favoritedBy: [String]
     
     var question: String
     var responseOptions: [String]
     var responseResults: [[String]]
     
-    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, responseOptions: [String], responseResults: [[String]]) {
+    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, responseOptions: [String], responseResults: [[String]], favoritedBy: [String]) {
         self.postId = postId
         self.userId = userId
         self.comments = comments
@@ -30,6 +31,8 @@ class RankPost: Post {
         self.viewCounter = viewCounter
         self.responseCounter = responseCounter
         self.postDateAndTime = postDateAndTime
+        self.favoritedBy = favoritedBy
+        
         self.question = question
         self.responseOptions = responseOptions
         self.responseResults = responseResults
