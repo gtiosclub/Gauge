@@ -8,7 +8,9 @@
 import Foundation
 
 class PostFirebase: ObservableObject {
-    
+    @Published var feedPosts: [Post] = []
+    @Published var allQueriedPosts: [Post] = []
+        
     func createBinaryPost(userId: String, category: Category, question: String, responseOption1: String, responseOption2: String) {
         // Create post instance
         let post = BinaryPost(
@@ -104,6 +106,5 @@ class PostFirebase: ObservableObject {
                 
             }
         }
-    }
-    
+    }    
 }
