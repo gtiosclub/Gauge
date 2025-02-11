@@ -148,5 +148,29 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
+    
+    func addComment(postId: String, commentId: String, commentType: CommentType, userId: String ,content: String){
+            let newCommentRef = Firebase.db.collection("POSTS")
+                .document(postId).collection("COMMENTS").document(commentId)
+            
+            newCommentRef.setData([
+                "postId" : postId,
+                "commentId" : commentId,
+                "commentType": String(describing: commentType),
+                "userId": userId ,
+                "content": content,
+                "likes" : [],
+                "dislikes" : [],
+            ]) { error in
+                if let error = error{
+                    print("Error adding Comment: \(error)")
+                } else {
+                    print("added new comment to COMMENTS")
+                }
+            }
+        }
+
+
 
 }
