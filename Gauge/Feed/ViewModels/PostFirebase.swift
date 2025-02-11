@@ -70,11 +70,6 @@ class PostFirebase: ObservableObject {
                 print("error writing doc: \(error)")
             } else {
                 print("added new post to POSTS")
-                
-                // Create empty collections for comments & responses
-                documentRef.collection("COMMENTS")
-                documentRef.collection("RESPONSES")
-                documentRef.collection("VIEWS")
             }
         }
     }
@@ -116,11 +111,6 @@ class PostFirebase: ObservableObject {
                 print("error writing doc: \(error)")
             } else {
                 print("added new post to POSTS")
-                
-                // Create empty collections for comments & responses
-                documentRef.collection("COMMENTS")
-                documentRef.collection("RESPONSES")
-                documentRef.collection("VIEWS")
             }
         }
     }    
