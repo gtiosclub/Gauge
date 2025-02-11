@@ -10,6 +10,7 @@ import SwiftData
 
 struct DemoView: View {
     @StateObject var firebaseVM = FirebaseDemoVM()
+    @StateObject var userVM = UserFirebase()
 
     var body: some View {
         VStack(spacing: 20) {
@@ -21,6 +22,13 @@ struct DemoView: View {
                 
                 Button("Add new User") {
                     firebaseVM.addNewUser()
+                }
+                
+                Button("add user search") {
+                    userVM.addUserSearch(
+                        userId: "2kDjg6AEanY2raJDnDgqb76M6dn1",
+                        search: "food"
+                    )
                 }
             }
             
