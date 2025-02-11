@@ -16,6 +16,7 @@ class SliderPost: Post {
     var viewCounter: Int
     var responseCounter: Int
     var postDateAndTime: Date
+    var favoritedBy: [String]
     
     var question: String
     var lowerBoundValue: Double
@@ -24,7 +25,28 @@ class SliderPost: Post {
     var upperBoundLabel: String
     var responseResults: [Double]
     
-    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double]) {
+    // Initializing locally
+    init (postId: String, userId: String, category: Category, postDateAndTime: Date, question: String, lowerBoundLabel: String, upperBoundLabel: String, lowerBoundValue: Double, upperBoundValue: Double) {
+        self.postId = postId
+        self.userId = userId
+        self.comments = []
+        self.responses = []
+        self.category = category
+        self.viewCounter = 0
+        self.responseCounter = 0
+        self.postDateAndTime = postDateAndTime
+        self.favoritedBy = []
+        
+        self.question = question
+        self.lowerBoundLabel = lowerBoundLabel
+        self.upperBoundLabel = upperBoundLabel
+        self.lowerBoundValue = lowerBoundValue
+        self.upperBoundValue = upperBoundValue
+        self.responseResults = []
+    }
+    
+    // Initializing from Firebase
+    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double], favoritedBy: [String]) {
         self.postId = postId
         self.userId = userId
         self.comments = comments
@@ -33,6 +55,8 @@ class SliderPost: Post {
         self.viewCounter = viewCounter
         self.responseCounter = responseCounter
         self.postDateAndTime = postDateAndTime
+        self.favoritedBy = favoritedBy
+        
         self.question = question
         self.lowerBoundValue = lowerBoundValue
         self.upperBoundValue = upperBoundValue

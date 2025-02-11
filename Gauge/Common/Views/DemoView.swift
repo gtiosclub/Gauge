@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 
 struct DemoView: View {
-    @Environment(\.modelContext) private var modelContext
     @StateObject var firebaseVM = FirebaseDemoVM()
 
     var body: some View {
