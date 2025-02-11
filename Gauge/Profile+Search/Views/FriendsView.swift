@@ -46,7 +46,7 @@ struct FriendsView: View {
     struct SearchView: View {
         var userID: String
         @State private var searchText = ""
-        @State private var users: [User] = []
+        @State private var users: [[String: Any]] = []
         @State private var isLoading = false
         
         var body: some View {
@@ -63,9 +63,10 @@ struct FriendsView: View {
                     ProgressView("Searching...")
                         .padding()
                 } else {
-                    List(users) { user in
+                    List(users.indices, id: \.self) { index in
+                        let user = users[index]
                         HStack {
-                            Text(user.username)
+                            Text(user["username"] as? String ?? "Unknown")
                             Spacer()
                             Button(action: {
                                 // Add friend request logic here
@@ -85,10 +86,9 @@ struct FriendsView: View {
             isLoading = true
             users.removeAll()
             
-            // Use the Firebase singleton instance to query Firestore
-            Firebase.db.collection("USERS")
-                .whereField("username", isGreaterThanOrEqualTo: searchText)
-                .whereField("username", isLessThanOrEqualTo: searchText + "\u{f8ff}")
+            // Query Firestore for usernames that match the search text
+            Firestore.firestore().collection("USERS")
+                .whereField("username", isEqualTo: searchText) // Exact match
                 .getDocuments { (querySnapshot, error) in
                     isLoading = false
                     if let error = error {
@@ -96,15 +96,13 @@ struct FriendsView: View {
                     } else {
                         for document in querySnapshot!.documents {
                             let data = document.data()
-                            if let userID = data["userID"] as? String, let username = data["username"] as? String, let email = data["email"] as? String {
-                                let user = User(userId: userID, username: username,email:email)
-                                self.users.append(user)
-                            }
+                            self.users.append(data)
                         }
                     }
                 }
         }
     }
+    
     
     struct IncomingRequestsView: View {
         var userID: String
