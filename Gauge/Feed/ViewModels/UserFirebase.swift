@@ -36,7 +36,6 @@ class UserFirebase: ObservableObject {
                         postIds.append(document.documentID)
                     }
                     
-                    print(postIds.count)
                     completion (postIds)
                 }
             }
