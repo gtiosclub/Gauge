@@ -19,8 +19,12 @@ protocol Post {
     var favoritedBy: [String] {get set} // UserIds of users that have favorited
 }
 
-enum Category {
+enum Category: String {
     case food, fashion, travel, sports, entertainment, tech, arts, other
+}
+
+enum PostType: String {
+    case BinaryPost, SliderPost, RankPost
 }
 
 struct Comment {
