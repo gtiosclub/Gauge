@@ -145,19 +145,6 @@ class PostFirebase: ObservableObject {
                 print("Error writing RankPost document: \(error)")
             } else {
                 print("Added new ranked post to POSTS \(documentRef.documentID)")
-                
-                // Create empty subcollections
-                let collectionsToCreate = ["COMMENTS", "RESPONSES", "VIEWS"]
-                
-                for collectionName in collectionsToCreate {
-                    documentRef.collection(collectionName).document().setData([:]) { error in
-                        if let error = error {
-                            print("Error creating \(collectionName) subcollection: \(error)")
-                        } else {
-                            print("Created empty \(collectionName) subcollection")
-                        }
-                    }
-                }
             }
         }
     }
