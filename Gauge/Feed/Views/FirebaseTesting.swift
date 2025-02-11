@@ -10,11 +10,11 @@ import SwiftUI
 struct FirebaseTesting: View {
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
+    @State private var postIds: [String] = []
 
     var body: some View {
         VStack(spacing: 20) {
             Section("Write Data") {
-                // Krish Tests
                 Button("Add Binary Post") {
                     postVM.createBinaryPost(
                         userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
@@ -45,6 +45,12 @@ struct FirebaseTesting: View {
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
                     )
                 }
+                
+                Button("add user search") {
+                    userVM.addUserSearch(
+                        search: "friends"
+                    )
+                }
             }
             
             Section("Get Live Data (Great for feed & games!)") {
@@ -54,7 +60,13 @@ struct FirebaseTesting: View {
             }
             
             Section("Read Data") {
-                
+                Button("Get posts by userId") {
+                    userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
+                        self.postIds = postIds
+                    }
+                    
+                    print(postIds.count)
+                }
             }
             
             Section("Update Data") {
@@ -73,4 +85,6 @@ struct FirebaseTesting: View {
 
 #Preview {
     FirebaseTesting()
+        .environmentObject(PostFirebase())
+        .environmentObject(UserFirebase())
 }

@@ -24,12 +24,6 @@ struct DemoView: View {
                     firebaseVM.addNewUser()
                 }
                 
-                Button("add user search") {
-                    userVM.addUserSearch(
-                        userId: "2kDjg6AEanY2raJDnDgqb76M6dn1",
-                        search: "food"
-                    )
-                }
             }
             
             Section("Get Live Data (Great for feed & games!)") {
