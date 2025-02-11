@@ -63,7 +63,8 @@ class PostFirebase: ObservableObject {
             "responseOption1": post.responseOption1,
             "responseOption2": post.responseOption2,
             "responseResult1": post.responseResult1,
-            "responseResult2": post.responseResult2
+            "responseResult2": post.responseResult2,
+            "favoritedBy": post.favoritedBy
         ]) { error in
             if let error = error {
                 print("error writing doc: \(error)")
@@ -108,7 +109,8 @@ class PostFirebase: ObservableObject {
             "upperBoundValue": post.upperBoundValue,
             "lowerBoundLabel": post.lowerBoundLabel,
             "upperBoundLabel": post.upperBoundLabel,
-            "responseResults": post.responseResults
+            "responseResults": post.responseResults,
+            "favoritedBy": post.favoritedBy
         ]) { error in
             if let error = error {
                 print("error writing doc: \(error)")
