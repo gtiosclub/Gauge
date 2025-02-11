@@ -36,6 +36,15 @@ struct FirebaseTesting: View {
                         upperBoundLabel: "Goated 🐐"
                     )
                 }
+                
+                Button("Add Ranked Post") {
+                    postVM.createRankPost(
+                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+                        category: .entertainment,
+                        question: "Best Half-Time Performance?",
+                        responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
+                    )
+                }
             }
             
             Section("Get Live Data (Great for feed & games!)") {
