@@ -25,6 +25,27 @@ class SliderPost: Post {
     var upperBoundLabel: String
     var responseResults: [Double]
     
+    // Initializing locally
+    init (postId: String, userId: String, category: Category, postDateAndTime: Date, question: String, lowerBoundLabel: String, upperBoundLabel: String, lowerBoundValue: Double, upperBoundValue: Double) {
+        self.postId = postId
+        self.userId = userId
+        self.comments = []
+        self.responses = []
+        self.category = category
+        self.viewCounter = 0
+        self.responseCounter = 0
+        self.postDateAndTime = postDateAndTime
+        self.favoritedBy = []
+        
+        self.question = question
+        self.lowerBoundLabel = lowerBoundLabel
+        self.upperBoundLabel = upperBoundLabel
+        self.lowerBoundValue = lowerBoundValue
+        self.upperBoundValue = upperBoundValue
+        self.responseResults = []
+    }
+    
+    // Initializing from Firebase
     init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double], favoritedBy: [String]) {
         self.postId = postId
         self.userId = userId

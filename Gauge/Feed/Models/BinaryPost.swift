@@ -24,6 +24,26 @@ class BinaryPost: Post {
     var responseResult1: Int
     var responseResult2: Int
     
+    // Initializing locally
+    init (postId: String, userId: String, category: Category, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String) {
+        self.postId = postId
+        self.userId = userId
+        self.comments = []
+        self.responses = []
+        self.category = category
+        self.viewCounter = 0
+        self.responseCounter = 0
+        self.postDateAndTime = postDateAndTime
+        self.favoritedBy = []
+        
+        self.question = question
+        self.responseOption1 = responseOption1
+        self.responseOption2 = responseOption2
+        self.responseResult1 = 0
+        self.responseResult2 = 0
+    }
+    
+    // Initializing from Firebase
     init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, responseResult1: Int, responseResult2: Int, favoritedBy: [String]) {
         self.postId = postId
         self.userId = userId

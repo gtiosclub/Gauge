@@ -11,7 +11,13 @@ struct HomeView: View {
     @EnvironmentObject var userVM: UserFirebase
     
     var body: some View {
-        Text("Hello, \(userVM.user.username)!")
+        VStack {
+            Text("Hello, \(userVM.user.username)!")
+            
+            NavigationLink("To Testing Screen") {
+                FirebaseTesting()
+            }
+        }
     }
 }
 

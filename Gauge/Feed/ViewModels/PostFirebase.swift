@@ -6,27 +6,46 @@
 //
 
 import Foundation
+import Firebase
 
 class PostFirebase: ObservableObject {
     @Published var feedPosts: [Post] = []
     @Published var allQueriedPosts: [Post] = []
+    
+    init() {
+        Keys.fetchKeys()
+    }
+    
+    func getLiveFeedPosts(user: User) {
+        let allPosts: [String] = user.myViews + user.myResponses
+        Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
+            guard let snapshot = snapshot else {
+                print("Error fetching post updates: \(error!)")
+                return
+            }
+            
+            for change in snapshot.documentChanges {
+                if change.type == .added {
+                    
+                } else if change.type == .modified {
+
+                } else if change.type == .removed {
+                    
+                }
+            }
+        }
+    }
         
     func createBinaryPost(userId: String, category: Category, question: String, responseOption1: String, responseOption2: String) {
         // Create post instance
         let post = BinaryPost(
             postId: UUID().uuidString,
             userId: userId,
-            comments: [],
-            responses: [],
             category: category,
-            viewCounter: 0,
-            responseCounter: 0,
             postDateAndTime: Date(),
             question: question,
             responseOption1: responseOption1,
-            responseOption2: responseOption2,
-            responseResult1: 0,
-            responseResult2: 0
+            responseOption2: responseOption2
         )
         
         // Create document in Firebase
@@ -54,6 +73,7 @@ class PostFirebase: ObservableObject {
                 // Create empty collections for comments & responses
                 documentRef.collection("COMMENTS")
                 documentRef.collection("RESPONSES")
+                documentRef.collection("VIEWS")
             }
         }
     }
@@ -63,18 +83,13 @@ class PostFirebase: ObservableObject {
         let post = SliderPost(
             postId: UUID().uuidString,
             userId: userId,
-            comments: [],
-            responses: [],
             category: category,
-            viewCounter: 0,
-            responseCounter: 0,
             postDateAndTime: Date(),
             question: question,
-            lowerBoundValue: lowerBoundValue,
-            upperBoundValue: upperBoundValue,
             lowerBoundLabel: lowerBoundLabel,
             upperBoundLabel: upperBoundLabel,
-            responseResults: []
+            lowerBoundValue: lowerBoundValue,
+            upperBoundValue: upperBoundValue
         )
         
         // Create document in Firebase
@@ -103,7 +118,7 @@ class PostFirebase: ObservableObject {
                 // Create empty collections for comments & responses
                 documentRef.collection("COMMENTS")
                 documentRef.collection("RESPONSES")
-                
+                documentRef.collection("VIEWS")
             }
         }
     }    

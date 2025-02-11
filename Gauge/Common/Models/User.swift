@@ -28,12 +28,13 @@ class User: Equatable, Identifiable {
     var myNextPosts: [String] = []
     
     // MARK: AI Algorithm Variables
-    var myPosts: [String] = []
-    var myResponses: [String] = []
-    var myReactions: [String] = []
-    var mySearches: [String] = []
-    var myComments: [String] = []
-    var myAccessedProfiles: [String] = [] // User IDs of other users, sorted by profile accesses
+    var myPosts: [String] = [] // PostIds of the user's posts
+    var myResponses: [String] = [] // PostIds of those responded to
+    var myViews: [String] = [] // PostIds of those skipped
+    var myFavorites: [String] = [] // PostIds of those favorited
+    var myComments: [String] = [] // PostIds of those commented on
+    var mySearches: [String] = [] // Search queries
+    var myAccessedProfiles: [String] = [] // UserIDs of other users, sorted by profile accesses
     // MARK: AI Algorithm Variables
     
     init(userId: String, username: String, email: String) {
@@ -45,7 +46,7 @@ class User: Equatable, Identifiable {
         self.lastFeedRefresh = Date()
     }
     
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myPosts: [String], myResponses: [String], myReactions: [String], mySearches: [String], myComments: [String], myCategories: [String], badges: [String], streak: Int) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myPosts: [String], myResponses: [String], myFavorites: [String], mySearches: [String], myComments: [String], myCategories: [String], badges: [String], streak: Int) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -55,7 +56,7 @@ class User: Equatable, Identifiable {
         self.friends = friends
         self.myPosts = myPosts
         self.myResponses = myResponses
-        self.myReactions = myReactions
+        self.myFavorites = myFavorites
         self.mySearches = mySearches
         self.myComments = myComments
         self.myCategories = myCategories
