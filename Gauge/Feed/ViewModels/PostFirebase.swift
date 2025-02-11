@@ -113,5 +113,53 @@ class PostFirebase: ObservableObject {
                 print("added new post to POSTS")
             }
         }
-    }    
+    }
+    
+    func createRankPost(userId: String, category: Category, question: String, responseOptions: [String]) {
+        let post = RankPost(
+            postId: UUID().uuidString,
+            userId: userId,
+            category: category,
+            postDateAndTime: Date(),
+            question: question,
+            responseOptions: responseOptions
+        )
+        
+        let documentRef = Firebase.db.collection("POSTS").document(post.postId)
+        
+        // Main post document data
+        documentRef.setData([
+            "type": PostType.RankPost.rawValue,
+            "postId": post.postId,
+            "userId": post.userId,
+            "category": post.category.rawValue,
+            "postDateAndTime": Timestamp(date: post.postDateAndTime),
+            "question": post.question,
+            "responseOptions": post.responseOptions,
+            "viewCounter": 0,
+            "responseCounter": 0,
+            "favoritedBy": post.favoritedBy,
+            "responseResults": post.responseResults
+        ]) { error in
+            if let error = error {
+                print("Error writing RankPost document: \(error)")
+            } else {
+                print("Added new ranked post to POSTS \(documentRef.documentID)")
+                
+                // Create empty subcollections
+                let collectionsToCreate = ["COMMENTS", "RESPONSES", "VIEWS"]
+                
+                for collectionName in collectionsToCreate {
+                    documentRef.collection(collectionName).document().setData([:]) { error in
+                        if let error = error {
+                            print("Error creating \(collectionName) subcollection: \(error)")
+                        } else {
+                            print("Created empty \(collectionName) subcollection")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
