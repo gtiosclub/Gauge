@@ -23,9 +23,12 @@ struct GamesHome: View {
                         .cornerRadius(10)
                 }
                 .navigationTitle(Text("Games"))
+                
             }
             
         }
+        
+        
     }
 }
 

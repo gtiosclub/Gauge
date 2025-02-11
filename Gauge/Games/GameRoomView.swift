@@ -10,20 +10,23 @@ import SwiftUI
 struct GameRoomView: View {
     @State var showSettings: Bool = false
     @StateObject private var gameSettings = GameSettingsVM()
+    @State var isHost: Bool
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         
-        //navigation view
-        NavigationView {
             
-            //vstack for the entire screen
-            VStack(spacing: 20) {
-                Spacer()
-                
-                //roomcode
-                Text("ROOMCODE")
-                    .font(.title)
-                
+        //vstack for the entire screen
+        VStack(spacing: 20) {
+            Spacer()
+            
+            //roomcode
+            Text("ROOMCODE")
+                .font(.title)
+            
+            
+            
+            if isHost {
                 Spacer()
                 
                 //start button to start the game
@@ -35,24 +38,30 @@ struct GameRoomView: View {
                 .frame(width: 80, height: 30)
                 .background(Color.blue)
                 .foregroundColor(.white)
+            } else {
                 
-                Spacer()
-                
-                //hstack for the icons of the players
-                HStack {
-                    
-                    
-                }
-                .frame(maxWidth: .infinity, alignment: .top)
-                .frame(height: UIScreen.main.bounds.height / 2) //white bottom half of the screen
-                .background(.white)
+                Text("Waiting for host...")
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top) //vstack covers entire screen and aligns to the top
-            .navigationTitle(Text("Take Match"))
-            .background(Color(.systemGray3))
-            .navigationBarTitleDisplayMode(.inline) //places title and cogwheel at the top and center
-            .toolbar { //adds a toolbar for the cogwheel
+            
+            Spacer()
+            
+            //hstack for the icons of the players
+            HStack {
+                
+                
+            }
+            .frame(maxWidth: .infinity, alignment: .top)
+            .frame(height: UIScreen.main.bounds.height / 2) //white bottom half of the screen
+            .background(.white)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top) //vstack covers entire screen and aligns to the top
+        .navigationTitle(Text("Take Match"))
+        .background(Color(.systemGray3))
+        .navigationBarTitleDisplayMode(.inline) //places title and cogwheel at the top and center
+        .navigationBarBackButtonHidden(true)
+        .toolbar { //adds a toolbar for the cogwheel
 
+            if isHost {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     
                     //button for openign the settings page
@@ -64,19 +73,36 @@ struct GameRoomView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showSettings) { // makes the settings page a sheet and not a navigation to another page
                 
-                GameSettingsView(gameSettings: gameSettings)
-                    .presentationDetents([.medium]) //stops before full screen
-                    .presentationDragIndicator(.visible) //shows drag indicator
+            ToolbarItem(placement: .navigationBarLeading) {
+                
+                //back button
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.4)) { // Smooth transition
+                        dismiss()
+                    }
+                }) {
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(.black)
+                }
             }
+            
+        }
+        .sheet(isPresented: $showSettings) { // makes the settings page a sheet and not a navigation to another page
+            
+            GameSettingsView(gameSettings: gameSettings)
+                .presentationDetents([.medium]) //stops before full screen
+                .presentationDragIndicator(.visible) //shows drag indicator
         }
     }
+        
         
 }
 
 #Preview {
-    GameRoomView()
+    NavigationStack {
+        GameRoomView(isHost: false)
+    }
 }
 
 //game settings sheet

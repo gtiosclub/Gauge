@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct TakeMatchHome: View {
+    var isHost: Bool = false
+    
     var body: some View {
             
             VStack() {
@@ -21,7 +23,7 @@ struct TakeMatchHome: View {
                     .cornerRadius(5)
                 HStack() {
                     
-                    NavigationLink(destination: GameRoomView()) {
+                    NavigationLink(destination: GameRoomView(isHost: true)) {
                         
                         Text("Create")
                             .frame(width: 80, height: 15)
@@ -32,20 +34,34 @@ struct TakeMatchHome: View {
                             .cornerRadius(5)
                     }
                     
-                    Text("Join")
-                        .frame(width: 80, height: 15)
-                        .bold()
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(5)
+                    NavigationLink(destination: GameRoomView(isHost: false)) {
+                        Text("Join")
+                            .frame(width: 80, height: 15)
+                            .bold()
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(5)
+                    }
                 }
             }
             .frame(width: 200)
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    
+                    NavigationLink(destination: GamesHome()) {
+                        Image(systemName: "arrow.left")
+                            .foregroundColor(.black)
+                    }
+                }
+            }
         
     }
 }
 
 #Preview {
-    TakeMatchHome()
+    NavigationStack {
+        TakeMatchHome()
+    }
 }
