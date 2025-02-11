@@ -10,7 +10,22 @@ import SwiftUI
 struct GamesHome: View {
     // Will include a tab list view of all the games in the app
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        
+        NavigationView {
+            
+            VStack(spacing: 20) {
+                
+                NavigationLink(destination: TakeMatchHome()) {
+                    Text("Take Match")
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(.blue)
+                        .cornerRadius(10)
+                }
+                .navigationTitle(Text("Games"))
+            }
+            
+        }
     }
 }
 
