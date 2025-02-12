@@ -25,7 +25,7 @@ struct TakeMatchHome: View {
                     .cornerRadius(5)
                 HStack {
                     
-                    NavigationLink(destination: GameRoomView(isHost: true, roomCode: roomCode)) {
+                    NavigationLink(destination: TakeMatchRoomView(isHost: true, roomCode: roomCode)) {
                         
                         Text("Create")
                             .frame(width: 80, height: 15)
@@ -75,7 +75,7 @@ struct TakeMatchHome: View {
                                 .opacity(0.1)
                             
                         } else {
-                            NavigationLink(destination: GameRoomView(isHost: false, roomCode: roomCode)) {
+                            NavigationLink(destination: TakeMatchRoomView(isHost: false, roomCode: roomCode)) {
                                 
                                 Image(systemName: "arrow.right")
                                     .foregroundColor(.black)

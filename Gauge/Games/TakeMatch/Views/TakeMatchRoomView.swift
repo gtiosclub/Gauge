@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct GameRoomView: View {
+struct TakeMatchRoomView: View {
     @State var showSettings: Bool = false
-    @StateObject private var gameSettings = GameSettingsVM()
+    @StateObject private var gameSettings = TakeMatchSettingsVM()
     @State var isHost: Bool
     @State var roomCode: String
     @Environment(\.dismiss) private var dismiss
@@ -102,14 +102,14 @@ struct GameRoomView: View {
 
 #Preview {
     NavigationStack {
-        GameRoomView(isHost: false, roomCode: "1234")
+        TakeMatchRoomView(isHost: false, roomCode: "1234")
     }
 }
 
 //game settings sheet
 struct GameSettingsView: View {
     
-    @StateObject var gameSettings = GameSettingsVM()
+    @StateObject var gameSettings = TakeMatchSettingsVM()
     
     var body: some View {
         

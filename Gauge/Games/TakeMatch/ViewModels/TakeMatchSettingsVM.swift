@@ -8,7 +8,7 @@
 import SwiftUI
 
 //game settings class so that the game settings can persist across views
-class GameSettingsVM: ObservableObject {
+class TakeMatchSettingsVM: ObservableObject {
     @Published var numRounds: Int = 3
     
 }
