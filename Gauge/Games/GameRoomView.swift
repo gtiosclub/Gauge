@@ -11,6 +11,7 @@ struct GameRoomView: View {
     @State var showSettings: Bool = false
     @StateObject private var gameSettings = GameSettingsVM()
     @State var isHost: Bool
+    @State var roomCode: String
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -21,7 +22,7 @@ struct GameRoomView: View {
             Spacer()
             
             //roomcode
-            Text("ROOMCODE")
+            Text("\(roomCode)")
                 .font(.title)
             
             
@@ -101,7 +102,7 @@ struct GameRoomView: View {
 
 #Preview {
     NavigationStack {
-        GameRoomView(isHost: false)
+        GameRoomView(isHost: false, roomCode: "1234")
     }
 }
 
