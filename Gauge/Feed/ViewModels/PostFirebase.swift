@@ -16,6 +16,23 @@ class PostFirebase: ObservableObject {
         Keys.fetchKeys()
     }
     
+    func dislikeComment(postId: String, commentId: String, userId: String) {
+        let commentRef = Firebase.db.collection("POSTS")
+            .document(postId)
+            .collection("COMMENTS")
+            .document(commentId)
+        
+        commentRef.updateData([
+            "dislikes": FieldValue.arrayUnion([userId])
+        ]) { error in
+            if let error = error {
+                print("Error disliking comment: \(error.localizedDescription)")
+            } else {
+                print("Successfully disliked the comment.")
+            }
+        }
+    }
+
     func getLiveFeedPosts(user: User) {
         let allPosts: [String] = user.myViews + user.myResponses
         Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
