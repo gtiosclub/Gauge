@@ -31,7 +31,7 @@ struct GameRoomView: View {
                 Spacer()
                 
                 //start button to start the game
-                NavigationLink(destination: GamesHome()) {
+                NavigationLink(destination: TakeMatchView()) {
                     
                     Text("Start")
                 }
