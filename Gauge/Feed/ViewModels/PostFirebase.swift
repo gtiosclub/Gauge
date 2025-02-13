@@ -35,7 +35,21 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    func likeComment(postId: String, commentId: String, userId: String){
+        let commentRef = Firebase.db.collection("POSTS")
+            .document(postId)
+            .collection("COMMENTS")
+            .document(commentId)
         
+        commentRef.updateData([
+            "likes": FieldValue.arrayUnion([userId])
+        ]){
+            error in
+            if var error = error {
+                print("error in liking comment: \(error.localizedDescription)")
+            }
+        }
+    }
     func createBinaryPost(userId: String, category: Category, question: String, responseOption1: String, responseOption2: String) {
         // Create post instance
         let post = BinaryPost(
