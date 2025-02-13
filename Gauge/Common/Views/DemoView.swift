@@ -19,6 +19,12 @@ struct DemoView: View {
                     firebaseVM.addUserAustin()
                 }
                 
+                Button("Update User Austin"){
+                    firebaseVM.updateAustinFields()
+                }
+                
+                
+                
                 Button("Add new User") {
                     firebaseVM.addNewUser()
                 }

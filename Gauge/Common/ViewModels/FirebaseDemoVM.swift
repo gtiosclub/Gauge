@@ -24,6 +24,17 @@ class FirebaseDemoVM: ObservableObject {
         }
     }
     
+    func updateAustinFields() {
+            let updatedUser = User(userId: "austin", username: "Austin", email: "austin@example.com")
+            updatedUser.phoneNumber = "999-999-9999" // Example new phone number
+            updatedUser.streak = 5
+            updatedUser.badges = ["Gold", "Platinum"]
+            
+            let userFirebase = UserFirebase()
+            userFirebase.updateUserFields(user: updatedUser)
+        }
+
+    
     func addNewUser() {
         Firebase.db.collection("USERS").addDocument(data: [
             "username": "new user!",
