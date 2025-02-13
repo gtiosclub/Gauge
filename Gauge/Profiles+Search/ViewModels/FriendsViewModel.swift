@@ -45,7 +45,29 @@ class FriendsViewModel: ObservableObject {
     }
     
     /// Searches for friends in a user’s list based on a given search string
-    func searchFriends() {
-        
+    func searchFriends(userId: String, searchString: String) async -> [[String: Any]]? {
+            do {
+                let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
+                
+                guard let data = document.data(), let friendIds = data["friends"] as? [String] else { return nil }
+                
+                var matchingFriends: [[String: Any]] = []
+                let querySnapshot = try await Firebase.db.collection("USERS")
+                    .whereField("userId", in: friendIds)
+                    .getDocuments()
+                
+                for document in querySnapshot.documents {
+                    let friendData = document.data()
+                    if let username = friendData["username"] as? String,
+                       username.lowercased().contains(searchString.lowercased()) {
+                        matchingFriends.append(friendData)
+                    }
+                }
+                
+                return matchingFriends
+            } catch {
+                print("Error searching friends: \(error)")
+                return nil
+            }
+        }
     }
-}
