@@ -73,4 +73,6 @@ struct FirebaseTesting: View {
 
 #Preview {
     FirebaseTesting()
+        .environmentObject(PostFirebase())
+        .environmentObject(UserFirebase())
 }
