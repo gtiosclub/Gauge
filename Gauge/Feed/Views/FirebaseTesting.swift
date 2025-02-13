@@ -45,6 +45,13 @@ struct FirebaseTesting: View {
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
                     )
                 }
+                Button("Add response") {
+                    postVM.addResponse(
+                        postId: "examplePost",
+                        userId: "exampleUser",
+                        responseOption: "Chocolate"
+                        )
+                }
             }
             
             Section("Get Live Data (Great for feed & games!)") {
