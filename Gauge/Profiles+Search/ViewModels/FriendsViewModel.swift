@@ -26,43 +26,32 @@ class FriendsViewModel: ObservableObject {
     }
     
     /// Fetches incoming friend requests
-    func getIncomingRequests(userID: String, completion: @escaping ([[String: Any]]) -> Void) {
-        var incomingFriends: [[String: Any]] = []
-
-        // Step 1: Query the 'friendIn' collection for the given userID
-        Firebase.db.collection("friendsIn").document(userID).getDocument { snapshot, error in
-            if let error = error {
-                print("Error fetching friend requests: \(error)")
-                completion([])
-                return
+    func getIncomingRequests(userID: String) async -> [String] {
+        
+        //initialize empty array to store incomingFriend requests
+        var incomingFriends: [String] = []
+                
+        // 1: Query the 'friendIn' collection for the given userID
+        // 2: implement error handling with if else statement, ?? for fallback value ? when calling function
+        do {
+            //snapshot of the user
+            let snapshot = try await Firebase.db.collection("users").document(userID).getDocument()
+            
+            //? (optional chaining) attempts to get dictionary keys - all incoming friend requests from friendsIn key. ? prevents code from crashing if method fails, as (keyword for type conversion)
+            if let friendsIn = snapshot.data()?["friendsIn"] as? [String] {
+                //add each userID to the array
+                //friendsIn is a temporary variable created by this if let statement
+                incomingFriends.append(contentsOf: friendsIn)
+            } else {
+                print("No incoming friends found for \(userID)")
             }
-
-            guard let data = snapshot?.data() else {
-                print("No friend requests found for \(userID)")
-                completion([])
-                return
-            }
-
-            let group = DispatchGroup() // Used to manage multiple async calls
-
-            // Step 2: Fetch user details for each friendID
-            for (friendID, _) in data {
-                group.enter()
-                Firebase.db.collection("users").document(friendID).getDocument { userSnapshot, userError in
-                    if let userError = userError {
-                        print("Error fetching user details for \(friendID): \(userError)")
-                    } else if let userData = userSnapshot?.data() {
-                        incomingFriends.append(userData)
-                    }
-                    group.leave()
-                }
-            }
-
-            // Step 3: Return the result once all calls are complete
-            group.notify(queue: .main) {
-                completion(incomingFriends)
-            }
+        } catch {
+            print("Error fetching incoming friend requests \(error.localizedDescription)")
         }
+               
+            
+        //return the array of incoming friend requests
+        return incomingFriends;
     }
 
     
