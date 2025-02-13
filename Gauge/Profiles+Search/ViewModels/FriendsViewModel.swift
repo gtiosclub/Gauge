@@ -70,4 +70,20 @@ class FriendsViewModel: ObservableObject {
                 return nil
             }
         }
+    
+    
+    func getUserFromId(userId: String) async -> User? {
+        do {
+            let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
+            guard let userData = document.data() else {return nil}
+            
+            guard let name = userData["name"] as? String else { return nil }
+            guard let email = userData["email"] as? String else { return nil }
+            let outputUser = try User(userId: userId, username: name, email: email)
+            
+            return outputUser
+        } catch {
+            return nil
+        }
     }
+}
