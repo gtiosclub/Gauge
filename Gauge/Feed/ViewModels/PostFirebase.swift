@@ -170,6 +170,15 @@ class PostFirebase: ObservableObject {
                 }
             }
         }
+    func deleteComment(postId: String, commentId: String){
+        Firebase.db.collection("POSTS").document(postId).collection("COMMENTS").document(commentId).delete(){ error in
+            if let error = error{
+                print("Error deleting Comment: \(error)")
+            } else {
+                print("deleted comment from COMMENTS")
+            }
+        }
+    }
 
 
 
