@@ -59,6 +59,8 @@ struct GamesHome: View {
                     }
                     .padding()
                 }
+
+                .navigationTitle(Text("Games"))
                     
                 if showingPopover {
                     VStack {
@@ -134,6 +136,8 @@ struct GamesHome: View {
                     }
             }
         }
+        
+        
     }
 }
 
