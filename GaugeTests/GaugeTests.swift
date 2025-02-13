@@ -32,5 +32,14 @@ final class GaugeTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+    
+    func testGetOutgoingRequests() async {
+        let testUser = User(userId: "dummy", username: "dummy", email: "dummy")
+        let viewModel = FriendsViewModel(user: testUser)
+        
+        let userId = testUser.userId
+        let friendsOutgoing = await viewModel.getOutgoingRequests(userId: userId)
+        print(friendsOutgoing)
+    }
 
 }

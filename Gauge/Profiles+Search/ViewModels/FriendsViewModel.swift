@@ -13,7 +13,6 @@ class FriendsViewModel: ObservableObject {
     @Published var incomingRequests: [String: [String]] = [:]
     @Published var outgoingRequests: [String: [String]] = [:]
     
-    
     init(user: User) {
         self.friends = user.friends
         self.incomingRequests = user.friendIn
@@ -31,8 +30,18 @@ class FriendsViewModel: ObservableObject {
     }
     
     /// Fetches outgoing friend requests
-    func getOutgoingRequests() {
-        
+    func getOutgoingRequests(userId: String) async -> [String]? {
+        do {
+            let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
+            
+            guard let data = document.data() else { return nil }
+            guard let friendsOut = data["friendsOut"] as? [String] else { return nil }
+            
+            return friendsOut
+        } catch{
+            print("Error getting document")
+            return nil
+        }
     }
     
     /// Searches for friends in a user’s list based on a given search string
