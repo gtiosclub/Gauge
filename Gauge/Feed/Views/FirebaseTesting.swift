@@ -25,6 +25,8 @@ struct FirebaseTesting: View {
                     )
                 }
                 
+                
+                
                 Button("Add Slider Post") {
                     postVM.createSliderPost(
                         userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
