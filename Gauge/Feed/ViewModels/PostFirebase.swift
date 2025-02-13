@@ -148,5 +148,19 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
+    func addUserToFavoritedBy(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("POSTS").document(postId)
+        
+        documentRef.updateData([
+            "favoritedBy": FieldValue.arrayUnion([userId])
+        ]) { error in
+            if let error = error {
+                print("Error adding user to favoritedBy array: \(error)")
+            } else {
+                print("Added \(userId) to favoritedBy array of post \(postId).")
+            }
+        }
+    }
 
 }
