@@ -14,7 +14,6 @@ struct FirebaseTesting: View {
     var body: some View {
         VStack(spacing: 20) {
             Section("Write Data") {
-                // Krish Tests
                 Button("Add Binary Post") {
                     postVM.createBinaryPost(
                         userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
