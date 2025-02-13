@@ -11,6 +11,7 @@ import SwiftData
 struct DemoView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject var firebaseVM = FirebaseDemoVM()
+    @StateObject var postVM = PostFirebase()
 
     var body: some View {
         VStack(spacing: 20) {
@@ -22,6 +23,29 @@ struct DemoView: View {
                 
                 Button("Add new User") {
                     firebaseVM.addNewUser()
+                }
+                
+                // Krish Tests
+                Button("Add Binary Post") {
+                    postVM.createBinaryPost(
+                        userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
+                        category: .food,
+                        question: "Is pizza the goat food?",
+                        responseOption1: "yes",
+                        responseOption2: "no"
+                    )
+                }
+                
+                Button("Add Slider Post") {
+                    postVM.createSliderPost(
+                        userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
+                        category: .tech,
+                        question: "rate Swift 1-10",
+                        lowerBoundValue: 1,
+                        upperBoundValue: 10,
+                        lowerBoundLabel: "Terrible 🤮",
+                        upperBoundLabel: "Goated 🐐"
+                    )
                 }
             }
             

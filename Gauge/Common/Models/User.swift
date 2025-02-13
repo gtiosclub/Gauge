@@ -25,14 +25,16 @@ class User: Equatable, Identifiable {
     var profilePhoto: String = ""
     var phoneNumber: String = ""
     var myCategories: [String] = []
+    var myNextPosts: [String] = []
     
-    // MARK: AI Algorithm Variables - Ignore for now
+    // MARK: AI Algorithm Variables
     var myPosts: [String] = []
     var myResponses: [String] = []
     var myReactions: [String] = []
     var mySearches: [String] = []
     var myComments: [String] = []
-    // MARK: AI Algorithm Variables - Ignore for now
+    var myAccessedProfiles: [String] = [] // User IDs of other users, sorted by profile accesses
+    // MARK: AI Algorithm Variables
     
     init(userId: String, username: String, email: String) {
         self.userId = userId

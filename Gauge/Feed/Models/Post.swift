@@ -16,10 +16,15 @@ protocol Post {
     var viewCounter: Int {get set}
     var responseCounter: Int {get set}
     var postDateAndTime: Date {get set} // String in Firebase
+    var favoritedBy: [String] {get set} // UserIds of users that have favorited
 }
 
-enum Category {
+enum Category: String {
     case food, fashion, travel, sports, entertainment, tech, arts, other
+}
+
+enum PostType: String {
+    case BinaryPost, SliderPost, RankPost
 }
 
 struct Comment {

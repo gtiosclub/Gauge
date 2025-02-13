@@ -16,6 +16,7 @@ class SliderPost: Post {
     var viewCounter: Int
     var responseCounter: Int
     var postDateAndTime: Date
+    var favoritedBy: [String]
     
     var question: String
     var lowerBoundValue: Double
@@ -24,7 +25,7 @@ class SliderPost: Post {
     var upperBoundLabel: String
     var responseResults: [Double]
     
-    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double]) {
+    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double], favoritedBy: [String]) {
         self.postId = postId
         self.userId = userId
         self.comments = comments
@@ -33,6 +34,8 @@ class SliderPost: Post {
         self.viewCounter = viewCounter
         self.responseCounter = responseCounter
         self.postDateAndTime = postDateAndTime
+        self.favoritedBy = favoritedBy
+        
         self.question = question
         self.lowerBoundValue = lowerBoundValue
         self.upperBoundValue = upperBoundValue

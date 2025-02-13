@@ -7,7 +7,7 @@
 
 import SwiftUI
 struct SignInView: View {
-    @StateObject private var authVM = AuthenticationVM()
+    @EnvironmentObject var authVM: AuthenticationVM
     @State private var email = ""
     @State private var password = ""
     

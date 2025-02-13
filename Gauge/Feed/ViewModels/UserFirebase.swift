@@ -7,6 +7,8 @@
 
 import Foundation
 
-class UserFirebase {
+class UserFirebase: ObservableObject {
+    @Published var user: User = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
+    
     
 }
