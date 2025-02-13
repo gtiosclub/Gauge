@@ -33,15 +33,15 @@ class FriendsViewModel: ObservableObject {
     func getOutgoingRequests(userId: String) async -> [String]? {
         do {
             let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
-            if let data = document.data() {
-                let friendsOutgoing = data["friendsOut"] as? [String] ?? []
-                return friendsOutgoing
-            }
+            
+            guard let data = document.data() else { return nil }
+            guard let friendsOut = data["friendsOut"] as? [String] else { return nil }
+            
+            return friendsOut
         } catch{
             print("Error getting document")
+            return nil
         }
-        
-        return []
     }
     
     /// Searches for friends in a user’s list based on a given search string
