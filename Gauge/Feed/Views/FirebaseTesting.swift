@@ -36,6 +36,25 @@ struct FirebaseTesting: View {
                         upperBoundLabel: "Goated 🐐"
                     )
                 }
+                
+                Button("Fetch Favorite Post") {
+                    postVM.getUserFavorites(
+                        userId: "ExampleUser")
+                }
+                
+                Button("Like Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
+                }
+                
+                Button("Dislike Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
+                }
             }
             
             Section("Get Live Data (Great for feed & games!)") {
