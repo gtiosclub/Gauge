@@ -78,9 +78,39 @@ class FriendsViewModel: ObservableObject {
             
             guard let name = userData["name"] as? String else { return nil }
             guard let email = userData["email"] as? String else { return nil }
-            let outputUser = try User(userId: userId, username: name, email: email)
             
-            return outputUser
+            let phoneNumber = userData["phoneNumber"] as? String
+            let friendIn = userData["friendIn"] as? [String : [String]]
+            let friendOut = userData["friendOut"] as? [String: [String]]
+            let friends = userData["friends"] as? [String: [String]]
+            let myPosts = userData["myPosts"] as? [String]
+            let myResponses = userData["myResponses"] as? [String]
+            let myReactions = userData["myReactions"] as? [String]
+            let mySearches = userData["mySearches"] as? [String]
+            let myComments = userData["myComments"] as? [String]
+            let myCategories = userData["myCategories"] as? [String]
+            let badges = userData["badges"] as? [String]
+            let streak = userData["streak"] as? Int
+            
+            if let phoneNumber = phoneNumber,
+               let friendIn = friendIn,
+               let friendOut = friendOut,
+               let friends = friends,
+               let myPosts = myPosts,
+               let myResponses = myResponses,
+               let myReactions = myReactions,
+               let mySearches = mySearches,
+               let myComments = myComments,
+               let myCategories = myCategories,
+               let badges = badges,
+               let streak = streak {
+                let outputUser = try User(userId: userId, username: name, phoneNumber: phoneNumber, email: email,friendIn: friendIn, friendOut: friendOut, friends: friends, myPosts: myPosts, myResponses: myResponses, myReactions: myReactions, mySearches: mySearches, myComments: myComments, myCategories: myCategories, badges: badges, streak: streak)
+                return outputUser
+            } else {
+                let outputUser = try User(userId: userId, username: name, email: email)
+                return outputUser
+            }
+                
         } catch {
             return nil
         }

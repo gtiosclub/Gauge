@@ -43,7 +43,7 @@ final class GaugeTests: XCTestCase {
     }
     
     func testGetUserFromId() async {
-        let testUser = User(userId: "dummy", username: "dummy", email: "dummy")
+        let testUser = User(userId: "exampleUser", username: "dummy", email: "dummy")
         let viewModel = FriendsViewModel(user: testUser)
         
         let userId = testUser.id
