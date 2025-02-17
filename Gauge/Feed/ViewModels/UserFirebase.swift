@@ -68,4 +68,22 @@ class UserFirebase: ObservableObject {
             }
         }
     }
+    
+    func getUserFavorites(userId: String) {
+        // Create an array to store favorite postId
+        var allFavoritePosts: [String] = []
+        // fetch all documents in the "POSTS" collection
+        // that have the "userId" in their "favoriteBy" field
+        Firebase.db.collection("POSTS")
+            .whereField("favoritedBy", arrayContains: userId)
+            .getDocuments { (snapshot, error) in
+                if let error = error {
+                    print("Error getting favorite posts: \(error)")
+                } else {
+                    for document in snapshot!.documents {
+                        allFavoritePosts.append(document.documentID)
+                    }
+                }
+            }
+    }
 }
