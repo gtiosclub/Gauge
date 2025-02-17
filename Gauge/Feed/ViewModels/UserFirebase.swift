@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 
 class UserFirebase: ObservableObject {
-    @Published var user: User = User(userId: "2kDjg6AEanY2raJDnDgqb76M6dn1", username: "exampleUser", email: "exuser@gmail.com")
+    @Published var user: User = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
     
     func addUserSearch(search: String) {
         // Update user var
@@ -39,7 +39,6 @@ class UserFirebase: ObservableObject {
                     completion (postIds)
                 }
             }
-        
     }
     
     //let attributesList = ["lastLogin", "lastFeedRefresh", "streak", "friendIn", "friendOut", "friends", "badges", "profilePhoto", "phoneNumber", "myCategories", "myNextPosts", "mySearches", "myAccessedProfiles"]
@@ -60,20 +59,13 @@ class UserFirebase: ObservableObject {
                     "mySearches":user.mySearches,
                     "myAccessedProfiles": user.myAccessedProfiles
                     
-                ] as [String : Any]
-                
+        ] as [String : Any]
+        
         Firebase.db.collection("USERS").document(user.userId).updateData(data) { error in
-                    if let error = error {
-                        print("DEBUG: Failed to updateUserFields from UserFirebase class \(error.localizedDescription)")
-                        return
-                    }
-                }
+            if let error = error {
+                print("DEBUG: Failed to updateUserFields from UserFirebase class \(error.localizedDescription)")
+                return
+            }
+        }
     }
-            
-
-    
-    
-    
-    
-    
 }
