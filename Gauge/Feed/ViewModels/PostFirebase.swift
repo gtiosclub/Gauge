@@ -160,6 +160,17 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    func deletePost(postId: String){
+        Firebase.db.collection("POSTS").document(postId).delete() { error in
+            if let error = error {
+                print("Error removing post: \(error)")
+            } else {
+                print("post successfully removed!")
+            }
+        }
+        
+        
+    }
     
     func createRankPost(userId: String, category: Category, question: String, responseOptions: [String]) {
         let post = RankPost(
