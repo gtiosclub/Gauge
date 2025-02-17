@@ -32,7 +32,7 @@ class PostFirebase: ObservableObject {
                 } else if change.type == .modified {
 
                 } else if change.type == .removed {
-                    
+                    self.allQueriedPosts = self.allQueriedPosts.filter { $0.postId != change.document.documentID }
                 }
             }
         }
