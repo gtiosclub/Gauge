@@ -36,6 +36,15 @@ struct FirebaseTesting: View {
                         upperBoundLabel: "Goated 🐐"
                     )
                 }
+              
+                Button("Add Ranked Post") {
+                    postVM.createRankPost(
+                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+                        category: .entertainment,
+                        question: "Best Half-Time Performance?",
+                        responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
+                    )
+                }
                 
                 Button("Fetch Favorite Post") {
                     postVM.getUserFavorites(
@@ -83,4 +92,6 @@ struct FirebaseTesting: View {
 
 #Preview {
     FirebaseTesting()
+        .environmentObject(PostFirebase())
+        .environmentObject(UserFirebase())
 }
