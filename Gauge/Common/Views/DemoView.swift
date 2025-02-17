@@ -14,22 +14,14 @@ struct DemoView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            
             Section("Write Data") {
                 Button("Add User Austin") {
                     firebaseVM.addUserAustin()
                 }
                 
-                Button("Update User Austin"){
-                    firebaseVM.updateAustinFields()
-                }
-                
-                
-                
                 Button("Add new User") {
                     firebaseVM.addNewUser()
                 }
-                
             }
             
             Section("Get Live Data (Great for feed & games!)") {

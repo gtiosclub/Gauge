@@ -25,8 +25,6 @@ struct FirebaseTesting: View {
                     )
                 }
                 
-                
-                
                 Button("Add Slider Post") {
                     postVM.createSliderPost(
                         userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
@@ -47,19 +45,6 @@ struct FirebaseTesting: View {
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
                     )
                 }
-                
-                Button("add user search") {
-                    userVM.addUserSearch(
-                        search: "friends"
-                    )
-                }
-
-                Button("Add user to favoritedBy of a post (hardcoded for Firebase testing)") {
-                    postVM.addUserToFavoritedBy(
-                        postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
-                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
-                    )
-                }
 
                 Button("Add response") {
                     postVM.addResponse(
@@ -67,25 +52,6 @@ struct FirebaseTesting: View {
                         userId: "exampleUser",
                         responseOption: "Chocolate"
                         )
-                }
-              
-                Button("Fetch Favorite Post") {
-                    postVM.getUserFavorites(
-                        userId: "ExampleUser")
-                }
-                
-                Button("Like Comment") {
-                    postVM.dislikeComment(
-                        postId: "examplePost",
-                        commentId: "Ge3KON8x7l1jUUlpRvd7",
-                        userId: "Jack")
-                }
-                
-                Button("Dislike Comment") {
-                    postVM.dislikeComment(
-                        postId: "examplePost",
-                        commentId: "Ge3KON8x7l1jUUlpRvd7",
-                        userId: "Jack")
                 }
             }
             
@@ -106,11 +72,48 @@ struct FirebaseTesting: View {
             }
             
             Section("Update Data") {
+                Button("Like Comment") {
+                    postVM.likeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
+                }
                 
+                Button("Dislike Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
+                }
+                
+                Button("Update User Austin") {
+                    let updatedUser = User(userId: "austin", username: "Austin", email: "austin@example.com")
+                    updatedUser.phoneNumber = "999-999-9999" // Example new phone number
+                    updatedUser.streak = 5
+                    updatedUser.badges = ["Gold", "Platinum"]
+                    
+                    userVM.updateUserFields(user: updatedUser)
+                }
+                
+                Button("Update post favorited by (add user)") {
+                    postVM.addUserToFavoritedBy(
+                        postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
+                    )
+                }
+                
+                Button("Update user searches (add)") {
+                    userVM.addUserSearch(
+                        search: "friends"
+                    )
+                }
             }
             
             Section("View Data") {
-                
+                Button("Fetch Favorited Posts") {
+                    postVM.getUserFavorites(
+                        userId: "ExampleUser")
+                }
             }
         }
         .onAppear() {

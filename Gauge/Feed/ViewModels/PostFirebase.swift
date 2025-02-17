@@ -17,7 +17,6 @@ class PostFirebase: ObservableObject {
     }
     
     func dislikeComment(postId: String, commentId: String, userId: String) {
-        
         // Reference a specific comment in the "COMMENTS" collection
         // of a specific post in the "POSTS" collection
         // from firebase database
@@ -58,8 +57,6 @@ class PostFirebase: ObservableObject {
             }
     }
     
-
-    
     func getLiveFeedPosts(user: User) {
         let allPosts: [String] = user.myViews + user.myResponses
         Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
@@ -79,6 +76,7 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
     func likeComment(postId: String, commentId: String, userId: String){
         let commentRef = Firebase.db.collection("POSTS")
             .document(postId)
@@ -173,6 +171,7 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
     func deletePost(postId: String){
         Firebase.db.collection("POSTS").document(postId).delete() { error in
             if let error = error {
@@ -181,8 +180,6 @@ class PostFirebase: ObservableObject {
                 print("post successfully removed!")
             }
         }
-        
-        
     }
     
     func createRankPost(userId: String, category: Category, question: String, responseOptions: [String]) {
@@ -216,16 +213,13 @@ class PostFirebase: ObservableObject {
             } else {
                 print("Added new ranked post to POSTS \(documentRef.documentID)")
             }
-            
         }
     }
     
     //Parameters should be postId, responseId (generate a UUID using UUID()), userId, and responseOption. See Response struct in Post file for details on this
-    func addResponse(postId:String, userId:String, responseOption:String) {
+    func addResponse(postId: String, userId: String, responseOption: String) {
         let responseId = UUID().uuidString
         
-        
-                                                                                                                                                    
         //The postId is used to query the correct document in the POST collection.
         let correctPost = Firebase.db.collection("POSTS").document(postId)
         
@@ -243,10 +237,6 @@ class PostFirebase: ObservableObject {
                 print("Response added succesfully")
             }
         }
-        
-        
-        
-        
     }
     
     func addUserToFavoritedBy(postId: String, userId: String) {
@@ -263,27 +253,28 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    
-    func addComment(postId: String, commentId: String, commentType: CommentType, userId: String ,content: String){
-            let newCommentRef = Firebase.db.collection("POSTS")
-                .document(postId).collection("COMMENTS").document(commentId)
-            
-            newCommentRef.setData([
-                "postId" : postId,
-                "commentId" : commentId,
-                "commentType": String(describing: commentType),
-                "userId": userId ,
-                "content": content,
-                "likes" : [],
-                "dislikes" : [],
-            ]) { error in
-                if let error = error{
-                    print("Error adding Comment: \(error)")
-                } else {
-                    print("added new comment to COMMENTS")
-                }
+    func addComment(postId: String, commentType: CommentType, userId: String, content: String){
+        let commentId = UUID().uuidString
+        let newCommentRef = Firebase.db.collection("POSTS")
+            .document(postId).collection("COMMENTS").document(commentId)
+        
+        newCommentRef.setData([
+            "postId" : postId,
+            "commentId" : commentId,
+            "commentType": String(describing: commentType),
+            "userId": userId ,
+            "content": content,
+            "likes" : [],
+            "dislikes" : [],
+        ]) { error in
+            if let error = error{
+                print("Error adding Comment: \(error)")
+            } else {
+                print("added new comment to COMMENTS")
             }
         }
+    }
+    
     func deleteComment(postId: String, commentId: String){
         Firebase.db.collection("POSTS").document(postId).collection("COMMENTS").document(commentId).delete(){ error in
             if let error = error{
@@ -293,7 +284,4 @@ class PostFirebase: ObservableObject {
             }
         }
     }
-
-
-
 }
