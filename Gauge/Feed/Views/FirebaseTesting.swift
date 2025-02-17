@@ -18,7 +18,7 @@ struct FirebaseTesting: View {
                 Button("Add Binary Post") {
                     postVM.createBinaryPost(
                         userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
-                        category: .food,
+                        categories: [.sports(.nfl)],
                         question: "Is pizza the goat food?",
                         responseOption1: "yes",
                         responseOption2: "no"
@@ -28,7 +28,7 @@ struct FirebaseTesting: View {
                 Button("Add Slider Post") {
                     postVM.createSliderPost(
                         userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
-                        category: .tech,
+                        categories: [.educational(.cs)],
                         question: "rate Swift 1-10",
                         lowerBoundValue: 1,
                         upperBoundValue: 10,
@@ -40,7 +40,7 @@ struct FirebaseTesting: View {
                 Button("Add Ranked Post") {
                     postVM.createRankPost(
                         userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
-                        category: .entertainment,
+                        categories: [.arts(.music)],
                         question: "Best Half-Time Performance?",
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
                     )
