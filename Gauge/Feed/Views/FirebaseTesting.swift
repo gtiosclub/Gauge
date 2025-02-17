@@ -14,7 +14,6 @@ struct FirebaseTesting: View {
     var body: some View {
         VStack(spacing: 20) {
             Section("Write Data") {
-                // Krish Tests
                 Button("Add Binary Post") {
                     postVM.createBinaryPost(
                         userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
@@ -24,6 +23,8 @@ struct FirebaseTesting: View {
                         responseOption2: "no"
                     )
                 }
+                
+                
                 
                 Button("Add Slider Post") {
                     postVM.createSliderPost(
@@ -36,7 +37,7 @@ struct FirebaseTesting: View {
                         upperBoundLabel: "Goated 🐐"
                     )
                 }
-                
+              
                 Button("Add Ranked Post") {
                     postVM.createRankPost(
                         userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
@@ -44,6 +45,40 @@ struct FirebaseTesting: View {
                         question: "Best Half-Time Performance?",
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
                     )
+                }
+                
+                Button("Add user to favoritedBy of a post (hardcoded for Firebase testing)") {
+                    postVM.addUserToFavoritedBy(
+                        postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
+                    )
+                }
+
+                Button("Add response") {
+                    postVM.addResponse(
+                        postId: "examplePost",
+                        userId: "exampleUser",
+                        responseOption: "Chocolate"
+                        )
+                }
+              
+                Button("Fetch Favorite Post") {
+                    postVM.getUserFavorites(
+                        userId: "ExampleUser")
+                }
+                
+                Button("Like Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
+                }
+                
+                Button("Dislike Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
                 }
             }
             
