@@ -25,6 +25,8 @@ struct FirebaseTesting: View {
                     )
                 }
                 
+                
+                
                 Button("Add Slider Post") {
                     postVM.createSliderPost(
                         userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
@@ -36,7 +38,7 @@ struct FirebaseTesting: View {
                         upperBoundLabel: "Goated 🐐"
                     )
                 }
-                
+              
                 Button("Add Ranked Post") {
                     postVM.createRankPost(
                         userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
@@ -45,12 +47,32 @@ struct FirebaseTesting: View {
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
                     )
                 }
+
                 Button("Add response") {
                     postVM.addResponse(
                         postId: "examplePost",
                         userId: "exampleUser",
                         responseOption: "Chocolate"
                         )
+                }
+              
+                Button("Fetch Favorite Post") {
+                    postVM.getUserFavorites(
+                        userId: "ExampleUser")
+                }
+                
+                Button("Like Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
+                }
+                
+                Button("Dislike Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
                 }
             }
             
@@ -80,4 +102,6 @@ struct FirebaseTesting: View {
 
 #Preview {
     FirebaseTesting()
+        .environmentObject(PostFirebase())
+        .environmentObject(UserFirebase())
 }
