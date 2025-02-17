@@ -203,7 +203,37 @@ class PostFirebase: ObservableObject {
             } else {
                 print("Added new ranked post to POSTS \(documentRef.documentID)")
             }
+            
         }
+    }
+    
+    //Parameters should be postId, responseId (generate a UUID using UUID()), userId, and responseOption. See Response struct in Post file for details on this
+    func addResponse(postId:String, userId:String, responseOption:String) {
+        let responseId = UUID().uuidString
+        
+        
+                                                                                                                                                    
+        //The postId is used to query the correct document in the POST collection.
+        let correctPost = Firebase.db.collection("POSTS").document(postId)
+        
+        //The Response should be added to a POST's RESPONSE collection.
+        let responseLocation = Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").document(responseId)
+        
+ 
+        //The two attributes are the userId and responseOption. Both strings
+        let response = ["userId": userId, "responseOption": responseOption]
+        
+        responseLocation.setData(response) { err in
+            if let err = err {
+                print("Error writing document: \(err)")
+            } else {
+                print("Response added succesfully")
+            }
+        }
+        
+        
+        
+        
     }
 
 }

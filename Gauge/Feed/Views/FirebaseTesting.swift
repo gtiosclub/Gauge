@@ -47,7 +47,15 @@ struct FirebaseTesting: View {
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
                     )
                 }
-                
+
+                Button("Add response") {
+                    postVM.addResponse(
+                        postId: "examplePost",
+                        userId: "exampleUser",
+                        responseOption: "Chocolate"
+                        )
+                }
+              
                 Button("Fetch Favorite Post") {
                     postVM.getUserFavorites(
                         userId: "ExampleUser")
