@@ -16,6 +16,50 @@ class PostFirebase: ObservableObject {
         Keys.fetchKeys()
     }
     
+    func dislikeComment(postId: String, commentId: String, userId: String) {
+        
+        // Reference a specific comment in the "COMMENTS" collection
+        // of a specific post in the "POSTS" collection
+        // from firebase database
+        let commentRef = Firebase.db
+            .collection("POSTS")
+            .document(postId)
+            .collection("COMMENTS")
+            .document(commentId)
+        
+        // use arrayUnion() to add userId to the dislikes field
+        // of the specific comment referenced aboved
+        commentRef.updateData([
+            "dislikes": FieldValue.arrayUnion([userId])
+        ]) { error in
+            if let error = error {
+                print("Error disliking comment: \(error.localizedDescription)")
+            } else {
+                print("Successfully disliked the comment.")
+            }
+        }
+    }
+
+    func getUserFavorites(userId: String) {
+        // Create an array to store favorite postId
+        var allFavoritePosts: [String] = []
+        // fetch all documents in the "POSTS" collection
+        // that have the "userId" in their "favoriteBy" field
+        Firebase.db.collection("POSTS")
+            .whereField("favoritedBy", arrayContains: userId)
+            .getDocuments { (snapshot, error) in
+                if let error = error {
+                    print("Error getting favorite posts: \(error)")
+                } else {
+                    for document in snapshot!.documents {
+                        allFavoritePosts.append(document.documentID)
+                    }
+                }
+            }
+    }
+    
+
+    
     func getLiveFeedPosts(user: User) {
         let allPosts: [String] = user.myViews + user.myResponses
         Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
@@ -23,7 +67,7 @@ class PostFirebase: ObservableObject {
                 print("Error fetching post updates: \(error!)")
                 return
             }
-            
+    
             for change in snapshot.documentChanges {
                 if change.type == .added {
                     
@@ -35,6 +79,8 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
+    
         
     func createBinaryPost(userId: String, category: Category, question: String, responseOption1: String, responseOption2: String) {
         // Create post instance
@@ -114,6 +160,17 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    func deletePost(postId: String){
+        Firebase.db.collection("POSTS").document(postId).delete() { error in
+            if let error = error {
+                print("Error removing post: \(error)")
+            } else {
+                print("post successfully removed!")
+            }
+        }
+        
+        
+    }
     
     func createRankPost(userId: String, category: Category, question: String, responseOptions: [String]) {
         let post = RankPost(
@@ -146,7 +203,37 @@ class PostFirebase: ObservableObject {
             } else {
                 print("Added new ranked post to POSTS \(documentRef.documentID)")
             }
+            
         }
+    }
+    
+    //Parameters should be postId, responseId (generate a UUID using UUID()), userId, and responseOption. See Response struct in Post file for details on this
+    func addResponse(postId:String, userId:String, responseOption:String) {
+        let responseId = UUID().uuidString
+        
+        
+                                                                                                                                                    
+        //The postId is used to query the correct document in the POST collection.
+        let correctPost = Firebase.db.collection("POSTS").document(postId)
+        
+        //The Response should be added to a POST's RESPONSE collection.
+        let responseLocation = Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").document(responseId)
+        
+ 
+        //The two attributes are the userId and responseOption. Both strings
+        let response = ["userId": userId, "responseOption": responseOption]
+        
+        responseLocation.setData(response) { err in
+            if let err = err {
+                print("Error writing document: \(err)")
+            } else {
+                print("Response added succesfully")
+            }
+        }
+        
+        
+        
+        
     }
     
     func addUserToFavoritedBy(postId: String, userId: String) {

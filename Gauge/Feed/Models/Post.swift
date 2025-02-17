@@ -17,6 +17,7 @@ protocol Post {
     var responseCounter: Int {get set}
     var postDateAndTime: Date {get set} // String in Firebase
     var favoritedBy: [String] {get set} // UserIds of users that have favorited
+    var question: String {get set}
 }
 
 enum Category: String {
