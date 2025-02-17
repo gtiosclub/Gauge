@@ -25,6 +25,8 @@ struct FirebaseTesting: View {
                     )
                 }
                 
+                
+                
                 Button("Add Slider Post") {
                     postVM.createSliderPost(
                         userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
@@ -36,7 +38,7 @@ struct FirebaseTesting: View {
                         upperBoundLabel: "Goated 🐐"
                     )
                 }
-                
+              
                 Button("Add Ranked Post") {
                     postVM.createRankPost(
                         userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
@@ -50,6 +52,40 @@ struct FirebaseTesting: View {
                     userVM.addUserSearch(
                         search: "friends"
                     )
+                }
+
+                Button("Add user to favoritedBy of a post (hardcoded for Firebase testing)") {
+                    postVM.addUserToFavoritedBy(
+                        postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
+                    )
+                }
+
+                Button("Add response") {
+                    postVM.addResponse(
+                        postId: "examplePost",
+                        userId: "exampleUser",
+                        responseOption: "Chocolate"
+                        )
+                }
+              
+                Button("Fetch Favorite Post") {
+                    postVM.getUserFavorites(
+                        userId: "ExampleUser")
+                }
+                
+                Button("Like Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
+                }
+                
+                Button("Dislike Comment") {
+                    postVM.dislikeComment(
+                        postId: "examplePost",
+                        commentId: "Ge3KON8x7l1jUUlpRvd7",
+                        userId: "Jack")
                 }
             }
             
