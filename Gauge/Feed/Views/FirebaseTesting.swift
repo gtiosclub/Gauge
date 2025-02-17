@@ -10,6 +10,7 @@ import SwiftUI
 struct FirebaseTesting: View {
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
+    @State private var postIds: [String] = []
 
     var body: some View {
         VStack(spacing: 20) {
@@ -47,6 +48,12 @@ struct FirebaseTesting: View {
                     )
                 }
                 
+                Button("add user search") {
+                    userVM.addUserSearch(
+                        search: "friends"
+                    )
+                }
+
                 Button("Add user to favoritedBy of a post (hardcoded for Firebase testing)") {
                     postVM.addUserToFavoritedBy(
                         postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
@@ -89,7 +96,13 @@ struct FirebaseTesting: View {
             }
             
             Section("Read Data") {
-                
+                Button("Get posts by userId") {
+                    userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
+                        self.postIds = postIds
+                    }
+                    
+                    print(postIds.count)
+                }
             }
             
             Section("Update Data") {
