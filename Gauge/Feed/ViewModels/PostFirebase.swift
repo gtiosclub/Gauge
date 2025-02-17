@@ -16,47 +16,6 @@ class PostFirebase: ObservableObject {
         Keys.fetchKeys()
     }
     
-    func dislikeComment(postId: String, commentId: String, userId: String) {
-        // Reference a specific comment in the "COMMENTS" collection
-        // of a specific post in the "POSTS" collection
-        // from firebase database
-        let commentRef = Firebase.db
-            .collection("POSTS")
-            .document(postId)
-            .collection("COMMENTS")
-            .document(commentId)
-        
-        // use arrayUnion() to add userId to the dislikes field
-        // of the specific comment referenced aboved
-        commentRef.updateData([
-            "dislikes": FieldValue.arrayUnion([userId])
-        ]) { error in
-            if let error = error {
-                print("Error disliking comment: \(error.localizedDescription)")
-            } else {
-                print("Successfully disliked the comment.")
-            }
-        }
-    }
-
-    func getUserFavorites(userId: String) {
-        // Create an array to store favorite postId
-        var allFavoritePosts: [String] = []
-        // fetch all documents in the "POSTS" collection
-        // that have the "userId" in their "favoriteBy" field
-        Firebase.db.collection("POSTS")
-            .whereField("favoritedBy", arrayContains: userId)
-            .getDocuments { (snapshot, error) in
-                if let error = error {
-                    print("Error getting favorite posts: \(error)")
-                } else {
-                    for document in snapshot!.documents {
-                        allFavoritePosts.append(document.documentID)
-                    }
-                }
-            }
-    }
-    
     func getLiveFeedPosts(user: User) {
         let allPosts: [String] = user.myViews + user.myResponses
         Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
@@ -89,6 +48,29 @@ class PostFirebase: ObservableObject {
             error in
             if var error = error {
                 print("error in liking comment: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func dislikeComment(postId: String, commentId: String, userId: String) {
+        // Reference a specific comment in the "COMMENTS" collection
+        // of a specific post in the "POSTS" collection
+        // from firebase database
+        let commentRef = Firebase.db
+            .collection("POSTS")
+            .document(postId)
+            .collection("COMMENTS")
+            .document(commentId)
+        
+        // use arrayUnion() to add userId to the dislikes field
+        // of the specific comment referenced aboved
+        commentRef.updateData([
+            "dislikes": FieldValue.arrayUnion([userId])
+        ]) { error in
+            if let error = error {
+                print("Error disliking comment: \(error.localizedDescription)")
+            } else {
+                print("Successfully disliked the comment.")
             }
         }
     }
@@ -216,7 +198,6 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    //Parameters should be postId, responseId (generate a UUID using UUID()), userId, and responseOption. See Response struct in Post file for details on this
     func addResponse(postId: String, userId: String, responseOption: String) {
         let responseId = UUID().uuidString
         

@@ -111,7 +111,7 @@ struct FirebaseTesting: View {
             
             Section("View Data") {
                 Button("Fetch Favorited Posts") {
-                    postVM.getUserFavorites(
+                    userVM.getUserFavorites(
                         userId: "ExampleUser")
                 }
             }
