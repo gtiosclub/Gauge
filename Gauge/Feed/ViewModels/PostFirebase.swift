@@ -11,6 +11,8 @@ import Firebase
 class PostFirebase: ObservableObject {
     @Published var feedPosts: [Post] = []
     @Published var allQueriedPosts: [Post] = []
+    @Published var skippedPost: Post? = nil
+    private var currentFeedPostsListener: ListenerRegistration? = nil
     
     init() {
         Keys.fetchKeys()
