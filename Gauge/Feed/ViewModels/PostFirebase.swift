@@ -77,12 +77,12 @@ class PostFirebase: ObservableObject {
         }
     }
   
-    func createBinaryPost(userId: String, category: Category, question: String, responseOption1: String, responseOption2: String) {
+    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String) {
         // Create post instance
         let post = BinaryPost(
             postId: UUID().uuidString,
             userId: userId,
-            category: category,
+            categories: categories,
             postDateAndTime: Date(),
             question: question,
             responseOption1: responseOption1,
@@ -96,7 +96,7 @@ class PostFirebase: ObservableObject {
             "type": PostType.BinaryPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "category": post.category.rawValue,
+            "categories": post.categories,
             "viewCounter": post.viewCounter,
             "responseCounter": post.responseCounter,
             "postDateAndTime": post.postDateAndTime,
@@ -115,12 +115,12 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func createSliderPost(userId: String, category: Category, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String) {
+    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String) {
         // Create post instance
         let post = SliderPost(
             postId: UUID().uuidString,
             userId: userId,
-            category: category,
+            categories: categories,
             postDateAndTime: Date(),
             question: question,
             lowerBoundLabel: lowerBoundLabel,
@@ -136,7 +136,7 @@ class PostFirebase: ObservableObject {
             "type": PostType.SliderPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "category": post.category.rawValue,
+            "categories": post.categories,
             "viewCounter": post.viewCounter,
             "responseCounter": post.responseCounter,
             "postDateAndTime": post.postDateAndTime,
@@ -166,11 +166,11 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func createRankPost(userId: String, category: Category, question: String, responseOptions: [String]) {
+    func createRankPost(userId: String, categories: [Category], question: String, responseOptions: [String]) {
         let post = RankPost(
             postId: UUID().uuidString,
             userId: userId,
-            category: category,
+            categories: categories,
             postDateAndTime: Date(),
             question: question,
             responseOptions: responseOptions
@@ -183,7 +183,7 @@ class PostFirebase: ObservableObject {
             "type": PostType.RankPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "category": post.category.rawValue,
+            "categories": post.categories,
             "postDateAndTime": Timestamp(date: post.postDateAndTime),
             "question": post.question,
             "responseOptions": post.responseOptions,
