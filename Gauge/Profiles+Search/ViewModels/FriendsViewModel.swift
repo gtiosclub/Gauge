@@ -55,14 +55,19 @@ class FriendsViewModel: ObservableObject {
     
     
     /// Fetches outgoing friend requests
-    func getOutgoingRequests(userId: String) async -> [String]? {
+    func getOutgoingRequests(userId: String) async -> [User]? {
         do {
             let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
             
             guard let data = document.data() else { return nil }
             guard let friendsOut = data["friendsOut"] as? [String] else { return nil }
             
-            return friendsOut
+            var outgoingRequests = [User]()
+            for friend in friendsOut {
+                await outgoingRequests.append(getUserFromId(userId: friend)!)
+            }
+            
+            return outgoingRequests
         } catch{
             print("Error getting document")
             return nil
