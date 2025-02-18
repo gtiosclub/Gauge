@@ -45,6 +45,13 @@ struct FirebaseTesting: View {
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
                     )
                 }
+                
+                Button("Add user to VIEWS of a post (hardcoded for Firebase testing)") {
+                    postVM.addViewToPost(
+                        postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
+                    )
+                }
 
                 Button("Add response") {
                     postVM.addResponse(
