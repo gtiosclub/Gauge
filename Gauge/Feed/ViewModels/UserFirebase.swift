@@ -86,4 +86,24 @@ class UserFirebase: ObservableObject {
                 }
             }
     }
+    
+    func setUserCategories(userId: String, category: [Category]){
+        print("The function is being called")
+        var categoryString :[String] = []
+        for cat in category {
+            categoryString.append(cat.rawValue)
+            
+        }
+        
+        Firebase.db.collection("USERS").document(userId).updateData([
+            "myCategories": categoryString
+        ]) { error in
+            if let error = error {
+                print("Error settting user categories: \(error)")
+            } else {
+                print("successfully set the user categories")
+            }
+        }
+        
+    }
 }
