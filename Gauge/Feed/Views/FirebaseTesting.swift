@@ -69,6 +69,12 @@ struct FirebaseTesting: View {
                     
                     print(postIds.count)
                 }
+                
+                Button("Get all user data by userId") {
+                    let user = userVM.getAllUserData(userId: "2kDjg6AEanY2raJDnDgqb76M6dn1") { user in
+                        print(user)
+                    }
+                }
             }
             
             Section("Update Data") {
