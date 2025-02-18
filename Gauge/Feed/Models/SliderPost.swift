@@ -7,7 +7,7 @@
 
 import Foundation
 
-class SliderPost: Post {
+class SliderPost: Post, Equatable {
     var postId: String
     var userId: String
     var comments: [Comment]
@@ -68,5 +68,9 @@ class SliderPost: Post {
         self.lowerBoundLabel = lowerBoundLabel
         self.upperBoundLabel = upperBoundLabel
         self.responseResults = responseResults
+    }
+    
+    static func == (lhs: SliderPost, rhs: SliderPost) -> Bool {
+        return lhs.postId == rhs.postId
     }
 }

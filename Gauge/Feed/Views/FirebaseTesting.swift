@@ -13,7 +13,7 @@ struct FirebaseTesting: View {
     @State private var postIds: [String] = []
 
     var body: some View {
-        VStack(spacing: 20) {
+        ScrollView() {
             Section("Write Data") {
                 Button("Add Binary Post") {
                     postVM.createBinaryPost(
@@ -114,6 +114,20 @@ struct FirebaseTesting: View {
                     userVM.getUserFavorites(
                         userId: "ExampleUser")
                 }
+                Button("Start Listener"){
+                    postVM.getLiveFeedPosts(user: userVM.user)
+                }
+                List{
+                    ForEach(postVM.allQueriedPosts,id:\.postId){ post in
+                        Text("\(post.postId)")
+                    
+                    }
+                    
+                }
+//                .onChange(of: postVM.allQueriedPosts, initial: true) {old, new in
+//                        print("new doc received: \(new)")
+//                }
+                
             }
         }
         .onAppear() {

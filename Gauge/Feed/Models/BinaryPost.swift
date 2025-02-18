@@ -7,7 +7,7 @@
 
 import Foundation
 
-class BinaryPost: Post {
+class BinaryPost: Post, Equatable {    
     // Post protocol attributes
     var postId: String
     var userId: String
@@ -66,5 +66,8 @@ class BinaryPost: Post {
         self.responseOption2 = responseOption2
         self.responseResult1 = responseResult1
         self.responseResult2 = responseResult2
+    }
+    static func == (lhs: BinaryPost, rhs: BinaryPost) -> Bool {
+        return lhs.postId == rhs.postId
     }
 }
