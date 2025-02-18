@@ -25,32 +25,31 @@ class FriendsViewModel: ObservableObject {
     }
     
     /// Fetches incoming friend requests
-    func getIncomingRequests(userID: String) async -> [String] {
+    func getIncomingRequests(userId: String) async -> [User] {
+        var incomingRequests = [User]()
 
-        //initialize empty array to store incomingFriend requests
-        var incomingFriends: [String] = []
 
         // 1: Query the 'friendIn' collection for the given userID
         // 2: implement error handling with if else statement, ?? for fallback value ? when calling function
         do {
             //snapshot of the user
-            let snapshot = try await Firebase.db.collection("users").document(userID).getDocument()
+            let snapshot = try await Firebase.db.collection("users").document(userId).getDocument()
 
-            //? (optional chaining) attempts to get dictionary keys - all incoming friend requests from friendsIn key. ? prevents code from crashing if method fails, as (keyword for type conversion)
-            if let friendsIn = snapshot.data()?["friendsIn"] as? [String] {
-                //add each userID to the array
-                //friendsIn is a temporary variable created by this if let statement
-                incomingFriends.append(contentsOf: friendsIn)
+            if let friendsIn = snapshot.data()?["friendIn"] as? [String: [String]] {
+                
+                for friendId in friendsIn.keys {
+                    if let user = await getUserFromId(userId: friendId) {
+                        incomingRequests.append(user)
+                    }
+                }
             } else {
-                print("No incoming friends found for \(userID)")
+                print("No incoming friends found for \(userId)")
             }
         } catch {
             print("Error fetching incoming friend requests \(error.localizedDescription)")
         }
-
-
         //return the array of incoming friend requests
-        return incomingFriends;
+        return incomingRequests;
     }
     
     
@@ -60,10 +59,10 @@ class FriendsViewModel: ObservableObject {
             let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
             
             guard let data = document.data() else { return nil }
-            guard let friendsOut = data["friendsOut"] as? [String] else { return nil }
+            guard let friendsOut = data["friendOut"] as? [String: [String]] else { return nil }
             
             var outgoingRequests = [User]()
-            for friendId in friendsOut {
+            for friendId in friendsOut.keys {
                 if let user = await getUserFromId(userId: friendId) {
                     outgoingRequests.append(user)
                 }
