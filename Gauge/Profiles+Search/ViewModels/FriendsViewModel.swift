@@ -63,8 +63,10 @@ class FriendsViewModel: ObservableObject {
             guard let friendsOut = data["friendsOut"] as? [String] else { return nil }
             
             var outgoingRequests = [User]()
-            for friend in friendsOut {
-                await outgoingRequests.append(getUserFromId(userId: friend)!)
+            for friendId in friendsOut {
+                if let user = await getUserFromId(userId: friendId) {
+                    outgoingRequests.append(user)
+                }
             }
             
             return outgoingRequests
