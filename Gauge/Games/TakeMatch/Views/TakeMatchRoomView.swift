@@ -8,64 +8,82 @@
 import SwiftUI
 
 struct TakeMatchRoomView: View {
+    @StateObject private var mcManager = MCManager.shared
     @State var showSettings: Bool = false
     @StateObject private var gameSettings = TakeMatchSettingsVM()
     @State var isHost: Bool
-    @State var roomCode: String
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        
-            
-        //vstack for the entire screen
         VStack(spacing: 20) {
             Spacer()
             
-            //roomcode
-            Text("\(roomCode)")
+            // Display the room code
+            Text("Room Code: \(mcManager.roomCode)")
                 .font(.title)
-            
-            
-            
+                .bold()
+
             if isHost {
                 Spacer()
                 
-                //start button to start the game
-                NavigationLink(destination: TakeMatchView()) {
-                    
-                    Text("Start")
+                Button("Start") {
+                    mcManager.sendMessage("StartGame")
                 }
                 .padding()
                 .frame(width: 80, height: 30)
                 .background(Color.blue)
                 .foregroundColor(.white)
             } else {
-                
                 Text("Waiting for host...")
             }
-            
+
             Spacer()
             
-            //hstack for the icons of the players
             HStack {
                 
-                
+                ForEach(mcManager.connectedPeers, id: \.self) { peer in
+                    VStack {
+                        Image(systemName: "person.circle.fill") // Player Icon
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(.blue)
+
+                        Text(peer.displayName) // Player Name
+                            .font(.caption)
+                            .lineLimit(1)
+                            .frame(width: 80)
+                    }
+                }
             }
             .frame(maxWidth: .infinity, alignment: .top)
-            .frame(height: UIScreen.main.bounds.height / 2) //white bottom half of the screen
+            .frame(height: UIScreen.main.bounds.height / 2)
             .background(.white)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top) //vstack covers entire screen and aligns to the top
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationTitle(Text("Take Match"))
         .background(Color(.systemGray3))
-        .navigationBarTitleDisplayMode(.inline) //places title and cogwheel at the top and center
+        .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
-        .toolbar { //adds a toolbar for the cogwheel
-
+        .onAppear {
+            mcManager.refreshConnectedPeers()
+            if isHost == false {
+                mcManager.sendMessage("RequestRoomCode") // Ask host for room code
+                
+            }
+        }
+        .onReceive(mcManager.$connectedPeers) { _ in
+            print("UI updated with connected peers: \(mcManager.connectedPeers.map { $0.displayName })")
+        }
+        .onDisappear {
+            if isHost {
+                mcManager.stopHosting()
+            } else {
+                mcManager.stopBrowsing()
+            }
+        }
+        .toolbar {
             if isHost {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    
-                    //button for openign the settings page
                     Button(action: {
                         showSettings.toggle()
                     }) {
@@ -74,12 +92,10 @@ struct TakeMatchRoomView: View {
                     }
                 }
             }
-                
+
             ToolbarItem(placement: .navigationBarLeading) {
-                
-                //back button
                 Button(action: {
-                    withAnimation(.easeInOut(duration: 0.4)) { // Smooth transition
+                    withAnimation(.easeInOut(duration: 0.4)) {
                         dismiss()
                     }
                 }) {
@@ -87,22 +103,18 @@ struct TakeMatchRoomView: View {
                         .foregroundColor(.black)
                 }
             }
-            
         }
-        .sheet(isPresented: $showSettings) { // makes the settings page a sheet and not a navigation to another page
-            
+        .sheet(isPresented: $showSettings) {
             GameSettingsView(gameSettings: gameSettings)
-                .presentationDetents([.medium]) //stops before full screen
-                .presentationDragIndicator(.visible) //shows drag indicator
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
     }
-        
-        
 }
 
 #Preview {
     NavigationStack {
-        TakeMatchRoomView(isHost: false, roomCode: "1234")
+        TakeMatchRoomView(isHost: true)
     }
 }
 
