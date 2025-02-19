@@ -33,7 +33,7 @@ class FriendsViewModel: ObservableObject {
         // 2: implement error handling with if else statement, ?? for fallback value ? when calling function
         do {
             //snapshot of the user
-            let snapshot = try await Firebase.db.collection("users").document(userId).getDocument()
+            let snapshot = try await Firebase.db.collection("USERS").document(userId).getDocument()
 
             if let friendsIn = snapshot.data()?["friendIn"] as? [String: [String]] {
                 
