@@ -258,6 +258,28 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    func getResponses(postId: String, completion: @escaping ([String: Int]) -> Void){
+        var responses: [String: Int] = [:]
+        
+        Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").getDocuments { (snapshot, error) in
+            if let error = error{
+                print("Error getting Post data: \(error)")
+            } else {
+                for document in snapshot!.documents {
+                    let data = document.data()
+                    
+                    if responses.keys.contains(data["responseOption"] as! String){
+                        responses[data["responseOption"] as! String]! += 1
+                    } else {
+                        responses[data["responseOption"] as! String] = 1
+                    }
+                }
+                
+                completion(responses)
+            }
+        }
+    }
+    
     func deleteComment(postId: String, commentId: String){
         Firebase.db.collection("POSTS").document(postId).collection("COMMENTS").document(commentId).delete(){ error in
             if let error = error{

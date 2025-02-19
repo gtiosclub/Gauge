@@ -50,8 +50,8 @@ struct FirebaseTesting: View {
                     postVM.addResponse(
                         postId: "examplePost",
                         userId: "exampleUser",
-                        responseOption: "Chocolate"
-                        )
+                        responseOption: "Vanilla"
+                    )
                 }
             }
             
@@ -73,6 +73,12 @@ struct FirebaseTesting: View {
                 Button("Get all user data by userId") {
                     let user = userVM.getAllUserData(userId: "2kDjg6AEanY2raJDnDgqb76M6dn1") { user in
                         print(user)
+                    }
+                }
+                
+                Button("Get response results from a post") {
+                    postVM.getResponses(postId: "examplePost") { results in
+                        print(results)
                     }
                 }
             }
