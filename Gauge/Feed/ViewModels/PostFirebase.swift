@@ -258,6 +258,7 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    // Currently only works for Binary & Slider posts
     func getResponses(postId: String, completion: @escaping ([String: Int]) -> Void){
         var responses: [String: Int] = [:]
         
@@ -278,6 +279,21 @@ class PostFirebase: ObservableObject {
                 completion(responses)
             }
         }
+    }
+    
+    func suggestPostCategories(question: String, responseOptions: [String], completion: @escaping (([String]) -> Void)) {
+        let categories: [String] = Category.allCategoryStrings
+        
+        let prompt = """
+        Given the following question and options:
+        Question: \(question)
+        Options: \(responseOptions.joined(separator: ", "))
+        
+        From the list of categories below:
+        \(categories.joined(separator: ", "))
+        
+        Return a list of the categories that the post belongs to, ensuring the categories are valid and exist in the list provided.
+        """
     }
     
     func deleteComment(postId: String, commentId: String){

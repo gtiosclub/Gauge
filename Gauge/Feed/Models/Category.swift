@@ -15,49 +15,64 @@ enum Category {
     case relationships(Relationships)
     case other(Other)
     
-    enum Sports: String {
+    enum Sports: String, CaseIterable {
         case nfl = "NFL"
         case collegeFootball = "College Football"
         case mlb = "MLB"
     }
     
-    enum Entertainment: String {
+    enum Entertainment: String, CaseIterable {
         case movies = "Movies"
         case tvShows = "TV Shows"
     }
     
-    enum Educational: String {
+    enum Educational: String, CaseIterable {
         case cs = "Computer Science"
         case math = "Math"
         case environment = "Environment"
         case health = "Health & Fitness"
     }
     
-    enum News: String {
+    enum News: String, CaseIterable {
         case politics = "Politics"
         case business = "Business"
     }
     
-    enum Lifestyle: String {
+    enum Lifestyle: String, CaseIterable {
         case fashion = "Fashion"
         case beauty = "Beauty"
         case travel = "Travel"
     }
     
-    enum Arts: String {
+    enum Arts: String, CaseIterable {
         case music = "Music"
         case artwork = "Artwork"
     }
     
-    enum Relationships: String {
+    enum Relationships: String, CaseIterable {
         case dating = "Dating"
         case relationships = "Relationships"
         case parenting = "Parenting"
     }
     
-    enum Other: String {
+    enum Other: String, CaseIterable {
         case funny = "Funny"
         case jokes = "Jokes"
+    }
+    
+    static var allCases: [Category] {
+        return Sports.allCases.map(Category.sports) +
+               Entertainment.allCases.map(Category.entertainment) +
+               Educational.allCases.map(Category.educational) +
+               News.allCases.map(Category.news) +
+               Lifestyle.allCases.map(Category.lifestyle) +
+               Arts.allCases.map(Category.arts) +
+               Relationships.allCases.map(Category.relationships) +
+               Other.allCases.map(Category.other)
+    }
+
+    static var allCategoryStrings: [String] {
+        return allCases.map { $0.rawValue }
     }
     
     var rawValue: String {
