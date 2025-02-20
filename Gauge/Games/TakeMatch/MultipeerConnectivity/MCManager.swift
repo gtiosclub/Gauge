@@ -56,7 +56,6 @@ class MCManager: NSObject, ObservableObject {
         browser = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
         browser?.delegate = self
         browser?.startBrowsingForPeers()
-
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             self.browser?.stopBrowsingForPeers()
         }
@@ -90,7 +89,7 @@ extension MCManager: MCSessionDelegate {
     // Called when a peer changes connection state (Connected, Connecting, Not Connected)
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
         DispatchQueue.main.async {
-            self.connectedPeers = session.connectedPeers
+            self.connectedPeers = session.connectedPeers + [self.peerID]
         }
         print("Peer \(peerID.displayName) changed state: \(state)")
         if state == .connected {
@@ -156,6 +155,7 @@ extension MCManager: MCNearbyServiceBrowserDelegate {
                 self.foundPeer = peerID
                 self.isReadyToNavigate = true // Allow navigation once peer is found
             }
+            browser.invitePeer(peerID, to: self.session, withContext: nil, timeout: 10)
         }
     }
     
