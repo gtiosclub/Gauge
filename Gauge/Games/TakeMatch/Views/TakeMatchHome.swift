@@ -1,105 +1,72 @@
-//
-//  TakeMatchHome.swift
-//  Gauge
-//
-//  Created by Nikola Cao on 2/10/25.
-//
-
 import SwiftUI
 
 struct TakeMatchHome: View {
-    var isHost: Bool = false
+    @StateObject private var mcManager = MCManager.shared
     @State var roomCode: String = ""
     @State var showJoinRoom: Bool = false
-    
+    @State var navigateToRoom = false
+    @State var isHost = false
+
     var body: some View {
-            
+        NavigationStack {
             VStack {
-                
                 Text("Take Match")
-                    .frame(width: 200, height: 100)
+                    .font(.largeTitle)
                     .bold()
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(.gray)
-                    .cornerRadius(5)
+
                 HStack {
-                    
-                    NavigationLink(destination: TakeMatchRoomView(isHost: true, roomCode: roomCode)) {
-                        
-                        Text("Create")
-                            .frame(width: 80, height: 15)
-                            .bold()
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(5)
-                    }
-                    
-                    Button(action: { withAnimation(.easeInOut(duration: 0.3)) {
-                        
-                            showJoinRoom.toggle()
-                        }
+                    // Create Room
+                    Button(action: {
+                        mcManager.startHosting()
+                        isHost = true
+                        navigateToRoom = true
                     }) {
-                        Text("Join")
-                            .frame(width: 80, height: 15)
-                            .bold()
-                            .foregroundColor(.white)
+                        Text("Create Room")
                             .padding()
                             .background(Color.blue)
+                            .foregroundColor(.white)
                             .cornerRadius(5)
                     }
-                    
-                }
-                
-                if showJoinRoom {
-                    
-                    HStack {
-                        
-                        TextField("Room Code", text: $roomCode)
-                            .padding(10)
-                            .background(
-                                RoundedRectangle(cornerRadius: 5)
-                                    .stroke(Color.gray, lineWidth: 2) // Thin outline
-                            )
-                            .frame(width: 170)
-                        
-                        if roomCode.isEmpty {
-                            
-                                
-                            Image(systemName: "arrow.right")
-                                .foregroundColor(.black)
-                                .padding()
-                                .background(.gray)
-                                .cornerRadius(5)
-                                .opacity(0.1)
-                            
-                        } else {
-                            NavigationLink(destination: TakeMatchRoomView(isHost: false, roomCode: roomCode)) {
-                                
-                                Image(systemName: "arrow.right")
-                                    .foregroundColor(.black)
-                            }
+
+                    // Join Room Button
+                    Button(action: {
+                        showJoinRoom.toggle()
+                        isHost = false
+                    }) {
+                        Text("Join Room")
                             .padding()
-                            .background(.gray)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
                             .cornerRadius(5)
+                    }
+                }
+
+                if showJoinRoom {
+                    HStack {
+                        TextField("Enter Room Code", text: $roomCode)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+
+                        Button(action: {
+                            mcManager.startBrowsing(forRoomCode: roomCode)
+                            if mcManager.availableRooms[roomCode] != nil {
+                                navigateToRoom = true
+                                isHost = false
+                                mcManager.sendMessage("RequestRoomCode")
+                            }
+                        }) {
+                            Image(systemName: "arrow.right")
                         }
-                    }
-                    .transition(.opacity)
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .frame(width: 200)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    
-                    NavigationLink(destination: GamesHome()) {
-                        Image(systemName: "arrow.left")
-                            .foregroundColor(.black)
+                        .padding()
+                        .background(Color.gray)
+                        .cornerRadius(5)
                     }
                 }
             }
+            .navigationDestination(isPresented: $navigateToRoom) {
+                TakeMatchRoomView(isHost: isHost)
+            }
+        }
     }
 }
 
