@@ -53,6 +53,12 @@ struct FirebaseTesting: View {
                         responseOption: "Chocolate"
                         )
                 }
+                
+                Button("test setUserCategories"){
+                    print("the testing is being called")
+                    userVM.setUserCategories(userId: "austin", category: [Category.educational(.environment), Category.educational(.math)])
+                }
+                
             }
             
             Section("Get Live Data (Great for feed & games!)") {
