@@ -11,75 +11,75 @@ struct FirebaseTesting: View {
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
     @State private var postIds: [String] = []
-
+    
     var body: some View {
-        ScrollView() {
-            Section("Write Data") {
-                Button("Add Binary Post") {
-                    postVM.createBinaryPost(
-                        userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
-                        categories: [.sports(.nfl)],
-                        question: "Is pizza the goat food?",
-                        responseOption1: "yes",
-                        responseOption2: "no"
-                    )
-                }
-                
-                Button("Add Slider Post") {
-                    postVM.createSliderPost(
-                        userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
-                        categories: [.educational(.cs)],
-                        question: "rate Swift 1-10",
-                        lowerBoundValue: 1,
-                        upperBoundValue: 10,
-                        lowerBoundLabel: "Terrible 🤮",
-                        upperBoundLabel: "Goated 🐐"
-                    )
-                }
-              
-                Button("Add Ranked Post") {
-                    postVM.createRankPost(
-                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
-                        categories: [.arts(.music)],
-                        question: "Best Half-Time Performance?",
-                        responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
-                    )
-                }
-                
-                Button("Add user to VIEWS of a post (hardcoded for Firebase testing)") {
-                    postVM.addViewToPost(
-                        postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
-                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
-                    )
-                }
-
-                Button("Add response") {
-                    postVM.addResponse(
-                        postId: "examplePost",
-                        userId: "exampleUser",
-                        responseOption: "Chocolate"
+        ScrollView {
+            VStack(spacing: 20) {
+                Section("Write Data") {
+                    Button("Add Binary Post") {
+                        postVM.createBinaryPost(
+                            userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
+                            categories: [.sports(.nfl)],
+                            question: "Is pizza the goat food?",
+                            responseOption1: "yes",
+                            responseOption2: "no"
                         )
-                }
-                
-                Button("test setUserCategories"){
-                    print("the testing is being called")
-                    userVM.setUserCategories(userId: "austin", category: [Category.educational(.environment), Category.educational(.math)])
-                }
-                
-            }
-            
-            Section("Get Live Data (Great for feed & games!)") {
-                Button("Watch for Posts") {
-                    postVM.getLiveFeedPosts(user: userVM.user)
-                }
-            }
-            
-            Section("Read Data") {
-                Button("Get posts by userId") {
-                    userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
-                        self.postIds = postIds
+                    }
+                    
+                    Button("Add Slider Post") {
+                        postVM.createSliderPost(
+                            userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
+                            categories: [.educational(.cs)],
+                            question: "rate Swift 1-10",
+                            lowerBoundValue: 1,
+                            upperBoundValue: 10,
+                            lowerBoundLabel: "Terrible 🤮",
+                            upperBoundLabel: "Goated 🐐"
+                        )
+                    }
+                    
+                    Button("Add Ranked Post") {
+                        postVM.createRankPost(
+                            userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+                            categories: [.arts(.music)],
+                            question: "Best Half-Time Performance?",
+                            responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
+                        )
+                    }
+                    
+                    Button("Add user to VIEWS of a post (hardcoded for Firebase testing)") {
+                        postVM.addViewToPost(
+                            postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                            userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
+                        )
+                    }
+                    
+                    Button("Add response") {
+                        postVM.addResponse(
+                            postId: "examplePost",
+                            userId: "exampleUser",
+                            responseOption: "Chocolate"
+                        )
+                    }
+                    
+                    Button("test setUserCategories"){
+                        print("the testing is being called")
+                        userVM.setUserCategories(userId: "austin", category: [Category.educational(.environment), Category.educational(.math)])
                     }
                 }
+                
+                Section("Get Live Data (Great for feed & games!)") {
+                    Button("Watch for Posts") {
+                        postVM.getLiveFeedPosts(user: userVM.user)
+                    }
+                }
+                
+                Section("Read Data") {
+                    Button("Get posts by userId") {
+                        userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
+                            self.postIds = postIds
+                        }
+                    }
                     
                     Button("Add Slider Post") {
                         postVM.createSliderPost(
@@ -182,6 +182,19 @@ struct FirebaseTesting: View {
                         userVM.getUserFavorites(
                             userId: "ExampleUser")
                     }
+                    
+                    Button("Start Listener"){
+                        postVM.getLiveFeedPosts(user: userVM.user)
+                    }
+                    
+                    List {
+                        ForEach(postVM.allQueriedPosts,id:\.postId){ post in
+                            Text("\(post.postId)")
+                        }
+                    }
+                    //                .onChange(of: postVM.allQueriedPosts, initial: true) {old, new in
+                    //                        print("new doc received: \(new)")
+                    //                }
                 }
                 
                 Section("OpenAI Queries") {
@@ -193,24 +206,7 @@ struct FirebaseTesting: View {
                         }
                     }
                 }
-                Button("Start Listener"){
-                    postVM.getLiveFeedPosts(user: userVM.user)
-                }
-                List{
-                    ForEach(postVM.allQueriedPosts,id:\.postId){ post in
-                        Text("\(post.postId)")
-                    
-                    }
-                    
-                }
-//                .onChange(of: postVM.allQueriedPosts, initial: true) {old, new in
-//                        print("new doc received: \(new)")
-//                }
-                
             }
-        }
-        .onAppear() {
-//            print("\(Keys.openAIKey)")
         }
     }
 }
