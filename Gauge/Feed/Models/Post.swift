@@ -10,6 +10,8 @@ import Foundation
 protocol Post {
     var postId: String {get set}
     var userId: String {get set}
+    var username: String {get set}
+    var profilePhoto: String {get set}
     var comments: [Comment] {get set}
     var responses: [Response] {get set}
     var categories: [Category] {get set} // String in Firebase
@@ -27,6 +29,8 @@ enum PostType: String {
 struct Comment {
     var commentType: CommentType // enum (text, GIF), String in Firebase
     var userId: String
+    var username: String // NOT stored in Firebase
+    var profilePhoto: String // NOT stored in Firebase
     var commentId: String
     var likes: [String] // userIds
     var dislikes: [String] // userIds

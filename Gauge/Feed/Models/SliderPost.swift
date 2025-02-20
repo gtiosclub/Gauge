@@ -10,6 +10,8 @@ import Foundation
 class SliderPost: Post {
     var postId: String
     var userId: String
+    var username: String = "" // NOT stored in Firebase
+    var profilePhoto: String = "" // NOT stored in Firebase
     var comments: [Comment]
     var responses: [Response]
     var categories: [Category]
@@ -49,10 +51,12 @@ class SliderPost: Post {
     }
     
     // Initializing from Firebase
-    init(postId: String, userId: String, comments: [Comment], responses: [Response], categories: [Category], viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double], favoritedBy: [String]) {
+    init(postId: String, userId: String, username: String, profilePhoto: String, comments: [Comment], responses: [Response], categories: [Category], viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double], favoritedBy: [String]) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
+        self.username = username
+        self.profilePhoto = profilePhoto
         self.comments = comments
         self.responses = responses
         self.categories = categories
