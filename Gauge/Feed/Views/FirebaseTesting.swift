@@ -59,6 +59,10 @@ struct FirebaseTesting: View {
                 Button("Watch for Posts") {
                     postVM.getLiveFeedPosts(user: userVM.user)
                 }
+                
+                Button("Generate 20 Keywords") {
+                    postVM.generatePostKeywords(postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2")
+                }
             }
             
             Section("Read Data") {
