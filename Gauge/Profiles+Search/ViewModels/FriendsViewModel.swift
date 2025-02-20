@@ -25,44 +25,50 @@ class FriendsViewModel: ObservableObject {
     }
     
     /// Fetches incoming friend requests
-    func getIncomingRequests(userID: String) async -> [String] {
+    func getIncomingRequests(userId: String) async -> [User] {
+        var incomingRequests = [User]()
 
-        //initialize empty array to store incomingFriend requests
-        var incomingFriends: [String] = []
 
         // 1: Query the 'friendIn' collection for the given userID
         // 2: implement error handling with if else statement, ?? for fallback value ? when calling function
         do {
             //snapshot of the user
-            let snapshot = try await Firebase.db.collection("users").document(userID).getDocument()
+            let snapshot = try await Firebase.db.collection("USERS").document(userId).getDocument()
 
-            //? (optional chaining) attempts to get dictionary keys - all incoming friend requests from friendsIn key. ? prevents code from crashing if method fails, as (keyword for type conversion)
-            if let friendsIn = snapshot.data()?["friendsIn"] as? [String] {
-                //add each userID to the array
-                //friendsIn is a temporary variable created by this if let statement
-                incomingFriends.append(contentsOf: friendsIn)
+            if let friendsIn = snapshot.data()?["friendIn"] as? [String: [String]] {
+                
+                for friendId in friendsIn.keys {
+                    if let user = await getUserFromId(userId: friendId) {
+                        incomingRequests.append(user)
+                    }
+                }
             } else {
-                print("No incoming friends found for \(userID)")
+                print("No incoming friends found for \(userId)")
             }
         } catch {
             print("Error fetching incoming friend requests \(error.localizedDescription)")
         }
-
-
         //return the array of incoming friend requests
-        return incomingFriends;
+        return incomingRequests;
     }
     
     
     /// Fetches outgoing friend requests
-    func getOutgoingRequests(userId: String) async -> [String]? {
+    func getOutgoingRequests(userId: String) async -> [User]? {
         do {
             let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
             
             guard let data = document.data() else { return nil }
-            guard let friendsOut = data["friendsOut"] as? [String] else { return nil }
+            guard let friendsOut = data["friendOut"] as? [String: [String]] else { return nil }
             
-            return friendsOut
+            var outgoingRequests = [User]()
+            for friendId in friendsOut.keys {
+                if let user = await getUserFromId(userId: friendId) {
+                    outgoingRequests.append(user)
+                }
+            }
+            
+            return outgoingRequests
         } catch{
             print("Error getting document")
             return nil
@@ -70,13 +76,13 @@ class FriendsViewModel: ObservableObject {
     }
     
     /// Searches for friends in a user’s list based on a given search string
-    func searchFriends(userId: String, searchString: String) async -> [[String: Any]]? {
+    func searchFriends(userId: String, searchString: String) async -> [User]? {
             do {
                 let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
                 
                 guard let data = document.data(), let friendIds = data["friends"] as? [String] else { return nil }
                 
-                var matchingFriends: [[String: Any]] = []
+                var matchingFriends: [User] = []
                 let querySnapshot = try await Firebase.db.collection("USERS")
                     .whereField("userId", in: friendIds)
                     .getDocuments()
@@ -85,7 +91,10 @@ class FriendsViewModel: ObservableObject {
                     let friendData = document.data()
                     if let username = friendData["username"] as? String,
                        username.lowercased().contains(searchString.lowercased()) {
-                        matchingFriends.append(friendData)
+                        let friendUserId = document.documentID
+                        if let user = await getUserFromId(userId: friendUserId) {
+                            matchingFriends.append(user)
+                        }
                     }
                 }
                 
@@ -95,4 +104,33 @@ class FriendsViewModel: ObservableObject {
                 return nil
             }
         }
+    
+    func getUserFromId(userId: String) async -> User? {
+        do {
+            let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
+            guard let userData = document.data() else {return nil}
+            
+            guard let name = userData["name"] as? String else { return nil }
+            guard let email = userData["email"] as? String else { return nil }
+            
+            let phoneNumber = userData["phoneNumber"] as? String ?? ""
+            let friendIn = userData["friendIn"] as? [String : [String]] ?? [:]
+            let friendOut = userData["friendOut"] as? [String: [String]] ?? [:]
+            let friends = userData["friends"] as? [String: [String]] ?? [:]
+            let myPosts = userData["myPosts"] as? [String] ?? []
+            let myResponses = userData["myResponses"] as? [String] ?? []
+            let myReactions = userData["myReactions"] as? [String] ?? []
+            let mySearches = userData["mySearches"] as? [String] ?? []
+            let myComments = userData["myComments"] as? [String] ?? []
+            let myCategories = userData["myCategories"] as? [String] ?? []
+            let badges = userData["badges"] as? [String] ?? []
+            let streak = userData["streak"] as? Int ?? 0
+            
+            let outputUser = try User(userId: userId, username: name, phoneNumber: phoneNumber, email: email,friendIn: friendIn, friendOut: friendOut, friends: friends, myPosts: myPosts, myResponses: myResponses, myReactions: myReactions, mySearches: mySearches, myComments: myComments, myCategories: myCategories, badges: badges, streak: streak)
+            return outputUser
+                
+        } catch {
+            return nil
+        }
     }
+}

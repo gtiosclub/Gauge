@@ -41,5 +41,13 @@ final class GaugeTests: XCTestCase {
         let friendsOutgoing = await viewModel.getOutgoingRequests(userId: userId)
         print(friendsOutgoing)
     }
-
+    
+    func testGetUserFromId() async {
+        let testUser = User(userId: "exampleUser", username: "dummy", email: "dummy")
+        let viewModel = FriendsViewModel(user: testUser)
+        
+        let userId = testUser.id
+        let user = await viewModel.getUserFromId(userId: userId)
+        print(user)
+    }
 }
