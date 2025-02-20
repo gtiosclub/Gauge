@@ -79,7 +79,7 @@ class MCManager: NSObject, ObservableObject {
     
     func refreshConnectedPeers() {
         DispatchQueue.main.async {
-            self.connectedPeers = self.session.connectedPeers
+            self.connectedPeers = self.session.connectedPeers + [self.peerID]
         }
     }
 }
