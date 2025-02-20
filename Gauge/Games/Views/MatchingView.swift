@@ -10,30 +10,31 @@ import SwiftUI
 struct MatchingView: View {
     var responses: [String]
     var playerPictures: [String]
-    @State var circlePosition: CGPoint = .zero
     @Binding var guessedMatches: [String: String]
+    
+    @State private var dragOffset = CGSize.zero
+    @State private var lastPosition = CGSize.zero
+    @State private var isDragging = false
+    @State private var hoveredResponse: String? = nil // Track hovered response
+    
     var onSubmit: () -> Void
     var body: some View {
         VStack {
             Text("Match").font(.largeTitle.bold())
-            ZStack() {
+            ZStack {
                 Rectangle()
                     .foregroundColor(Color(.secondarySystemFill))
                 ZStack {
                     VStack(spacing: 12) {
                         ForEach(responses, id: \.self) { response in
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.white)
-                                    .shadow(radius: 1.5, x: 1.5, y: 1.5)
-                                Text(response)
-                                    .font(.title)
-                            }.dropDestination(for: Image.self) {
-                                playerSelection, location in
-                                circlePosition = location
-                                return true
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.white)
+                                        .shadow(radius: 1.5, x: 1.5, y: 1.5)
+                                    Text(response)
+                                        .font(.title)
+                                }
                             }
-                        }
                         Spacer()
                     }
                     .padding(.vertical)
@@ -41,19 +42,37 @@ struct MatchingView: View {
             }
             Spacer()
             ForEach(playerPictures, id: \.self) { imageName in
-                Image(imageName)
+                Image("TestProfile")
                     .resizable()
-                    .scaledToFill()
                     .frame(width: 80, height: 80)
                     .clipShape(Circle())
                     .shadow(radius: 1.5, x: 1.5, y: 1.5)
-                    .draggable(
-                        Image(imageName))
+                    .foregroundColor(.yellow)
+                    .scaleEffect(isDragging ? 1.2 : 1.0)
+                    .opacity(isDragging ? 0.8 : 1.0)
+                    .offset(x: lastPosition.width + dragOffset.width,
+                            y: lastPosition.height + dragOffset.height)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    dragOffset = value.translation
+                                    isDragging = true
+                                }
+                            }
+                            .onEnded { value in
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    lastPosition.width += dragOffset.width
+                                    lastPosition.height += dragOffset.height
+                                    dragOffset = .zero
+                                    isDragging = false
+                                }
+                            }
+                    )
             }
         }
     }
 }
-
 #Preview {
     MatchingView(responses: ["Pizza", "Hamburgers", "Fried Chicken", "Ice Cream"], playerPictures: ["TestProfile"], guessedMatches: .constant([:]), onSubmit: { })
 }
