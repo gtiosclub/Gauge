@@ -28,7 +28,50 @@ class PostFirebase: ObservableObject {
     
             for change in snapshot.documentChanges {
                 if change.type == .added {
-                    
+                    print(change.document.documentID)
+                    let newPostData = change.document.data()
+                    if(newPostData["type"] as? String == PostType.BinaryPost.rawValue){
+                        print("adding binary")
+                        let post1 = BinaryPost(
+                            postId: newPostData["postId"] as? String ?? "",
+                            userId: newPostData["userId"] as? String ?? "",
+                            categories: newPostData["categories"] as? [Category] ?? [],
+                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
+                            question: newPostData["question"] as? String ?? "",
+                            responseOption1: newPostData["responseOption1"] as? String ?? "",
+                            responseOption2: newPostData["responseOption2"] as? String ?? "")
+                        DispatchQueue.main.async{
+                            self.allQueriedPosts.append(post1)
+                        }
+                        
+                    } else if(newPostData["type"] as? String == PostType.SliderPost.rawValue){
+                        print("adding slider")
+                        let post2 = SliderPost(
+                            postId:newPostData["postId"] as? String ?? "",
+                            userId: newPostData["userId"] as? String ?? "",
+                            categories: newPostData["categories"] as? [Category] ?? [],
+                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
+                            question: newPostData["question"] as? String ?? "",
+                            lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
+                            upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
+                            lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
+                            upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1)
+                        DispatchQueue.main.async{
+                            self.allQueriedPosts.append(post2)
+                        }
+                    } else if(newPostData["type"] as? String == PostType.RankPost.rawValue){
+                        print("adding rank")
+                        let post3 = RankPost(
+                            postId: newPostData["postId"] as? String ?? "",
+                            userId: newPostData["userId"] as? String ?? "",
+                            categories: newPostData["categories"] as? [Category] ?? [],
+                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
+                            question: newPostData["question"] as? String ?? "",
+                            responseOptions: newPostData["responseOptions"] as? [String] ?? [])
+                        DispatchQueue.main.async{
+                            self.allQueriedPosts.append(post3)
+                        }
+                    }
                 } else if change.type == .modified {
 
                 } else if change.type == .removed {
@@ -363,6 +406,19 @@ class PostFirebase: ObservableObject {
                 print("Error deleting Comment: \(error)")
             } else {
                 print("deleted comment from COMMENTS")
+            }
+        }
+    }
+    
+    
+    func addViewToPost(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("POSTS").document(postId).collection("VIEWS").document(userId)
+        
+        documentRef.setData(["userId": userId]) { error in
+            if let error = error {
+                print("Error adding view to post: \(error)")
+            } else {
+                print("Added view to post \(postId).")
             }
         }
     }

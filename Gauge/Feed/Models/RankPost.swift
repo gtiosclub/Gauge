@@ -7,7 +7,7 @@
 
 import Foundation
 
-class RankPost: Post {
+class RankPost: Post, Equatable {
     // Post protocol attributes
     var postId: String
     var userId: String
@@ -60,5 +60,9 @@ class RankPost: Post {
         // Rank post specific attributes
         self.responseOptions = responseOptions
         self.responseResults = responseResults
+    }
+    
+    static func == (lhs: RankPost, rhs: RankPost) -> Bool {
+        return lhs.postId == rhs.postId
     }
 }
