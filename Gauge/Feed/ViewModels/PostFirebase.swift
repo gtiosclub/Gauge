@@ -11,13 +11,93 @@ import Firebase
 class PostFirebase: ObservableObject {
     @Published var feedPosts: [Post] = []
     @Published var allQueriedPosts: [Post] = []
+    @Published var skippedPost: Post? = nil
+    private var currentFeedPostsListener: ListenerRegistration? = nil
     
     init() {
         Keys.fetchKeys()
     }
     
+    func getLiveFeedPosts(user: User) {
+        let allPosts: [String] = user.myViews + user.myResponses
+        Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
+            guard let snapshot = snapshot else {
+                print("Error fetching post updates: \(error!)")
+                return
+            }
+    
+            for change in snapshot.documentChanges {
+                if change.type == .added {
+                    print(change.document.documentID)
+                    let newPostData = change.document.data()
+                    if(newPostData["type"] as? String == PostType.BinaryPost.rawValue){
+                        print("adding binary")
+                        let post1 = BinaryPost(
+                            postId: newPostData["postId"] as? String ?? "",
+                            userId: newPostData["userId"] as? String ?? "",
+                            categories: newPostData["categories"] as? [Category] ?? [],
+                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
+                            question: newPostData["question"] as? String ?? "",
+                            responseOption1: newPostData["responseOption1"] as? String ?? "",
+                            responseOption2: newPostData["responseOption2"] as? String ?? "")
+                        DispatchQueue.main.async{
+                            self.allQueriedPosts.append(post1)
+                        }
+                        
+                    } else if(newPostData["type"] as? String == PostType.SliderPost.rawValue){
+                        print("adding slider")
+                        let post2 = SliderPost(
+                            postId:newPostData["postId"] as? String ?? "",
+                            userId: newPostData["userId"] as? String ?? "",
+                            categories: newPostData["categories"] as? [Category] ?? [],
+                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
+                            question: newPostData["question"] as? String ?? "",
+                            lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
+                            upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
+                            lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
+                            upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1)
+                        DispatchQueue.main.async{
+                            self.allQueriedPosts.append(post2)
+                        }
+                    } else if(newPostData["type"] as? String == PostType.RankPost.rawValue){
+                        print("adding rank")
+                        let post3 = RankPost(
+                            postId: newPostData["postId"] as? String ?? "",
+                            userId: newPostData["userId"] as? String ?? "",
+                            categories: newPostData["categories"] as? [Category] ?? [],
+                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
+                            question: newPostData["question"] as? String ?? "",
+                            responseOptions: newPostData["responseOptions"] as? [String] ?? [])
+                        DispatchQueue.main.async{
+                            self.allQueriedPosts.append(post3)
+                        }
+                    }
+                } else if change.type == .modified {
+
+                } else if change.type == .removed {
+                    
+                }
+            }
+        }
+    }
+    
+    func likeComment(postId: String, commentId: String, userId: String){
+        let commentRef = Firebase.db.collection("POSTS")
+            .document(postId)
+            .collection("COMMENTS")
+            .document(commentId)       
+      
+        commentRef.updateData([
+            "likes": FieldValue.arrayUnion([userId])
+        ]){
+            error in
+            if var error = error {
+                print("error in liking comment: \(error.localizedDescription)")
+            }
+        }
+    }
+    
     func dislikeComment(postId: String, commentId: String, userId: String) {
-        
         // Reference a specific comment in the "COMMENTS" collection
         // of a specific post in the "POSTS" collection
         // from firebase database
@@ -39,55 +119,13 @@ class PostFirebase: ObservableObject {
             }
         }
     }
-
-    func getUserFavorites(userId: String) {
-        // Create an array to store favorite postId
-        var allFavoritePosts: [String] = []
-        // fetch all documents in the "POSTS" collection
-        // that have the "userId" in their "favoriteBy" field
-        Firebase.db.collection("POSTS")
-            .whereField("favoritedBy", arrayContains: userId)
-            .getDocuments { (snapshot, error) in
-                if let error = error {
-                    print("Error getting favorite posts: \(error)")
-                } else {
-                    for document in snapshot!.documents {
-                        allFavoritePosts.append(document.documentID)
-                    }
-                }
-            }
-    }
-    
-
-    
-    func getLiveFeedPosts(user: User) {
-        let allPosts: [String] = user.myViews + user.myResponses
-        Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
-            guard let snapshot = snapshot else {
-                print("Error fetching post updates: \(error!)")
-                return
-            }
-    
-            for change in snapshot.documentChanges {
-                if change.type == .added {
-                    
-                } else if change.type == .modified {
-
-                } else if change.type == .removed {
-                    
-                }
-            }
-        }
-    }
-    
-    
-        
-    func createBinaryPost(userId: String, category: Category, question: String, responseOption1: String, responseOption2: String) {
+  
+    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String) {
         // Create post instance
         let post = BinaryPost(
             postId: UUID().uuidString,
             userId: userId,
-            category: category,
+            categories: categories,
             postDateAndTime: Date(),
             question: question,
             responseOption1: responseOption1,
@@ -101,7 +139,7 @@ class PostFirebase: ObservableObject {
             "type": PostType.BinaryPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "category": post.category.rawValue,
+            "categories": post.categories,
             "viewCounter": post.viewCounter,
             "responseCounter": post.responseCounter,
             "postDateAndTime": post.postDateAndTime,
@@ -120,12 +158,12 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func createSliderPost(userId: String, category: Category, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String) {
+    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String) {
         // Create post instance
         let post = SliderPost(
             postId: UUID().uuidString,
             userId: userId,
-            category: category,
+            categories: categories,
             postDateAndTime: Date(),
             question: question,
             lowerBoundLabel: lowerBoundLabel,
@@ -141,7 +179,7 @@ class PostFirebase: ObservableObject {
             "type": PostType.SliderPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "category": post.category.rawValue,
+            "categories": post.categories,
             "viewCounter": post.viewCounter,
             "responseCounter": post.responseCounter,
             "postDateAndTime": post.postDateAndTime,
@@ -160,6 +198,7 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
     func deletePost(postId: String){
         Firebase.db.collection("POSTS").document(postId).delete() { error in
             if let error = error {
@@ -168,15 +207,13 @@ class PostFirebase: ObservableObject {
                 print("post successfully removed!")
             }
         }
-        
-        
     }
     
-    func createRankPost(userId: String, category: Category, question: String, responseOptions: [String]) {
+    func createRankPost(userId: String, categories: [Category], question: String, responseOptions: [String]) {
         let post = RankPost(
             postId: UUID().uuidString,
             userId: userId,
-            category: category,
+            categories: categories,
             postDateAndTime: Date(),
             question: question,
             responseOptions: responseOptions
@@ -189,7 +226,7 @@ class PostFirebase: ObservableObject {
             "type": PostType.RankPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "category": post.category.rawValue,
+            "categories": post.categories,
             "postDateAndTime": Timestamp(date: post.postDateAndTime),
             "question": post.question,
             "responseOptions": post.responseOptions,
@@ -203,16 +240,12 @@ class PostFirebase: ObservableObject {
             } else {
                 print("Added new ranked post to POSTS \(documentRef.documentID)")
             }
-            
         }
     }
     
-    //Parameters should be postId, responseId (generate a UUID using UUID()), userId, and responseOption. See Response struct in Post file for details on this
-    func addResponse(postId:String, userId:String, responseOption:String) {
+    func addResponse(postId: String, userId: String, responseOption: String) {
         let responseId = UUID().uuidString
         
-        
-                                                                                                                                                    
         //The postId is used to query the correct document in the POST collection.
         let correctPost = Firebase.db.collection("POSTS").document(postId)
         
@@ -230,10 +263,64 @@ class PostFirebase: ObservableObject {
                 print("Response added succesfully")
             }
         }
-        
-        
-        
-        
     }
-
+    
+    func addUserToFavoritedBy(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("POSTS").document(postId)
+        
+        documentRef.updateData([
+            "favoritedBy": FieldValue.arrayUnion([userId])
+        ]) { error in
+            if let error = error {
+                print("Error adding user to favoritedBy array: \(error)")
+            } else {
+                print("Added \(userId) to favoritedBy array of post \(postId).")
+            }
+        }
+    }
+    
+    func addComment(postId: String, commentType: CommentType, userId: String, content: String){
+        let commentId = UUID().uuidString
+        let newCommentRef = Firebase.db.collection("POSTS")
+            .document(postId).collection("COMMENTS").document(commentId)
+        
+        newCommentRef.setData([
+            "postId" : postId,
+            "commentId" : commentId,
+            "commentType": String(describing: commentType),
+            "userId": userId ,
+            "content": content,
+            "likes" : [],
+            "dislikes" : [],
+        ]) { error in
+            if let error = error{
+                print("Error adding Comment: \(error)")
+            } else {
+                print("added new comment to COMMENTS")
+            }
+        }
+    }
+    
+    func deleteComment(postId: String, commentId: String){
+        Firebase.db.collection("POSTS").document(postId).collection("COMMENTS").document(commentId).delete(){ error in
+            if let error = error{
+                print("Error deleting Comment: \(error)")
+            } else {
+                print("deleted comment from COMMENTS")
+            }
+        }
+    }
+    
+    
+    func addViewToPost(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("POSTS").document(postId).collection("VIEWS").document(userId)
+        
+        documentRef.setData(["userId": userId]) { error in
+            if let error = error {
+                print("Error adding view to post: \(error)")
+            } else {
+                print("Added view to post \(postId).")
+            }
+        }
+    }
 }

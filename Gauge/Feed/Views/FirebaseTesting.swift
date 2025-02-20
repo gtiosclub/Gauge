@@ -10,27 +10,25 @@ import SwiftUI
 struct FirebaseTesting: View {
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
+    @State private var postIds: [String] = []
 
     var body: some View {
-        VStack(spacing: 20) {
+        ScrollView() {
             Section("Write Data") {
-                // Krish Tests
                 Button("Add Binary Post") {
                     postVM.createBinaryPost(
                         userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
-                        category: .food,
+                        categories: [.sports(.nfl)],
                         question: "Is pizza the goat food?",
                         responseOption1: "yes",
                         responseOption2: "no"
                     )
                 }
                 
-                
-                
                 Button("Add Slider Post") {
                     postVM.createSliderPost(
                         userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
-                        category: .tech,
+                        categories: [.educational(.cs)],
                         question: "rate Swift 1-10",
                         lowerBoundValue: 1,
                         upperBoundValue: 10,
@@ -42,9 +40,16 @@ struct FirebaseTesting: View {
                 Button("Add Ranked Post") {
                     postVM.createRankPost(
                         userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
-                        category: .entertainment,
+                        categories: [.arts(.music)],
                         question: "Best Half-Time Performance?",
                         responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
+                    )
+                }
+                
+                Button("Add user to VIEWS of a post (hardcoded for Firebase testing)") {
+                    postVM.addViewToPost(
+                        postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
                     )
                 }
 
@@ -55,14 +60,33 @@ struct FirebaseTesting: View {
                         responseOption: "Chocolate"
                         )
                 }
-              
-                Button("Fetch Favorite Post") {
-                    postVM.getUserFavorites(
-                        userId: "ExampleUser")
+                
+                Button("test setUserCategories"){
+                    print("the testing is being called")
+                    userVM.setUserCategories(userId: "austin", category: [Category.educational(.environment), Category.educational(.math)])
                 }
                 
+            }
+            
+            Section("Get Live Data (Great for feed & games!)") {
+                Button("Watch for Posts") {
+                    postVM.getLiveFeedPosts(user: userVM.user)
+                }
+            }
+            
+            Section("Read Data") {
+                Button("Get posts by userId") {
+                    userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
+                        self.postIds = postIds
+                    }
+                    
+                    print(postIds.count)
+                }
+            }
+            
+            Section("Update Data") {
                 Button("Like Comment") {
-                    postVM.dislikeComment(
+                    postVM.likeComment(
                         postId: "examplePost",
                         commentId: "Ge3KON8x7l1jUUlpRvd7",
                         userId: "Jack")
@@ -74,23 +98,48 @@ struct FirebaseTesting: View {
                         commentId: "Ge3KON8x7l1jUUlpRvd7",
                         userId: "Jack")
                 }
-            }
-            
-            Section("Get Live Data (Great for feed & games!)") {
-                Button("Watch for Posts") {
-                    postVM.getLiveFeedPosts(user: userVM.user)
+                
+                Button("Update User Austin") {
+                    let updatedUser = User(userId: "austin", username: "Austin", email: "austin@example.com")
+                    updatedUser.phoneNumber = "999-999-9999" // Example new phone number
+                    updatedUser.streak = 5
+                    updatedUser.badges = ["Gold", "Platinum"]
+                    
+                    userVM.updateUserFields(user: updatedUser)
+                }
+                
+                Button("Update post favorited by (add user)") {
+                    postVM.addUserToFavoritedBy(
+                        postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2"
+                    )
+                }
+                
+                Button("Update user searches (add)") {
+                    userVM.addUserSearch(
+                        search: "friends"
+                    )
                 }
             }
             
-            Section("Read Data") {
-                
-            }
-            
-            Section("Update Data") {
-                
-            }
-            
             Section("View Data") {
+                Button("Fetch Favorited Posts") {
+                    userVM.getUserFavorites(
+                        userId: "ExampleUser")
+                }
+                Button("Start Listener"){
+                    postVM.getLiveFeedPosts(user: userVM.user)
+                }
+                List{
+                    ForEach(postVM.allQueriedPosts,id:\.postId){ post in
+                        Text("\(post.postId)")
+                    
+                    }
+                    
+                }
+//                .onChange(of: postVM.allQueriedPosts, initial: true) {old, new in
+//                        print("new doc received: \(new)")
+//                }
                 
             }
         }
