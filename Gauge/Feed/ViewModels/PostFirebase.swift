@@ -284,16 +284,75 @@ class PostFirebase: ObservableObject {
     func suggestPostCategories(question: String, responseOptions: [String], completion: @escaping (([String]) -> Void)) {
         let categories: [String] = Category.allCategoryStrings
         
-        let prompt = """
-        Given the following question and options:
-        Question: \(question)
-        Options: \(responseOptions.joined(separator: ", "))
+        let systemPrompt = """
+            You are a classifier that assigns categories to a post based on 
+            a post's question and its responses. 
+            Only respond with valid categories from the provided list. 
+            Do not create new categories. Return the answer as a JSON array.
+            """
         
-        From the list of categories below:
-        \(categories.joined(separator: ", "))
+        let userPrompt = """
+            Question: \(question)
+            Response Options: \(responseOptions.joined(separator: ", "))
+            Valid Categories: \(categories.joined(separator: ", "))
+
+            Provide the category list as a JSON array without using any
+            markdown or coding blocks, just the raw string value.
+            """
         
-        Return a list of the categories that the post belongs to, ensuring the categories are valid and exist in the list provided.
-        """
+        let parameters: [String: Any] = [
+           "model": "gpt-4o-mini",
+           "messages": [
+                ["role": "system", "content": systemPrompt],
+                ["role": "user", "content": userPrompt]
+           ],
+           "temperature": 0.2
+        ]
+        
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(Keys.openAIKey)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            print("body created")
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
+        } catch {
+            print("Error serializing request body: \(error)")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error querying OpenAI: \(error)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received from OpenAI")
+                return
+            }
+            
+            do {
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let choices = jsonResponse["choices"] as? [[String: Any]],
+                   let message = choices[0]["message"] as? [String : Any],
+                   let content = message["content"] as? String,
+                   let jsonData = content.data(using: .utf8),
+                   let suggestedCategories = try? JSONDecoder().decode([String].self, from: jsonData) {
+                    completion(suggestedCategories)
+                } else {
+                    print("Incorrect response formatting")
+                }
+            } catch {
+                print("Error parsing OpenAI response: \(error)")
+            }
+        }.resume()
     }
     
     func deleteComment(postId: String, commentId: String){
