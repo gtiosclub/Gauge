@@ -310,4 +310,17 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
+    
+    func addViewToPost(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("POSTS").document(postId).collection("VIEWS").document(userId)
+        
+        documentRef.setData(["userId": userId]) { error in
+            if let error = error {
+                print("Error adding view to post: \(error)")
+            } else {
+                print("Added view to post \(postId).")
+            }
+        }
+    }
 }
