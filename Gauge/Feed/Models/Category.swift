@@ -75,6 +75,32 @@ enum Category {
         return allCases.map { $0.rawValue }
     }
     
+    static func mapStringsToCategories(returnedStrings: [String]) -> [Category] {
+        var categories: [Category] = []
+
+        for string in returnedStrings {
+            if let sportsCategory = Category.Sports(rawValue: string) {
+                categories.append(.sports(sportsCategory))
+            } else if let entertainmentCategory = Category.Entertainment(rawValue: string) {
+                categories.append(.entertainment(entertainmentCategory))
+            } else if let educationalCategory = Category.Educational(rawValue: string) {
+                categories.append(.educational(educationalCategory))
+            } else if let newsCategory = Category.News(rawValue: string) {
+                categories.append(.news(newsCategory))
+            } else if let lifestyleCategory = Category.Lifestyle(rawValue: string) {
+                categories.append(.lifestyle(lifestyleCategory))
+            } else if let artsCategory = Category.Arts(rawValue: string) {
+                categories.append(.arts(artsCategory))
+            } else if let relationshipsCategory = Category.Relationships(rawValue: string) {
+                categories.append(.relationships(relationshipsCategory))
+            } else if let otherCategory = Category.Other(rawValue: string) {
+                categories.append(.other(otherCategory))
+            }
+        }
+        
+        return categories
+    }
+    
     var rawValue: String {
         switch self {
         default:

@@ -281,7 +281,7 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func suggestPostCategories(question: String, responseOptions: [String], completion: @escaping (([String]) -> Void)) {
+    func suggestPostCategories(question: String, responseOptions: [String], completion: @escaping (([Category]) -> Void)) {
         let categories: [String] = Category.allCategoryStrings
         
         let systemPrompt = """
@@ -344,7 +344,8 @@ class PostFirebase: ObservableObject {
                    let message = choices[0]["message"] as? [String : Any],
                    let content = message["content"] as? String,
                    let jsonData = content.data(using: .utf8),
-                   let suggestedCategories = try? JSONDecoder().decode([String].self, from: jsonData) {
+                   let rawCategories = try? JSONDecoder().decode([String].self, from: jsonData).filter({ categories.contains($0) }) {
+                    let suggestedCategories = Category.mapStringsToCategories(returnedStrings: rawCategories)
                     completion(suggestedCategories)
                 } else {
                     print("Incorrect response formatting")
@@ -354,6 +355,7 @@ class PostFirebase: ObservableObject {
             }
         }.resume()
     }
+    
     
     func deleteComment(postId: String, commentId: String){
         Firebase.db.collection("POSTS").document(postId).collection("COMMENTS").document(commentId).delete(){ error in
