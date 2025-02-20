@@ -11,6 +11,8 @@ class BinaryPost: Post, Equatable {
     // Post protocol attributes
     var postId: String
     var userId: String
+    var username: String = "" // NOT stored in Firebase
+    var profilePhoto: String = "" // NOT stored in Firebase
     var comments: [Comment]
     var responses: [Response]
     var categories: [Category]
@@ -48,10 +50,12 @@ class BinaryPost: Post, Equatable {
     }
     
     // Initializing from Firebase
-    init(postId: String, userId: String, comments: [Comment], responses: [Response], categories: [Category], viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, responseResult1: Int, responseResult2: Int, favoritedBy: [String]) {
+    init(postId: String, userId: String, username: String, profilePhoto: String, comments: [Comment], responses: [Response], categories: [Category], viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, responseResult1: Int, responseResult2: Int, favoritedBy: [String]) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
+        self.username = username
+        self.profilePhoto = profilePhoto
         self.comments = comments
         self.responses = responses
         self.categories = categories
