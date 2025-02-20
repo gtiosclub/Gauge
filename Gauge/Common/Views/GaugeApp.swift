@@ -41,7 +41,7 @@ struct GaugeApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationPath, root: {
-                ContentView()
+                TakeMatchHome()
             })
         }
         .modelContainer(sharedModelContainer)

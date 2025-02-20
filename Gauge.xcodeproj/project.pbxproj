@@ -42,9 +42,22 @@
 		48227A112D500C9B00C720E0 /* GaugeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GaugeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1D3DE8382D5EA5B200EDBBF9 /* Exceptions for "Gauge" folder in "Gauge" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 482279F42D500C9A00C720E0 /* Gauge */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		482279F72D500C9A00C720E0 /* Gauge */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1D3DE8382D5EA5B200EDBBF9 /* Exceptions for "Gauge" folder in "Gauge" target */,
+			);
 			path = Gauge;
 			sourceTree = "<group>";
 		};
@@ -435,6 +448,7 @@
 				DEVELOPMENT_TEAM = 5GCQR6W96Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Gauge/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -464,6 +478,7 @@
 				DEVELOPMENT_TEAM = 5GCQR6W96Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Gauge/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
