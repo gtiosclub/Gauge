@@ -8,7 +8,7 @@
 import Foundation
 
 class SliderPost: Post, Equatable {
-    var postId: String
+    @Published var postId: String
     var userId: String
     var username: String = "" // NOT stored in Firebase
     var profilePhoto: String = "" // NOT stored in Firebase
@@ -16,7 +16,6 @@ class SliderPost: Post, Equatable {
     var responses: [Response]
     var categories: [Category]
     var viewCounter: Int
-    var responseCounter: Int
     var postDateAndTime: Date
     var favoritedBy: [String]
     var question: String
@@ -26,7 +25,6 @@ class SliderPost: Post, Equatable {
     var upperBoundValue: Double
     var lowerBoundLabel: String
     var upperBoundLabel: String
-    var responseResults: [Double]
     
     // Initializing locally
     init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, lowerBoundLabel: String, upperBoundLabel: String, lowerBoundValue: Double, upperBoundValue: Double) {
@@ -37,7 +35,6 @@ class SliderPost: Post, Equatable {
         self.responses = []
         self.categories = categories
         self.viewCounter = 0
-        self.responseCounter = 0
         self.postDateAndTime = postDateAndTime
         self.favoritedBy = []
         self.question = question
@@ -47,11 +44,10 @@ class SliderPost: Post, Equatable {
         self.upperBoundLabel = upperBoundLabel
         self.lowerBoundValue = lowerBoundValue
         self.upperBoundValue = upperBoundValue
-        self.responseResults = []
     }
     
     // Initializing from Firebase
-    init(postId: String, userId: String, username: String, profilePhoto: String, comments: [Comment], responses: [Response], categories: [Category], viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double], favoritedBy: [String]) {
+    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], viewCounter: Int = 0, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, favoritedBy: [String]) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -61,7 +57,6 @@ class SliderPost: Post, Equatable {
         self.responses = responses
         self.categories = categories
         self.viewCounter = viewCounter
-        self.responseCounter = responseCounter
         self.postDateAndTime = postDateAndTime
         self.favoritedBy = favoritedBy
         self.question = question
@@ -71,7 +66,6 @@ class SliderPost: Post, Equatable {
         self.upperBoundValue = upperBoundValue
         self.lowerBoundLabel = lowerBoundLabel
         self.upperBoundLabel = upperBoundLabel
-        self.responseResults = responseResults
     }
     
     static func == (lhs: SliderPost, rhs: SliderPost) -> Bool {

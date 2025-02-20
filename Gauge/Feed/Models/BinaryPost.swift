@@ -7,9 +7,9 @@
 
 import Foundation
 
-class BinaryPost: Post, Equatable {    
+class BinaryPost: Post, Equatable {
     // Post protocol attributes
-    var postId: String
+    @Published var postId: String
     var userId: String
     var username: String = "" // NOT stored in Firebase
     var profilePhoto: String = "" // NOT stored in Firebase
@@ -17,7 +17,6 @@ class BinaryPost: Post, Equatable {
     var responses: [Response]
     var categories: [Category]
     var viewCounter: Int
-    var responseCounter: Int
     var postDateAndTime: Date
     var favoritedBy: [String]
     var question: String
@@ -37,7 +36,6 @@ class BinaryPost: Post, Equatable {
         self.responses = []
         self.categories = categories
         self.viewCounter = 0
-        self.responseCounter = 0
         self.postDateAndTime = postDateAndTime
         self.favoritedBy = []
         self.question = question
@@ -50,7 +48,7 @@ class BinaryPost: Post, Equatable {
     }
     
     // Initializing from Firebase
-    init(postId: String, userId: String, username: String, profilePhoto: String, comments: [Comment], responses: [Response], categories: [Category], viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, responseResult1: Int, responseResult2: Int, favoritedBy: [String]) {
+    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], viewCounter: Int = 0, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, responseResult1: Int = 0, responseResult2: Int = 0, favoritedBy: [String]) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -60,7 +58,6 @@ class BinaryPost: Post, Equatable {
         self.responses = responses
         self.categories = categories
         self.viewCounter = viewCounter
-        self.responseCounter = responseCounter
         self.postDateAndTime = postDateAndTime
         self.favoritedBy = favoritedBy
         self.question = question
@@ -71,6 +68,7 @@ class BinaryPost: Post, Equatable {
         self.responseResult1 = responseResult1
         self.responseResult2 = responseResult2
     }
+    
     static func == (lhs: BinaryPost, rhs: BinaryPost) -> Bool {
         return lhs.postId == rhs.postId
     }
