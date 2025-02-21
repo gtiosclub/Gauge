@@ -26,6 +26,7 @@ struct FriendsView: View {
                                     .foregroundColor(.gray)
                                     .padding(.trailing)
                             }
+                            .foregroundColor(.black)
                         }
                         .padding(.top, 16)
                         
@@ -45,7 +46,7 @@ struct FriendsView: View {
                                         .foregroundColor(.black)
                                         .padding(.leading, 6)
                                 }
-                                Spacer()  
+                                Spacer()
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.gray)
                             }
