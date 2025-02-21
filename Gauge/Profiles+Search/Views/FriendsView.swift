@@ -13,26 +13,28 @@ struct FriendsView: View {
                 
                 Divider()
                     .padding(.horizontal)
+                    .padding(.top, 8)
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         SectionHeader(title: "Requests")
                             .padding(.top, 16)
                         FriendRequestView()
-                            .padding(.bottom, 16)
+                            .padding(.bottom, 8)
                         
-                        HStack(spacing: -10) {
+                        HStack(spacing: -8) {
                             ForEach(0..<4) { _ in
                                 Circle()
                                     .frame(width: 30, height: 30)
                                     .foregroundColor(Color(.systemGray3))
                             }
-                            Text(" and 4 others...")
+                            Text("  and 4 others...")
                                 .font(.subheadline)
                                 .foregroundColor(.black)
-                                .padding(.leading, 10)
+                                .padding(.leading, 6)
                         }
                         .padding(.horizontal)
+                        .padding(.top, -8)
                         
                         SectionHeader(title: "27 Friends")
                             .padding(.top, 16)
@@ -51,11 +53,14 @@ struct SearchBar: View {
     
     var body: some View {
         HStack {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.gray)
             TextField("Search", text: $text)
+                .frame(height: 36)
                 .padding(8)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
-                .frame(height: 30)
+                .frame(height: 28)
             
             Image(systemName: "mic.fill")
                 .foregroundColor(.gray)
@@ -79,7 +84,7 @@ struct SectionHeader: View {
 
 struct FriendRequestView: View {
     var body: some View {
-        HStack {
+        HStack(spacing: 10) {
             Circle()
                 .frame(width: 36, height: 36)
                 .foregroundColor(Color(.systemGray3))
@@ -87,23 +92,22 @@ struct FriendRequestView: View {
             Spacer()
             Button("Accept") {
                 
-                
             }
-            .padding(.horizontal, 8)
             .font(.system(size: 16, weight: .bold))
+            .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(Color.blue)
             .foregroundColor(.white)
             .cornerRadius(6)
             
             Button(action: {}) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.gray)
-                                .frame(width: 20, height: 16)
-                                .padding(6)
-                                .background(Color.gray.opacity(0.3))
-                                .cornerRadius(4)
-                        }
+                Image(systemName: "xmark")
+                    .frame(width: 20, height: 15)
+                    .padding(6)
+                    .foregroundColor(.gray)
+                    .background(Color.gray.opacity(0.3))
+                    .cornerRadius(4)
+            }
         }
         .padding(.horizontal)
     }
@@ -112,7 +116,7 @@ struct FriendRequestView: View {
 struct FriendsListView: View {
     var body: some View {
         ForEach(0..<10) { _ in
-            HStack {
+            HStack(spacing: 10) {
                 Circle()
                     .frame(width: 36, height: 36)
                     .foregroundColor(Color(.systemGray3))
