@@ -39,31 +39,33 @@ class ProfileViewModel: ObservableObject {
     
     
     //remove profile picture
-    func removeProfilePicture(userID: String) async -> Void {
+    func removeProfilePicture(userID: String) async -> Bool {
         
         //update profile picture in firestore
         let userDocument = Firebase.db.collection("USERS").document(userID)
         
-        //delete data in database
-        userDocument.updateData(["profilePhoto": FieldValue.delete()]) { error in
-            if let error = error {
-                print("Error updating document: \(error.localizedDescription)")
-            } else {
-                print("Document successfully updated")
-            }
+        do {
+            //delete data in database
+            try await userDocument.updateData(["profilePhoto": FieldValue.delete()])
+            print("Profile Picture updated!")
+        } catch {
+            print("Error updating Profile Picture: \(error.localizedDescription)")
+            return false
         }
         
         //removeAndReturn returns true if image successfully removed from firebaseStorage
-        guard let removed = removeAndReturn(userID) else {
+        let removed = await removeAndReturn(userID)
+        if !removed {
             print("failed to successfully remove profile picture")
         }
-
+        
+        return removed
     }
     
     
     
     //get pfp function
-    func getProfilePicture(userID: String) async -> Void {
+    func getProfilePicture(userID: String) async -> UIImage {
         //user
         let userDocument = Firebase.db.collection("USERS").document(userID)
         
@@ -78,6 +80,7 @@ class ProfileViewModel: ObservableObject {
         } catch {
             print("Error fetching document: \(error.localizedDescription)")
         }
+        
     }
     
     
