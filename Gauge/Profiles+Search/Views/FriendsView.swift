@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FriendsView: View {
     @State private var searchText = ""
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         NavigationView {
@@ -17,24 +18,40 @@ struct FriendsView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        SectionHeader(title: "Requests")
-                            .padding(.top, 16)
+                        NavigationLink(destination: RequestsView()) {
+                            HStack {
+                                SectionHeader(title: "Requests")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                                    .padding(.trailing)
+                            }
+                        }
+                        .padding(.top, 16)
+                        
                         FriendRequestView()
                             .padding(.bottom, 8)
                         
-                        HStack(spacing: -8) {
-                            ForEach(0..<4) { _ in
-                                Circle()
-                                    .frame(width: 30, height: 30)
-                                    .foregroundColor(Color(.systemGray3))
+                        NavigationLink(destination: RequestsView()) {
+                            HStack {
+                                HStack(spacing: -8) {
+                                    ForEach(0..<4) { _ in
+                                        Circle()
+                                            .frame(width: 30, height: 30)
+                                            .foregroundColor(Color(.systemGray3))
+                                    }
+                                    Text("  and 4 others")
+                                        .font(.subheadline)
+                                        .foregroundColor(.black)
+                                        .padding(.leading, 6)
+                                }
+                                Spacer()  
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
                             }
-                            Text("  and 4 others...")
-                                .font(.subheadline)
-                                .foregroundColor(.black)
-                                .padding(.leading, 6)
+                            .padding(.horizontal)
+                            .padding(.top, -8)
                         }
-                        .padding(.horizontal)
-                        .padding(.top, -8)
                         
                         SectionHeader(title: "27 Friends")
                             .padding(.top, 16)
@@ -43,7 +60,19 @@ struct FriendsView: View {
                 }
             }
             .navigationBarTitle("Friends", displayMode: .inline)
-            .navigationBarItems(leading: Button("Profile") {})
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: "chevron.left")
+                            Text("Profile")
+                        }
+                    }
+                }
+            }
         }
     }
 }
