@@ -97,9 +97,13 @@ struct FriendRequestView: View {
             .cornerRadius(6)
             
             Button(action: {}) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.gray)
-            }
+                            Image(systemName: "xmark")
+                                .foregroundColor(.gray)
+                                .frame(width: 20, height: 16)
+                                .padding(6)
+                                .background(Color.gray.opacity(0.3))
+                                .cornerRadius(4)
+                        }
         }
         .padding(.horizontal)
     }
