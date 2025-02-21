@@ -86,7 +86,7 @@ struct FriendRequestView: View {
     var body: some View {
         HStack(spacing: 10) {
             Circle()
-                .frame(width: 36, height: 36)
+                .frame(width: 30, height: 30)
                 .foregroundColor(Color(.systemGray3))
             Text("username")
             Spacer()
@@ -118,7 +118,7 @@ struct FriendsListView: View {
         ForEach(0..<10) { _ in
             HStack(spacing: 10) {
                 Circle()
-                    .frame(width: 36, height: 36)
+                    .frame(width: 30, height: 30)
                     .foregroundColor(Color(.systemGray3))
                 Text("username")
                 Spacer()
