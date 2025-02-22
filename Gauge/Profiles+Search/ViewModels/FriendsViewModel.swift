@@ -146,38 +146,42 @@ class FriendsViewModel: ObservableObject {
     }
     func acceptFriendRequest(friendId: String, hostId: String) async throws {
         do {
-            async let friendDocumentSnapshot = Firebase.db.collection("USERS").document(friendId).getDocument()
-            async let hostDocumentSnapshot = Firebase.db.collection("USERS").document(hostId).getDocument()
+            let batch = Firebase.db.batch()
+            let friendDocRef = Firebase.db.collection("USERS").document(friendId)
+            let hostDocRef = Firebase.db.collection("USERS").document(hostId)
+            async let friendDocumentSnapshot = friendDocRef.getDocument()
+            async let hostDocumentSnapshot = hostDocRef.getDocument()
             
             let (friendSnapshot, hostSnapshot) = try await (friendDocumentSnapshot, hostDocumentSnapshot)
             
-            let friendDocumentRef = Firebase.db.collection("USERS").document(friendId)
+            // remove hostId from friend's outgoing requests
             guard let friendDocument = friendSnapshot.data() else {
                 throw FriendRequestError.invalidData(reason: "Friend document not found")
             }
             guard var friendsOut = friendDocument["friendOut"] as? [String: [String]] else { throw FriendRequestError.invalidData(reason: "No outgoing request data for friend")}
-            if friendsOut.removeValue(forKey: hostId) != nil {
-                try await friendDocumentRef.updateData(["friendOut": friendsOut])
-            } else {
+            guard friendsOut.removeValue(forKey: hostId) != nil else {
                 throw FriendRequestError.invalidData(reason: "Host is not in friend's outgoing requests")
             }
+            batch.updateData(["friendOut": friendsOut], forDocument: friendDocRef)
             
-            let hostDocumentRef = Firebase.db.collection("USERS").document(hostId)
+            // remove friendId from host's incoming requests
             guard let hostDocument = hostSnapshot.data() else {
                 throw FriendRequestError.invalidData(reason: "Host document not found")
             }
             guard var hostIn = hostDocument["friendIn"] as? [String: [String]] else { throw FriendRequestError.invalidData(reason: "No incoming request data for host")}
-            if hostIn.removeValue(forKey: friendId) != nil{
-                try await hostDocumentRef.updateData(["friendIn": hostIn])
-            } else {
+            guard hostIn.removeValue(forKey: friendId) != nil else {
                 throw FriendRequestError.invalidData(reason: "Friend is not in host's incoming requests")
             }
             
+            // add friend as host's friends
             var hostFriends = hostDocument["friends"] as? [String: [String]] ?? [:]
             guard let friendUserName = friendDocument["userName"] as? String else { throw FriendRequestError.userError(reason: "Friend document does not contain userName")}
             let friendProfilePhoto = friendDocument["profilePhoto"] as? String ?? ""
             hostFriends[friendId] = [friendUserName, friendProfilePhoto]
-            try await hostDocumentRef.updateData(["friends": hostFriends])
+            batch.updateData(["friendIn": hostIn, "friends": hostFriends], forDocument: hostDocRef)
+
+            try await batch.commit()
+
         } catch FriendRequestError.invalidData(let reason) {
             print("Data Error - \(reason)")
             throw FriendRequestError.invalidData(reason: reason)
