@@ -170,9 +170,9 @@ class FriendsViewModel: ObservableObject {
             
             // add friend as host's friends
             var hostFriends = hostDocument["friends"] as? [String: [String]] ?? [:]
-            guard let friendUserName = friendDocument["userName"] as? String else { throw FriendRequestError.userError(reason: "Friend document does not contain userName")}
+            guard let friendUsername = friendDocument["username"] as? String else { throw FriendRequestError.userError(reason: "Friend document does not contain username")}
             let friendProfilePhoto = friendDocument["profilePhoto"] as? String ?? ""
-            hostFriends[friendId] = [friendUserName, friendProfilePhoto]
+            hostFriends[friendId] = [friendUsername, friendProfilePhoto]
             batch.updateData(["friendIn": hostIn, "friends": hostFriends], forDocument: hostDocRef)
 
             try await batch.commit()
