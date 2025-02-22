@@ -141,7 +141,6 @@ class FriendsViewModel: ObservableObject {
     
     func acceptFriendRequest(friendId: String, hostId: String) async throws {
         do {
-            let batch = Firebase.db.batch()
             let friendDocRef = Firebase.db.collection("USERS").document(friendId)
             let hostDocRef = Firebase.db.collection("USERS").document(hostId)
             async let friendDocumentSnapshot = friendDocRef.getDocument()
@@ -157,8 +156,6 @@ class FriendsViewModel: ObservableObject {
             guard friendsOut.removeValue(forKey: hostId) != nil else {
                 throw FriendRequestError.invalidData(reason: "Host is not in friend's outgoing requests")
             }
-            batch.updateData(["friendOut": friendsOut], forDocument: friendDocRef)
-            
             // remove friendId from host's incoming requests
             guard let hostDocument = hostSnapshot.data() else {
                 throw FriendRequestError.invalidData(reason: "Host document not found")
@@ -168,15 +165,23 @@ class FriendsViewModel: ObservableObject {
                 throw FriendRequestError.invalidData(reason: "Friend is not in host's incoming requests")
             }
             
-            // add friend as host's friends
+            // add host to freind's friends
+            var friendFriends = friendDocument["friends"] as? [String: [String]] ?? [:]
+            guard let hostUsername = hostDocument["username"] as? String else { throw FriendRequestError.userError(reason: "Host document does not contain username")}
+            let hostProfilePhoto = hostDocument["profilePhoto"] as? String ?? ""
+            friendFriends[hostId] = [hostUsername, hostProfilePhoto]
+            
+            // add friend to host's friends
             var hostFriends = hostDocument["friends"] as? [String: [String]] ?? [:]
             guard let friendUsername = friendDocument["username"] as? String else { throw FriendRequestError.userError(reason: "Friend document does not contain username")}
             let friendProfilePhoto = friendDocument["profilePhoto"] as? String ?? ""
             hostFriends[friendId] = [friendUsername, friendProfilePhoto]
+            
+            let batch = Firebase.db.batch()
+            batch.updateData(["friendOut": friendsOut,"friends": friendFriends], forDocument: friendDocRef)
             batch.updateData(["friendIn": hostIn, "friends": hostFriends], forDocument: hostDocRef)
 
             try await batch.commit()
-
         } catch FriendRequestError.invalidData(let reason) {
             print("Data Error - \(reason)")
             throw FriendRequestError.invalidData(reason: reason)
