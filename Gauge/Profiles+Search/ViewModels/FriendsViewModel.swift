@@ -146,9 +146,13 @@ class FriendsViewModel: ObservableObject {
     }
     func acceptFriendRequest(friendId: String, hostId: String) async throws {
         do {
+            async let friendDocumentSnapshot = Firebase.db.collection("USERS").document(friendId).getDocument()
+            async let hostDocumentSnapshot = Firebase.db.collection("USERS").document(hostId).getDocument()
+            
+            let (friendSnapshot, hostSnapshot) = try await (friendDocumentSnapshot, hostDocumentSnapshot)
+            
             let friendDocumentRef = Firebase.db.collection("USERS").document(friendId)
-            let friendDocumentSnapshot = try await friendDocumentRef.getDocument()
-            guard let friendDocument = friendDocumentSnapshot.data() else {
+            guard let friendDocument = friendSnapshot.data() else {
                 throw FriendRequestError.invalidData(reason: "Friend document not found")
             }
             guard var friendsOut = friendDocument["friendOut"] as? [String: [String]] else { throw FriendRequestError.invalidData(reason: "No outgoing request data for friend")}
@@ -159,8 +163,7 @@ class FriendsViewModel: ObservableObject {
             }
             
             let hostDocumentRef = Firebase.db.collection("USERS").document(hostId)
-            let hostDocumentSnapshot = try await hostDocumentRef.getDocument()
-            guard let hostDocument = hostDocumentSnapshot.data() else {
+            guard let hostDocument = hostSnapshot.data() else {
                 throw FriendRequestError.invalidData(reason: "Host document not found")
             }
             guard var hostIn = hostDocument["friendIn"] as? [String: [String]] else { throw FriendRequestError.invalidData(reason: "No incoming request data for host")}
