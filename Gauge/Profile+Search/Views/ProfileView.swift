@@ -11,50 +11,72 @@ struct ProfileView: View {
     @State private var selectedTab: String = "Takes"
 
     var body: some View {
-        VStack {
-            HStack {
-                Circle()
-                    .frame(width: 60, height: 60)
-                    .foregroundColor(.gray)
+        NavigationView {
+            VStack {
+                HStack {
+                    Circle()
+                        .frame(width: 80, height: 80)
+                        .foregroundColor(.gray)
 
-                VStack(alignment: .leading) {
-                    Text("username")
-                        .font(.headline)
-                    
-                    Button(action: {
-                    }) {
-                        Text("Edit Profile")
-                            .font(.caption)
-                            .padding(6)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.black, lineWidth: 1)
-                            )
+                    VStack(alignment: .leading) {
+                        Text("username")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Button(action: {
+                        }) {
+                            Text("Edit Profile")
+                                .font(.caption)
+                                .padding(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.black, lineWidth: 1)
+                                )
+                        }
                     }
+                    Spacer()
                 }
+                .padding()
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        TabButton(title: "Takes", selectedTab: $selectedTab)
+                        Spacer()
+                        TabButton(title: "Votes", selectedTab: $selectedTab)
+                        Spacer()
+                        TabButton(title: "Comments", selectedTab: $selectedTab)
+                        Spacer()
+                        TabButton(title: "Badges", selectedTab: $selectedTab)
+                        Spacer()
+                        TabButton(title: "Statistics", selectedTab: $selectedTab)
+                        Spacer()
+                        TabButton(title: "Favorites", selectedTab: $selectedTab)
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.top, 10)
+                VStack {
+                    Text("\(selectedTab) Content Here")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(UIColor.systemGray6))
+                }
+                .cornerRadius(10)
+                .padding()
+
                 Spacer()
             }
-            .padding()
-
-            HStack {
-                TabButton(title: "Takes", selectedTab: $selectedTab)
-                TabButton(title: "Votes", selectedTab: $selectedTab)
-                TabButton(title: "Comments", selectedTab: $selectedTab)
-                TabButton(title: "Badges", selectedTab: $selectedTab)
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: SettingsView()) {
+                        Image(systemName: "gearshape")
+                            .foregroundColor(.black)
+                    }
+                }
             }
-            .padding(.horizontal)
-
-            VStack {
-                Text("\(selectedTab) Content Here")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(UIColor.systemGray6))
-            }
-            .cornerRadius(10)
-            .padding()
-
-            Spacer()
         }
     }
 }
@@ -67,24 +89,28 @@ struct TabButton: View {
         Button(action: {
             selectedTab = title
         }) {
-            VStack {
+            VStack(spacing: 0) {
                 Text(title)
+                    .font(.system(size: 25))
                     .foregroundColor(selectedTab == title ? .black : .gray)
                     .fontWeight(selectedTab == title ? .bold : .regular)
                 
-                if selectedTab == title {
-                    Rectangle()
-                        .frame(height: 2)
-                        .foregroundColor(.blue)
-                } else {
-                    Rectangle()
-                        .frame(height: 2)
-                        .foregroundColor(.clear)
-                }
+                Rectangle()
+                    .frame(height: 2)
+                    .foregroundColor(selectedTab == title ? .blue : .gray)
+                    .edgesIgnoringSafeArea(.horizontal)
             }
-            .padding(.vertical, 5)
+            .padding(.vertical, 8)
         }
-        .frame(maxWidth: .infinity)
+        .frame(minWidth: 100)
+    }
+}
+
+struct SettingsView: View {
+    var body: some View {
+        Text("Settings Screen")
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -93,7 +119,6 @@ struct ProfileView_Previews: PreviewProvider {
         ProfileView()
     }
 }
-
 
 #Preview {
     ProfileView()
