@@ -1,167 +1,166 @@
 import MultipeerConnectivity
 
-class MCManager: NSObject, ObservableObject {
-    static let shared = MCManager()
-    private let serviceType = "takegames"
-
-    private var peerID: MCPeerID
-    private var session: MCSession
-    private var advertiser: MCNearbyServiceAdvertiser?
-    private var browser: MCNearbyServiceBrowser?
-
-    @Published var roomCode: String = ""
-    @Published var availableRooms: [String: MCPeerID] = [:] // Store rooms by code
-    @Published var connectedPeers: [MCPeerID] = []
-    @Published var foundPeer: MCPeerID?
-    @Published var isReadyToNavigate: Bool = false
-
-    override init() {
-        let storedID = UserDefaults.standard.string(forKey: "mcPeerID") ?? UUID().uuidString
-        UserDefaults.standard.set(storedID, forKey: "mcPeerID")
-
-        let displayName = "\(UIDevice.current.name)-\(storedID.prefix(4))"
-        peerID = MCPeerID(displayName: displayName)
-
-        session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .required)
-        super.init()
-
-        session.delegate = self
-    }
-
-    // MARK: - Generate a Random 4-Letter Room Code
-    private func generateRoomCode() -> String {
-        let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return String((0..<4).map { _ in letters.randomElement()! })
-    }
-
-    // MARK: - Hosting (Create Room)
-    func startHosting() {
-        roomCode = generateRoomCode() // Generate room code
-        print("Hosting room with code: \(roomCode)")
-
-        advertiser = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: ["roomCode": roomCode], serviceType: serviceType)
-        advertiser?.delegate = self
-        advertiser?.startAdvertisingPeer()
-        
-        isReadyToNavigate = true // Allow navigation
-    }
-
-    func stopHosting() {
-        advertiser?.stopAdvertisingPeer()
-        advertiser = nil
-    }
-
-    // MARK: - Joining (Search for Room)
-    func startBrowsing(forRoomCode code: String) {
-        browser = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
-        browser?.delegate = self
-        browser?.startBrowsingForPeers()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            self.browser?.stopBrowsingForPeers()
-        }
-    }
-
-    func stopBrowsing() {
-        browser?.stopBrowsingForPeers()
-        browser = nil
-    }
-
-    // MARK: - Sending Data
-    func sendMessage(_ message: String) {
-        guard !session.connectedPeers.isEmpty else { return }
-        do {
-            let data = message.data(using: .utf8)!
-            try session.send(data, toPeers: session.connectedPeers, with: .reliable)
-        } catch {
-            print("Error sending message: \(error.localizedDescription)")
-        }
-    }
+extension String {
     
-    func refreshConnectedPeers() {
-        DispatchQueue.main.async {
-            self.connectedPeers = self.session.connectedPeers
-        }
-    }
+    static var serviceName = "takematch"
 }
 
-// MARK: - MCSessionDelegate
-extension MCManager: MCSessionDelegate {
-    // Called when a peer changes connection state (Connected, Connecting, Not Connected)
-    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        DispatchQueue.main.async {
-            self.connectedPeers = session.connectedPeers
-        }
-        print("Peer \(peerID.displayName) changed state: \(state)")
-        if state == .connected {
-            print("\(peerID.displayName) has joined!")
-            self.sendMessage("PlayerJoined:\(peerID.displayName)") // Notify others
-        } else if state == .notConnected {
-            print("\(peerID.displayName) has left!")
-        }
-    }
-
-    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        if let message = String(data: data, encoding: .utf8) {
-            print("Received data: \(message) from \(peerID.displayName)")
-
-            if message == "RequestRoomCode" {
-                if let roomCodeData = self.roomCode.data(using: .utf8) {
-                    try? session.send(roomCodeData, toPeers: [peerID], with: .reliable)
-                    print("Sent room code to \(peerID.displayName)")
-                } else {
-                    print("nothing sent")
-                }
+class MCManager: NSObject, ObservableObject {
+    
+    let serviceType = String.serviceName
+    let session: MCSession
+    let myPeerID: MCPeerID
+    var nearbyServiceAdvertiser: MCNearbyServiceAdvertiser
+    let nearbyServiceBrowser: MCNearbyServiceBrowser
+    
+    @Published var connectedPeers: [MCPeerID] = []
+    @Published var discoveredPeers: [MCPeerID: String] = [:]
+    @Published var receivedInvite: Bool = false
+    @Published var receievedInviteFrom: MCPeerID?
+    @Published var invitationHandler: ((Bool, MCSession?) -> Void)?
+    @Published var paired: Bool = false
+    
+    var isAvailableToPlay: Bool = false {
+        didSet {
+            
+            if isAvailableToPlay {
+                startAdvertising()
             } else {
-                DispatchQueue.main.async {
-                    self.roomCode = message // Update room code if received from host
-                }
+                stopAdvertising()
             }
         }
     }
-
-    // Required: Called when receiving a stream from a peer (Not used in most cases)
-    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
-        print("Received stream \(streamName) from \(peerID.displayName), but streaming is not implemented.")
+    
+    init(yourName: String) {
+        
+        myPeerID = MCPeerID(displayName: yourName)
+        session = MCSession(peer: myPeerID)
+        nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: nil, serviceType: serviceType)
+        nearbyServiceBrowser = MCNearbyServiceBrowser(peer: myPeerID, serviceType: serviceType)
+        
+        super.init()
+        session.delegate = self
+        nearbyServiceAdvertiser.delegate = self
+        nearbyServiceBrowser.delegate = self
     }
-
-    // Required: Called when receiving a resource file from a peer (Not used in most cases)
-    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
-        print("Started receiving resource: \(resourceName) from \(peerID.displayName)")
+    
+    deinit {
+        stopBrowsing()
+        stopAdvertising()
     }
-
-    // Required: Called when a resource file is fully received (Not used in most cases)
-    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {
-        if let error = error {
-            print("Error receiving resource \(resourceName): \(error.localizedDescription)")
+    
+    func startAdvertising() {
+        
+        nearbyServiceAdvertiser.startAdvertisingPeer()
+    }
+    
+    func stopAdvertising() {
+        
+        nearbyServiceAdvertiser.stopAdvertisingPeer()
+    }
+    
+    func startBrowsing() {
+        
+        nearbyServiceBrowser.startBrowsingForPeers()
+    }
+    
+    func stopBrowsing() {
+        
+        nearbyServiceBrowser.stopBrowsingForPeers()
+        discoveredPeers.removeAll()
+    }
+    
+    func startHosting(with roomCode: String) {
+        stopAdvertising()
+        nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: ["roomCode": roomCode], serviceType: serviceType)
+        nearbyServiceAdvertiser.delegate = self
+        startAdvertising()
+    }
+    
+    func joinRoom(with code: String) {
+        
+        if let targetPeer = discoveredPeers.first(where: { $0.value == code })?.key {
+            nearbyServiceBrowser.invitePeer(targetPeer, to: session, withContext: nil, timeout: 10)
         } else {
-            print("Finished receiving resource \(resourceName) from \(peerID.displayName)")
+            print("No host found with room code: \(code)")
         }
     }
 }
 
-// MARK: - MCNearbyServiceAdvertiserDelegate
-extension MCManager: MCNearbyServiceAdvertiserDelegate {
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        invitationHandler(true, session)
-    }
-}
-
-// MARK: - MCNearbyServiceBrowserDelegate
 extension MCManager: MCNearbyServiceBrowserDelegate {
+    
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
-        if let roomCode = info?["roomCode"] {
-            DispatchQueue.main.async {
-                self.availableRooms[roomCode] = peerID
-                self.foundPeer = peerID
-                self.isReadyToNavigate = true // Allow navigation once peer is found
+        
+        DispatchQueue.main.async {
+            
+            if let room = info?["roomCode"] {
+                self.discoveredPeers[peerID] = room
             }
         }
     }
     
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+                
         DispatchQueue.main.async {
-            self.availableRooms = self.availableRooms.filter { $0.value != peerID }
+            self.discoveredPeers.removeValue(forKey: peerID)
         }
     }
 }
+
+extension MCManager: MCNearbyServiceAdvertiserDelegate {
+    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
+        
+        DispatchQueue.main.async {
+            self.receivedInvite = true
+            self.receievedInviteFrom = peerID
+            self.invitationHandler = invitationHandler
+            
+            invitationHandler(true, self.session)
+        }
+    }
+}
+
+extension MCManager: MCSessionDelegate {
+    func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+        
+        DispatchQueue.main.async {
+            
+            
+            self.connectedPeers = session.connectedPeers
+            
+            switch state {
+            case .notConnected:
+                DispatchQueue.main.async {
+                    self.paired = false
+                    self.isAvailableToPlay = true
+                }
+            case .connected:
+                DispatchQueue.main.async {
+                    self.paired = true
+                    self.isAvailableToPlay = true
+                }
+            default:
+                self.paired = false
+                self.isAvailableToPlay = true
+            }
+        }
+    }
+    
+    func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+        
+    }
+    
+    func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
+        
+    }
+    
+    func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
+        
+    }
+    
+    func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: (any Error)?) {
+        
+    }
+}
+
+

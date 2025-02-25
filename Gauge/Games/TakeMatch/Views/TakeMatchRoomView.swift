@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct TakeMatchRoomView: View {
-    @StateObject private var mcManager = MCManager.shared
+    @ObservedObject var mcManager: MCManager
     @State var showSettings: Bool = false
     @StateObject private var gameSettings = TakeMatchSettingsVM()
     @State var isHost: Bool
+    var roomCode: String
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -19,15 +20,14 @@ struct TakeMatchRoomView: View {
             Spacer()
             
             // Display the room code
-            Text("Room Code: \(mcManager.roomCode)")
+            Text(isHost ? "Hosting Room: \(roomCode)" : "Joined Room: \(roomCode)")
                 .font(.title)
                 .bold()
 
             if isHost {
-                Spacer()
                 
                 Button("Start") {
-                    mcManager.sendMessage("StartGame")
+                    
                 }
                 .padding()
                 .frame(width: 80, height: 30)
@@ -40,18 +40,16 @@ struct TakeMatchRoomView: View {
             Spacer()
             
             HStack {
-                
-                ForEach(mcManager.connectedPeers, id: \.self) { peer in
-                    VStack {
-                        Image(systemName: "person.circle.fill") // Player Icon
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .foregroundColor(.blue)
-
-                        Text(peer.displayName) // Player Name
-                            .font(.caption)
-                            .lineLimit(1)
-                            .frame(width: 80)
+                VStack {
+                    
+                    Text("Participants:")
+                        .font(.headline)
+                    
+                    Text("You: \(mcManager.myPeerID.displayName)")
+                        .foregroundColor(.blue)
+                    
+                    ForEach(mcManager.connectedPeers, id:\.self) { peer in
+                        Text(peer.displayName)
                     }
                 }
             }
@@ -64,22 +62,9 @@ struct TakeMatchRoomView: View {
         .background(Color(.systemGray3))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
-        .onAppear {
-            mcManager.refreshConnectedPeers()
-            if isHost == false {
-                mcManager.sendMessage("RequestRoomCode") // Ask host for room code
-                
-            }
-        }
-        .onReceive(mcManager.$connectedPeers) { _ in
-            print("UI updated with connected peers: \(mcManager.connectedPeers.map { $0.displayName })")
-        }
         .onDisappear {
-            if isHost {
-                mcManager.stopHosting()
-            } else {
-                mcManager.stopBrowsing()
-            }
+            mcManager.isAvailableToPlay = false
+            mcManager.stopBrowsing()
         }
         .toolbar {
             if isHost {
@@ -96,6 +81,7 @@ struct TakeMatchRoomView: View {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.4)) {
+                        mcManager.isAvailableToPlay = false
                         dismiss()
                     }
                 }) {
@@ -114,7 +100,7 @@ struct TakeMatchRoomView: View {
 
 #Preview {
     NavigationStack {
-        TakeMatchRoomView(isHost: true)
+        TakeMatchRoomView(mcManager: MCManager(yourName: "test"), isHost: true, roomCode: "ABCD")
     }
 }
 
