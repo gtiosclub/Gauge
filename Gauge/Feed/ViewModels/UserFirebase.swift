@@ -11,6 +11,36 @@ import FirebaseFirestore
 class UserFirebase: ObservableObject {
     @Published var user: User = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
     
+    func getAllUserData(userId: String, completion: @escaping (User) -> Void) {
+        Firebase.db.collection("USERS").document(userId).getDocument { document, error in
+            if let error = error {
+                print("Error getting documents: \(error)")
+            } else {
+                if let data = document?.data() {
+                    let userObj = User(
+                        userId: data["userId"] as? String ?? "",
+                        username: data["username"] as? String ?? "",
+                        phoneNumber: data["phoneNumber"] as? String ?? "",
+                        email: data["email"] as? String ?? "",
+                        friendIn: data["friendIn"] as? [String: [String]] ?? [:],
+                        friendOut: data["friendOut"] as? [String: [String]] ?? [:],
+                        friends: data["friends"] as? [String: [String]] ?? [:],
+                        myPosts: data["myPosts"] as? [String] ?? [],
+                        myResponses: data["myResponses"] as? [String] ?? [],
+                        myFavorites: data["myFavorites"] as? [String] ?? [],
+                        mySearches: data["mySearches"] as? [String] ?? [],
+                        myComments: data["myComments"] as? [String] ?? [],
+                        myCategories: data["myCategories"] as? [String] ?? [],
+                        badges: data["badges"] as? [String] ?? [],
+                        streak: data["streak"] as? Int ?? 0
+                    )
+                    
+                    completion(userObj)
+                }
+            }
+        }
+    }
+    
     func getUserPostInteractions() {
         // create variables to store subcollection info
         var responsePostIDs: [String] = []

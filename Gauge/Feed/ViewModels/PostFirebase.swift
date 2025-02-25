@@ -9,9 +9,9 @@ import Foundation
 import Firebase
 
 class PostFirebase: ObservableObject {
-    @Published var feedPosts: [Post] = []
-    @Published var allQueriedPosts: [Post] = []
-    @Published var skippedPost: Post? = nil
+    @Published var feedPosts: [any Post] = []
+    @Published var allQueriedPosts: [AnyObservablePost] = []
+    @Published var skippedPost: (any Post)? = nil
     private var currentFeedPostsListener: ListenerRegistration? = nil
     
     init() {
@@ -25,58 +25,59 @@ class PostFirebase: ObservableObject {
                 print("Error fetching post updates: \(error!)")
                 return
             }
-    
-            for change in snapshot.documentChanges {
-                if change.type == .added {
-                    print(change.document.documentID)
-                    let newPostData = change.document.data()
-                    if(newPostData["type"] as? String == PostType.BinaryPost.rawValue){
-                        print("adding binary")
-                        let post1 = BinaryPost(
-                            postId: newPostData["postId"] as? String ?? "",
-                            userId: newPostData["userId"] as? String ?? "",
-                            categories: newPostData["categories"] as? [Category] ?? [],
-                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
-                            question: newPostData["question"] as? String ?? "",
-                            responseOption1: newPostData["responseOption1"] as? String ?? "",
-                            responseOption2: newPostData["responseOption2"] as? String ?? "")
-                        DispatchQueue.main.async{
-                            self.allQueriedPosts.append(post1)
+            
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+                for change in snapshot.documentChanges {
+                    if change.type == .added {
+                        print(change.document.documentID)
+                        let newPostData = change.document.data()
+                        if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
+                            let post = BinaryPost(postId: newPostData["postId"] as? String ?? "",
+                                                  userId: newPostData["userId"] as? String ?? "",
+                                                  categories: newPostData["categories"] as? [Category] ?? [],
+                                                  postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                                  question: newPostData["question"] as? String ?? "",
+                                                  responseOption1: newPostData["responseOption1"] as? String ?? "",
+                                                  responseOption2: newPostData["responseOption2"] as? String ?? "",
+                                                  favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
+                            
+                            self.allQueriedPosts.append(AnyObservablePost(post))
+                            self.allQueriedPosts = self.allQueriedPosts
+                        } else if (newPostData["type"] as? String == PostType.SliderPost.rawValue) {
+                            let post = SliderPost(postId: newPostData["postId"] as? String ?? "",
+                                                  userId: newPostData["userId"] as? String ?? "",
+                                                  categories: newPostData["categories"] as? [Category] ?? [],
+                                                  postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                                  question: newPostData["question"] as? String ?? "",
+                                                  lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
+                                                  upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
+                                                  lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
+                                                  upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
+                                                  favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
+                            
+                            self.allQueriedPosts.append(AnyObservablePost(post))
+                            self.allQueriedPosts = self.allQueriedPosts
+                        } else if (newPostData["type"] as? String == PostType.RankPost.rawValue){
+                            let post = RankPost(postId: newPostData["postId"] as? String ?? "",
+                                                  userId: newPostData["userId"] as? String ?? "",
+                                                  categories: newPostData["categories"] as? [Category] ?? [],
+                                                  postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                                  question: newPostData["question"] as? String ?? "",
+                                                  responseOptions: newPostData["responseOptions"] as? [String] ?? [],
+                                                  favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
+                            
+                            self.allQueriedPosts.append(AnyObservablePost(post))
+                            self.allQueriedPosts = self.allQueriedPosts
                         }
                         
-                    } else if(newPostData["type"] as? String == PostType.SliderPost.rawValue){
-                        print("adding slider")
-                        let post2 = SliderPost(
-                            postId:newPostData["postId"] as? String ?? "",
-                            userId: newPostData["userId"] as? String ?? "",
-                            categories: newPostData["categories"] as? [Category] ?? [],
-                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
-                            question: newPostData["question"] as? String ?? "",
-                            lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
-                            upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
-                            lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
-                            upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1)
-                        DispatchQueue.main.async{
-                            self.allQueriedPosts.append(post2)
-                        }
-                    } else if(newPostData["type"] as? String == PostType.RankPost.rawValue){
-                        print("adding rank")
-                        let post3 = RankPost(
-                            postId: newPostData["postId"] as? String ?? "",
-                            userId: newPostData["userId"] as? String ?? "",
-                            categories: newPostData["categories"] as? [Category] ?? [],
-                            postDateAndTime: newPostData["postDateAndTime"] as? Date ?? Date(),
-                            question: newPostData["question"] as? String ?? "",
-                            responseOptions: newPostData["responseOptions"] as? [String] ?? [])
-                        DispatchQueue.main.async{
-                            self.allQueriedPosts.append(post3)
-                        }
+                    } else if change.type == .modified {
+                        
+                    } else if change.type == .removed {
+                        self.allQueriedPosts = self.allQueriedPosts.filter { $0.postId != change.document.documentID }
                     }
-                } else if change.type == .modified {
-
-                } else if change.type == .removed {
-                    
                 }
+                
             }
         }
     }
@@ -141,7 +142,6 @@ class PostFirebase: ObservableObject {
             "userId": post.userId,
             "categories": post.categories,
             "viewCounter": post.viewCounter,
-            "responseCounter": post.responseCounter,
             "postDateAndTime": post.postDateAndTime,
             "question": post.question,
             "responseOption1": post.responseOption1,
@@ -159,6 +159,12 @@ class PostFirebase: ObservableObject {
     }
     
     func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String) {
+        var categoryString: [String] = []
+        for cat in categories {
+            categoryString.append(cat.rawValue)
+        }
+
+        
         // Create post instance
         let post = SliderPost(
             postId: UUID().uuidString,
@@ -179,16 +185,13 @@ class PostFirebase: ObservableObject {
             "type": PostType.SliderPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "categories": post.categories,
-            "viewCounter": post.viewCounter,
-            "responseCounter": post.responseCounter,
-            "postDateAndTime": post.postDateAndTime,
+            "categories": categoryString,
+            "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
             "lowerBoundValue": post.lowerBoundValue,
             "upperBoundValue": post.upperBoundValue,
             "lowerBoundLabel": post.lowerBoundLabel,
             "upperBoundLabel": post.upperBoundLabel,
-            "responseResults": post.responseResults,
             "favoritedBy": post.favoritedBy
         ]) { error in
             if let error = error {
@@ -233,7 +236,6 @@ class PostFirebase: ObservableObject {
             "viewCounter": 0,
             "responseCounter": 0,
             "favoritedBy": post.favoritedBy,
-            "responseResults": post.responseResults
         ]) { error in
             if let error = error {
                 print("Error writing RankPost document: \(error)")
@@ -300,6 +302,105 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
+    // Currently only works for Binary & Slider posts
+    func getResponses(postId: String, completion: @escaping ([String: Int]) -> Void){
+        var responses: [String: Int] = [:]
+        
+        Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").getDocuments { (snapshot, error) in
+            if let error = error{
+                print("Error getting Post data: \(error)")
+            } else {
+                for document in snapshot!.documents {
+                    let data = document.data()
+                    
+                    if responses.keys.contains(data["responseOption"] as! String){
+                        responses[data["responseOption"] as! String]! += 1
+                    } else {
+                        responses[data["responseOption"] as! String] = 1
+                    }
+                }
+                
+                completion(responses)
+            }
+        }
+    }
+    
+    func suggestPostCategories(question: String, responseOptions: [String], completion: @escaping (([Category]) -> Void)) {
+        let categories: [String] = Category.allCategoryStrings
+        
+        let systemPrompt = """
+            You are a classifier that assigns categories to a post based on 
+            a post's question and its responses. 
+            Only respond with valid categories from the provided list. 
+            Do not create new categories. Return the answer as a JSON array.
+            """
+        
+        let userPrompt = """
+            Question: \(question)
+            Response Options: \(responseOptions.joined(separator: ", "))
+            Valid Categories: \(categories.joined(separator: ", "))
+
+            Provide the category list as a JSON array without using any
+            markdown or coding blocks, just the raw string value.
+            """
+        
+        let parameters: [String: Any] = [
+           "model": "gpt-4o-mini",
+           "messages": [
+                ["role": "system", "content": systemPrompt],
+                ["role": "user", "content": userPrompt]
+           ],
+           "temperature": 0.2
+        ]
+        
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(Keys.openAIKey)", forHTTPHeaderField: "Authorization")
+        
+        do {
+            print("body created")
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
+        } catch {
+            print("Error serializing request body: \(error)")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error querying OpenAI: \(error)")
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received from OpenAI")
+                return
+            }
+            
+            do {
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let choices = jsonResponse["choices"] as? [[String: Any]],
+                   let message = choices[0]["message"] as? [String : Any],
+                   let content = message["content"] as? String,
+                   let jsonData = content.data(using: .utf8),
+                   let rawCategories = try? JSONDecoder().decode([String].self, from: jsonData).filter({ categories.contains($0) }) {
+                    let suggestedCategories = Category.mapStringsToCategories(returnedStrings: rawCategories)
+                    completion(suggestedCategories)
+                } else {
+                    print("Incorrect response formatting")
+                }
+            } catch {
+                print("Error parsing OpenAI response: \(error)")
+            }
+        }.resume()
+    }
+    
     
     func deleteComment(postId: String, commentId: String){
         Firebase.db.collection("POSTS").document(postId).collection("COMMENTS").document(commentId).delete(){ error in
