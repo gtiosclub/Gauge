@@ -33,19 +33,13 @@ struct GaugeApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
-    
-    @StateObject var userVM: UserFirebase = UserFirebase()
-    @StateObject var postVM: PostFirebase = PostFirebase()
-    @State private var navigationPath: NavigationPath = NavigationPath()
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $navigationPath, root: {
+            NavigationView {
                 ContentView()
-            })
+            }
         }
         .modelContainer(sharedModelContainer)
-        .environmentObject(userVM)
-        .environmentObject(postVM)
     }
 }
