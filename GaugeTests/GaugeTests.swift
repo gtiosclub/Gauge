@@ -7,6 +7,7 @@
 
 import XCTest
 @testable import Gauge
+import FirebaseFirestore
 
 final class GaugeTests: XCTestCase {
 
@@ -32,5 +33,39 @@ final class GaugeTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+    
+    func testGetOutgoingRequests() async {
+        let testUser = User(userId: "dummy", username: "dummy", email: "dummy")
+        let viewModel = FriendsViewModel(user: testUser)
+        
+        let userId = testUser.userId
+        let friendsOutgoing = await viewModel.getOutgoingRequests(userId: userId)
+        print(friendsOutgoing)
+    }
+    
+    func testGetUserFromId() async {
+        let testUser = User(userId: "exampleUser", username: "dummy", email: "dummy")
+        let viewModel = FriendsViewModel(user: testUser)
+        
+        let userId = testUser.id
+        let user = await viewModel.getUserFromId(userId: userId)
+        print(user)
+    }
+    
+    
+    func testFriendRequest() async {
+        let friendUser = User(userId: "thing2", username: "dummy", email: "dummy")
+        let hostUser = User(userId: "thing1", username: "dummy", email: "dummy")
+        let viewModel = FriendsViewModel(user: hostUser)
+        
+        let friendId = friendUser.id
+        let hostId = hostUser.id
+        do {
+            try await viewModel.acceptFriendRequest(friendId: friendId, hostId: hostId)
+            print("Friend request accepted successfully.")
+        } catch {
+            print("error")
+        }
 
+    }
 }
