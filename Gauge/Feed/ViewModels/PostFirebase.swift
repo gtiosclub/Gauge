@@ -34,8 +34,6 @@ class PostFirebase: ObservableObject {
                         print(change.document.documentID)
                         let newPostData = change.document.data()
                         if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
-                            print("adding binary")
-                            
                             let post = BinaryPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
@@ -48,7 +46,6 @@ class PostFirebase: ObservableObject {
                             self.allQueriedPosts.append(AnyObservablePost(post))
                             self.allQueriedPosts = self.allQueriedPosts
                         } else if (newPostData["type"] as? String == PostType.SliderPost.rawValue) {
-                            print("adding slider")
                             let post = SliderPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
@@ -63,8 +60,6 @@ class PostFirebase: ObservableObject {
                             self.allQueriedPosts.append(AnyObservablePost(post))
                             self.allQueriedPosts = self.allQueriedPosts
                         } else if (newPostData["type"] as? String == PostType.RankPost.rawValue){
-                            print("adding rank")
-                            
                             let post = RankPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
