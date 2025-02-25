@@ -29,6 +29,7 @@ class PostFirebase: ObservableObject {
             DispatchQueue.main.async {
                 self.objectWillChange.send()
                 for change in snapshot.documentChanges {
+                    
                     if change.type == .added {
                         print(change.document.documentID)
                         let newPostData = change.document.data()
@@ -77,6 +78,59 @@ class PostFirebase: ObservableObject {
                         }
                         
                     } else if change.type == .modified {
+                        //removes post from Queue
+                        if let index = self.allQueriedPosts.firstIndex(where: { $0.postId == change.document.documentID }) {
+                            let newPostData = change.document.data()
+                        
+                        //adds post back with new data
+                        if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
+                            print("updating binary post")
+                            
+                            self.allQueriedPosts[index] = AnyObservablePost(
+                                BinaryPost(
+                                        postId: newPostData["postId"] as? String ?? "",
+                                        userId: newPostData["userId"] as? String ?? "",
+                                        categories: newPostData["categories"] as? [Category] ?? [],
+                                        postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                            question: newPostData["question"] as? String ?? "",
+                                            responseOption1: newPostData["responseOption1"] as? String ?? "",
+                                            responseOption2: newPostData["responseOption2"] as? String ?? "",
+                                            favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
+                                )
+                            self.allQueriedPosts = self.allQueriedPosts
+                            
+                        } else if (newPostData["type"] as? String == PostType.SliderPost.rawValue) {
+                            print("updating slider post")
+                            self.allQueriedPosts[index] = AnyObservablePost(
+                                SliderPost(
+                                        postId: newPostData["postId"] as? String ?? "",
+                                        userId: newPostData["userId"] as? String ?? "",
+                                        categories: newPostData["categories"] as? [Category] ?? [],
+                                        postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                        question: newPostData["question"] as? String ?? "",
+                                        lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
+                                        upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
+                                        lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
+                                        upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
+                                        favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
+                                    )
+                
+                            self.allQueriedPosts = self.allQueriedPosts
+                        } else if (newPostData["type"] as? String == PostType.RankPost.rawValue){
+                            print("adding rank")
+                            
+                            self.allQueriedPosts[index] = AnyObservablePost(
+                                RankPost(postId: newPostData["postId"] as? String ?? "",
+                                                  userId: newPostData["userId"] as? String ?? "",
+                                                  categories: newPostData["categories"] as? [Category] ?? [],
+                                                  postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                                  question: newPostData["question"] as? String ?? "",
+                                                  responseOptions: newPostData["responseOptions"] as? [String] ?? [],
+                                                  favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
+                            )
+                            
+                            self.allQueriedPosts = self.allQueriedPosts
+                        }
                         
                     } else if change.type == .removed {
                         self.allQueriedPosts = self.allQueriedPosts.filter { $0.postId != change.document.documentID }
