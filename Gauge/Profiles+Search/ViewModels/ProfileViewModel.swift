@@ -13,81 +13,73 @@ import UIKit
 class ProfileViewModel: ObservableObject {
     
     @Published var user: User?
-    @Published var profileImage: UIImage? // current profile picture
     
     private var db = Firestore.firestore()
     private var storage = Storage.storage()
     
-    func uploadProfilePicture(userId: String, image: UIImage, completion: @escaping (String?) -> Void) {
+    func uploadProfilePicture(userId: String, image: UIImage) async -> String? {
         
         // firebase storage accepts image in data format
         guard let imageData = image.jpegData(compressionQuality: 0.75) else {
-            completion(nil)
-            return
+            print("couldn't convert image to data")
+            return nil
         }
         
         // reference to file in storage
         let storageRef = storage.reference().child("profilePictures/\(userId).jpg")
         
-        // uploading image to storage
-        storageRef.putData(imageData, metadata: nil) { metadata, error in
-            if let error = error {
-                print("error uploading image to firebase storage: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
+        do {
+            // upload image to storage
+            _ = try await storageRef.putDataAsync(imageData)
             
-            // url of uploaded image
-            storageRef.downloadURL { url, error in
-                if let error = error {
-                    print("error getting dowload URL: \(error.localizedDescription)")
-                    completion(nil)
-                    return
-                }
-                
-                if let url = url {
-                    completion(url.absoluteString) // converting url to string to return
-                } else {
-                    completion(nil)
-                }
-            }
+            // getting the url
+            let url = try await storageRef.downloadURL()
+            return url.absoluteString
+        } catch {
+            print("couldn't upload image: \(error.localizedDescription)")
+            return nil
         }
+        
     }
     
-    func fetchProfilePicture(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+    func fetchProfilePicture(from urlString: String) async -> UIImage? {
+        
         guard let url = URL(string: urlString) else {
-            completion(nil)
-            return
+            print("the URL is invalid.")
+            return nil
         }
         
-        //image from url
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print ("error fetching image: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            if let data = data, let image = UIImage(data: data) {
-                completion(image)
+        do {
+            // fetch image from URL
+            let (data, _) = try await URLSession.shared.data(from: url)
+            
+            // convert data to image
+            if let image = UIImage(data: data) {
+                return image
             } else {
-                completion(nil)
+                print("couldn't convert data to image.")
+                return nil
             }
-        }.resume()
+        } catch {
+            print("couldn't fetch image from URL: \(error.localizedDescription)")
+            return nil
+        }
         
     }
     
-    func deleteProfilePicture(userId: String, completion: @escaping (Bool) -> Void) {
+    func deleteProfilePicture(userId: String) async -> Bool {
+        
         let storageRef = storage.reference().child("profilePictures/\(userId).jpg")
         
-        storageRef.delete { error in
-            if let error = error {
-                print("error deleting image: \(error.localizedDescription)")
-                completion(false)
-            } else {
-                print("profile picture deleted.")
-                completion(true)
-            }
+        do {
+            // delete image from storage
+            try await storageRef.delete()
+            print("profile picture deleted.")
+            return true
+        } catch {
+            print("couldn't delete profile picture: \(error.localizedDescription)")
+            return false
         }
+        
     }
 }
-
