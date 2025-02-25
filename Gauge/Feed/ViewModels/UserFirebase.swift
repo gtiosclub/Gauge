@@ -152,8 +152,8 @@ class UserFirebase: ObservableObject {
             }
             
             if let data = document?.data() {
-                nameAndPhoto["username"] = data["username"] as? String
-                nameAndPhoto["profilePhoto"] = data["profilePhoto"] as? String
+                nameAndPhoto["username"] = data["username"] as? String ?? ""
+                nameAndPhoto["profilePhoto"] = data["profilePhoto"] as? String ?? ""
             }
             
             completion(nameAndPhoto)

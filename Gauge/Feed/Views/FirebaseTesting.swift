@@ -240,6 +240,7 @@ struct FirebaseTesting: View {
     }
 }
 
+
 #Preview {
     FirebaseTesting()
         .environmentObject(PostFirebase())

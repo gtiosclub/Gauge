@@ -40,6 +40,7 @@ struct Comment {
     var userId: String
     var username: String // NOT stored in Firebase
     var profilePhoto: String // NOT stored in Firebase
+    var date: Date
     var commentId: String
     var likes: [String] // userIds
     var dislikes: [String] // userIds

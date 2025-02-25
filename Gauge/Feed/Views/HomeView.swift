@@ -17,10 +17,30 @@ struct HomeView: View {
             NavigationLink("To Testing Screen") {
                 FirebaseTesting()
             }
+            
+            CommentView(comment: Comment(
+                commentType: .text,
+                userId: "Lv72Qz7Qc4TC2vDeE94q",
+                date: Date(),
+                commentId: "",
+                likes: [],
+                dislikes: [],
+                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. "
+            ))
+            CommentView(comment: Comment(
+                commentType: .text,
+                userId: "Lv72Qz7Qc4TC2vDeE94q",
+                date: Date(),
+                commentId: "",
+                likes: [],
+                dislikes: [],
+                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. "
+            ))
         }
     }
 }
 
 #Preview {
     HomeView()
+        .environmentObject(UserFirebase())
 }
