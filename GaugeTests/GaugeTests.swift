@@ -7,6 +7,7 @@
 
 import XCTest
 @testable import Gauge
+import FirebaseFirestore
 
 final class GaugeTests: XCTestCase {
 
@@ -49,5 +50,22 @@ final class GaugeTests: XCTestCase {
         let userId = testUser.id
         let user = await viewModel.getUserFromId(userId: userId)
         print(user)
+    }
+    
+    
+    func testFriendRequest() async {
+        let friendUser = User(userId: "thing2", username: "dummy", email: "dummy")
+        let hostUser = User(userId: "thing1", username: "dummy", email: "dummy")
+        let viewModel = FriendsViewModel(user: hostUser)
+        
+        let friendId = friendUser.id
+        let hostId = hostUser.id
+        do {
+            try await viewModel.acceptFriendRequest(friendId: friendId, hostId: hostId)
+            print("Friend request accepted successfully.")
+        } catch {
+            print("error")
+        }
+
     }
 }
