@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TakeMatchHome: View {
-    @StateObject private var mcManager = MCManager.shared
+    @StateObject var mcManager = MCManager(yourName: UIDevice.current.identifierForVendor?.uuidString ?? UIDevice.current.name)
     @State var roomCode: String = ""
     @State var showJoinRoom: Bool = false
     @State var navigateToRoom = false
@@ -17,9 +17,10 @@ struct TakeMatchHome: View {
                 HStack {
                     // Create Room
                     Button(action: {
-                        mcManager.startHosting()
                         isHost = true
+                        roomCode = generateRoomCode()
                         navigateToRoom = true
+                        mcManager.startHosting(with: roomCode)
                     }) {
                         Text("Create Room")
                             .padding()
@@ -32,6 +33,7 @@ struct TakeMatchHome: View {
                     Button(action: {
                         showJoinRoom.toggle()
                         isHost = false
+                        mcManager.startBrowsing()
                     }) {
                         Text("Join Room")
                             .padding()
@@ -46,28 +48,37 @@ struct TakeMatchHome: View {
                         TextField("Enter Room Code", text: $roomCode)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding()
+                        
+                        let roomAvailable = !roomCode.isEmpty && mcManager.discoveredPeers.values.contains(roomCode)
 
                         Button(action: {
-                            mcManager.startBrowsing(forRoomCode: roomCode)
-                            if mcManager.availableRooms[roomCode] != nil {
+                            if roomAvailable {
                                 navigateToRoom = true
                                 isHost = false
-                                mcManager.sendMessage("RequestRoomCode")
-
+                                mcManager.joinRoom(with: roomCode)
+                                //mcManager.sendMessage("RequestRoomCode")
                             }
                         }) {
                             Image(systemName: "arrow.right")
+                                .foregroundColor(.white)
                         }
                         .padding()
-                        .background(Color.gray)
+                        .background(roomAvailable ? Color.blue : Color.gray)
                         .cornerRadius(5)
+                        .disabled(!roomAvailable)
                     }
                 }
             }
             .navigationDestination(isPresented: $navigateToRoom) {
-                TakeMatchRoomView(isHost: isHost)
+                TakeMatchRoomView(mcManager: mcManager, isHost: isHost, roomCode: roomCode)
             }
         }
+    }
+    
+    func generateRoomCode() -> String {
+        
+        let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        return String((0..<4).compactMap { _ in letters.randomElement() })
     }
 }
 
