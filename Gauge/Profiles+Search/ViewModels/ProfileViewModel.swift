@@ -17,7 +17,7 @@ class ProfileViewModel: ObservableObject {
     private var db = Firestore.firestore()
     private var storage = Storage.storage()
     
-    func uploadProfilePicture(userId: String, image: UIImage) async -> String? {
+    func storeImageAndReturnURL(userId: String, image: UIImage) async -> String? {
         
         // firebase storage accepts image in data format
         guard let imageData = image.jpegData(compressionQuality: 0.75) else {
@@ -42,7 +42,7 @@ class ProfileViewModel: ObservableObject {
         
     }
     
-    func fetchProfilePicture(from urlString: String) async -> UIImage? {
+    func getImageFromURL(from urlString: String) async -> UIImage? {
         
         guard let url = URL(string: urlString) else {
             print("the URL is invalid.")
@@ -67,7 +67,7 @@ class ProfileViewModel: ObservableObject {
         
     }
     
-    func deleteProfilePicture(userId: String) async -> Bool {
+    func removeAndReturn(userId: String) async -> Bool {
         
         let storageRef = storage.reference().child("profilePictures/\(userId).jpg")
         
@@ -83,3 +83,68 @@ class ProfileViewModel: ObservableObject {
         
     }
 }
+    //store the image URL that is provided by FirebaseStorage
+    //add/update profile picture
+//    func updateProfilePicture(userID: String, image: UIImage) async -> Void {
+//        //update profilePhoto field
+//        guard let profilePhoto = storeImageAndReturnURL(image: image) else {
+//            print("Failed to get download URL")
+//            return
+//        }
+//        //update profile picture in firestore
+//        let userDocument = Firebase.db.collection("USERS").document(userID)
+//        userDocument.updateData(["profilePhoto": profilePhoto]) { error in
+//            if let error = error {
+//                print("Error updating document: \(error.localizedDescription)")
+//            } else {
+//                print("Document successfully updated")
+//            }
+//        }
+//        
+//    }
+//    
+    
+    //remove profile picture
+//    func removeProfilePicture(userID: String) async -> Bool {
+//        
+//        //update profile picture in firestore
+//        let userDocument = Firebase.db.collection("USERS").document(userID)
+//        
+//        do {
+//            //delete data in database
+//            try await userDocument.updateData(["profilePhoto": FieldValue.delete()])
+//            print("Profile Picture updated!")
+//        } catch {
+//            print("Error updating Profile Picture: \(error.localizedDescription)")
+//            return false
+//        }
+//        
+//        //removeAndReturn returns true if image successfully removed from firebaseStorage
+//        let removed = await removeAndReturn(userID)
+//        if !removed {
+//            print("failed to successfully remove profile picture")
+//        }
+//        
+//        return removed
+//    }
+    
+    
+    
+    //get pfp function
+//    func getProfilePicture(userID: String) async -> UIImage {
+//        //user
+//        let userDocument = Firebase.db.collection("USERS").document(userID)
+//        
+//        do {
+//            let document = try await userDocument.getDocument()
+//            if let data = document.data(),
+//               let urlString = data["profilePicture"] as? String {
+//                return await getImageFromURL(urlString: urlString)
+//            } else {
+//                print("Document does not exist or URL could not be retrieved")
+//            }
+//        } catch {
+//            print("Error fetching document: \(error.localizedDescription)")
+//        }
+//        
+//    }
