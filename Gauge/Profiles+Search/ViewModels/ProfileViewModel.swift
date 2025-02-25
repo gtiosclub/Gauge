@@ -36,7 +36,7 @@ class ProfileViewModel: ObservableObject {
 //        }
 //        
 //    }
-    
+//    
     
     //remove profile picture
 //    func removeProfilePicture(userID: String) async -> Bool {
