@@ -81,8 +81,7 @@ class PostFirebase: ObservableObject {
                         if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
                             print("updating binary post")
                             
-                            self.allQueriedPosts[index] = AnyObservablePost(
-                                BinaryPost(
+                            self.allQueriedPosts[index] = AnyObservablePost( BinaryPost(
                                         postId: newPostData["postId"] as? String ?? "",
                                         userId: newPostData["userId"] as? String ?? "",
                                         categories: newPostData["categories"] as? [Category] ?? [],
@@ -96,8 +95,7 @@ class PostFirebase: ObservableObject {
                             
                         } else if (newPostData["type"] as? String == PostType.SliderPost.rawValue) {
                             print("updating slider post")
-                            self.allQueriedPosts[index] = AnyObservablePost(
-                                SliderPost(
+                            self.allQueriedPosts[index] = AnyObservablePost( SliderPost(
                                         postId: newPostData["postId"] as? String ?? "",
                                         userId: newPostData["userId"] as? String ?? "",
                                         categories: newPostData["categories"] as? [Category] ?? [],
@@ -114,8 +112,7 @@ class PostFirebase: ObservableObject {
                         } else if (newPostData["type"] as? String == PostType.RankPost.rawValue){
                             print("adding rank")
                             
-                            self.allQueriedPosts[index] = AnyObservablePost(
-                                RankPost(postId: newPostData["postId"] as? String ?? "",
+                            self.allQueriedPosts[index] = AnyObservablePost( RankPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
                                                   postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
