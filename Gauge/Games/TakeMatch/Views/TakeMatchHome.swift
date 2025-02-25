@@ -56,6 +56,7 @@ struct TakeMatchHome: View {
                                 navigateToRoom = true
                                 isHost = false
                                 mcManager.joinRoom(with: roomCode)
+                                //mcManager.sendMessage("RequestRoomCode")
                             }
                         }) {
                             Image(systemName: "arrow.right")

@@ -62,6 +62,15 @@ class MCManager: NSObject, ObservableObject {
     func startBrowsing() {
         
         nearbyServiceBrowser.startBrowsingForPeers()
+
+//     // MARK: - Joining (Search for Room)
+//     func startBrowsing(forRoomCode code: String) {
+//         browser = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
+//         browser?.delegate = self
+//         browser?.startBrowsingForPeers()
+//         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+//             self.browser?.stopBrowsingForPeers()
+//         }
     }
     
     func stopBrowsing() {
@@ -103,6 +112,7 @@ extension MCManager: MCNearbyServiceBrowserDelegate {
                 
         DispatchQueue.main.async {
             self.discoveredPeers.removeValue(forKey: peerID)
+            //self.connectedPeers = self.session.connectedPeers + [self.peerID]
         }
     }
 }
@@ -116,6 +126,14 @@ extension MCManager: MCNearbyServiceAdvertiserDelegate {
             self.invitationHandler = invitationHandler
             
             invitationHandler(true, self.session)
+//             self.connectedPeers = session.connectedPeers + [self.peerID]
+//         }
+//         print("Peer \(peerID.displayName) changed state: \(state)")
+//         if state == .connected {
+//             print("\(peerID.displayName) has joined!")
+//             self.sendMessage("PlayerJoined:\(peerID.displayName)") // Notify others
+//         } else if state == .notConnected {
+//             print("\(peerID.displayName) has left!")
         }
     }
 }
@@ -164,3 +182,23 @@ extension MCManager: MCSessionDelegate {
 }
 
 
+
+// MARK: - MCNearbyServiceBrowserDelegate
+extension MCManager: MCNearbyServiceBrowserDelegate {
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        if let roomCode = info?["roomCode"] {
+            DispatchQueue.main.async {
+                self.availableRooms[roomCode] = peerID
+                self.foundPeer = peerID
+                self.isReadyToNavigate = true // Allow navigation once peer is found
+            }
+            browser.invitePeer(peerID, to: self.session, withContext: nil, timeout: 10)
+        }
+    }
+    
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        DispatchQueue.main.async {
+            self.availableRooms = self.availableRooms.filter { $0.value != peerID }
+        }
+    }
+}
