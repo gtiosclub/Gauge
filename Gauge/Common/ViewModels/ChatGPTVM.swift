@@ -15,7 +15,7 @@ class ChatGPTVM: ObservableObject {
     @Published var messages: [Message] = [Message(content: "Pick a topic to generate a take!", isUser: false)]
     @Published var isQuerying = false
     @Published var latestAIResponse: String?
-    @Published var isKeyFetched: Bool = false
+    @Published var storedQuestions: [String] = []
     
     var gptKey = ChatGPTAPI(apiKey: "<PUT API KEY HERE>")
     
@@ -58,9 +58,7 @@ class ChatGPTVM: ObservableObject {
         self.isQuerying = true
             
         do {
-            print("Sending request to OpenAI API...") // Log the request
             let response = try await gptKey.sendMessage(text: content)
-            print("Received response: \(response)") // Log the response
             
             // Update UI state on the main thread
             self.messages.append(Message(content: response, isUser: false))
@@ -71,6 +69,31 @@ class ChatGPTVM: ObservableObject {
             self.isQuerying = false
             }
         }
+    
+    func generateQuestion(from categories: [String]) async {
+        guard !categories.isEmpty else {
+            latestAIResponse = "Please select a topic."
+            return
+        }
+            
+        for category in categories {
+            let prompt = "Generate a divisive opinion-based question about \(category)"
+            self.isQuerying = true
+            do {
+                let response = try await gptKey.sendMessage(text: prompt)
+                
+                // Update UI state on the main thread
+                self.storedQuestions.append(response)
+                self.isQuerying = false
+            } catch {
+                    // Update UI state on the main thread
+                self.latestAIResponse = "Error generating question for \(category): \(error.localizedDescription)"
+                self.isQuerying = false
+            }
+        }
+    }
+            
+        
     
     func startNewChat() {
        messages = [
