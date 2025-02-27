@@ -76,12 +76,6 @@ struct FirebaseTesting: View {
             }
             
             Section("Update Data") {
-                Button("Add View") {
-                    postVM.addView(
-                        postId: "examplePost",
-                        userId: "Jack")
-                }
-                
                 Button("Remove View") {
                     postVM.removeView(
                         postId: "examplePost",
