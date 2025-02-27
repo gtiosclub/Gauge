@@ -1,3 +1,10 @@
+//
+//  FirebaseTesting.swift
+//  Gauge
+//
+//  Created by Austin Huguenard on 2/10/25.
+//
+
 import SwiftUI
 
 struct FirebaseTesting: View {
