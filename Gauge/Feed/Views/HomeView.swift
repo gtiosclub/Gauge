@@ -18,6 +18,7 @@ struct HomeView: View {
                 FirebaseTesting()
             }
             
+            
             CommentView(comment: Comment(
                 commentType: .text,
                 userId: "Lv72Qz7Qc4TC2vDeE94q",
@@ -25,7 +26,7 @@ struct HomeView: View {
                 commentId: "",
                 likes: [],
                 dislikes: [],
-                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. "
+                content: "Love "
             ))
             CommentView(comment: Comment(
                 commentType: .text,
@@ -34,7 +35,7 @@ struct HomeView: View {
                 commentId: "",
                 likes: [],
                 dislikes: [],
-                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. "
+                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. "
             ))
         }
     }
