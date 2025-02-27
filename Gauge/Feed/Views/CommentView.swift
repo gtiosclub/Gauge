@@ -67,7 +67,7 @@ struct CommentView: View {
                     .frame(alignment: .leading)
                     
                     HStack {
-                        Text(comment.content)
+                        ExpandableText(comment.content)
                             .lineLimit(nil)
                             .frame(alignment: .topLeading)
                             .foregroundColor(Color(white: 0.2))
