@@ -46,8 +46,9 @@ struct Comment {
     var content: String
 }
 
-enum CommentType {
-    case text, GIF
+enum CommentType:String,CaseIterable {
+    case text = "text"
+    case GIF = "GIF"
 }
 
 struct Response {
