@@ -24,32 +24,38 @@ struct ExpandableText: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Text(text)
-                .lineLimit(expanded ? nil : lineLimit)
-
-                .background(
-                    Text(text).lineLimit(lineLimit)
-                        .background(GeometryReader { displayedGeometry in
-                            ZStack {
-                                Text(self.text)
-                                    .background(GeometryReader { fullGeometry in
-                                        Color.clear.onAppear {
-                                            self.truncated = fullGeometry.size.height > displayedGeometry.size.height
-                                        }
-                                    })
-                            }
-                            .frame(height: .greatestFiniteMagnitude)
-                        })
-                        .hidden()
-            )
-
-            if truncated { toggleButton }
+        withAnimation() {
+            VStack(alignment: .leading) {
+                Text(text)
+                    .lineLimit(expanded ? nil : lineLimit)
+                
+                    .background(
+                        Text(text).lineLimit(lineLimit)
+                            .background(GeometryReader { displayedGeometry in
+                                ZStack {
+                                    Text(self.text)
+                                        .background(GeometryReader { fullGeometry in
+                                            Color.clear.onAppear {
+                                                self.truncated = fullGeometry.size.height > displayedGeometry.size.height
+                                            }
+                                        })
+                                }
+                                .frame(height: .greatestFiniteMagnitude)
+                            })
+                            .hidden()
+                    )
+                
+                if truncated { toggleButton }
+            }
         }
     }
 
     var toggleButton: some View {
-        Button(action: { self.expanded.toggle() }) {
+        Button(action: {
+            withAnimation {
+                self.expanded.toggle()
+            }
+        }) {
             Text(self.expanded ? "Show less" : "Show more")
                 .font(.caption)
         }

@@ -56,7 +56,7 @@ struct CommentView: View {
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(Color(white: 0.4))
-                        Text("• 1d ago")
+                        Text("• \(DateConverter.timeAgo(from: comment.date))")
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(Color(white: 0.6))
@@ -112,7 +112,7 @@ struct CommentView: View {
     CommentView(comment: Comment(
         commentType: .text,
         userId: "Lv72Qz7Qc4TC2vDeE94q",
-        date: Date(),
+        date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
         commentId: "",
         likes: [],
         dislikes: [],

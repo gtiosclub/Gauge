@@ -31,7 +31,7 @@ struct HomeView: View {
                         Comment(
                             commentType: .text,
                             userId: "Lv72Qz7Qc4TC2vDeE94q",
-                            date: Date(),
+                            date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
                             commentId: "",
                             likes: [],
                             dislikes: [],
@@ -40,7 +40,7 @@ struct HomeView: View {
                         Comment(
                             commentType: .text,
                             userId: "Lv72Qz7Qc4TC2vDeE94q",
-                            date: Date(),
+                            date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
                             commentId: "",
                             likes: [],
                             dislikes: [],

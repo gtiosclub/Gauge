@@ -18,4 +18,12 @@ class DateConverter {
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         return formatter.string(from: date)
     }
+    
+    static func timeAgo(from date: Date) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.minute, .hour, .day, .weekOfMonth]
+        formatter.maximumUnitCount = 1
+        formatter.unitsStyle = .abbreviated
+        return formatter.string(from: date, to: Date()) ?? "Just now"
+    }
 }
