@@ -53,7 +53,7 @@ class UserFirebase: ObservableObject {
                 for document in documents {
                     let documentRef = Firebase.db.collection("POSTS").document(document.documentID)
                     
-                
+                    
                     let subcollections = ["RESPONSES", "COMMENTS", "VIEWS"]
                     
                     //traverse through subcollections
@@ -179,4 +179,48 @@ class UserFirebase: ObservableObject {
         }
         
     }
+
+    //calculate how many views a users post has
+    func getUserNumViews(userId: String, completion: @escaping (Int) -> Void) {
+        var totalViews = 0
+        var pendingRequests = 0
+        
+        //Get all user posts
+        Firebase.db.collection("POSTS")
+            .whereField("userId", isEqualTo: userId) //user specific posts
+            .getDocuments { snapshot, error in
+                if let documents = snapshot?.documents {
+                    if documents.isEmpty {
+                        completion(0)
+                        return
+                    }
+                    
+                    //create this to track how many posts to traverse thru
+                    pendingRequests = documents.count
+                    
+                    for document in documents {
+                        let postId = document.documentID
+                        let documentRef = Firebase.db.collection("POSTS").document(postId)
+                        
+                        // views on each document
+                        documentRef.collection("VIEWS")
+                            .getDocuments { subSnapshot, subError in
+                                if let subDocuments = subSnapshot?.documents {
+                                    totalViews += subDocuments.count
+                                }
+                                
+                                pendingRequests -= 1
+                                
+                                
+                                if pendingRequests == 0 {
+                                    completion(totalViews)
+                                }
+                            }
+                    }
+                } else {
+                    completion(0)
+                }
+            }
+    }
+    
 }

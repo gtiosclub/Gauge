@@ -19,11 +19,43 @@ enum Category {
         case nfl = "NFL"
         case collegeFootball = "College Football"
         case mlb = "MLB"
+        // new
+        case collegeBaseball = "College Basebell"
+        case tennis = "Tennis"
+        case nba = "NBA"
+        case collegeBasketball = "College Basketball"
+        case mma = "MMA"
+        case golf = "Golf"
+        case cricket = "Cricket"
+        case iceHockey = "Ice Hockey"
+        case rugby = "Rugby"
+        case boxing = "Boxing"
+        case mixedMartialArts = "Mixed Martial Arts"
+        case F1 = "F1"
+        case soccer = "Soccer"
+        case swimming = "Swimming"
+        case olympics = "Olypmics"
+        case pickleball = "Pickleball"
     }
     
     enum Entertainment: String, CaseIterable {
         case movies = "Movies"
         case tvShows = "TV Shows"
+        // new
+        case movieReccomendations = "Movie Reccomendations"
+        case showReccomendations = "Show Reccomendations"
+        case videoGames = "Video Games"
+        case music = "Music"
+        case books = "Books"
+        case podcasts = "Podcasts"
+        case socialMedia = "Social Media"
+        case webSeries = "Web Series"
+        case webComics = "Web Comics"
+        case anime = "Anime"
+        case videoClips = "Video Clips"
+        case shortFilms = "Short Films"
+        case documentaries = "Documentaries"
+        case realityTV = "Reality TV"
     }
     
     enum Educational: String, CaseIterable {
@@ -31,33 +63,118 @@ enum Category {
         case math = "Math"
         case environment = "Environment"
         case health = "Health & Fitness"
+        // new
+        case history = "History"
+        case economics = "Economics"
+        case chemistry = "Chemistry"
+        case physics = "Physics"
+        case biology = "Biology"
+        case psychology = "Psychology"
+        case literature = "Literature"
+        case philosophy = "Philosophy"
+        case foreignLanguage = "Foreign Language"
+        case testPreparation = "Test Preparation"
+        case studyStrategies = "Study Strategies"
+        case engineering = "Engineering"
+        case art = "Art"
+        case finance = "Finance"
     }
     
     enum News: String, CaseIterable {
         case politics = "Politics"
         case business = "Business"
+        // new
+        case technology = "Technology"
+        case science = "Science"
+        case worldEvents = "World Events"
+        case entertainment = "Entertainment"
+        case health = "Health"
+        case climate = "Climate"
+        case space = "Space"
+        case sports = "Sports"
+        case crime = "Crime"
+        case education = "Education"
+        case culture = "Culture"
+        case stockMarket = "Stock Market"
+        case animals = "Animals"
+        case positiveStories = "Positive Stories"
     }
     
     enum Lifestyle: String, CaseIterable {
         case fashion = "Fashion"
         case beauty = "Beauty"
         case travel = "Travel"
+        // new
+        case skincare = "Skincare"
+        case cooking = "Cooking"
+        case fitness = "Fitness"
+        case mentalHealth = "Mental Health"
+        case finances = "Finances"
+        case personalDevelopment = "Personal Development"
+        case homeDecor = "Home Decor"
+        case positivity = "Positivity"
+        case wellness = "Wellness"
+        case jewelry = "Jewelry"
+        case homeInspiration = "Home Inspiration"
+        case lifeHacks = "Life Hacks"
+        case workLifeBalance = "Work Life Balance"
+        case productivity = "Productivity"
+        case minimalism = "Minimalism"
     }
     
     enum Arts: String, CaseIterable {
         case music = "Music"
         case artwork = "Artwork"
+        // new
+        case photography = "Photography"
+        case writing = "Writing"
+        case design = "Design"
+        case videoGames = "Video Games"
+        case poetry = "Poetry"
+        case film = "Film"
+        case painting = "Painting"
+        case crochet = "Crochet"
+        case drawing = "Drawing"
+        case editing = "Editing"
+        case dance = "Dance"
     }
     
     enum Relationships: String, CaseIterable {
         case dating = "Dating"
         case relationships = "Relationships"
         case parenting = "Parenting"
+        // new
+        case friendship = "Friendship"
+        case breakUp = "Break Up"
+        case singleLife = "Single Life"
+        case datingAdvice = "Dating Advice"
+        case longDistanceRelationships = "Long Distance Relationships"
+        case datingTips = "Dating Tips"
+        case relationshipGoals = "Relationship Goals"
+        case family = "Family"
+        case sibling = "Siblings"
+        case newParent = "newParent"
+        case generalRelationshipAdivce = "General Relationship Adivce"
+        case healthyRelationship = "Healthy Relationship"
+        case healthyFriendship = "Healthy Friendship"
+        case communication = "Communication"
+        case trustIssues = "Trust Issues"
+        case loveLanguages = "Love Languages"
+        case emotionalSupport = "Emotional Support"
     }
     
     enum Other: String, CaseIterable {
         case funny = "Funny"
         case jokes = "Jokes"
+        // new
+        case lifeAdvice = "Life Advice"
+        case cutePets = "Cute Pets"
+        case rant = "Rant"
+        case conspiraryTheories = "Conspirary Theories"
+        case rememberWhen = "Remember When"
+        case adviceColumns = "Advice Columns"
+        case randomThoughts = "Random Thoughts"
+        case motivationalQuotes = "Motivational Quotes"
     }
     
     static var allCases: [Category] {
