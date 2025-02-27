@@ -18,6 +18,24 @@ class PostFirebase: ObservableObject {
         Keys.fetchKeys()
     }
 
+    // Remove a user to "VIEWS" collection within a post
+    func removeView(postId: String, userId: String){
+        let viewRef = Firebase.db.collection("POSTS")
+            .document(postId)
+            .collection("VIEWS")
+      
+        viewRef.document("\(userId)").delete()
+    }
+    
+    // Add a user to "VIEWS" collection within a post
+    func addView(postId: String, userId: String){
+        let viewRef = Firebase.db.collection("POSTS")
+            .document(postId)
+            .collection("VIEWS")
+      
+        viewRef.document("\(userId)").setData(["viewedAt": Timestamp()])
+    }
+    
     func generatePostKeywords(postId: String) {
         let db = Firestore.firestore()
         let postRef = db.collection("POSTS").document(postId)
