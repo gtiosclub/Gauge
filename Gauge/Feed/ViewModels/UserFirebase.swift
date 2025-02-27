@@ -142,6 +142,24 @@ class UserFirebase: ObservableObject {
         }
     }
     
+    func getUsernameAndPhoto(userId: String, completion: @escaping ([String: String]) -> Void) {
+        var nameAndPhoto = ["username": "", "profilePhoto": ""]
+        
+        Firebase.db.collection("USERS").document(userId).getDocument { document, error in
+            if let error = error {
+                print("Error getting user \(error)")
+                return
+            }
+            
+            if let data = document?.data() {
+                nameAndPhoto["username"] = data["username"] as? String ?? ""
+                nameAndPhoto["profilePhoto"] = data["profilePhoto"] as? String ?? ""
+            }
+            
+            completion(nameAndPhoto)
+        }
+    }
+    
     func getUserFavorites(userId: String) {
         // Create an array to store favorite postId
         var allFavoritePosts: [String] = []

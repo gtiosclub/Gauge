@@ -133,6 +133,12 @@ struct FirebaseTesting: View {
                                 print(results)
                             }
                         }
+                        
+                        Button("Get username and profile picture") {
+                            userVM.getUsernameAndPhoto(userId: "Lv72Qz7Qc4TC2vDeE94q") { object in
+                                print(object)
+                            }
+                        }
                     }
                     
                     Section("Update Data") {
