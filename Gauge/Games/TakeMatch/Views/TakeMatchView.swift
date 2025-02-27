@@ -25,6 +25,7 @@ struct TakeMatchView: View {
                     if responses.count == players.count {
                         currentScreen = 2
                     }
+                    return responses
                 }
             case 2:
                 MatchingView(responses: Array(responses.values), playerPictures: players, guessedMatches: $guessedMatches) {

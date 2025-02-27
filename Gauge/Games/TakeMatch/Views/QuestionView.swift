@@ -10,7 +10,13 @@ import SwiftUI
 struct QuestionView: View {
     var question: String
     @Binding var inputText: String
-    var onSubmit: () -> Void
+    var onSubmit: () -> [String:String]
+    @State var submitAnswer = false
+    @State var responses: [String:String] = [:]
+    @Environment(\.dismiss) private var dismiss
+    
+    @FocusState private var isTextFieldFocused: Bool
+
 
     var body: some View {
         VStack(spacing: 12) {
@@ -22,8 +28,12 @@ struct QuestionView: View {
                     .padding()
             }
             InfoField(title: "A:", text: $inputText)
+                .focused($isTextFieldFocused)
             Button(action: {
-                onSubmit()
+                isTextFieldFocused = false
+                responses = onSubmit()
+                submitAnswer = true
+                
             }) {
                 Text("Submit")
                     .font(.headline)
@@ -39,12 +49,38 @@ struct QuestionView: View {
             .padding(.horizontal, 40)
             .padding(.top, 20)
 
-        }.padding()
+        }
+        .padding()
+        .navigationTitle(Text("Take Match"))
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        dismiss()
+                    }
+                }) {
+                    Image(systemName: "arrow.left")
+                        .foregroundColor(.black)
+                }
+            }
+        }
+        .navigationDestination(isPresented: $submitAnswer) {
+            ResultsView(
+                responses: responses,
+                guessedMatches: [:],
+                onRestart: {
+                    
+                }
+            )
+        }
+        
     }
 }
 
 #Preview {
-    QuestionView(question: "Q: Some question about this person's preferences", inputText: .constant(""), onSubmit: { })
+    QuestionView(question: "Q: Some question about this person's preferences", inputText: .constant(""), onSubmit: {return [:] })
 }
 
 struct InfoField: View {

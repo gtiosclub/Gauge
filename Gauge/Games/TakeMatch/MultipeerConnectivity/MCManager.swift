@@ -19,6 +19,7 @@ class MCManager: NSObject, ObservableObject {
     @Published var receievedInviteFrom: MCPeerID?
     @Published var invitationHandler: ((Bool, MCSession?) -> Void)?
     @Published var paired: Bool = false
+    @Published var takeMatchAnswers: [Answer] = []
     
     var isAvailableToPlay: Bool = false {
         didSet {
@@ -94,6 +95,20 @@ class MCManager: NSObject, ObservableObject {
             print("No host found with room code: \(code)")
         }
     }
+    
+    func submitAnswer(_ answerText: String) {
+        let answer = Answer(sender: myPeerID.displayName, text: answerText)
+        self.takeMatchAnswers.append(answer)
+        // Then send the data asynchronously if needed
+        if !session.connectedPeers.isEmpty {
+            do {
+                let data = try JSONEncoder().encode(answer)
+                try session.send(data, toPeers: session.connectedPeers, with: .reliable)
+            } catch {
+                print("Error sending answer: \(error)")
+            }
+        }
+    }
 }
 
 extension MCManager: MCNearbyServiceBrowserDelegate {
@@ -165,7 +180,14 @@ extension MCManager: MCSessionDelegate {
     }
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        
+        do {
+            let answer = try JSONDecoder().decode(Answer.self, from: data)
+            DispatchQueue.main.async {
+                self.takeMatchAnswers.append(answer)
+            }
+        } catch {
+            print("Error decoding answer: \(error)")
+        }
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
