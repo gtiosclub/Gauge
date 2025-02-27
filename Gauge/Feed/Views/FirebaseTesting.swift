@@ -1,10 +1,3 @@
-//
-//  FirebaseTesting.swift
-//  Gauge
-//
-//  Created by Austin Huguenard on 2/10/25.
-//
-
 import SwiftUI
 
 struct FirebaseTesting: View {
@@ -38,41 +31,6 @@ struct FirebaseTesting: View {
                                 upperBoundLabel: "Goated 🐐"
                             )
                         }
-                    }
-                    
-                    Button("Get response results from a post") {
-                        postVM.getResponses(postId: "examplePost") { results in
-                            print(results)
-                        }
-                    }
-                    
-                    Button("Get username and profile picture") {
-                        userVM.getUsernameAndPhoto(userId: "Lv72Qz7Qc4TC2vDeE94q") { object in
-                            print(object)
-                        }
-                    }
-                }
-                
-                Section("Update Data") {
-                    Button("Like Comment") {
-                        postVM.likeComment(
-                            postId: "examplePost",
-                            commentId: "Ge3KON8x7l1jUUlpRvd7",
-                            userId: "Jack")
-                    }
-                    
-                    Button("Dislike Comment") {
-                        postVM.dislikeComment(
-                            postId: "examplePost",
-                            commentId: "Ge3KON8x7l1jUUlpRvd7",
-                            userId: "Jack")
-                    }
-                    
-                    Button("Update User Austin") {
-                        let updatedUser = User(userId: "austin", username: "Austin", email: "austin@example.com")
-                        updatedUser.phoneNumber = "999-999-9999" // Example new phone number
-                        updatedUser.streak = 5
-                        updatedUser.badges = ["Gold", "Platinum"]
                         
                         Button("Add Ranked Post") {
                             postVM.createRankPost(
@@ -168,6 +126,12 @@ struct FirebaseTesting: View {
                                 print(results)
                             }
                         }
+                        
+                        Button("Get username and profile picture") {
+                            userVM.getUsernameAndPhoto(userId: "Lv72Qz7Qc4TC2vDeE94q") { object in
+                                print(object)
+                            }
+                        }
                     }
                     
                     Section("Update Data") {
@@ -239,7 +203,6 @@ struct FirebaseTesting: View {
         }
     }
 }
-
 
 #Preview {
     FirebaseTesting()
