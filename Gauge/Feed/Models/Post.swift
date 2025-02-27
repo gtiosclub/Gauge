@@ -35,7 +35,8 @@ enum PostType: String {
     case BinaryPost, SliderPost, RankPost
 }
 
-struct Comment {
+struct Comment: Identifiable, Hashable {
+    var id: String {commentId}
     var commentType: CommentType // enum (text, GIF), String in Firebase
     var userId: String
     var username: String // NOT stored in Firebase
