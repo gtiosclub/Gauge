@@ -70,8 +70,9 @@ struct TakeMatchHome: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToRoom) {
-                TakeMatchRoomView(mcManager: mcManager, isHost: isHost, roomCode: roomCode)
+                TakeMatchRoomView(mcManager: mcManager, isHost: isHost, roomCode: roomCode, onExit: resetHomeState)
             }
+            
         }
     }
     
@@ -79,6 +80,13 @@ struct TakeMatchHome: View {
         
         let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         return String((0..<4).compactMap { _ in letters.randomElement() })
+    }
+    
+    func resetHomeState() {
+        roomCode = ""
+        showJoinRoom = false
+        navigateToRoom = false
+        isHost = false
     }
 }
 

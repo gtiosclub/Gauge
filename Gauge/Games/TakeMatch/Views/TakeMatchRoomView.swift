@@ -13,6 +13,7 @@ struct TakeMatchRoomView: View {
     @StateObject private var gameSettings = TakeMatchSettingsVM()
     @State var isHost: Bool
     var roomCode: String
+    var onExit: () -> Void
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -82,6 +83,7 @@ struct TakeMatchRoomView: View {
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.4)) {
                         mcManager.isAvailableToPlay = false
+                        onExit()
                         dismiss()
                     }
                 }) {
@@ -95,12 +97,19 @@ struct TakeMatchRoomView: View {
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
         }
+        .onDisappear {
+            if !isHost {
+                mcManager.session.disconnect()
+            }
+            mcManager.isAvailableToPlay = false
+            mcManager.stopBrowsing()
+        }
     }
 }
 
 #Preview {
     NavigationStack {
-        TakeMatchRoomView(mcManager: MCManager(yourName: "test"), isHost: true, roomCode: "ABCD")
+        TakeMatchRoomView(mcManager: MCManager(yourName: "test"), isHost: true, roomCode: "ABCD", onExit: {})
     }
 }
 
