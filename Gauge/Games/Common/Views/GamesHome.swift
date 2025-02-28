@@ -10,7 +10,7 @@ import SwiftUI
 struct GamesHome: View {
     // Will include a tab list view of all the games in the app
     let games: [String] = [
-        "Game 1",
+        "Take Match",
         "Game 2",
         "Game 3",
         "Game 4",
@@ -24,45 +24,50 @@ struct GamesHome: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGray5)  // Light gray
-                    .edgesIgnoringSafeArea(.all)  // Fill the entire screen
                 ScrollView {
                     VStack(spacing: 10) {
-                        ForEach(games, id: \.self) { game in
-                            Button(action: {
-                                selectedGame = game
-                                withAnimation {
-                                    self.showingPopover.toggle()
-                                }
-                            }) {
-                                VStack {
-                                    Image("game_image")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(
-                                            width: 300, height: 100,
-                                            alignment: .center
-                                        )
-                                        .foregroundColor(.primary)
-
-                                    Text(game)
-                                        .font(.headline)
-                                        .bold()
-                                        .padding(.top, 8)
-                                    Spacer()
-                                }
-                                .foregroundColor(.primary)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(5)
+                        Button(action: {
+                            selectedGame = "Take Match"
+                            withAnimation {
+                                self.showingPopover.toggle()
                             }
-                            .buttonStyle(PlainButtonStyle())
-                            .padding(5)
+                        }) {
+                            GameCardView(gameTitle: "Take Match", playerRange: "3-8", duration: "15m", description: "Match your friends to their takes!")
                         }
+//                        ForEach(games, id: \.self) { game in
+//                            Button(action: {
+//                                selectedGame = game
+//                                withAnimation {
+//                                    self.showingPopover.toggle()
+//                                }
+//                            }) {
+//                                VStack {
+//                                    Image("game_image")
+//                                        .resizable()
+//                                        .aspectRatio(contentMode: .fit)
+//                                        .frame(
+//                                            width: 300, height: 100,
+//                                            alignment: .center
+//                                        )
+//                                        .foregroundColor(.primary)
+//
+//                                    Text(game)
+//                                        .font(.headline)
+//                                        .bold()
+//                                        .padding(.top, 8)
+//                                    Spacer()
+//                                }
+//                                .foregroundColor(.primary)
+//                                .padding()
+//                                .background(Color.white)
+//                                .cornerRadius(5)
+//                            }
+//                            .buttonStyle(PlainButtonStyle())
+//                            .padding(5)
+//                        }
                     }
                     .padding()
                 }
-
                 .navigationTitle(Text("Games"))
             }
 
@@ -82,7 +87,7 @@ struct GamesHome: View {
                             }
                             Spacer()
                         }
-                        Text("Options for \(selectedGame ?? "Game")")
+                        Text(selectedGame ?? "")
                             .font(.title2)
                             .padding()
                         HStack {
@@ -138,8 +143,6 @@ struct GamesHome: View {
                     .background(Color(.systemBackground))
                     .cornerRadius(20)
                     .shadow(radius: 10)
-                    .padding()
-                    Spacer()
                 }
                 .zIndex(1)  // Ensure the popover is on top
             }
@@ -147,6 +150,44 @@ struct GamesHome: View {
         }
     }
 }
+
+struct GameCardView: View {
+    var gameTitle: String
+    var playerRange: String
+    var duration: String
+    var description: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 100) // Placeholder for image
+
+            HStack(spacing: 10) {
+                Text(gameTitle)
+                    .font(.title)
+                    .fontWeight(.bold)
+                Label(playerRange, systemImage: "person.2.fill")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                Label(duration, systemImage: "clock")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
+
+
+            Text(description)
+                .font(.body)
+                .foregroundColor(.black)
+                .lineLimit(2)
+        }
+        .padding()
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .shadow(radius: 5)
+    }
+}
+
 
 #Preview {
     GamesHome()

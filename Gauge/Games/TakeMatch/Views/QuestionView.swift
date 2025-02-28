@@ -11,7 +11,7 @@ struct QuestionView: View {
     var question: String
     @Binding var inputText: String
     var onSubmit: () -> Void
-    
+
     var body: some View {
         VStack(spacing: 12) {
             ZStack {
@@ -57,8 +57,7 @@ struct InfoField: View {
                 .frame(height: 250).focused($isTyping)
                 .background(isTyping ? .black : Color(.gray),in:RoundedRectangle(cornerRadius: 14).stroke(lineWidth: 2))
                 .font(.title)
-            
-            
+          
             Text(title).padding(.horizontal, 5)
                 .background(.white.opacity(isTyping || !text.isEmpty ? 1 : 0))
                 .foregroundStyle(isTyping ? .black : .black)

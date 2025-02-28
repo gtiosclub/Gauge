@@ -11,12 +11,12 @@ struct MatchingView: View {
     var responses: [String]
     var playerPictures: [String]
     @Binding var guessedMatches: [String: String]
-    
+
     @State private var dragOffset = CGSize.zero
     @State private var lastPosition = CGSize.zero
     @State private var isDragging = false
     @State private var hoveredResponse: String? = nil // Track hovered response
-    
+
     var onSubmit: () -> Void
     var body: some View {
         VStack {
