@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var userVM: UserFirebase
+    @EnvironmentObject var postVm: PostFirebase
     @State var showComments: Bool = false
     
     var body: some View {
@@ -22,6 +23,13 @@ struct HomeView: View {
                 
                 Button("Show Comments View") {
                     showComments = true
+                }
+                
+                NavigationLink("Select Categories Screen") {
+                    SelectCategories(
+                        question: "Which channel is better?",
+                        responseOptions: ["National Geographic", "Animal Planet"]
+                    )
                 }
                 
             }
