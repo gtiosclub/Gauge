@@ -64,7 +64,9 @@ struct SelectCategories: View {
                 HStack {
                     ForEach(selectedCategories, id: \.self) { category in
                         Button(category.rawValue) {
-                            
+                            withAnimation {
+                                selectedCategories = selectedCategories.filter { $0 != category}
+                            }
                         }
                         .padding(10)
                         .font(.subheadline)
@@ -90,8 +92,10 @@ struct SelectCategories: View {
                         HStack {
                             ForEach(suggestedCategories, id: \.self) { category in
                                 Button(category.rawValue) {
-                                    selectedCategories.append(category)
-                                    suggestedCategories = suggestedCategories.filter { $0 != category }
+                                    withAnimation {
+                                        selectedCategories.append(category)
+                                        suggestedCategories = suggestedCategories.filter { $0 != category }
+                                    }
                                 }
                                 .padding(10)
                                 .font(.subheadline)
