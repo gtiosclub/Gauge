@@ -11,20 +11,24 @@ struct SelectCategories: View {
     @EnvironmentObject var postVM: PostFirebase
     @State var categoryInput: String = ""
     @State var isSearching: Bool = false
-    @State var suggestedCategories: [Category] = [Category.sports(.collegeFootball), Category.arts(.music)]
-    @State var selectedCategories: [Category] = [Category.sports(.nfl), Category.arts(.artwork)]
+    @State var suggestedCategories: [Category] = []
+    @State var selectedCategories: [Category] = []
+    
+    let question: String
+    let responseOptions: [String]
     
     var filteredCategories: [String] {
-        categoryInput.isEmpty ? [] : Category.allCategoryStrings.filter { $0.localizedCaseInsensitiveContains(categoryInput) }
+        categoryInput.isEmpty ? [] : Category.allCategoryStrings.filter { $0.localizedCaseInsensitiveContains(categoryInput) && !selectedCategories.contains(Category.stringToCategory($0)!)
+        }
     }
     
     func getSuggestedCategories() {
-//        postVM.suggestPostCategories(
-//            question: "Which channel is better?",
-//            responseOptions: ["National Geographic", "Animal Planet"]
-//        ) { suggestedCategories in
-//            self.suggestedCategories = suggestedCategories
-//        }
+        postVM.suggestPostCategories(
+            question: self.question,
+            responseOptions: self.responseOptions
+        ) { suggestedCategories in
+            self.suggestedCategories = suggestedCategories
+        }
     }
     
     var body: some View {
@@ -61,7 +65,7 @@ struct SelectCategories: View {
                 .background(Color(.systemGray5))
                 .cornerRadius(20)
                 
-                HStack {
+                FlowLayout(verticalSpacing: 5, horizontalSpacing: 5) {
                     ForEach(selectedCategories, id: \.self) { category in
                         Button(category.rawValue) {
                             withAnimation {
@@ -74,6 +78,7 @@ struct SelectCategories: View {
                         .background(Color(.systemGray6))
                         .foregroundColor(.black)
                         .cornerRadius(20)
+                        .fixedSize()
                     }
                     
                     Spacer()
@@ -89,7 +94,7 @@ struct SelectCategories: View {
                             Spacer()
                         }
                         
-                        HStack {
+                        FlowLayout(verticalSpacing: 5, horizontalSpacing: 5) {
                             ForEach(suggestedCategories, id: \.self) { category in
                                 Button(category.rawValue) {
                                     withAnimation {
@@ -103,6 +108,7 @@ struct SelectCategories: View {
                                 .background(Color(.systemGray6))
                                 .foregroundColor(.black)
                                 .cornerRadius(20)
+                                .fixedSize()
                             }
                             
                             Spacer()
@@ -113,11 +119,11 @@ struct SelectCategories: View {
             }
             
             if isSearching {
-                VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 10) {
                     List(filteredCategories, id: \.self) { category in
                         Button(category) {
-                            selectedCategories.append(Category.stringToCategory(category)!)
                             withAnimation {
+                                selectedCategories.append(Category.stringToCategory(category)!)
                                 isSearching = false
                             }
                         }
@@ -132,7 +138,7 @@ struct SelectCategories: View {
                     
                     Spacer()
                 }
-                .padding(.top, 310)
+                .padding(.top, 30)
                 .zIndex(2)
             
                 //Background to dismiss searching
@@ -149,7 +155,7 @@ struct SelectCategories: View {
     }
 }
 
-#Preview {
-    SelectCategories()
-        .environmentObject(PostFirebase())
-}
+//#Preview {
+//    SelectCategories()
+//        .environmentObject(PostFirebase())
+//}
