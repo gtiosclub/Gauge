@@ -80,8 +80,6 @@ struct SelectCategories: View {
                         .cornerRadius(20)
                         .fixedSize()
                     }
-                    
-                    Spacer()
                 }
                 
                 if (!suggestedCategories.isEmpty) {
@@ -110,12 +108,11 @@ struct SelectCategories: View {
                                 .cornerRadius(20)
                                 .fixedSize()
                             }
-                            
-                            Spacer()
                         }
                     }
                 }
                 
+                Spacer()
             }
             
             if isSearching {
@@ -138,7 +135,7 @@ struct SelectCategories: View {
                     
                     Spacer()
                 }
-                .padding(.top, 30)
+                .padding(.top, 50)
                 .zIndex(2)
             
                 //Background to dismiss searching
@@ -151,6 +148,7 @@ struct SelectCategories: View {
                     }
             }
         }
+        .padding(.horizontal, 20)
         .onAppear(perform: getSuggestedCategories)
     }
 }
