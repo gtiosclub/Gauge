@@ -18,7 +18,9 @@ struct SelectCategories: View {
     let responseOptions: [String]
     
     var filteredCategories: [String] {
-        categoryInput.isEmpty ? [] : Category.allCategoryStrings.filter { $0.localizedCaseInsensitiveContains(categoryInput) && !selectedCategories.contains(Category.stringToCategory($0)!)
+        categoryInput.isEmpty ? [] : Category.allCategoryStrings.filter { $0.localizedCaseInsensitiveContains(categoryInput)
+            && !selectedCategories.contains(Category.stringToCategory($0)!)
+            && !suggestedCategories.contains(Category.stringToCategory($0)!)
         }
     }
     
