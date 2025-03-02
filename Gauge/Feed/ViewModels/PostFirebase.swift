@@ -343,6 +343,7 @@ class PostFirebase: ObservableObject {
             "postId" : postId,
             "commentId" : commentId,
             "commentType": String(describing: commentType),
+            "date": DateConverter.convertDateToString(Date()),
             "userId": userId ,
             "content": content,
             "likes" : [],
@@ -355,6 +356,43 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+    
+    func getComments(postId: String, completion: @escaping ([Comment]) -> Void) {
+           var comments: [Comment] = []
+           
+           Firebase.db.collection("POSTS").document(postId).collection("COMMENTS").getDocuments() { snapshot, error in
+               if let error = error {
+                   print("Error getting Comments: \(error)")
+                   completion([])
+                   return
+               } else {
+                   for document in snapshot!.documents {
+                       let data = document.data()
+                       //let commentTypeString = data["commentType"] as? CommentType
+                       let commentTypeString = data["commentType"] as? String ?? ""
+                       
+                       let commentType = CommentType(rawValue: commentTypeString) ?? .text
+                       
+                       let commentObj = Comment (
+                           commentType: commentType,
+                           userId: data["userId"] as? String ?? "",
+                           username:"",
+                           profilePhoto: "",
+                           date: DateConverter.convertStringToDate(data["date"] as? String ?? "") ?? Date(),
+                           commentId: data["commentId"] as? String ??  "",
+                           likes: data["likes"] as? [String] ?? [],
+                           dislikes: data["dislikes"] as? [String] ?? [],
+                           content: data["content"] as? String ?? ""
+                       )
+                       comments.append(commentObj)
+                       
+                       
+                   }
+                   completion(comments)
+               }
+               
+           }
+       }
     
     // Currently only works for Binary & Slider posts
     func getResponses(postId: String, completion: @escaping ([String: Int]) -> Void){

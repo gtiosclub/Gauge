@@ -53,7 +53,7 @@ class UserFirebase: ObservableObject {
                 for document in documents {
                     let documentRef = Firebase.db.collection("POSTS").document(document.documentID)
                     
-                
+                    
                     let subcollections = ["RESPONSES", "COMMENTS", "VIEWS"]
                     
                     //traverse through subcollections
@@ -142,6 +142,24 @@ class UserFirebase: ObservableObject {
         }
     }
     
+    func getUsernameAndPhoto(userId: String, completion: @escaping ([String: String]) -> Void) {
+        var nameAndPhoto = ["username": "", "profilePhoto": ""]
+        
+        Firebase.db.collection("USERS").document(userId).getDocument { document, error in
+            if let error = error {
+                print("Error getting user \(error)")
+                return
+            }
+            
+            if let data = document?.data() {
+                nameAndPhoto["username"] = data["username"] as? String ?? ""
+                nameAndPhoto["profilePhoto"] = data["profilePhoto"] as? String ?? ""
+            }
+            
+            completion(nameAndPhoto)
+        }
+    }
+    
     func getUserFavorites(userId: String) {
         // Create an array to store favorite postId
         var allFavoritePosts: [String] = []
@@ -179,4 +197,48 @@ class UserFirebase: ObservableObject {
         }
         
     }
+
+    //calculate how many views a users post has
+    func getUserNumViews(userId: String, completion: @escaping (Int) -> Void) {
+        var totalViews = 0
+        var pendingRequests = 0
+        
+        //Get all user posts
+        Firebase.db.collection("POSTS")
+            .whereField("userId", isEqualTo: userId) //user specific posts
+            .getDocuments { snapshot, error in
+                if let documents = snapshot?.documents {
+                    if documents.isEmpty {
+                        completion(0)
+                        return
+                    }
+                    
+                    //create this to track how many posts to traverse thru
+                    pendingRequests = documents.count
+                    
+                    for document in documents {
+                        let postId = document.documentID
+                        let documentRef = Firebase.db.collection("POSTS").document(postId)
+                        
+                        // views on each document
+                        documentRef.collection("VIEWS")
+                            .getDocuments { subSnapshot, subError in
+                                if let subDocuments = subSnapshot?.documents {
+                                    totalViews += subDocuments.count
+                                }
+                                
+                                pendingRequests -= 1
+                                
+                                
+                                if pendingRequests == 0 {
+                                    completion(totalViews)
+                                }
+                            }
+                    }
+                } else {
+                    completion(0)
+                }
+            }
+    }
+    
 }
