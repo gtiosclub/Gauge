@@ -12,7 +12,7 @@ struct SelectCategories: View {
     @State var categoryInput: String = ""
     @State var isSearching: Bool = false
     @State var suggestedCategories: [Category] = []
-    @State var selectedCategories: [Category] = []
+    @Binding var selectedCategories: [Category]
     
     let question: String
     let responseOptions: [String]
@@ -98,7 +98,9 @@ struct SelectCategories: View {
                             ForEach(suggestedCategories, id: \.self) { category in
                                 Button(category.rawValue) {
                                     withAnimation {
-                                        selectedCategories.append(category)
+                                        if (!selectedCategories.contains(category)) {
+                                            selectedCategories.append(category)
+                                        }
                                         suggestedCategories = suggestedCategories.filter { $0 != category }
                                     }
                                 }
@@ -122,7 +124,9 @@ struct SelectCategories: View {
                     List(filteredCategories, id: \.self) { category in
                         Button(category) {
                             withAnimation {
-                                selectedCategories.append(Category.stringToCategory(category)!)
+                                if (!selectedCategories.contains(Category.stringToCategory(category)!)) {
+                                    selectedCategories.append(Category.stringToCategory(category)!)
+                                }
                                 isSearching = false
                             }
                         }
