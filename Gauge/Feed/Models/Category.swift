@@ -5,7 +5,7 @@
 //  Created by Austin Huguenard on 2/17/25.
 //
 
-enum Category {
+enum Category: Hashable {
     case sports(Sports)
     case entertainment(Entertainment)
     case educational(Educational)
