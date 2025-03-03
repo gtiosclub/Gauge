@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var userVM: UserFirebase
-    @EnvironmentObject var postVm: PostFirebase
+    @EnvironmentObject var postVM: PostFirebase
     @State var showComments: Bool = false
     @State var selectedCategories: [Category] = []
     
@@ -32,6 +32,10 @@ struct HomeView: View {
                         question: "Which channel is better?",
                         responseOptions: ["National Geographic", "Animal Planet"]
                     )
+                }
+                
+                NavigationLink("Feed View") {
+                    FeedView()
                 }
             }
             .sheet(isPresented: $showComments) {
