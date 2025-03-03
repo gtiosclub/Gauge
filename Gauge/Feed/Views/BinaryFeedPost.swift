@@ -12,97 +12,179 @@ struct BinaryFeedPost: View {
     @EnvironmentObject var userVM: UserFirebase
     
     let post: BinaryPost
+    let index: Int
+    @Binding var dragAmount: CGSize
+    @Binding var optionSelected: Int
     
     var body: some View {
         VStack(alignment: .leading) {
-            
-            //ProfilePhoto + username + days since posted
-            HStack{
-                profileImage
-                Text(post.userId)
-                    .bold()
-                    .font(.system(size: 16))
-                    .padding(.leading, 10)
-                
-                Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
-                    .font(.system(size: 13))
-                    .padding(.leading, 5)
-            }
-            
-            
-            //Category Boxes
-            ScrollView(.horizontal) {
-                HStack {
-                    let categories: [Category] = post.categories
+            if index == 0 {
+                HStack{
+                    profileImage
+                    Text(post.userId)
+                        .bold()
+                        .font(.system(size: 16))
+                        .padding(.leading, 10)
                     
-                    ForEach(categories, id: \.self) { category in
-                        Text(category.rawValue)
-                            .padding(.leading, 10)
-                            .padding(.trailing, 10)
-                            .font(.system(size: 14))
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color.gray)
-                                    .opacity(0.2)
-                                    .frame(height: 32)
-                            )
-                            .padding(.top, 10)
-                            .frame(minWidth: 40)
-                            .fixedSize(horizontal: true, vertical: false)
+                    Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
+                        .font(.system(size: 13))
+                        .padding(.leading, 5)
+                }
+                
+                
+                //Category Boxes
+                ScrollView(.horizontal) {
+                    HStack {
+                        let categories: [Category] = post.categories
+                        
+                        ForEach(categories, id: \.self) { category in
+                            Text(category.rawValue)
+                                .padding(.leading, 10)
+                                .padding(.trailing, 10)
+                                .font(.system(size: 14))
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(Color.gray)
+                                        .opacity(0.2)
+                                        .frame(height: 32)
+                                )
+                                .padding(.top, 10)
+                                .frame(minWidth: 40)
+                                .fixedSize(horizontal: true, vertical: false)
+                        }
+                        
+                        Spacer()
                     }
+                    .padding(.bottom, 10)
+                }
+                .padding(.leading, 0)
+                
+                VStack {
+                    Text(post.question)
+                        .padding(.top, 15)
+                        .bold()
+                        .font(.system(size: 35))
                     
                     Spacer()
+                    
+                    ZStack {
+                        HStack {
+                            Text(post.responseOption1)
+                                .foregroundColor(.gray)
+                                .font(.system(size: optionSelected == 1 ? 50 : 30))
+                                .font(optionSelected == 1 ? .title : .title2)
+                                .opacity(dragAmount.width < 0.0 ? (1.0 - (dragAmount.width / 150.0).magnitude) : 1.0)
+                            
+                            
+                            Spacer()
+                            
+                            Image(systemName: "arrow.left.and.right")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 50, height: 50)
+                                .foregroundColor(.gray)
+                                .opacity(1.0 - (dragAmount.width / 100.0).magnitude)
+                            
+                            Spacer()
+                            
+                            Text(post.responseOption2)
+                                .foregroundColor(.gray)
+                                .font(.system(size: optionSelected == 2 ? 50 : 30))
+                                .font(optionSelected == 2 ? .title : .title2)
+                                .opacity(dragAmount.width > 0.0 ? (1.0 - dragAmount.width / 100.0) : 1.0)
+                        }
+                        .padding(.horizontal)
+                        .opacity(0.5)
+                        
+                        
+                        HStack {
+                            Spacer()
+                            
+                            if dragAmount.width < 0.0 {
+                                HStack {
+                                    Text(post.responseOption1)
+                                        .font(.system(size: 30))
+                                    
+                                    Image(systemName: "arrow.left")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50, height: 50)
+                                }
+                                .opacity((dragAmount.width / 100.0).magnitude)
+                                .foregroundStyle(.red)
+                            }
+                            
+                            Spacer(minLength: 20.0)
+                            
+                            if dragAmount.width > 0.0 {
+                                HStack {
+                                    Image(systemName: "arrow.right")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50, height: 50)
+                                    
+                                    Text(post.responseOption2)
+                                        .font(.system(size: 30))
+                                }
+                                .opacity(dragAmount.width / 100.0)
+                                .foregroundStyle(.green)
+                            }
+                            
+                            Spacer()
+                        }
+                    }
                 }
-                .padding(.bottom, 10)
-            }
-            .padding(.leading, 0)
-            
-            //Post Question
-            Text(post.question)
-                .padding(.top, 15)
-                .bold()
-                .font(.system(size: 35))
-            
-            // Response Option 1 & 2 with horizontal arrow in between
-            HStack {
-                Button(post.responseOption1){
-                    post.responseResult1 += 1
+                .background(
+                    dragAmount.width < 0.0 ? (
+                        Ellipse()
+                            .fill(
+                                RadialGradient(
+                                    gradient: Gradient(colors: [.red.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .white]),
+                                    center: .center,
+                                    startRadius: 10,
+                                    endRadius: 400
+                                )
+                            )
+                            .frame(width: 600, height: 800)
+                            .offset(x: -200, y: 200)
+                    ) : (
+                        Ellipse()
+                            .fill(
+                                RadialGradient(
+                                    gradient: Gradient(colors: [.green.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .white]),
+                                    center: .center,
+                                    startRadius: 10,
+                                    endRadius: 400
+                                )
+                            )
+                            .frame(width: 600, height: 800)
+                            .offset(x: 200, y: 200)
+                    )
+                )
+                
+                Spacer(minLength: 20.0)
+                
+                if optionSelected != 0 {
+                    HStack {
+                        Spacer()
+                        
+                        Image(systemName: "arrow.up")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 50, alignment: .center)
+                            .foregroundColor(.gray)
+                            .opacity(0.5)
+                        
+                        Spacer()
+                    }
                 }
-                .foregroundColor(.gray)
-                .font(.system(size: 30))
-//                .frame(minWidth: 120, alignment: .center)
-
                 
-                Spacer()
-                
-                Image(systemName: "arrow.left.and.right")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 50)
+                Text("\(post.responseResult1 + post.responseResult2) votes")
                     .foregroundColor(.gray)
-                
-                Spacer()
-                
-                Button(post.responseOption2){
-                    post.responseResult2 = post.responseResult2 + 1
-                }
-                .foregroundColor(.gray)
-                .font(.system(size: 30))
-//                    .frame(minWidth: 120, alignment: .center)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
             }
-            .padding(.top, 150)
-            .padding(.horizontal)
-            
-            Spacer()
-            
-            Text("\(post.responseResult1 + post.responseResult2) votes")
-                .foregroundColor(.gray)
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
         }
-        .padding(.top, 0)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(.horizontal)
     }
     
     var profileImage: some View {
@@ -135,9 +217,10 @@ struct BinaryFeedPost: View {
             }
     }
 }
-//
+
+
 #Preview {
-    BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "good", responseOption2: "bad")
+    BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), index: 0, dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0)
     )
 }
 
