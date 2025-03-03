@@ -37,6 +37,11 @@ class User: Equatable, Identifiable {
     var myAccessedProfiles: [String] = [] // UserIDs of other users, sorted by profile accesses
     // MARK: AI Algorithm Variables
     
+    // MARK: STATS
+    var numUserResponses: Int = 0
+    var numUserViews: Int = 0
+    // MARK: STATS
+    
     init(userId: String, username: String, email: String) {
         self.userId = userId
         self.username = username

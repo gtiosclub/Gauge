@@ -15,6 +15,10 @@ struct CommentsView: View {
             LazyVStack {
                 ForEach(comments, id: \.self) { comment in
                     CommentView(comment: comment)
+                        .transaction { transaction in
+                            transaction.animation = .easeInOut
+                        }
+                        
                 }
             }
         }
@@ -31,7 +35,7 @@ struct CommentsView: View {
                 commentId: "",
                 likes: [],
                 dislikes: [],
-                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
+                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communityee. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
             ),
             Comment(
                 commentType: .text,
@@ -40,7 +44,7 @@ struct CommentsView: View {
                 commentId: "",
                 likes: [],
                 dislikes: [],
-                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
+                content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communitwwy. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
             )
         ]
     )
