@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct TakeMatchView: View {
+    @ObservedObject var mcManager: MCManager
     @State private var currentScreen: Int = 1
     @State private var question: String = "What's the most overrated food?"
     @State private var responses: [String: String] = [:]
@@ -19,13 +20,12 @@ struct TakeMatchView: View {
         VStack {
             switch currentScreen {
             case 1:
-                QuestionView(question: question, inputText: $inputText) {
+                QuestionView(mcManager: mcManager, question: question, inputText: $inputText) {
                     responses[players[responses.count]] = inputText
                     inputText = ""
                     if responses.count == players.count {
                         currentScreen = 2
                     }
-                    return responses
                 }
             case 2:
                 MatchingView(responses: Array(responses.values), playerPictures: players, guessedMatches: $guessedMatches) {
@@ -36,6 +36,7 @@ struct TakeMatchView: View {
                     responses = [:]
                     guessedMatches = [:]
                     currentScreen = 1
+                    return true
                 }
             default:
                 Text("Invalid screen")
@@ -47,5 +48,5 @@ struct TakeMatchView: View {
 }
 
 #Preview {
-    TakeMatchView()
+    TakeMatchView(mcManager: MCManager(yourName: "test"))
 }

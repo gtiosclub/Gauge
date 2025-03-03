@@ -10,7 +10,8 @@ import SwiftUI
 struct ResultsView: View {
     var responses: [String: String]
     var guessedMatches: [String: String]
-    var onRestart: () -> Void
+    var onRestart: () -> Bool
+    @State var navigateToHome = false
     
     var body: some View {
         VStack {
@@ -22,12 +23,18 @@ struct ResultsView: View {
                     Text(guessedMatches[responses[player] ?? ""] == player ? "✅" : "❌")
                 }
             }
-            Button("Again?", action: onRestart)
+            Button(action: {navigateToHome = onRestart()}) {
+                Text("Again?")
+            }
+        }
+        .navigationBarBackButtonHidden()
+        .navigationDestination(isPresented: $navigateToHome) {
+            TakeMatchHome()
         }
     }
 }
 
 
 #Preview {
-    ResultsView(responses: ["Player": "Answer"], guessedMatches: ["Answer": "Player"], onRestart: { })
+    ResultsView(responses: ["Player": "Answer"], guessedMatches: ["Answer": "Player"], onRestart: { return false })
 }

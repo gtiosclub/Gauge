@@ -41,34 +41,37 @@ struct MatchingView: View {
                 }.padding(.horizontal)
             }
             Spacer()
-            ForEach(playerPictures, id: \.self) { imageName in
-                Image("TestProfile")
-                    .resizable()
-                    .frame(width: 80, height: 80)
-                    .clipShape(Circle())
-                    .shadow(radius: 1.5, x: 1.5, y: 1.5)
-                    .foregroundColor(.yellow)
-                    .scaleEffect(isDragging ? 1.2 : 1.0)
-                    .opacity(isDragging ? 0.8 : 1.0)
-                    .offset(x: lastPosition.width + dragOffset.width,
-                            y: lastPosition.height + dragOffset.height)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    dragOffset = value.translation
-                                    isDragging = true
+            
+            HStack {
+                ForEach(playerPictures, id: \.self) { imageName in
+                    Image("TestProfile")
+                        .resizable()
+                        .frame(width: 80, height: 80)
+                        .clipShape(Circle())
+                        .shadow(radius: 1.5, x: 1.5, y: 1.5)
+                        .foregroundColor(.yellow)
+                        .scaleEffect(isDragging ? 1.2 : 1.0)
+                        .opacity(isDragging ? 0.8 : 1.0)
+                        .offset(x: lastPosition.width + dragOffset.width,
+                                y: lastPosition.height + dragOffset.height)
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        dragOffset = value.translation
+                                        isDragging = true
+                                    }
                                 }
-                            }
-                            .onEnded { value in
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    lastPosition.width += dragOffset.width
-                                    lastPosition.height += dragOffset.height
-                                    dragOffset = .zero
-                                    isDragging = false
+                                .onEnded { value in
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        lastPosition.width += dragOffset.width
+                                        lastPosition.height += dragOffset.height
+                                        dragOffset = .zero
+                                        isDragging = false
+                                    }
                                 }
-                            }
-                    )
+                        )
+                }
             }
         }
     }

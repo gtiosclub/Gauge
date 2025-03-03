@@ -12,7 +12,6 @@ struct TakeMatchRoomView: View {
     @State var showSettings: Bool = false
     @StateObject private var gameSettings = TakeMatchSettingsVM()
     @State var isHost: Bool
-    @State var startGame = false
     var roomCode: String
     var onExit: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -23,7 +22,6 @@ struct TakeMatchRoomView: View {
         NavigationStack {
             VStack(spacing: 20) {
                 Spacer()
-                
                 // Display the room code
                 Text(isHost ? "Hosting Room: \(roomCode)" : "Joined Room: \(roomCode)")
                     .font(.title)
@@ -32,8 +30,8 @@ struct TakeMatchRoomView: View {
                 if isHost {
                     
                     Button("Start") {
-                        
-                        startGame = true
+                        mcManager.broadcastStartGame()
+                        mcManager.gameStarted = true
                     }
                     .padding()
                     .frame(width: 80, height: 30)
@@ -102,21 +100,14 @@ struct TakeMatchRoomView: View {
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
-            .onDisappear {
-                if !isHost {
-                    mcManager.session.disconnect()
-                }
-                mcManager.isAvailableToPlay = false
-                mcManager.stopBrowsing()
-            }
-            .navigationDestination(isPresented: $startGame) {
+            .navigationDestination(isPresented: $mcManager.gameStarted) {
                 QuestionView(
+                    mcManager: mcManager,
                     question: "What is your favorite color?",
                     inputText: $answerText,
                     onSubmit: {
                         mcManager.submitAnswer(answerText)
                         answerText = ""
-                        return Dictionary(uniqueKeysWithValues: mcManager.takeMatchAnswers.map { ($0.sender, $0.text) })
                     }
                 )
             }

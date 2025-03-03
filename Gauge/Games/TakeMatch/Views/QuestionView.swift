@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct QuestionView: View {
+    @ObservedObject var mcManager: MCManager
     var question: String
     @Binding var inputText: String
-    var onSubmit: () -> [String:String]
+    var onSubmit: () -> Void
     @State var submitAnswer = false
-    @State var responses: [String:String] = [:]
     @Environment(\.dismiss) private var dismiss
+
     
     @FocusState private var isTextFieldFocused: Bool
 
@@ -31,7 +32,7 @@ struct QuestionView: View {
                 .focused($isTextFieldFocused)
             Button(action: {
                 isTextFieldFocused = false
-                responses = onSubmit()
+                onSubmit()
                 submitAnswer = true
                 
             }) {
@@ -54,33 +55,30 @@ struct QuestionView: View {
         .navigationTitle(Text("Take Match"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.4)) {
-                        dismiss()
-                    }
-                }) {
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(.black)
-                }
-            }
-        }
         .navigationDestination(isPresented: $submitAnswer) {
-            ResultsView(
-                responses: responses,
-                guessedMatches: [:],
-                onRestart: {
-                    
-                }
-            )
+            
+            let responses = Dictionary(uniqueKeysWithValues: mcManager.takeMatchAnswers.map { ($0.sender, $0.text) })
+            if (mcManager.connectedPeers.count + 1 <= responses.count) {
+                ResultsView(
+                    responses: responses,
+                    guessedMatches: [:],
+                    onRestart: {
+                        return true
+                    }
+                )
+            } else {
+                
+                WaitingView(mcManager: mcManager, expectedCount: mcManager.connectedPeers.count)
+            }
+            
         }
+        .navigationBarBackButtonHidden()
         
     }
 }
 
 #Preview {
-    QuestionView(question: "Q: Some question about this person's preferences", inputText: .constant(""), onSubmit: {return [:] })
+    QuestionView(mcManager: MCManager(yourName: "test"), question: "Q: Some question about this person's preferences", inputText: .constant(""), onSubmit: { })
 }
 
 struct InfoField: View {

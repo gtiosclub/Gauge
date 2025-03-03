@@ -72,7 +72,7 @@ struct TakeMatchHome: View {
             .navigationDestination(isPresented: $navigateToRoom) {
                 TakeMatchRoomView(mcManager: mcManager, isHost: isHost, roomCode: roomCode, onExit: resetHomeState)
             }
-            
+            .navigationBarBackButtonHidden()
         }
     }
     

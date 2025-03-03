@@ -20,6 +20,7 @@ class MCManager: NSObject, ObservableObject {
     @Published var invitationHandler: ((Bool, MCSession?) -> Void)?
     @Published var paired: Bool = false
     @Published var takeMatchAnswers: [Answer] = []
+    @Published var gameStarted: Bool = false
     
     var isAvailableToPlay: Bool = false {
         didSet {
@@ -80,6 +81,19 @@ class MCManager: NSObject, ObservableObject {
         discoveredPeers.removeAll()
     }
     
+//    func restartHost() {
+//        
+//        connectedPeers = []
+//        discoveredPeers = [:]
+//        receivedInvite = false
+//        paired = false
+//        takeMatchAnswers = []
+//        gameStarted = false
+//        
+//        stopBrowsing()
+//        stopAdvertising()
+//    }
+    
     func startHosting(with roomCode: String) {
         stopAdvertising()
         nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: ["roomCode": roomCode], serviceType: serviceType)
@@ -106,6 +120,29 @@ class MCManager: NSObject, ObservableObject {
                 try session.send(data, toPeers: session.connectedPeers, with: .reliable)
             } catch {
                 print("Error sending answer: \(error)")
+            }
+        }
+    }
+    
+    func broadcastStartGame() {
+        let message = "startGame"
+        if let data = message.data(using: .utf8) {
+            do {
+                try session.send(data, toPeers: session.connectedPeers, with: .reliable)
+            } catch {
+                print("Error sending start game message: \(error)")
+            }
+        }
+    }
+    
+    func broadcastGoToResults() {
+        
+        let message="goToResults"
+        if let data = message.data(using: .utf8) {
+            do {
+                try session.send(data, toPeers: session.connectedPeers, with: .reliable)
+            } catch {
+                print("Error sending go to results message: \(error)")
             }
         }
     }
@@ -180,13 +217,24 @@ extension MCManager: MCSessionDelegate {
     }
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        do {
-            let answer = try JSONDecoder().decode(Answer.self, from: data)
-            DispatchQueue.main.async {
-                self.takeMatchAnswers.append(answer)
+        // Try to interpret the data as a string
+        if let message = String(data: data, encoding: .utf8) {
+            if message == "startGame" {
+                // When a joiner receives the start signal, update gameStarted.
+                DispatchQueue.main.async {
+                    self.gameStarted = true
+                }
+            } else {
+                // Handle other messages (like answers) here.
+                do {
+                    let answer = try JSONDecoder().decode(Answer.self, from: data)
+                    DispatchQueue.main.async {
+                        self.takeMatchAnswers.append(answer)
+                    }
+                } catch {
+                    print("Error decoding answer: \(error)")
+                }
             }
-        } catch {
-            print("Error decoding answer: \(error)")
         }
     }
     
