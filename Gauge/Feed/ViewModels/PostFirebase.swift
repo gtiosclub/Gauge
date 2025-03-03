@@ -18,6 +18,12 @@ class PostFirebase: ObservableObject {
         Keys.fetchKeys()
     }
     
+    func addDummyPosts() {
+        feedPosts.append(BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "good", responseOption2: "bad"))
+        
+        feedPosts.append(BinaryPost(postId: "834729384", userId: "myman", categories: [.lifestyle(.homeDecor), .other(.funny)], postDateAndTime: Date(), question: "Is it gross to have carpet in your bedroom", responseOption1: "TF no", responseOption2: "Yeah..."))
+    }
+    
     func getLiveFeedPosts(user: User) {
         let allPosts: [String] = user.myViews + user.myResponses
         Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in

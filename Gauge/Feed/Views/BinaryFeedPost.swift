@@ -14,7 +14,7 @@ struct BinaryFeedPost: View {
     let post: BinaryPost
     
     var body: some View {
-        VStack(alignment: .leading){
+        VStack(alignment: .leading) {
             
             //ProfilePhoto + username + days since posted
             HStack{
@@ -22,32 +22,40 @@ struct BinaryFeedPost: View {
                 Text(post.userId)
                     .bold()
                     .font(.system(size: 16))
-                Text("\(post.postDateAndTime)") //Fix this after date converter has been implemented
+                    .padding(.leading, 10)
+                
+                Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
                     .font(.system(size: 13))
                     .padding(.leading, 5)
             }
             
             
             //Category Boxes
-            HStack(spacing: 10){
-                let  categories: [Category] = post.categories
-                ForEach(categories, id: \.self) { category in
-                    Text(category.rawValue)
-                        .padding(.leading, 10)
-                        .padding(.trailing, 10)
-                        .font(.system(size: 14))
-                        .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.blue)
-                            .frame(height: 32)
-                        )
+            ScrollView(.horizontal) {
+                HStack {
+                    let categories: [Category] = post.categories
+                    
+                    ForEach(categories, id: \.self) { category in
+                        Text(category.rawValue)
+                            .padding(.leading, 10)
+                            .padding(.trailing, 10)
+                            .font(.system(size: 14))
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.gray)
+                                    .opacity(0.2)
+                                    .frame(height: 32)
+                            )
                             .padding(.top, 10)
                             .frame(minWidth: 40)
                             .fixedSize(horizontal: true, vertical: false)
+                    }
+                    
+                    Spacer()
                 }
-                Spacer()
+                .padding(.bottom, 10)
             }
-                .padding(.leading, 10)
+            .padding(.leading, 0)
             
             //Post Question
             Text(post.question)
@@ -56,17 +64,17 @@ struct BinaryFeedPost: View {
                 .font(.system(size: 35))
             
             // Response Option 1 & 2 with horizontal arrow in between
-            HStack(){
-                Spacer()
+            HStack {
                 Button(post.responseOption1){
                     post.responseResult1 += 1
                 }
-                    .foregroundColor(.gray)
-                    .font(.system(size: 30))
-                    .frame(minWidth: 120, alignment: .center)
+                .foregroundColor(.gray)
+                .font(.system(size: 30))
+//                .frame(minWidth: 120, alignment: .center)
 
                 
                 Spacer()
+                
                 Image(systemName: "arrow.left.and.right")
                     .resizable()
                     .scaledToFit()
@@ -74,49 +82,42 @@ struct BinaryFeedPost: View {
                     .foregroundColor(.gray)
                 
                 Spacer()
+                
                 Button(post.responseOption2){
                     post.responseResult2 = post.responseResult2 + 1
                 }
-                    .foregroundColor(.gray)
-                    .font(.system(size: 30))
-                    .frame(minWidth: 120, alignment: .center)
-                
-                Spacer()
-                
-                    
+                .foregroundColor(.gray)
+                .font(.system(size: 30))
+//                    .frame(minWidth: 120, alignment: .center)
             }
-                .padding(.top, 150)
+            .padding(.top, 150)
+            .padding(.horizontal)
             
             Spacer()
+            
             Text("\(post.responseResult1 + post.responseResult2) votes")
-                        .foregroundColor(.gray)
-                        .scaledToFit()
-                        .frame(maxWidth: .infinity)
+                .foregroundColor(.gray)
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
         }
         .padding(.top, 0)
-        .padding(.leading, 20)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        
-        
-        
+        .padding(.horizontal)
     }
     
-    
-    
-    
-    
-    var profileImage: some View{
+    var profileImage: some View {
         if post.profilePhoto == "" {
             AnyView(Image(systemName: "person")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 20, height: 20)
+                .frame(width: 18, height: 18)
                 .background(Circle()
                     .fill(Color.gray)
                     .frame(width:28, height: 28)
+                    .opacity(0.6)
                    )
                 )
-        } else{
+        } else {
             AnyView(AsyncImage(url: URL(string: post.profilePhoto)) { image in
                 image.resizable()
                     .scaledToFill()
@@ -137,7 +138,6 @@ struct BinaryFeedPost: View {
 //
 #Preview {
     BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "good", responseOption2: "bad")
-        
     )
 }
 
