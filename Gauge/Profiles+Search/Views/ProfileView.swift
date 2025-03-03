@@ -53,6 +53,138 @@ struct ProfileView: View {
                     BadgesView(onBadgeTap: { badge in
                         selectedBadge = badge
                     })
+                } else if selectedTab == "Statistics" {
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Title
+                        Text("Username Statistics")
+                            .font(.system(size:20))
+                            .fontWeight(.bold)
+                            .padding(.vertical, 20)
+                            .padding(.horizontal)
+                            .frame(maxWidth: .infinity, alignment: .center)
+
+                        
+                        // Statistics list
+                        VStack(spacing: 0) {
+                            // Total Votes Made
+                            HStack {
+                                Text("Total Votes Made")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("50 Votes")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                            
+                            Divider().padding(.horizontal)
+                            
+                            // Total Takes Made
+                            HStack {
+                                Text("Total Takes Made")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("50 Takes")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                            
+                            Divider().padding(.horizontal)
+                            
+                            // Total Votes Collected
+                            HStack {
+                                Text("Total Votes Collected")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("50 Votes")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                            
+                            Divider().padding(.horizontal)
+                            
+                            // Total Comments Made
+                            HStack {
+                                Text("Total Comments Made")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("20 Comments")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                            
+                            Divider().padding(.horizontal)
+                            
+                            // Ratio View/Response
+                            HStack {
+                                Text("Ratio View/Response")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("20 Comments")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                        }
+                        
+                        Spacer()
+                    }
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .padding([.horizontal, .bottom])
                 } else {
                     VStack {
                         Text("\(selectedTab) Content Here")
