@@ -111,7 +111,7 @@ struct FirebaseTesting: View {
                         }
                     }
                     
-                    Section("Read Data") {
+                    Section(header: Text("Read Data")) {
                         Button("Get posts by userId") {
                             userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
                                 self.postIds = postIds
@@ -139,6 +139,21 @@ struct FirebaseTesting: View {
                                 print(object)
                             }
                         }
+                        
+                        Button("Get number of responses for a list of posts") {
+                            Task {
+                                if let count = await postVM.getUserNumResponses(postIds: [
+                                    "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                                    "examplePost"
+                                ]) {
+                                    print("Number of responses: \(count)")
+                                } else {
+                                    print("Failed to get number of responses")
+                                }
+                            }
+                        }
+
+
                     }
                     
                     Section("Update Data") {
