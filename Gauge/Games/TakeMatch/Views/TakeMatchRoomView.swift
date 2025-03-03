@@ -12,8 +12,12 @@ struct TakeMatchRoomView: View {
     @State var showSettings: Bool = false
     @StateObject private var gameSettings = TakeMatchSettingsVM()
     @State var isHost: Bool
+
+    @State var categories = ["Sports", "Food", "Music", "Pop Culture", "TV Shows", "Movies/Film", "Celebrities"]
+
     var roomCode: String
     var onExit: () -> Void
+  
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -93,7 +97,7 @@ struct TakeMatchRoomView: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            GameSettingsView(gameSettings: gameSettings)
+            GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings, categories: $categories)
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
         }
@@ -117,28 +121,86 @@ struct TakeMatchRoomView: View {
 struct GameSettingsView: View {
     
     @StateObject var gameSettings = TakeMatchSettingsVM()
+    @Binding var showSettings: Bool
+    @Binding var categories: [String]
     
     var body: some View {
         
         VStack() {
-            
-            Text("Customize Game")
-                .font(.headline)
+            Text("Game Settings")
+                .font(.title)
+                .bold()
                 .padding()
             
             Form {
-                
-                Section {
-                    
-                    Picker("Rounds", selection: $gameSettings.numRounds) {
+                HStack() {
+                    Text("# of Rounds").font(.headline)
+                    Section {
                         
-                        ForEach(1...5, id: \.self) { round in
-                            Text("\(round)").tag(round)
+                        Picker("", selection: $gameSettings.numRounds) {
+                            
+                            ForEach(1...5, id: \.self) { round in
+                                Text("\(round)").tag(round)
+                            }
+                        }
+                        
+                    }
+                    .listRowBackground(Color(.systemGray4))
+                }
+                HStack() {
+                    Text("Round Length").font(.headline)
+                    Section {
+                        
+                        Picker("", selection: $gameSettings.roundLen) {
+                            
+                            ForEach([15,30,45,60], id: \.self) { length in
+                                Text("\(length)s").tag(length)
+                            }
+                        }
+                        
+                    }
+                    .listRowBackground(Color(.systemGray4))
+                }
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Categories")
+                        .font(.headline)
+                    
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                        ForEach(categories, id: \.self) { category in
+                            Button(action: {
+                                // Handle category selection
+                            }) {
+                                Text(category)
+                                    .font(.body)
+                                    .foregroundColor(.black)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.white)
+                                    .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.black, lineWidth: 1))
+                            }
                         }
                     }
-                    
                 }
-                .listRowBackground(Color(.systemGray4))
+                .padding(.horizontal)
+                
+                Text("Looking good?")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                
+                Button(action: {
+                    // Handle done action
+                    showSettings = false
+                }) {
+                    Text("DONE")
+                        .font(.headline)
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(.systemGray3))
+                        .cornerRadius(8)
+                        .foregroundColor(.black)
+                }
+               
             }
             .scrollContentBackground(.hidden)
             .background(.white)
@@ -149,7 +211,5 @@ struct GameSettingsView: View {
     }
 }
 
-#Preview {
-    GameSettingsView()
-}
+
 

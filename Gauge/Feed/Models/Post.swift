@@ -12,15 +12,12 @@ protocol Post {
     var userId: String {get set}
     var comments: [Comment] {get set}
     var responses: [Response] {get set}
-    var category: Category {get set} // String in Firebase
+    var categories: [Category] {get set} // String in Firebase
     var viewCounter: Int {get set}
     var responseCounter: Int {get set}
     var postDateAndTime: Date {get set} // String in Firebase
     var favoritedBy: [String] {get set} // UserIds of users that have favorited
-}
-
-enum Category: String {
-    case food, fashion, travel, sports, entertainment, tech, arts, other
+    var question: String {get set}
 }
 
 enum PostType: String {
