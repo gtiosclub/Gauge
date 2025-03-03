@@ -143,10 +143,11 @@ class PostFirebase: ObservableObject {
       
         commentRef.updateData([
             "likes": FieldValue.arrayUnion([userId])
-        ]){
-            error in
-            if var error = error {
+        ]) { error in
+            if let error = error {
                 print("error in liking comment: \(error.localizedDescription)")
+            } else {
+                print("Successfully liked the comment.")
             }
         }
     }
@@ -513,6 +514,131 @@ class PostFirebase: ObservableObject {
             } else {
                 print("Added view to post \(postId).")
             }
+        }
+    }
+    
+    func removeView(postId: String, userId: String) {
+        let viewRef = Firebase.db.collection("POSTS")
+            .document(postId)
+            .collection("VIEWS")
+            .document(userId)
+        
+        viewRef.delete() { error in
+            if let error = error {
+                print("Error removing view to post: \(error)")
+            } else {
+                print("Removed view to post \(postId)")
+            }
+        }
+    }
+    
+    func generatePostKeywords(postId: String) {
+        let db = Firestore.firestore()
+        let postRef = db.collection("POSTS").document(postId)
+        
+        postRef.getDocument { (document, error) in
+            if let error = error {
+                print("Error fetching post: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let document = document, document.exists,
+                  let question = document.data()?["question"] as? String,
+                  let category = document.data()?["category"] as? String,
+                  let responseOptions = document.data()?["responseOptions"] as? [String] else {
+                print("Invalid post data")
+                return
+            }
+            
+            let responseText = responseOptions.joined(separator: ", ")
+            
+            let examplePrompt = """
+                    Here are some examples of generating keywords for different posts:
+                    Input:
+                    Question: "Did the Chiefs deserve to be in the game?"
+                    Category: "NFL"
+                    Response Options: "Nah they were trash", "Absolutely, no one else was better"
+                    Output:
+                    ["Football", "Chiefs", "Eagles", "NFL", "Super", "Bowl", "Game", "Playoffs", "Sports", "Referees", "Team", "Coach", "Defense", "Offense", "Quarterback", "Kansas", "Missouri", "Fans", "Stadium", "Victory"]
+                    Input:
+                    Question: "Is AI going to replace software engineers?"
+                    Category: "Technology"
+                    Response Options: "No, but it will change how they work", "Yes, it's inevitable"
+                    Output:
+                    ["AI", "Artificial Intelligence", "Machine Learning", "Software Engineers", "Programming", "Automation", "Jobs", "Future", "Tech", "Code", "Development", "GPT", "Deep Learning", "Innovation", "Industry", "Algorithms", "Computers", "Workforce", "Engineering", "Career"]
+                    Now, generate 20 keywords based on the following input:
+                    Question: "\(question)"
+                    Category: "\(category)"
+                    Response Options: "\(responseText)"
+                    Output:
+                    """
+            
+            let openAIRequest: [String: Any] = [
+                "model": "gpt-4o-mini",
+                "messages": [
+                    ["role": "system", "content": "You are an AI trained to extract the 20 most relevant keywords from a post based on its question, category, and response options. Respond ONLY with a JSON list of keywords."],
+                    ["role": "user", "content": examplePrompt]
+                ],
+                "temperature": 0.7
+            ]
+            
+            guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("Bearer \(Keys.openAIKey)", forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: openAIRequest, options: [])
+            } catch {
+                print("Failed to encode request")
+                return
+            }
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Error calling OpenAI API: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else {
+                    print("No data received")
+                    return
+                }
+                
+                do {
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                       let choices = jsonResponse["choices"] as? [[String: Any]],
+                       let text = choices.first?["message"] as? [String: Any],
+                       let content = text["content"] as? String {
+                        
+                        // Try to parse the content as JSON list
+                        let keywordsData = content.data(using: .utf8)
+                        if let keywords = try JSONSerialization.jsonObject(with: keywordsData!, options: []) as? [String] {
+                            
+                            // Store the keywords back in Firestore
+                            postRef.updateData(["keyword": keywords]) { error in
+                                if let error = error {
+                                    print("Error updating Firestore: \(error.localizedDescription)")
+                                } else {
+                                    print("Keywords successfully updated for post \(postId)")
+                                }
+                            }
+                        } else {
+                            print("Failed to parse OpenAI response")
+                        }
+                    } else {
+                        print("Unexpected response format from OpenAI")
+                    }
+                } catch {
+                    print("Error parsing JSON: \(error.localizedDescription)")
+                }
+            }
+            
+            task.resume()
         }
     }
 }
