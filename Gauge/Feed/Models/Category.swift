@@ -5,7 +5,7 @@
 //  Created by Austin Huguenard on 2/17/25.
 //
 
-enum Category {
+enum Category: Hashable {
     case sports(Sports)
     case entertainment(Entertainment)
     case educational(Educational)
@@ -216,6 +216,30 @@ enum Category {
         }
         
         return categories
+    }
+    
+    static func stringToCategory(_ string: String) -> Category? {
+        var category : Category?
+        
+        if let sportsCategory = Category.Sports(rawValue: string) {
+            category = .sports(sportsCategory)
+        } else if let entertainmentCategory = Category.Entertainment(rawValue: string) {
+            category = .entertainment(entertainmentCategory)
+        } else if let educationalCategory = Category.Educational(rawValue: string) {
+            category = .educational(educationalCategory)
+        } else if let newsCategory = Category.News(rawValue: string) {
+            category = .news(newsCategory)
+        } else if let lifestyleCategory = Category.Lifestyle(rawValue: string) {
+            category = .lifestyle(lifestyleCategory)
+        } else if let artsCategory = Category.Arts(rawValue: string) {
+            category = .arts(artsCategory)
+        } else if let relationshipsCategory = Category.Relationships(rawValue: string) {
+            category = .relationships(relationshipsCategory)
+        } else if let otherCategory = Category.Other(rawValue: string) {
+            category = .other(otherCategory)
+        }
+        
+        return category
     }
     
     var rawValue: String {

@@ -9,7 +9,9 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var userVM: UserFirebase
+    @EnvironmentObject var postVm: PostFirebase
     @State var showComments: Bool = false
+    @State var selectedCategories: [Category] = []
     
     var body: some View {
         NavigationStack {
@@ -24,6 +26,13 @@ struct HomeView: View {
                     showComments = true
                 }
                 
+                NavigationLink("Select Categories Screen") {
+                    SelectCategories(
+                        selectedCategories: $selectedCategories,
+                        question: "Which channel is better?",
+                        responseOptions: ["National Geographic", "Animal Planet"]
+                    )
+                }
             }
             .sheet(isPresented: $showComments) {
                 CommentsView(
