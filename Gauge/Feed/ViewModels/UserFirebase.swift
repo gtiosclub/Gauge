@@ -119,7 +119,7 @@ class UserFirebase: ObservableObject {
 
     func updateUserFields(user: User){
         let data = ["lastLogin": DateConverter.convertDateToString(user.lastLogin),
-                    "lastFeedRefresh": user.lastFeedRefresh,
+                    "lastFeedRefresh": DateConverter.convertDateToString(user.lastFeedRefresh),
                     "streak":user.streak,
                     "friendIn":user.friendIn,
                     "friendOut":user.friendOut,
