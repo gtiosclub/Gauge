@@ -24,37 +24,40 @@ struct ExpandableText: View {
     }
 
     var body: some View {
-        withAnimation() {
-            VStack(alignment: .leading) {
+        VStack(alignment: .leading) {
+            if expanded {
                 Text(text)
-                    .lineLimit(expanded ? nil : lineLimit)
-                
-                    .background(
-                        Text(text).lineLimit(lineLimit)
-                            .background(GeometryReader { displayedGeometry in
-                                ZStack {
-                                    Text(self.text)
-                                        .background(GeometryReader { fullGeometry in
-                                            Color.clear.onAppear {
-                                                self.truncated = fullGeometry.size.height > displayedGeometry.size.height
-                                            }
-                                        })
-                                }
-                                .frame(height: .greatestFiniteMagnitude)
-                            })
-                            .hidden()
-                    )
-                
-                if truncated { toggleButton }
+                    .lineLimit(nil)
+            } else {
+                Text(text)
+                    .lineLimit(lineLimit)
             }
+            
+            //                    .background(
+            //                        Text(text).lineLimit(lineLimit)
+            //                            .background(GeometryReader { displayedGeometry in
+            //                                ZStack {
+            //                                    Text(self.text)
+            //                                        .background(GeometryReader { fullGeometry in
+            //                                            Color.clear.onAppear {
+            //                                                self.truncated = fullGeometry.size.height > displayedGeometry.size.height
+            //                                            }
+            //                                        })
+            //                                }
+            //                                .frame(height: .greatestFiniteMagnitude)
+            //                            })
+            //                            .hidden()
+            //                    )
+            
+            toggleButton
         }
     }
 
     var toggleButton: some View {
         Button(action: {
-            withAnimation {
+//            withAnimation(.) {
                 self.expanded.toggle()
-            }
+//            }
         }) {
             Text(self.expanded ? "Show less" : "Show more")
                 .font(.caption)
