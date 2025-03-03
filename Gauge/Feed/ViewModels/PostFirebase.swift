@@ -19,9 +19,11 @@ class PostFirebase: ObservableObject {
     }
     
     func addDummyPosts() {
-        feedPosts.append(BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "good", responseOption2: "bad"))
+        feedPosts.append(BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"))
         
         feedPosts.append(BinaryPost(postId: "834729384", userId: "myman", categories: [.lifestyle(.homeDecor), .other(.funny)], postDateAndTime: Date(), question: "Is it gross to have carpet in your bedroom", responseOption1: "TF no", responseOption2: "Yeah..."))
+        
+        feedPosts.append(BinaryPost(postId: "21341234", userId: "anotherone", categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)], postDateAndTime: Date(), question: "Jimmy Kimmel is the best talk show host", responseOption1: "Nah", responseOption2: "Yupppp"))
     }
     
     func getLiveFeedPosts(user: User) {
