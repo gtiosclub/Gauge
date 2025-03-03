@@ -500,7 +500,7 @@ class PostFirebase: ObservableObject {
     }
     
     
-    func deleteComment(postId: String, commentId: String){
+    func deleteComment(postId: String, commentId: String) {
         Firebase.db.collection("POSTS").document(postId).collection("COMMENTS").document(commentId).delete(){ error in
             if let error = error{
                 print("Error deleting Comment: \(error)")
@@ -523,6 +523,26 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    func getUserNumResponses(postIds: [String]) async -> Int? {
+        do {
+            var totalResponses = 0
+            
+            for postId in postIds {
+                let documentRef = Firebase.db.collection("POSTS").document(postId).collection("RESPONSES")
+                let querySnapshot = try await documentRef.getDocuments()
+                let count = querySnapshot.documents.count
+                print("Number of responses under \(postId): \(count)")
+                totalResponses += count
+            }
+            
+            return totalResponses
+        } catch {
+            print("Error getting responses: \(error)")
+            return nil
+        }
+    }
+
+
     func removeView(postId: String, userId: String) {
         let viewRef = Firebase.db.collection("POSTS")
             .document(postId)
