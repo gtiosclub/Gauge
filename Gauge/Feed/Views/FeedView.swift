@@ -11,14 +11,21 @@ struct FeedView: View {
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
     @State private var dragOffset: CGSize = .zero
-    @State var opacityAmount = 1.0
-    @State var optionSelected: Int = 0
+    @State private var opacityAmount = 1.0
+    @State private var optionSelected: Int = 0
+    @State private var isConfirmed: Bool = false
     
     var body: some View {
         ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .background(.white)
+                .foregroundStyle(.gray.opacity(0.3))
+            
             VStack {
                 //                List {
                 //                    ForEach(postVM.feedPosts.reversed(), id: \.postId) { post in
+                
+                
                 if let post = postVM.feedPosts.first as? BinaryPost {
                     BinaryFeedPost(post: post, index: postVM.feedPosts.firstIndex(where: {$0.postId == post.postId})!, dragAmount: $dragOffset, optionSelected: $optionSelected)
                         .background(
@@ -35,17 +42,35 @@ struct FeedView: View {
                             DragGesture()
                                 .onChanged { gesture in
                                     withAnimation {
-                                        if gesture.translation.width.magnitude > 150 {
-                                            dragOffset = .zero
+                                        if gesture.translation.height.magnitude > gesture.translation.width.magnitude {
+                                            dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
                                             
-                                            if gesture.translation.width > 0 {
-                                                optionSelected = 2
-                                            } else {
-                                                optionSelected = 1
+                                            if dragOffset.height < -150 {
+                                                if optionSelected != 0 {
+                                                    if !isConfirmed && optionSelected == 1 {
+                                                        post.responseResult1 += 1
+                                                    } else if !isConfirmed {
+                                                        post.responseResult2 += 1
+                                                    }
+                                                    isConfirmed = true
+                                                }
+                                                
+                                                dragOffset = .zero
                                             }
                                             
                                         } else {
-                                            dragOffset = gesture.translation
+                                            if gesture.translation.width.magnitude > 150 {
+                                                dragOffset = .zero
+                                                
+                                                if gesture.translation.width > 0 {
+                                                    optionSelected = 2
+                                                } else {
+                                                    optionSelected = 1
+                                                }
+                                                
+                                            } else {
+                                                dragOffset = .init(width: gesture.translation.width, height: 0.0)
+                                            }
                                         }
                                     }
                                 }
@@ -56,7 +81,12 @@ struct FeedView: View {
                         .frame(minHeight: 500.0)
                 }
             }
-            .padding()
+//            .background {
+//                RoundedRectangle(cornerRadius: 10.0)
+//                    .foregroundStyle(.white)
+//            }
+            .offset(y: 10)
+            .padding(.vertical)
         }
         .onAppear() {
             postVM.addDummyPosts()
