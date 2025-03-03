@@ -118,7 +118,7 @@ class UserFirebase: ObservableObject {
     
 
     func updateUserFields(user: User){
-        let data = ["lastLogin": user.lastLogin,
+        let data = ["lastLogin": DateConverter.convertDateToString(user.lastLogin),
                     "lastFeedRefresh": user.lastFeedRefresh,
                     "streak":user.streak,
                     "friendIn":user.friendIn,
@@ -223,4 +223,50 @@ class UserFirebase: ObservableObject {
             }
     }
     
+    func getUserNumResponses(postIds: [String]) async -> Int? {
+            do {
+                var totalResponses = 0
+                
+                for postId in postIds {
+                    let documentRef = Firebase.db.collection("POSTS").document(postId).collection("RESPONSES")
+                    let querySnapshot = try await documentRef.getDocuments()
+                    let count = querySnapshot.documents.count
+                    print("Number of responses under \(postId): \(count)")
+                    totalResponses += count
+                }
+                
+                return totalResponses
+            } catch {
+                print("Error getting responses: \(error)")
+                return nil
+            }
+        }
+    
+    func getUserResponseToViewRatio(userId: String, completion: @escaping (Double) -> Void) {
+        getUserNumViews(userId: userId) { views in
+            // get all of user's posts
+            Firebase.db.collection("POSTS")
+                .whereField("userId", isEqualTo: userId)
+                .getDocuments { snapshot, error in
+                    if let documents = snapshot?.documents, !documents.isEmpty {
+                        let postIds = documents.map { document in
+                            return document.documentID
+                        }
+
+                        Task {
+                            let responses = await self.getUserNumResponses(postIds: postIds) ?? 0
+                            let total = responses + views
+                            
+                            let ratio = total > 0 ? Double(responses) / Double(total) : 0.0
+                            completion(ratio)
+                        }
+                    } else {
+                        completion(0.0) // no posts exist, return 0 ratio
+                    }
+                }
+        }
+    }
+
+
+
 }
