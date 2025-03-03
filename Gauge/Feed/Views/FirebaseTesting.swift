@@ -177,6 +177,16 @@ struct FirebaseTesting: View {
                                 search: "friends"
                             )
                         }
+                        
+                        Button("Generate 20 Keywords") {
+                            postVM.generatePostKeywords(postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2")
+                        }
+                        
+                        Button("Remove View") {
+                            postVM.removeView(
+                                postId: "examplePost",
+                                userId: "Jack")
+                        }
                     }
                     
                     Section("View Data") {
