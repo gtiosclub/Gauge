@@ -1,14 +1,8 @@
-//
-//  ProfileView.swift
-//  Gauge
-//
-//  Created by Sahil Ravani on 2/16/25.
-//
-
 import SwiftUI
 
 struct ProfileView: View {
-    @State private var selectedTab: String = "Takes"
+    @State private var selectedTab: String = "Badges"
+    @State private var selectedBadge: BadgeModel? = nil
 
     var body: some View {
         NavigationView {
@@ -22,9 +16,8 @@ struct ProfileView: View {
                         Text("username")
                             .font(.title2)
                             .fontWeight(.bold)
-                        
-                        Button(action: {
-                        }) {
+
+                        Button(action: {}) {
                             Text("Edit Profile")
                                 .font(.caption)
                                 .padding(8)
@@ -55,15 +48,22 @@ struct ProfileView: View {
                     .padding(.horizontal)
                 }
                 .padding(.top, 10)
-                VStack {
-                    Text("\(selectedTab) Content Here")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(UIColor.systemGray6))
+
+                if selectedTab == "Badges" {
+                    BadgesView(onBadgeTap: { badge in
+                        selectedBadge = badge
+                    })
+                } else {
+                    VStack {
+                        Text("\(selectedTab) Content Here")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color(UIColor.systemGray6))
+                    }
+                    .cornerRadius(10)
+                    .padding()
                 }
-                .cornerRadius(10)
-                .padding()
 
                 Spacer()
             }
@@ -76,6 +76,9 @@ struct ProfileView: View {
                             .foregroundColor(.black)
                     }
                 }
+            }
+            .sheet(item: $selectedBadge) { badge in
+                BadgeDetailView(badge: badge)
             }
         }
     }
@@ -94,7 +97,7 @@ struct TabButton: View {
                     .font(.system(size: 25))
                     .foregroundColor(selectedTab == title ? .black : .gray)
                     .fontWeight(selectedTab == title ? .bold : .regular)
-                
+
                 Rectangle()
                     .frame(height: 2)
                     .foregroundColor(selectedTab == title ? .blue : .gray)
@@ -118,8 +121,4 @@ struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileView()
     }
-}
-
-#Preview {
-    ProfileView()
 }
