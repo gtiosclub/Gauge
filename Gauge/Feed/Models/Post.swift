@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol Post: ObservableObject {
+protocol Post: ObservableObject, Identifiable {
     var postId: String {get set}
     var userId: String {get set}
     var username: String {get set}
@@ -21,15 +21,15 @@ protocol Post: ObservableObject {
     var question: String {get set}
 }
 
-class AnyObservablePost: ObservableObject, Identifiable {
-    let postId: String
-    let wrappedPost: any Post
-    
-    init(_ post: any Post) {
-        self.postId = post.postId
-        self.wrappedPost = post
-    }
-}
+//class AnyObservablePost: ObservableObject, Identifiable {
+//    let postId: String
+//    let wrappedPost: any Post
+//    
+//    init(_ post: any Post) {
+//        self.postId = post.postId
+//        self.wrappedPost = post
+//    }
+//}
 
 enum PostType: String {
     case BinaryPost, SliderPost, RankPost

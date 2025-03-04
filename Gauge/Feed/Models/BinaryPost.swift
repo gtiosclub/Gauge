@@ -19,15 +19,15 @@ class BinaryPost: Post, Equatable {
     var question: String
     
     // From subcollection
-    var responses: [Response]
-    var viewCounter: Int
-    var comments: [Comment]
+    @Published var responses: [Response]
+    @Published var viewCounter: Int
+    @Published var comments: [Comment]
     
     // Binary post specific attributes
     var responseOption1: String
     var responseOption2: String
-    var responseResult1: Int
-    var responseResult2: Int
+    @Published var responseResult1: Int
+    @Published var responseResult2: Int
     
     // Initializing locally
     init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String) {
