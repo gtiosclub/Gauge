@@ -10,13 +10,8 @@ import SwiftUI
 struct SearchView: View {
     @State private var searchText: String = ""
     @FocusState private var isSearchFieldFocused: Bool
-    let items = Array(1...50).map { "Category \($0)" }
+    @State var items = Array(1...50).map { "Category \($0)" }
     
-    // Define the grid columns
-    let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
     
     var body: some View {
         NavigationStack {
@@ -32,11 +27,6 @@ struct SearchView: View {
                             .focused($isSearchFieldFocused)
                             .onTapGesture {
                                 isSearchFieldFocused = true
-                            }
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    isSearchFieldFocused = true
-                                }
                             }
                     }
                     .padding(.horizontal)
@@ -62,46 +52,7 @@ struct SearchView: View {
                 if isSearchFieldFocused {
                     RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused, searchText: $searchText)
                 } else {
-                    // Categories
-                    Text("Categories")
-                        .font(.headline)
-                        .bold()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                    
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 10) {
-                            ForEach(items.indices, id: \.self) { index in
-                                if index < 2 {
-                                    // Large Categories
-                                    Section {
-                                        
-                                    } header: {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .fill(Color(.systemGray5))
-                                                .frame(height: 100)
-                                            Text(items[index])
-                                                .foregroundColor(Color(.black))
-                                                .font(.headline)
-                                        }
-                                    }
-                                } else {
-                                    // Small Categories
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(Color(.systemGray5))
-                                            .frame(height: 100)
-                                        
-                                        Text(items[index])
-                                            .foregroundColor(.black)
-                                            .font(.headline)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
+                    CategoriesView(items: $items)
                 }
             }
             .navigationTitle(isSearchFieldFocused ? "" : "Explore")
@@ -109,10 +60,62 @@ struct SearchView: View {
     }
 }
 
+struct CategoriesView: View {
+    @Binding var items: [String]
+    let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+    var body: some View {
+        Text("Categories")
+            .font(.headline)
+            .bold()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+        
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(items.indices, id: \.self) { index in
+                    if index < 2 {
+                        // Large Categories
+                        Section {
+                            
+                        } header: {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color(.systemGray5))
+                                    .frame(height: 100)
+                                Text(items[index])
+                                    .foregroundColor(Color(.black))
+                                    .font(.headline)
+                            }
+                        }
+                    } else {
+                        // Small Categories
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.systemGray5))
+                                .frame(height: 100)
+                            
+                            Text(items[index])
+                                .foregroundColor(.black)
+                                .font(.headline)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
 struct RecentSearchesView: View {
     @FocusState.Binding var isSearchFieldFocused: Bool
     @Binding var searchText: String
-    let recentSearches = ["Ha", "UIKit", "iOS 17", "Xcode", "Instagram Clone"]
+    
+    var showRecentSearches: Bool = true
+    let recentSearches = ["topic", "topic", "topic", "topic", "topic"]
+    let recentUsers = ["username", "username", "username", "username", "username"]
 
     var body: some View {
         VStack(alignment: .leading) {
