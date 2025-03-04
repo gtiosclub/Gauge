@@ -21,11 +21,221 @@ class PostFirebase: ObservableObject {
     }
     
     func addDummyPosts() {
-        feedPosts.append(BinaryPost(postId: "834729384", userId: "myman", categories: [.lifestyle(.homeDecor), .other(.funny)], postDateAndTime: Date(), question: "Is it gross to have carpet in your bedroom", responseOption1: "TF no", responseOption2: "Yeah..."))
+        feedPosts.append(BinaryPost(
+            postId: "834729384",
+            userId: "myman",
+            username: "CozyKing",
+            comments: [
+                Comment(commentType: .text, userId: "user001", username: "CarpetDefender", profilePhoto: "", date: Date(), commentId: "comm011", likes: ["user005", "user009"], dislikes: ["user007"], content: "Carpet in the bedroom is elite. Y’all sleeping on hardwood like cavemen."),
+                Comment(commentType: .text, userId: "user002", username: "HardwoodPurist", profilePhoto: "", date: Date(), commentId: "comm012", likes: ["user003", "user008"], dislikes: ["user001"], content: "Carpet is just a bacteria sponge. You ever seen what's in that thing after a year?"),
+                Comment(commentType: .text, userId: "user003", username: "RugLife", profilePhoto: "", date: Date(), commentId: "comm013", likes: ["user006"], dislikes: [], content: "Carpet is great until you drop something. Finding a contact lens on it is a spiritual experience. Or cleaning up spilled Dr. Pepper. That is a real bummer when you have carpet."),
+                Comment(commentType: .text, userId: "user004", username: "BarefootBandit", profilePhoto: "", date: Date(), commentId: "comm014", likes: ["user009"], dislikes: [], content: "If you walk on carpet with socks, you’re living life on easy mode. Hardwood is for risk takers.")
+            ],
+            responses: [
+                Response(responseId: "resp011", userId: "user010", responseOption: "TF no"),
+                Response(responseId: "resp012", userId: "user011", responseOption: "Yeah...")
+            ],
+            categories: [.lifestyle(.homeDecor), .other(.funny)],
+            viewCounter: 825,
+            postDateAndTime: Date(),
+            question: "Is it gross to have carpet in your bedroom?",
+            responseOption1: "TF no",
+            responseOption2: "Yeah...",
+            responseResult1: 467,
+            responseResult2: 358,
+            favoritedBy: ["user001", "user004", "user008"]
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "21341234",
+            userId: "anotherone",
+            username: "TalkShowConnoisseur",
+            comments: [
+                Comment(commentType: .text, userId: "user005", username: "KimmelFan", profilePhoto: "", date: Date(), commentId: "comm015", likes: ["user012", "user016"], dislikes: ["user017"], content: "Kimmel is a legend. Every show feels like a casual conversation, dude’s a natural."),
+                Comment(commentType: .text, userId: "user006", username: "ConanCultist", profilePhoto: "", date: Date(), commentId: "comm016", likes: ["user013"], dislikes: ["user005"], content: "Jimmy Kimmel is okay, but Conan O’Brien carried late-night TV on his back."),
+                Comment(commentType: .text, userId: "user007", username: "LettermanLoyalist", profilePhoto: "", date: Date(), commentId: "comm017", likes: ["user014"], dislikes: [], content: "Kimmel is good, but no one will ever top Letterman. The man had no filter."),
+                Comment(commentType: .text, userId: "user008", username: "ColbertConvert", profilePhoto: "", date: Date(), commentId: "comm018", likes: ["user015"], dislikes: ["user006"], content: "Kimmel’s great, but if we’re being honest, Stephen Colbert is running the game right now."),
+                Comment(commentType: .text, userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment.")
+            ],
+            responses: [
+                Response(responseId: "resp013", userId: "user012", responseOption: "Nah"),
+                Response(responseId: "resp014", userId: "user013", responseOption: "Yupppp")
+            ],
+            categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)],
+            viewCounter: 1_020,
+            postDateAndTime: Date(),
+            question: "Jimmy Kimmel is the best talk show host?",
+            responseOption1: "Nah",
+            responseOption2: "Yupppp",
+            responseResult1: 575,
+            responseResult2: 445,
+            favoritedBy: ["user006", "user007", "user008"]
+        ))
         
-        feedPosts.append(BinaryPost(postId: "21341234", userId: "anotherone", categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)], postDateAndTime: Date(), question: "Jimmy Kimmel is the best talk show host", responseOption1: "Nah", responseOption2: "Yupppp"))
-        
-        feedPosts.append(BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"))
+        feedPosts.append(BinaryPost(
+            postId: "123456789",
+            userId: "roommateFromHell",
+            username: "LandlordHater69",
+            comments: [
+                Comment(commentType: .text, userId: "user123", username: "CarpetHater", profilePhoto: "", date: Date(), commentId: "comm001", likes: ["user789"], dislikes: [], content: "Carpet in the bathroom should be a felony."),
+                Comment(commentType: .text, userId: "user456", username: "VinylTile4Life", profilePhoto: "", date: Date(), commentId: "comm002", likes: ["user123", "user999"], dislikes: ["user555"], content: "If I see a carpeted bathroom, I'm calling the cops.")
+            ],
+            responses: [
+                Response(responseId: "resp001", userId: "user789", responseOption: "Absolutely 🚔"),
+                Response(responseId: "resp002", userId: "user555", responseOption: "Nah, just a fine")
+            ],
+            categories: [.lifestyle(.homeDecor), .other(.funny)],
+            viewCounter: 305,
+            postDateAndTime: Date(),
+            question: "Should landlords go to prison for putting carpet in bathrooms?",
+            responseOption1: "Absolutely 🚔",
+            responseOption2: "Nah, just a fine",
+            responseResult1: 184,
+            responseResult2: 121,
+            favoritedBy: ["user789", "user456"]))
+
+        feedPosts.append(BinaryPost(
+            postId: "987654321",
+            userId: "toasterfanatic",
+            username: "HotDogDebater",
+            comments: [
+                Comment(commentType: .text, userId: "user777", username: "BreadDefender", profilePhoto: "", date: Date(), commentId: "comm003", likes: ["user222"], dislikes: [], content: "A hot dog is NOT a sandwich. Don't start this."),
+                Comment(commentType: .text, userId: "user222", username: "MeatIsMeat", profilePhoto: "", date: Date(), commentId: "comm004", likes: ["user777", "user999"], dislikes: [], content: "If a sub is a sandwich, then so is a hot dog. Wake up, sheeple.")
+            ],
+            responses: [
+                Response(responseId: "resp003", userId: "user111", responseOption: "Yes, it's meat between bread"),
+                Response(responseId: "resp004", userId: "user333", responseOption: "NO. Don't start this again.")
+            ],
+            categories: [.lifestyle(.cooking), .other(.funny)],
+            viewCounter: 520,
+            postDateAndTime: Date(),
+            question: "Is a hot dog a sandwich? 🌭",
+            responseOption1: "Yes, it's meat between bread",
+            responseOption2: "NO. Don't start this again.",
+            responseResult1: 258,
+            responseResult2: 262,
+            favoritedBy: ["user111", "user999"]
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "246813579",
+            userId: "midnightmunchies",
+            username: "ChristmasMovieGatekeeper",
+            comments: [
+                Comment(commentType: .text, userId: "user555", username: "YippeeKiYay", profilePhoto: "", date: Date(), commentId: "comm005", likes: ["user777"], dislikes: [], content: "If Home Alone counts, so does Die Hard."),
+                Comment(commentType: .text, userId: "user999", username: "HolidayPurist", profilePhoto: "", date: Date(), commentId: "comm006", likes: [], dislikes: ["user555"], content: "Christmas movies need Santa, end of discussion.")
+            ],
+            responses: [
+                Response(responseId: "resp005", userId: "user111", responseOption: "Yes, obviously"),
+                Response(responseId: "resp006", userId: "user333", responseOption: "No, grow up")
+            ],
+            categories: [.entertainment(.movies), .other(.funny)],
+            viewCounter: 790,
+            postDateAndTime: Date(),
+            question: "Is Die Hard a Christmas movie? 🎄🔫",
+            responseOption1: "Yes, obviously",
+            responseOption2: "No, grow up",
+            responseResult1: 432,
+            responseResult2: 358,
+            favoritedBy: ["user555", "user777"]
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "135792468",
+            userId: "toiletphilosopher",
+            categories: [.other(.funny), .lifestyle(.minimalism)],
+            postDateAndTime: Date(),
+            question: "Do you wet the toothbrush before or after putting toothpaste? 🪥",
+            responseOption1: "Before 🧐",
+            responseOption2: "After, obviously"
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "192837465",
+            userId: "theAIoverlords",
+            username: "AI_Groom",
+            comments: [
+                Comment(commentType: .text, userId: "user888", username: "TechLover", profilePhoto: "", date: Date(), commentId: "comm007", likes: ["user111"], dislikes: [], content: "AI can probably write better vows than me tbh."),
+                Comment(commentType: .text, userId: "user333", username: "FutureDivorcee", profilePhoto: "", date: Date(), commentId: "comm008", likes: [], dislikes: ["user888"], content: "If my spouse uses AI for our vows, I’m filing papers immediately.")
+            ],
+            responses: [
+                Response(responseId: "resp007", userId: "user444", responseOption: "Yes, AI is poetic"),
+                Response(responseId: "resp008", userId: "user999", responseOption: "No, I want a divorce already")
+            ],
+            categories: [.educational(.cs), .news(.worldEvents), .other(.funny)],
+            viewCounter: 400,
+            postDateAndTime: Date(),
+            question: "Would you let AI write your wedding vows? 💍🤖",
+            responseOption1: "Yes, AI is poetic",
+            responseOption2: "No, I want a divorce already",
+            responseResult1: 180,
+            responseResult2: 220,
+            favoritedBy: ["user888", "user111"]
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "555555555",
+            userId: "conspiracy_theorist",
+            categories: [.other(.conspiraryTheories), .other(.funny)],
+            postDateAndTime: Date(),
+            question: "Was the moon landing fake? 🌕🚀",
+            responseOption1: "Yes, obviously",
+            responseOption2: "Touch grass"
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "666777888",
+            userId: "gymbro69",
+            categories: [.lifestyle(.fitness), .other(.funny)],
+            postDateAndTime: Date(),
+            question: "Do you skip leg day? 🏋️‍♂️",
+            responseOption1: "Never, bro",
+            responseOption2: "Only on days ending in 'y'"
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "314159265",
+            userId: "mathnerd",
+            categories: [.educational(.math), .other(.funny)],
+            postDateAndTime: Date(),
+            question: "Is 0.999... equal to 1? 🤯",
+            responseOption1: "Yes, mathematically",
+            responseOption2: "No, that's a scam"
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "777123999",
+            userId: "starbucksoverlord",
+            username: "CaffeineAddict",
+            comments: [
+                Comment(commentType: .text, userId: "user321", username: "NetflixJunkie", profilePhoto: "", date: Date(), commentId: "comm009", likes: ["user654"], dislikes: [], content: "I need my shows. Coffee is replaceable."),
+                Comment(commentType: .text, userId: "user654", username: "JavaFiend", profilePhoto: "", date: Date(), commentId: "comm010", likes: ["user321"], dislikes: [], content: "If you think I can function without coffee, you’ve never met me.")
+            ],
+            responses: [
+                Response(responseId: "resp009", userId: "user111", responseOption: "Goodbye Netflix"),
+                Response(responseId: "resp010", userId: "user333", responseOption: "I'd rather perish")
+            ],
+            categories: [.lifestyle(.finances), .other(.funny)],
+            viewCounter: 612,
+            postDateAndTime: Date(),
+            question: "Would you rather give up coffee or streaming services? ☕📺",
+            responseOption1: "Goodbye Netflix",
+            responseOption2: "I'd rather perish",
+            responseResult1: 300,
+            responseResult2: 312,
+            favoritedBy: ["user321", "user654"]
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "888444222",
+            userId: "socialmediaman",
+            categories: [.entertainment(.socialMedia), .other(.funny)],
+            postDateAndTime: Date(),
+            question: "Would you delete social media for $10,000? 📱💰",
+            responseOption1: "Easy money",
+            responseOption2: "No, I'm addicted"
+        ))
+
     }
     
     func getNextFeedPost() {

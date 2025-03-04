@@ -43,6 +43,7 @@ struct BinaryResultView: View {
             .frame(height: 40)
             .cornerRadius(8)
         }
+        .frame(height: 40)
         .padding()
     }
 }

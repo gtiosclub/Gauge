@@ -57,15 +57,14 @@ struct BinaryFeedResults: View {
             .padding(.horizontal)
             
             BinaryResultView(post: post)
-            
+                
             Text("\(post.responseResult1 + post.responseResult2) votes")
                 .foregroundColor(.gray)
-            
-            Spacer(minLength: 10.0)
-            
-            CommentsView(comments: post.comments)
-            
-            Spacer()
+                .padding(.top, 10)
+                        
+            withAnimation(.none, {
+                CommentsView(comments: post.comments)
+            })            
         }
         .padding()
     }

@@ -58,6 +58,7 @@ enum Category: Hashable {
 
     enum Educational: String, CaseIterable {
         case cs = "💻 Computer Science"
+        case ai = "🤖 Artificial Intelligence"
         case math = "🔢 Math"
         case environment = "🌍 Environment"
         case health = "🏋️ Health & Fitness"
