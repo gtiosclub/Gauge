@@ -17,6 +17,8 @@
 		48227A5B2D526B4B00C720E0 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 48227A5A2D526B4B00C720E0 /* FirebaseMessaging */; };
 		48227A5D2D526B4B00C720E0 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 48227A5C2D526B4B00C720E0 /* FirebaseStorage */; };
 		48227A5F2D526B4B00C720E0 /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = 48227A5E2D526B4B00C720E0 /* FirebaseVertexAI */; };
+		485A110F2D6E40EF0008FA47 /* ChatGPTSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 485A110E2D6E40EF0008FA47 /* ChatGPTSwift */; };
+		485A11112D6E40EF0008FA47 /* SampleApp in Frameworks */ = {isa = PBXBuildFile; productRef = 485A11102D6E40EF0008FA47 /* SampleApp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,9 +44,22 @@
 		48227A112D500C9B00C720E0 /* GaugeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GaugeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1D3DE8382D5EA5B200EDBBF9 /* Exceptions for "Gauge" folder in "Gauge" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 482279F42D500C9A00C720E0 /* Gauge */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		482279F72D500C9A00C720E0 /* Gauge */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1D3DE8382D5EA5B200EDBBF9 /* Exceptions for "Gauge" folder in "Gauge" target */,
+			);
 			path = Gauge;
 			sourceTree = "<group>";
 		};
@@ -65,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				485A11112D6E40EF0008FA47 /* SampleApp in Frameworks */,
 				48227A5B2D526B4B00C720E0 /* FirebaseMessaging in Frameworks */,
 				48227A552D526B4B00C720E0 /* FirebaseDatabase in Frameworks */,
 				48227A5D2D526B4B00C720E0 /* FirebaseStorage in Frameworks */,
@@ -72,6 +88,7 @@
 				48227A4D2D526B4B00C720E0 /* FirebaseAnalytics in Frameworks */,
 				48227A532D526B4B00C720E0 /* FirebaseCrashlytics in Frameworks */,
 				48227A512D526B4B00C720E0 /* FirebaseCore in Frameworks */,
+				485A110F2D6E40EF0008FA47 /* ChatGPTSwift in Frameworks */,
 				48227A5F2D526B4B00C720E0 /* FirebaseVertexAI in Frameworks */,
 				48227A4F2D526B4B00C720E0 /* FirebaseAuth in Frameworks */,
 				48227A572D526B4B00C720E0 /* FirebaseFirestore in Frameworks */,
@@ -145,6 +162,8 @@
 				48227A5A2D526B4B00C720E0 /* FirebaseMessaging */,
 				48227A5C2D526B4B00C720E0 /* FirebaseStorage */,
 				48227A5E2D526B4B00C720E0 /* FirebaseVertexAI */,
+				485A110E2D6E40EF0008FA47 /* ChatGPTSwift */,
+				485A11102D6E40EF0008FA47 /* SampleApp */,
 			);
 			productName = Gauge;
 			productReference = 482279F52D500C9A00C720E0 /* Gauge.app */;
@@ -230,6 +249,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				48227A4B2D526B4B00C720E0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				4899FED52D67CB3500C00BAB /* XCRemoteSwiftPackageReference "ChatGPTSwift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 482279F62D500C9A00C720E0 /* Products */;
@@ -435,6 +455,7 @@
 				DEVELOPMENT_TEAM = 5GCQR6W96Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Gauge/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -464,6 +485,7 @@
 				DEVELOPMENT_TEAM = 5GCQR6W96Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Gauge/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -604,6 +626,14 @@
 				minimumVersion = 11.8.0;
 			};
 		};
+		4899FED52D67CB3500C00BAB /* XCRemoteSwiftPackageReference "ChatGPTSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/alfianlosari/ChatGPTSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -656,6 +686,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 48227A4B2D526B4B00C720E0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseVertexAI;
+		};
+		485A110E2D6E40EF0008FA47 /* ChatGPTSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4899FED52D67CB3500C00BAB /* XCRemoteSwiftPackageReference "ChatGPTSwift" */;
+			productName = ChatGPTSwift;
+		};
+		485A11102D6E40EF0008FA47 /* SampleApp */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4899FED52D67CB3500C00BAB /* XCRemoteSwiftPackageReference "ChatGPTSwift" */;
+			productName = SampleApp;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -12,28 +12,57 @@ class SliderPost: Post {
     var userId: String
     var comments: [Comment]
     var responses: [Response]
-    var category: Category
+    var categories: [Category]
     var viewCounter: Int
     var responseCounter: Int
     var postDateAndTime: Date
-    
+    var favoritedBy: [String]
     var question: String
+    
+    // Slider post specific attributes
     var lowerBoundValue: Double
     var upperBoundValue: Double
     var lowerBoundLabel: String
     var upperBoundLabel: String
     var responseResults: [Double]
     
-    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double]) {
+    // Initializing locally
+    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, lowerBoundLabel: String, upperBoundLabel: String, lowerBoundValue: Double, upperBoundValue: Double) {
+        // Post protocol attributes
+        self.postId = postId
+        self.userId = userId
+        self.comments = []
+        self.responses = []
+        self.categories = categories
+        self.viewCounter = 0
+        self.responseCounter = 0
+        self.postDateAndTime = postDateAndTime
+        self.favoritedBy = []
+        self.question = question
+        
+        // Slider post specific attributes
+        self.lowerBoundLabel = lowerBoundLabel
+        self.upperBoundLabel = upperBoundLabel
+        self.lowerBoundValue = lowerBoundValue
+        self.upperBoundValue = upperBoundValue
+        self.responseResults = []
+    }
+    
+    // Initializing from Firebase
+    init(postId: String, userId: String, comments: [Comment], responses: [Response], categories: [Category], viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double], favoritedBy: [String]) {
+        // Post protocol attributes
         self.postId = postId
         self.userId = userId
         self.comments = comments
         self.responses = responses
-        self.category = category
+        self.categories = categories
         self.viewCounter = viewCounter
         self.responseCounter = responseCounter
         self.postDateAndTime = postDateAndTime
+        self.favoritedBy = favoritedBy
         self.question = question
+        
+        // Slider post specific attributes
         self.lowerBoundValue = lowerBoundValue
         self.upperBoundValue = upperBoundValue
         self.lowerBoundLabel = lowerBoundLabel
