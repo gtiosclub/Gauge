@@ -35,7 +35,7 @@ class PostFirebase: ObservableObject {
         // Append a new post from allQueriedPosts (just index 0 for now)
     }
     
-    func watchForCurrentFeedPostChanegs() {
+    func watchForCurrentFeedPostChanges() {
         setUpCommentsListener()
         setUpResponsesListener()
         setUpViewsListener()
@@ -337,8 +337,7 @@ class PostFirebase: ObservableObject {
             "userId": post.userId,
             "categories": post.categories,
             "viewCounter": post.viewCounter,
-            //"postDateAndTime": DateConverter.convertStringToDate(change.document.data()["postDateAndTime"] as? String ?? "") ?? Date(),
-
+            "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
             "responseOption1": post.responseOption1,
             "responseOption2": post.responseOption2,
