@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct TakeMatchView: View {
+    @ObservedObject var mcManager: MCManager
     @ObservedObject  var gameSettings: TakeMatchSettingsVM
-    
+  
     @State private var currentScreen: Int = 1
     @State private var selectedTopic: String = ""
 
@@ -23,7 +24,8 @@ struct TakeMatchView: View {
         VStack {
             switch currentScreen {
             case 1:
-                QuestionView(question: gameSettings.question, inputText: $inputText) {
+                QuestionView(mcManager: mcManager, question: question, inputText: $inputText) {
+                //QuestionView(question: gameSettings.question, inputText: $inputText) {
                     responses[players[responses.count]] = inputText
                     inputText = ""
                     if responses.count == players.count {
@@ -31,7 +33,7 @@ struct TakeMatchView: View {
                     }
                 }
             case 2:
-                MatchingView(responses: Array(responses.values), playerPictures: players, guessedMatches: $guessedMatches) {
+                MatchingView(mcManager: mcManager, responses: Array(responses.values), playerPictures: players, guessedMatches: $guessedMatches) {
                     currentScreen = 3
                 }
             case 3:
@@ -39,6 +41,7 @@ struct TakeMatchView: View {
                     responses = [:]
                     guessedMatches = [:]
                     currentScreen = 1
+                    return true
                 }
             default:
                 Text("Invalid screen")
@@ -50,5 +53,6 @@ struct TakeMatchView: View {
 }
 
 #Preview {
-    TakeMatchView(gameSettings: TakeMatchSettingsVM())
+    TakeMatchView(mcManager: MCManager(yourName: "test"))
+    //TakeMatchView(gameSettings: TakeMatchSettingsVM())
 }

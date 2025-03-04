@@ -22,30 +22,35 @@ struct TakeMatchRoomView: View {
   
     @Environment(\.dismiss) private var dismiss
     
+    @State var answerText: String = ""
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
                 Spacer()
-                
                 // Display the room code
                 Text(isHost ? "Hosting Room: \(roomCode)" : "Joined Room: \(roomCode)")
                     .font(.title)
                     .bold()
                 
                 if isHost {
+                    
                     Button("Start") {
-                        //select random topic from selected categories
-                        //use to generate a question and navigate to takematch game
-                        if let topic = gameSettings.selectedCategories.randomElement() {
-                            gameSettings.selectedTopic = topic
-                            Task {
-                                await chatGPTVM.generateQuestion(from: [topic])
-                                if let question = chatGPTVM.storedQuestions.last {
-                                    gameSettings.question = question
-                                    navigateToTakeMatch = true
-                                }
-                            }
-                        }
+                        mcManager.broadcastStartGame()
+                        mcManager.gameStarted = true
+//                     Button("Start") {
+//                         //select random topic from selected categories
+//                         //use to generate a question and navigate to takematch game
+//                         if let topic = gameSettings.selectedCategories.randomElement() {
+//                             gameSettings.selectedTopic = topic
+//                             Task {
+//                                 await chatGPTVM.generateQuestion(from: [topic])
+//                                 if let question = chatGPTVM.storedQuestions.last {
+//                                     gameSettings.question = question
+//                                     navigateToTakeMatch = true
+//                                 }
+//                             }
+//                         }
                     }
                     .padding()
                     .frame(width: 80, height: 30)
@@ -63,11 +68,11 @@ struct TakeMatchRoomView: View {
                         Text("Participants:")
                             .font(.headline)
                         
-                        Text("You: \(mcManager.myPeerID.displayName)")
+                        Text("You: \(mcManager.username)")
                             .foregroundColor(.blue)
                         
                         ForEach(mcManager.connectedPeers, id:\.self) { peer in
-                            Text(peer.displayName)
+                            Text(mcManager.discoveredPeers[peer]?.username ?? peer.displayName)
                         }
                     }
                 }
@@ -110,21 +115,35 @@ struct TakeMatchRoomView: View {
                 }
             }
             .sheet(isPresented: $showSettings) {
-                GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings)
+                GameSettingsView(gameSettings: gameSettings)
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
-            .onDisappear {
-                if !isHost {
-                    mcManager.session.disconnect()
-                }
-                mcManager.isAvailableToPlay = false
-                mcManager.stopBrowsing()
+            .navigationDestination(isPresented: $mcManager.gameStarted) {
+                QuestionView(
+                    mcManager: mcManager,
+                    question: "What is your favorite color?",
+                    inputText: $answerText,
+                    onSubmit: {
+                        mcManager.submitAnswer(answerText)
+                        answerText = ""
+                    }
+                )
             }
-            .navigationDestination(isPresented: $navigateToTakeMatch) {
-                TakeMatchView(gameSettings: gameSettings)
-            }
-
+//                 GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings)
+//                     .presentationDetents([.medium])
+//                     .presentationDragIndicator(.visible)
+//             }
+//             .onDisappear {
+//                 if !isHost {
+//                     mcManager.session.disconnect()
+//                 }
+//                 mcManager.isAvailableToPlay = false
+//                 mcManager.stopBrowsing()
+//             }
+//             .navigationDestination(isPresented: $navigateToTakeMatch) {
+//                 TakeMatchView(gameSettings: gameSettings)
+//             }
         }
     }
 }
