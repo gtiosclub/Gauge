@@ -55,7 +55,9 @@ class PostFirebase: ObservableObject {
                 Comment(commentType: .text, userId: "user006", username: "ConanCultist", profilePhoto: "", date: Date(), commentId: "comm016", likes: ["user013"], dislikes: ["user005"], content: "Jimmy Kimmel is okay, but Conan O’Brien carried late-night TV on his back."),
                 Comment(commentType: .text, userId: "user007", username: "LettermanLoyalist", profilePhoto: "", date: Date(), commentId: "comm017", likes: ["user014"], dislikes: [], content: "Kimmel is good, but no one will ever top Letterman. The man had no filter."),
                 Comment(commentType: .text, userId: "user008", username: "ColbertConvert", profilePhoto: "", date: Date(), commentId: "comm018", likes: ["user015"], dislikes: ["user006"], content: "Kimmel’s great, but if we’re being honest, Stephen Colbert is running the game right now."),
-                Comment(commentType: .text, userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment.")
+                Comment(commentType: .text, userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment."),
+                Comment(commentType: .text, userId: "user010", username: "MyMom", profilePhoto: "", date: Date(), commentId: "comm020", likes: ["user010", "user011", "user010", "user011", "user010", "user011"], dislikes: [], content: "MY FAVVVV!"),
+                Comment(commentType: .text, userId: "user011", username: "YourMom", profilePhoto: "", date: Date(), commentId: "comm021", likes: [], dislikes: ["user010", "user011", "user010", "user011"], content: "Man sucks.")
             ],
             responses: [
                 Response(responseId: "resp013", userId: "user012", responseOption: "Nah"),

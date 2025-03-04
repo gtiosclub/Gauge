@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct CommentsView: View {
-    let comments: [Comment]
+    var comments: [Comment]
+    @State private var sortedComments: [Comment] = []
     
     var body: some View {
         ScrollView {
@@ -19,11 +20,15 @@ struct CommentsView: View {
                 }
             } else {
                 LazyVStack {
-                    ForEach(comments, id: \.self) { comment in
+                    ForEach(sortedComments, id: \.self) { comment in
                         CommentView(comment: comment)
-                            
                     }
                 }
+            }
+        }
+        .onAppear {
+            sortedComments = comments.sorted {
+                ($0.likes.count - $0.dislikes.count) > ($1.likes.count - $1.dislikes.count)
             }
         }
     }

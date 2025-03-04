@@ -27,9 +27,9 @@ struct ExpandableText: View {
         VStack(alignment: .leading) {
             Text(text)
                 .lineLimit(expanded ? nil : lineLimit)
-                .transaction { transaction in
-                    transaction.animation = .easeInOut
-                }
+//                .transaction { transaction in
+//                    transaction.animation = .easeInOut
+//                }
             
             //                    .background(
             //                        Text(text).lineLimit(lineLimit)
