@@ -57,7 +57,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         // Title
                         Text("Username Statistics")
-                            .font(.system(size:20))
+                            .font(.system(size:21))
                             .fontWeight(.bold)
                             .padding(.vertical, 20)
                             .padding(.horizontal)

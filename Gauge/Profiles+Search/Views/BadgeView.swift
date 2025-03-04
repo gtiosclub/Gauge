@@ -64,7 +64,7 @@ struct BadgeView: View {
                 .shadow(radius: 1)
             
             Text(badge.title)
-                .font(.system(size:15))
+                .font(.system(size:16))
                 .fontWeight(.medium)
                 .multilineTextAlignment(.center)
                 .frame(height: 40)
