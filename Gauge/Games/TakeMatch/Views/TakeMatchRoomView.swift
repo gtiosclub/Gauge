@@ -9,104 +9,122 @@ import SwiftUI
 
 struct TakeMatchRoomView: View {
     @ObservedObject var mcManager: MCManager
-    @State var showSettings: Bool = false
+
     @StateObject private var gameSettings = TakeMatchSettingsVM()
+    @StateObject private var chatGPTVM = ChatGPTVM()
+    
+    @State var showSettings: Bool = false
     @State var isHost: Bool
-
-    @State var categories = ["Sports", "Food", "Music", "Pop Culture", "TV Shows", "Movies/Film", "Celebrities"]
-
+    @State private var navigateToTakeMatch = false
+    
     var roomCode: String
     var onExit: () -> Void
   
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            
-            // Display the room code
-            Text(isHost ? "Hosting Room: \(roomCode)" : "Joined Room: \(roomCode)")
-                .font(.title)
-                .bold()
-
-            if isHost {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Spacer()
                 
-                Button("Start") {
-                    
+                // Display the room code
+                Text(isHost ? "Hosting Room: \(roomCode)" : "Joined Room: \(roomCode)")
+                    .font(.title)
+                    .bold()
+                
+                if isHost {
+                    Button("Start") {
+                        //select random topic from selected categories
+                        //use to generate a question and navigate to takematch game
+                        if let topic = gameSettings.selectedCategories.randomElement() {
+                            gameSettings.selectedTopic = topic
+                            Task {
+                                await chatGPTVM.generateQuestion(from: [topic])
+                                if let question = chatGPTVM.storedQuestions.last {
+                                    gameSettings.question = question
+                                    navigateToTakeMatch = true
+                                }
+                            }
+                        }
+                    }
+                    .padding()
+                    .frame(width: 80, height: 30)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                } else {
+                    Text("Waiting for host...")
                 }
-                .padding()
-                .frame(width: 80, height: 30)
-                .background(Color.blue)
-                .foregroundColor(.white)
-            } else {
-                Text("Waiting for host...")
-            }
-
-            Spacer()
-            
-            HStack {
-                VStack {
-                    
-                    Text("Participants:")
-                        .font(.headline)
-                    
-                    Text("You: \(mcManager.myPeerID.displayName)")
-                        .foregroundColor(.blue)
-                    
-                    ForEach(mcManager.connectedPeers, id:\.self) { peer in
-                        Text(peer.displayName)
+                
+                Spacer()
+                
+                HStack {
+                    VStack {
+                        
+                        Text("Participants:")
+                            .font(.headline)
+                        
+                        Text("You: \(mcManager.myPeerID.displayName)")
+                            .foregroundColor(.blue)
+                        
+                        ForEach(mcManager.connectedPeers, id:\.self) { peer in
+                            Text(peer.displayName)
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .top)
+                .frame(height: UIScreen.main.bounds.height / 2)
+                .background(.white)
             }
-            .frame(maxWidth: .infinity, alignment: .top)
-            .frame(height: UIScreen.main.bounds.height / 2)
-            .background(.white)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .navigationTitle(Text("Take Match"))
-        .background(Color(.systemGray3))
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .onDisappear {
-            mcManager.isAvailableToPlay = false
-            mcManager.stopBrowsing()
-        }
-        .toolbar {
-            if isHost {
-                ToolbarItem(placement: .navigationBarTrailing) {
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .navigationTitle(Text("Take Match"))
+            .background(Color(.systemGray3))
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(true)
+            .onDisappear {
+                mcManager.isAvailableToPlay = false
+                mcManager.stopBrowsing()
+            }
+            .toolbar {
+                if isHost {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            showSettings.toggle()
+                        }) {
+                            Image(systemName: "gearshape")
+                                .foregroundColor(.black)
+                        }
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
-                        showSettings.toggle()
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            mcManager.isAvailableToPlay = false
+                            onExit()
+                            dismiss()
+                        }
                     }) {
-                        Image(systemName: "gearshape")
+                        Image(systemName: "arrow.left")
                             .foregroundColor(.black)
                     }
                 }
             }
-
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.4)) {
-                        mcManager.isAvailableToPlay = false
-                        onExit()
-                        dismiss()
-                    }
-                }) {
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(.black)
+            .sheet(isPresented: $showSettings) {
+                GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+            }
+            .onDisappear {
+                if !isHost {
+                    mcManager.session.disconnect()
                 }
+                mcManager.isAvailableToPlay = false
+                mcManager.stopBrowsing()
             }
-        }
-        .sheet(isPresented: $showSettings) {
-            GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings, categories: $categories)
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
-        }
-        .onDisappear {
-            if !isHost {
-                mcManager.session.disconnect()
+            .navigationDestination(isPresented: $navigateToTakeMatch) {
+                TakeMatchView(gameSettings: gameSettings)
             }
-            mcManager.isAvailableToPlay = false
-            mcManager.stopBrowsing()
+
         }
     }
 }
@@ -116,13 +134,43 @@ struct TakeMatchRoomView: View {
         TakeMatchRoomView(mcManager: MCManager(yourName: "test"), isHost: true, roomCode: "ABCD", onExit: {})
     }
 }
+struct CategoryView: View{
+    @Binding var selectedCategories: [String]
+    var categoryName: String
+    var isSelected: Bool {
+        selectedCategories.contains(categoryName)
+    }
+    var body: some View {
+        Text(categoryName)
+            .font(.body)
+            .foregroundColor(.black)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(isSelected ? Color.blue.opacity(0.2) : Color.white)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(Color.black, lineWidth: 1)
+            )
+            .onTapGesture {
+                if selectedCategories.contains(categoryName) {
+                    selectedCategories.removeAll(where: {$0 == categoryName})
+                } else {
+                    selectedCategories.append(categoryName)
+                }
+
+            }
+    }
+}
 
 //game settings sheet
 struct GameSettingsView: View {
     
     @StateObject var gameSettings = TakeMatchSettingsVM()
     @Binding var showSettings: Bool
-    @Binding var categories: [String]
+
+    let categories: [String] = ["Sports", "Food", "Music", "Pop Culture", "TV Shows", "Movies/Film", "Celebrities"]
+
     
     var body: some View {
         
@@ -164,20 +212,10 @@ struct GameSettingsView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Categories")
                         .font(.headline)
-                    
+                    //can select multiple categories, depending on number of rounds & randomness not all categories may be used
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                         ForEach(categories, id: \.self) { category in
-                            Button(action: {
-                                // Handle category selection
-                            }) {
-                                Text(category)
-                                    .font(.body)
-                                    .foregroundColor(.black)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.white)
-                                    .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.black, lineWidth: 1))
-                            }
+                            CategoryView(selectedCategories: $gameSettings.selectedCategories, categoryName: category)
                         }
                     }
                 }
@@ -209,6 +247,8 @@ struct GameSettingsView: View {
         .background(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
+    
+
 }
 
 

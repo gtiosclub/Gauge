@@ -50,7 +50,7 @@ struct ChatGPTView: View {
                     .padding()
             }
         }
-        .navigationTitle("Atlas AI Assistant")
+        .navigationTitle("AI Assistant")
     }
 }
 
