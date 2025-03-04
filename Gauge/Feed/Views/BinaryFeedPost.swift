@@ -30,15 +30,15 @@ struct BinaryFeedPost: View {
             if index == 0 {
                 HStack{
                     profileImage
+                    
                     Text(post.userId)
                         .bold()
                         .font(.system(size: 16))
-                        .padding(.leading, 10)
                     
                     Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
                         .font(.system(size: 13))
-                        .padding(.leading, 5)
                 }
+                .padding(.leading)
                 
                 
                 //Category Boxes
@@ -65,14 +65,16 @@ struct BinaryFeedPost: View {
                         Spacer()
                     }
                     .padding(.bottom, 10)
+                    .padding(.leading)
                 }
-                .padding(.leading, 0)
                 
                 VStack {
                     Text(post.question)
                         .padding(.top, 15)
                         .bold()
                         .font(.system(size: 35))
+                        .frame(alignment: .leading)
+                        .multilineTextAlignment(.leading)
                     
                     Spacer()
                     
@@ -155,7 +157,7 @@ struct BinaryFeedPost: View {
                 }
                 .background(
                     dragAmount.width < 0.0 ? (
-                        Ellipse()
+                        AnyView(Ellipse()
                             .fill(
                                 RadialGradient(
                                     gradient: Gradient(colors: [.red.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
@@ -166,11 +168,12 @@ struct BinaryFeedPost: View {
                             )
                             .frame(width: 600, height: 800)
                             .offset(x: -200, y: 200)
-                    ) : (
-                        Ellipse()
+                    )) : (
+                        dragAmount.width == 0.0 ? AnyView(Ellipse().fill(.clear)) :
+                        AnyView(Ellipse()
                             .fill(
                                 RadialGradient(
-                                    gradient: Gradient(colors: dragAmount.width == 0.0 ? [.clear] : [.green.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
+                                    gradient: Gradient(colors: [.green.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
                                     center: .center,
                                     startRadius: 10,
                                     endRadius: 400
@@ -178,7 +181,7 @@ struct BinaryFeedPost: View {
                             )
                             .frame(width: 600, height: 800)
                             .offset(x: 200, y: 200)
-                    )
+                    ))
                 )
                 
                 Spacer(minLength: 100.0)
@@ -209,6 +212,7 @@ struct BinaryFeedPost: View {
             }
         }
         .padding()
+        .frame(width: UIScreen.main.bounds.width)
         .gradientBorder(borderWidth: 15, color: optionSelected == 1 ? .red : .green, cornerRadius: 10, opacity: computedOpacity)
     }
     
