@@ -12,21 +12,35 @@ class PostFirebase: ObservableObject {
     @Published var feedPosts: [any Post] = []
     @Published var allQueriedPosts: [AnyObservablePost] = []
     @Published var skippedPost: (any Post)? = nil
-    private var currentFeedPostsListener: ListenerRegistration? = nil
+    private var currentFeedPostCommentsListener: ListenerRegistration? = nil
+    private var currentFeedPostResponsesListener: ListenerRegistration? = nil
+    private var currentFeedPostViewsListener: ListenerRegistration? = nil
     
     init() {
         Keys.fetchKeys()
     }
     
     func addDummyPosts() {
-        feedPosts.append(BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"))
-        
         feedPosts.append(BinaryPost(postId: "834729384", userId: "myman", categories: [.lifestyle(.homeDecor), .other(.funny)], postDateAndTime: Date(), question: "Is it gross to have carpet in your bedroom", responseOption1: "TF no", responseOption2: "Yeah..."))
         
         feedPosts.append(BinaryPost(postId: "21341234", userId: "anotherone", categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)], postDateAndTime: Date(), question: "Jimmy Kimmel is the best talk show host", responseOption1: "Nah", responseOption2: "Yupppp"))
+        
+        feedPosts.append(BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"))
     }
     
-    func getLiveFeedPosts(user: User) {
+    func getNextFeedPost() {
+        // Pop index 0 of feedPosts
+        // Append a new post from allQueriedPosts (just index 0 for now)
+    }
+    
+    func watchForCurrentFeedPostChanges() {
+        // Cancel current listeners (if there are ones)
+        // Setup listener for new index 0 subcollections
+        // Save the listeners in the variables
+        // Make changes to the Post's (Binary) responses, viewCounter, comments, responseResult1, responseResult2
+    }
+    
+    func watchForNewPosts(user: User) {
         let allPosts: [String] = user.myViews + user.myResponses
         Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else {

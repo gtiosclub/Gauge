@@ -12,13 +12,19 @@ struct CommentsView: View {
     
     var body: some View {
         ScrollView {
-            LazyVStack {
-                ForEach(comments, id: \.self) { comment in
-                    CommentView(comment: comment)
-                        .transaction { transaction in
-                            transaction.animation = .easeInOut
-                        }
-                        
+            if comments.isEmpty {
+                Text("No Comments Yet!")
+                Button("Be the first") {
+                    
+                }
+            } else {
+                LazyVStack {
+                    ForEach(comments, id: \.self) { comment in
+                        CommentView(comment: comment)
+                            .transaction { transaction in
+                                transaction.animation = .easeInOut
+                            }
+                    }
                 }
             }
         }

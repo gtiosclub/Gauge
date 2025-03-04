@@ -24,7 +24,7 @@ struct ContentView: View {
             }
             .background(.red)
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     showSplashScreen = false
                 }
             }
@@ -75,10 +75,15 @@ struct ContentView: View {
                     }
                 }
             }
-            .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
+            .onChange(of: authVM.currentUser, initial: false) { oldUser, newUser in
                 if let signedInUser = newUser {
                     userVM.user = signedInUser
                 }
+                // populate the user data
+                // call watchForNewPosts
+                // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
+                // call the watchForCurrentFeedPostChanges
+                // call functions to fill out a user's AI Algo variables
             }
         }
     }

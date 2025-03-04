@@ -74,6 +74,7 @@ struct BinaryFeedPost: View {
                                 .font(.system(size: optionSelected == 1 ? 50 : 30))
                                 .font(optionSelected == 1 ? .title : .title2)
                                 .opacity(dragAmount.width < 0.0 ? (1.0 - (dragAmount.width / 150.0).magnitude) : 1.0)
+                                .frame(width: 150.0, alignment: .leading)
                             
                             
                             Spacer()
@@ -92,6 +93,7 @@ struct BinaryFeedPost: View {
                                 .font(.system(size: optionSelected == 2 ? 50 : 30))
                                 .font(optionSelected == 2 ? .title : .title2)
                                 .opacity(dragAmount.width > 0.0 ? (1.0 - dragAmount.width / 100.0) : 1.0)
+                                .frame(width: 150.0, alignment: .trailing)
                         }
                         .padding(.horizontal)
                         .opacity(0.5)
@@ -151,7 +153,7 @@ struct BinaryFeedPost: View {
                         Ellipse()
                             .fill(
                                 RadialGradient(
-                                    gradient: Gradient(colors: [.green.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .white]),
+                                    gradient: Gradient(colors: dragAmount.width == 0.0 ? [.clear] : [.green.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .white]),
                                     center: .center,
                                     startRadius: 10,
                                     endRadius: 400
@@ -162,7 +164,7 @@ struct BinaryFeedPost: View {
                     )
                 )
                 
-                Spacer(minLength: 20.0)
+                Spacer(minLength: 50.0)
                 
                 if optionSelected != 0 {
                     HStack {
@@ -171,8 +173,8 @@ struct BinaryFeedPost: View {
                         Image(systemName: "arrow.up")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 50, height: 50, alignment: .center)
-                            .foregroundColor(.gray)
+                            .frame(width: 30, height: 30, alignment: .center)
+                            .foregroundColor(dragAmount.height == 0.0 ? .gray : (optionSelected == 1 ? .red : .green))
                             .opacity(0.5)
                         
                         Spacer()
@@ -185,6 +187,16 @@ struct BinaryFeedPost: View {
                     .frame(maxWidth: .infinity)
             }
         }
+//        .background {
+//            RoundedRectangle(cornerRadius: 10.0)
+//                .padding()
+//                .foregroundStyle(.white)
+//        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 10.0)
+                .stroke(optionSelected == 1 ? .red : .green, lineWidth: 5)
+                .opacity(dragAmount.height < 0 && optionSelected != 0 ? 0.7 : 0.0)
+        )
     }
     
     var profileImage: some View {
