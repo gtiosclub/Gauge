@@ -56,6 +56,7 @@ struct CommentView: View {
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(Color(white: 0.4))
+                        
                         Text("• \(DateConverter.timeAgo(from: comment.date))")
                             .font(.subheadline)
                             .fontWeight(.semibold)
