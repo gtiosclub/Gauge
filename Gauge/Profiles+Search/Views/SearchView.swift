@@ -113,28 +113,85 @@ struct RecentSearchesView: View {
     @FocusState.Binding var isSearchFieldFocused: Bool
     @Binding var searchText: String
     
-    var showRecentSearches: Bool = true
-    let recentSearches = ["topic", "topic", "topic", "topic", "topic"]
-    let recentUsers = ["username", "username", "username", "username", "username"]
+    @State private var recentSearches = ["topic", "topic", "topic", "topic", "topic"]
+    @State private var recentUsers = ["username", "username", "username", "username", "username"]
+    let tabs = ["Topics", "Users"]
+    @State private var selectedTab: String = "Topics"
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Recent Searches")
+            Text("Recent")
                 .font(.headline)
                 .padding(.leading)
             
-            List(recentSearches, id: \.self) { search in
-                Button(action: {
-                    searchText = search
-                    isSearchFieldFocused = false
-                }) {
-                    Text(search)
-                        .foregroundColor(.black)
-                        .padding(.vertical, 5)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    if (selectedTab == "Topics") {
+                        ForEach(Array(recentSearches.enumerated()), id: \.element) { index, search in
+                            HStack{
+                                HStack {
+                                    Image(systemName: "number")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.black)
+                                        .padding(8)
+                                        .background(Color(.systemGray5))
+                                        .clipShape(Circle())
+                                    
+                                    Text(search)
+                                        .padding(5)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color.white)
+                                        .cornerRadius(10)
+                                }
+                                
+                                Button(action: {
+                                    recentSearches.remove(at: index)
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 12, weight: .regular))
+                                        .foregroundColor(Color(.systemGray))
+                                        .padding()
+                                }
+                            }
+                        }
+                    } else {
+                        ForEach(Array(recentUsers.enumerated()), id: \.element) { index, user in
+                            HStack{
+                                HStack {
+                                    Circle()
+                                        .fill(Color(.systemGray))
+                                        .frame(width: 30, height: 30)
+                                    Text(user)
+                                        .padding(5)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color.white)
+                                        .cornerRadius(10)
+                                }
+                                
+                                Button(action: {
+                                    recentUsers.remove(at: index)
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 12, weight: .regular))
+                                        .foregroundColor(Color(.systemGray))
+                                        .padding()
+                                }
+                            }
+                        }
+                    }
                 }
+                .padding()
             }
-            .listStyle(PlainListStyle())
         }
+        
+        Picker(selection: $selectedTab, label: Text("")) {
+            ForEach(tabs, id: \.self) { tab in
+                Text(tab).tag(tab)
+            }
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .frame(width: 300)
+        .padding()
     }
 }
 
