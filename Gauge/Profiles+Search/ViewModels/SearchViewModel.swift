@@ -55,7 +55,7 @@ class SearchViewModel {
     
     func getPostQuestion(postId: String) async -> String? {
         do {
-            let document = try await Firebase.db.collection("POST").document(postId).getDocument()
+            let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
             guard let postData = document.data() else {return nil}
             guard let question = postData["question"] as? String else { return nil }
             return question
@@ -66,18 +66,18 @@ class SearchViewModel {
     
     func getPostDateTime(postId: String) async -> Date? {
         do {
-            let document = try await Firebase.db.collection("POST").document(postId).getDocument()
-            guard let postData = document.data() else {return nil}
-            guard let postDateAndTime = postData["postDateAndTime"] as? Date else { return nil }
-            return postDateAndTime
+            let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
+            guard let postData = document.data() else { return nil}
+            guard let postDateAndTime = postData["postDateAndTime"] as? Timestamp else { return nil }
+            return postDateAndTime.dateValue()
         } catch {
             return nil
         }
     }
     
-    func getPostQuestionFromId(postId: String) async -> [String]? {
+    func getPostOptions(postId: String) async -> [String]? {
         do {
-            let document = try await Firebase.db.collection("POST").document(postId).getDocument()
+            let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
             guard let postData = document.data() else {return nil}
             guard let option1 = postData["responseOption1"] as? String else { return nil }
             guard let option2 = postData["responseOption2"] as? String else { return nil }
