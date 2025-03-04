@@ -107,7 +107,7 @@ struct FirebaseTesting: View {
                     
                     Section("Get Live Data (Great for feed & games!)") {
                         Button("Watch for Posts") {
-                            postVM.getLiveFeedPosts(user: userVM.user)
+                            postVM.watchForNewPosts(user: userVM.user)
                         }
                     }
                     
@@ -207,10 +207,6 @@ struct FirebaseTesting: View {
                     Section("View Data") {
                         Button("Fetch Favorited Posts") {
                             userVM.getUserFavorites(userId: "ExampleUser")
-                        }
-                        
-                        Button("Start Listener"){
-                            postVM.getLiveFeedPosts(user: userVM.user)
                         }
                         
                         ForEach(postVM.allQueriedPosts) { post in

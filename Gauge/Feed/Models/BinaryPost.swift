@@ -13,13 +13,15 @@ class BinaryPost: Post, Equatable {
     var userId: String
     var username: String = "" // NOT stored in Firebase
     var profilePhoto: String = "" // NOT stored in Firebase
-    var comments: [Comment]
-    var responses: [Response]
     var categories: [Category]
-    var viewCounter: Int
     var postDateAndTime: Date
     var favoritedBy: [String]
     var question: String
+    
+    // From subcollection
+    var responses: [Response]
+    var viewCounter: Int
+    var comments: [Comment]
     
     // Binary post specific attributes
     var responseOption1: String
