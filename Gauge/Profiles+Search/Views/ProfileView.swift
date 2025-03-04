@@ -1,14 +1,8 @@
-//
-//  ProfileView.swift
-//  Gauge
-//
-//  Created by Sahil Ravani on 2/16/25.
-//
-
 import SwiftUI
 
 struct ProfileView: View {
-    @State private var selectedTab: String = "Takes"
+    @State private var selectedTab: String = "Badges"
+    @State private var selectedBadge: BadgeModel? = nil
 
     var body: some View {
         NavigationView {
@@ -22,9 +16,8 @@ struct ProfileView: View {
                         Text("username")
                             .font(.title2)
                             .fontWeight(.bold)
-                        
-                        Button(action: {
-                        }) {
+
+                        Button(action: {}) {
                             Text("Edit Profile")
                                 .font(.caption)
                                 .padding(8)
@@ -55,15 +48,154 @@ struct ProfileView: View {
                     .padding(.horizontal)
                 }
                 .padding(.top, 10)
-                VStack {
-                    Text("\(selectedTab) Content Here")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(UIColor.systemGray6))
+
+                if selectedTab == "Badges" {
+                    BadgesView(onBadgeTap: { badge in
+                        selectedBadge = badge
+                    })
+                } else if selectedTab == "Statistics" {
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Title
+                        Text("Username Statistics")
+                            .font(.system(size:21))
+                            .fontWeight(.bold)
+                            .padding(.vertical, 20)
+                            .padding(.horizontal)
+                            .frame(maxWidth: .infinity, alignment: .center)
+
+                        
+                        // Statistics list
+                        VStack(spacing: 0) {
+                            // Total Votes Made
+                            HStack {
+                                Text("Total Votes Made")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("50 Votes")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                            
+                            Divider().padding(.horizontal)
+                            
+                            // Total Takes Made
+                            HStack {
+                                Text("Total Takes Made")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("50 Takes")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                            
+                            Divider().padding(.horizontal)
+                            
+                            // Total Votes Collected
+                            HStack {
+                                Text("Total Votes Collected")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("50 Votes")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                            
+                            Divider().padding(.horizontal)
+                            
+                            // Total Comments Made
+                            HStack {
+                                Text("Total Comments Made")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("20 Comments")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                            
+                            Divider().padding(.horizontal)
+                            
+                            // Ratio View/Response
+                            HStack {
+                                Text("Ratio View/Response")
+                                    .font(.system(size: 17))
+                                    .fontWeight(.regular)
+                                
+                                Spacer()
+                                
+                                HStack {
+                                    Text("20 Comments")
+                                        .font(.system(size: 17))
+                                        .foregroundColor(.gray)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.system(size: 14))
+                                }
+                            }
+                            .padding(.vertical, 15)
+                            .padding(.horizontal)
+                        }
+                        
+                        Spacer()
+                    }
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .padding([.horizontal, .bottom])
+                } else {
+                    VStack {
+                        Text("\(selectedTab) Content Here")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color(UIColor.systemGray6))
+                    }
+                    .cornerRadius(10)
+                    .padding()
                 }
-                .cornerRadius(10)
-                .padding()
 
                 Spacer()
             }
@@ -76,6 +208,9 @@ struct ProfileView: View {
                             .foregroundColor(.black)
                     }
                 }
+            }
+            .sheet(item: $selectedBadge) { badge in
+                BadgeDetailView(badge: badge)
             }
         }
     }
@@ -94,7 +229,7 @@ struct TabButton: View {
                     .font(.system(size: 25))
                     .foregroundColor(selectedTab == title ? .black : .gray)
                     .fontWeight(selectedTab == title ? .bold : .regular)
-                
+
                 Rectangle()
                     .frame(height: 2)
                     .foregroundColor(selectedTab == title ? .blue : .gray)
@@ -118,8 +253,4 @@ struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileView()
     }
-}
-
-#Preview {
-    ProfileView()
 }
