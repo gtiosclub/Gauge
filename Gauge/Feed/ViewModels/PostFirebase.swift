@@ -10,7 +10,7 @@ import Firebase
 
 class PostFirebase: ObservableObject {
     @Published var feedPosts: [any Post] = []
-    @Published var allQueriedPosts: [AnyObservablePost] = []
+    @Published var allQueriedPosts: [any Post] = []
     @Published var skippedPost: (any Post)? = nil
     private var currentFeedPostCommentsListener: ListenerRegistration? = nil
     private var currentFeedPostResponsesListener: ListenerRegistration? = nil
@@ -64,7 +64,7 @@ class PostFirebase: ObservableObject {
                                                   responseOption2: newPostData["responseOption2"] as? String ?? "",
                                                   favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
                             
-                            self.allQueriedPosts.append(AnyObservablePost(post))
+                            self.allQueriedPosts.append(post)
                             self.allQueriedPosts = self.allQueriedPosts
                         } else if (newPostData["type"] as? String == PostType.SliderPost.rawValue) {
                             let post = SliderPost(postId: newPostData["postId"] as? String ?? "",
@@ -78,7 +78,7 @@ class PostFirebase: ObservableObject {
                                                   upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
                                                   favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
                             
-                            self.allQueriedPosts.append(AnyObservablePost(post))
+                            self.allQueriedPosts.append(post)
                             self.allQueriedPosts = self.allQueriedPosts
                         } else if (newPostData["type"] as? String == PostType.RankPost.rawValue){
                             let post = RankPost(postId: newPostData["postId"] as? String ?? "",
@@ -89,7 +89,7 @@ class PostFirebase: ObservableObject {
                                                   responseOptions: newPostData["responseOptions"] as? [String] ?? [],
                                                   favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
                             
-                            self.allQueriedPosts.append(AnyObservablePost(post))
+                            self.allQueriedPosts.append(post)
                             self.allQueriedPosts = self.allQueriedPosts
                         }
                         
@@ -102,7 +102,7 @@ class PostFirebase: ObservableObject {
                             if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
                                 print("updating binary post")
                                 
-                                self.allQueriedPosts[index] = AnyObservablePost( BinaryPost(
+                                self.allQueriedPosts[index] = BinaryPost(
                                     postId: newPostData["postId"] as? String ?? "",
                                     userId: newPostData["userId"] as? String ?? "",
                                     categories: newPostData["categories"] as? [Category] ?? [],
@@ -111,12 +111,12 @@ class PostFirebase: ObservableObject {
                                     responseOption1: newPostData["responseOption1"] as? String ?? "",
                                     responseOption2: newPostData["responseOption2"] as? String ?? "",
                                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
-                                )
+
                                 self.allQueriedPosts = self.allQueriedPosts
                                 
                             } else if (newPostData["type"] as? String == PostType.SliderPost.rawValue) {
                                 print("updating slider post")
-                                self.allQueriedPosts[index] = AnyObservablePost( SliderPost(
+                                self.allQueriedPosts[index] = SliderPost(
                                     postId: newPostData["postId"] as? String ?? "",
                                     userId: newPostData["userId"] as? String ?? "",
                                     categories: newPostData["categories"] as? [Category] ?? [],
@@ -127,13 +127,12 @@ class PostFirebase: ObservableObject {
                                     lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
                                     upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
                                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
-                                )
                                 
                                 self.allQueriedPosts = self.allQueriedPosts
                             } else if (newPostData["type"] as? String == PostType.RankPost.rawValue){
                                 print("adding rank")
                                 
-                                self.allQueriedPosts[index] = AnyObservablePost( RankPost(
+                                self.allQueriedPosts[index] = RankPost(
                                     postId: newPostData["postId"] as? String ?? "",
                                     userId: newPostData["userId"] as? String ?? "",
                                     categories: newPostData["categories"] as? [Category] ?? [],
@@ -141,7 +140,6 @@ class PostFirebase: ObservableObject {
                                     question: newPostData["question"] as? String ?? "",
                                     responseOptions: newPostData["responseOptions"] as? [String] ?? [],
                                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
-                                )
                                 
                                 self.allQueriedPosts = self.allQueriedPosts
                             }

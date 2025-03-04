@@ -209,7 +209,7 @@ struct FirebaseTesting: View {
                             userVM.getUserFavorites(userId: "ExampleUser")
                         }
                         
-                        ForEach(postVM.allQueriedPosts) { post in
+                        ForEach(postVM.allQueriedPosts, id: \.postId) { post in
                             Text(post.postId)
                         }
                     }

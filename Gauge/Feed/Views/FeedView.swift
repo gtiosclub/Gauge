@@ -24,6 +24,11 @@ struct FeedView: View {
                     .foregroundStyle(.gray.opacity(0.3))
                     .padding(.horizontal, 5)
                 
+                RoundedRectangle(cornerRadius: 10)
+                    .background(.gray.opacity(0.3))
+                    .foregroundStyle(.white)
+                    .offset(y: 10)
+                
                 VStack {
                     //                List {
                     //                    ForEach(postVM.feedPosts.reversed(), id: \.postId) { post in
