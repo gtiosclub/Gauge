@@ -681,4 +681,38 @@ class PostFirebase: ObservableObject {
             task.resume()
         }
     }
+    
+    func skipPost(postId: String, userId: String) {
+        guard !feedPosts.isEmpty else {
+            print("No posts in feed to skip.")
+            return
+        }
+        
+        // Move the post at index 0 to skippedPost
+        skippedPost = feedPosts.removeFirst()
+        
+        print("Skipped post: \(skippedPost?.postId ?? "None")")
+
+        // add the post view to Firestore
+        addViewToPost(postId: postId, userId: userId)
+
+        // load the next post in the feed
+        getNextFeedPost()
+
+        // listen for changes in the new post
+        watchForCurrentFeedPostChanges()
+    }
+    
+    func undoSkipPost(postId: String, userId: String) {
+        guard let skipped = skippedPost else {
+            print("No post to undo skip.")
+            return
+        }
+
+        // add back the skipped post to the front of feedPosts
+        feedPosts.insert(skipped, at: 0)
+        skippedPost = nil
+        
+        print("Restored skipped post: \(skipped.postId)")
+    }
 }
