@@ -18,7 +18,6 @@ struct BinaryFeedResults: View {
                     Text("NEXT")
                         .foregroundStyle(.gray)
                         .opacity(0.5)
-                        .padding(.top, 10)
                     
                     Image(systemName: "arrow.down")
                         .resizable()
@@ -31,7 +30,7 @@ struct BinaryFeedResults: View {
                 Spacer()
             }
             
-            HStack{
+            HStack {
                 profileImage
                 
                 Text(post.userId)
@@ -41,27 +40,31 @@ struct BinaryFeedResults: View {
                 Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
                     .font(.system(size: 13))
                     .padding(.leading, 5)
+                    .foregroundStyle(.gray)
                 
                 Spacer()
             }
+            .padding(.horizontal)
             
-            Text(post.question)
-                .padding(.top, 10)
-                .font(.system(size: 25))
-                .frame(alignment: .leading)
+            HStack {
+                Text(post.question)
+                    .padding(.top, 10)
+                    .font(.system(size: 25))
+                    .frame(alignment: .leading)
+                    
+                Spacer()
+            }
+            .padding(.horizontal)
             
             BinaryResultView(post: post)
-            
+                
             Text("\(post.responseResult1 + post.responseResult2) votes")
                 .foregroundColor(.gray)
-                .scaledToFit()
-                .frame(maxWidth: .infinity)
-            
-            Spacer(minLength: 10.0)
-            
-            CommentsView(comments: post.comments)
-            
-            Spacer()
+                .padding(.top, 10)
+                        
+            withAnimation(.none, {
+                CommentsView(comments: post.comments)
+            })            
         }
         .padding()
     }

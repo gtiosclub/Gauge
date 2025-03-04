@@ -20,111 +20,55 @@ struct FeedView: View {
         GeometryReader { geo in
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
-                    .background(.white)
-                    .foregroundStyle(.gray.opacity(0.3))
-                    .padding(.horizontal, 5)
+                    .foregroundStyle(Color(red: 187.0 / 255, green: 187.0 / 255, blue: 187.0 / 255))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 0.5)
+                    )
+                    .padding(.horizontal, 12)
                 
                 RoundedRectangle(cornerRadius: 10)
-                    .background(.gray.opacity(0.3))
-                    .foregroundStyle(.white)
-                    .offset(y: 10)
+                    .foregroundStyle(Color(red: 187.0 / 255, green: 187.0 / 255, blue: 187.0 / 255))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 0.5)
+                    )
+                    .padding(.horizontal, 8)
+                    .offset(y: dragOffset.height > 0 ? dragOffset.height / 15 : 0.0)
+                    
+                RoundedRectangle(cornerRadius: 10)
+                    .foregroundStyle(Color(red: (min(255.0, 187.0 + dragOffset.height) / 255), green: (min(255.0, 187.0 + dragOffset.height) / 255), blue: (min(255.0, 187.0 + dragOffset.height) / 255)))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 0.5)
+                    )
+                    .padding(.horizontal, 4)
+                    .offset(y: 10 + (dragOffset.height > 0 ? dragOffset.height / 15 : 0.0))
                 
                 VStack {
-                    //                List {
-                    //                    ForEach(postVM.feedPosts.reversed(), id: \.postId) { post in
-                    
-                    
                     if let post = postVM.feedPosts.first as? BinaryPost {
                         ZStack(alignment: .top) {
                             if isConfirmed {
                                 BinaryFeedResults(post: post)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 10.0)
-                                            .fill(.white)
-                                    )
                             } else {
                                 BinaryFeedPost(post: post, index: postVM.feedPosts.firstIndex(where: {$0.postId == post.postId})!, dragAmount: $dragOffset, optionSelected: $optionSelected)
-//                                    .background(
-//                                        RoundedRectangle(cornerRadius: 10.0)
-//                                            .fill(.white)
-//                                            .padding()
-//                                    )
-                                //                            .offset(dragOffset)
-//                                    .stacked(at: postVM.feedPosts.firstIndex(where: {$0.postId == post.postId})!, in: 3, offset: $dragOffset)
-//                                    .dimmed(at: postVM.feedPosts.firstIndex(where: {$0.postId == post.postId})!, in: 3)
                                     .rotatedBy(at: postVM.feedPosts.firstIndex(where: {$0.postId == post.postId})!, offset: $dragOffset)
-                                    .gesture(
-                                        DragGesture()
-                                            .onChanged { gesture in
-                                                withAnimation {
-                                                    if gesture.translation.height.magnitude > gesture.translation.width.magnitude {
-                                                        dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
-                                                        
-                                                        if dragOffset.height < -150 {
-                                                            if optionSelected != 0 {
-                                                                if !isConfirmed && optionSelected == 1 {
-                                                                    post.responseResult1 += 1
-                                                                } else if !isConfirmed {
-                                                                    post.responseResult2 += 1
-                                                                }
-                                                                withAnimation {
-                                                                    isConfirmed = true
-                                                                }
-                                                            }
-                                                            
-                                                            dragOffset = .zero
-                                                        }
-                                                        
-                                                        if dragOffset.height > 150 && !hasSkipped {
-                                                            hasSkipped = true
-                                                            optionSelected = 0
-                                                            if isConfirmed {
-                                                                // Next post logic
-                                                                postVM.feedPosts.remove(at: 0)
-                                                            } else {
-                                                                // Skip logic
-                                                                postVM.feedPosts.remove(at: 0)
-                                                            }
-                                                        }
-                                                        
-                                                    } else {
-                                                        if gesture.translation.width.magnitude > 150 {
-                                                            dragOffset = .zero
-                                                            
-                                                            if gesture.translation.width > 0 {
-                                                                optionSelected = 2
-                                                            } else {
-                                                                optionSelected = 1
-                                                            }
-                                                            
-                                                        } else {
-                                                            dragOffset = .init(width: gesture.translation.width, height: 0.0)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            .onEnded { gesture in
-                                                dragOffset = .zero
-                                                hasSkipped = false
-                                            }
-                                    )
-                                    .frame(minHeight: 500.0)
+                                    .frame(width: max(0, geo.size.width))
                             }
                             
                             if dragOffset.height > 0 {
                                 LinearGradient(
                                     gradient: Gradient(colors: [
-                                        .black.opacity(dragOffset.height / 300.0),  // Darker at top
-                                        .clear  // Fully transparent at bottom
+                                        .black.opacity(dragOffset.height / 100.0),
+                                        .clear
                                     ]),
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
-                                .frame(height: 200, alignment: .top)
                                 .cornerRadius(10.0)
                                 .overlay(alignment: .top) {
                                     VStack {
-                                        Text("Skip Post")
+                                        Text(!isConfirmed ? "SKIP" : "NEXT")
                                             .foregroundColor(.white)
                                             .bold()
                                             .opacity(dragOffset.height / 150.0)
@@ -139,26 +83,82 @@ struct FeedView: View {
                                         Spacer()
                                     }
                                     .frame(alignment: .top)
+                                    .padding(.top)
                                 }
-                                .offset(y: dragOffset.height)
+                                .frame(width: max(0, geo.size.width))
                             }
                         }
-//                        .background {
-//                            RoundedRectangle(cornerRadius: 10.0)
-//                                .padding()
-//                                .foregroundStyle(.white)
-//                        }
+//                        .frame(width: max(0, geo.size.width), height: max(0, geo.size.height - 20))
                     }
                 }
-                //            .background {
-                //                RoundedRectangle(cornerRadius: 10.0)
-                //                    .padding()
-                //                    .foregroundStyle(.white)
-                //            }
-                .offset(y: 7)
-                .padding(.vertical)
+                .frame(width: max(0, geo.size.width), height: max(0, geo.size.height - 20))
+                .background {
+                    RoundedRectangle(cornerRadius: 10.0)
+                        .fill(Color.white)
+                }
+                .offset(y: dragOffset.height + 10)
+                .gesture(
+                    DragGesture()
+                        .onChanged { gesture in
+                            withAnimation {
+                                if gesture.translation.height.magnitude > gesture.translation.width.magnitude {
+                                    if !hasSkipped {
+                                        dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
+                                    } else {
+                                        dragOffset = CGSize(width: 0.0, height: 0.0)
+                                    }
+                                    
+                                    if dragOffset.height < -150 {
+                                        if optionSelected != 0 {
+                                            if !isConfirmed && optionSelected == 1 {
+                                                postVM.addView(responseOption: optionSelected)
+                                            } else if !isConfirmed {
+                                                postVM.addView(responseOption: optionSelected)
+                                            }
+                                            withAnimation {
+                                                isConfirmed = true
+                                            }
+                                        }
+                                        
+                                        dragOffset = .zero
+                                    }
+                                    
+                                    if dragOffset.height > 150 && !hasSkipped {
+                                        hasSkipped = true
+                                        optionSelected = 0
+                                        if isConfirmed {
+                                            // Next post logic
+                                            postVM.feedPosts.remove(at: 0)
+                                        } else {
+                                            // Skip logic
+                                            postVM.feedPosts.remove(at: 0)
+                                        }
+                                        isConfirmed = false
+                                    }
+                                    
+                                } else {
+                                    if gesture.translation.width.magnitude > 150 {
+                                        dragOffset = .zero
+                                        
+                                        if gesture.translation.width > 0 {
+                                            optionSelected = 2
+                                        } else {
+                                            optionSelected = 1
+                                        }
+                                        
+                                    } else {
+                                        dragOffset = .init(width: gesture.translation.width, height: 0.0)
+                                    }
+                                }
+                            }
+                        }
+                        .onEnded { gesture in
+                            dragOffset = .zero
+                            hasSkipped = false
+                        }
+                )
             }
-            .background(Color.white)
+            .frame(width: min(geo.size.width, UIScreen.main.bounds.width))
         }
         .onAppear() {
             postVM.addDummyPosts()
@@ -167,28 +167,6 @@ struct FeedView: View {
 }
 
 extension View {
-    func stacked(at position: Int, in total: Int, offset: Binding<CGSize>) -> some View {
-        if position == 0 {
-            return self.offset(x: offset.wrappedValue.width, y: offset.wrappedValue.height)
-        }
-        
-        let offset = Double(total - position) + 1
-        return self.offset(y: offset * 10)
-    }
-    
-    func dimmed(at position: Int, in total: Int) -> some View {
-        return self.opacity(1.0 * (1 / Double(position)))
-    }
-    
-    func shrunk(at position: Int, in total: Int) -> some View {
-        return self.frame(maxWidth: 1.0 * (1 / Double(position)))
-    }
-    
-    func colored(at position: Int, in total: Int) -> some View {
-        return self.background(position == 0 ? .white : .gray)
-//        return self.background()
-    }
-    
     func rotatedBy(at position: Int, offset: Binding<CGSize>) -> some View {
         if position == 0 {
             return self.rotationEffect(.degrees(offset.wrappedValue.width / 10.0))

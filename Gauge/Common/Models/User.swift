@@ -79,7 +79,4 @@ class User: Equatable, Identifiable {
     }
 }
 
-struct UserResponses {
-    var userResponses: [String : Int] // String is Category name .rawValue, Int is number of times interacted in session
-    var currentUserCategories: [String] // Current category list (as rawValues) in Firebase
-}
+

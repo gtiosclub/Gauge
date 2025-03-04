@@ -22,6 +22,7 @@ struct BinaryResultView: View {
                 ZStack(alignment: .leading) {
                     Rectangle()
                         .fill(Color.gray)
+                    
                     Text("\(Int(round(Double(fraction1 * 100))))% \(post.responseOption1)")
                         .foregroundColor(.white)
                         .padding(.leading, 8)
@@ -32,6 +33,7 @@ struct BinaryResultView: View {
                 ZStack(alignment: .trailing) {
                     Rectangle()
                         .fill(Color.gray.opacity(0.25))
+                    
                     Text("\(Int(round(Double(fraction2 * 100))))% \(post.responseOption2)")
                         .foregroundColor(.black)
                         .padding(.trailing, 8)
@@ -41,6 +43,7 @@ struct BinaryResultView: View {
             .frame(height: 40)
             .cornerRadius(8)
         }
+        .frame(height: 40)
         .padding()
     }
 }
