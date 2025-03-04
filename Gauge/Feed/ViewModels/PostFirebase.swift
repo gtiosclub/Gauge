@@ -30,15 +30,126 @@ class PostFirebase: ObservableObject {
     
     func getNextFeedPost() {
         // Pop index 0 of feedPosts
+        feedPosts.remove(at: 0)
+        feedPosts.append(allQueriedPosts[0])
         // Append a new post from allQueriedPosts (just index 0 for now)
     }
     
-    func watchForCurrentFeedPostChanges() {
-        // Cancel current listeners (if there are ones)
-        // Setup listener for new index 0 subcollections
-        // Save the listeners in the variables
-        // Make changes to the Post's (Binary) responses, viewCounter, comments, responseResult1, responseResult2
+    func watchForCurrentFeedPostChanegs() {
+        setUpCommentsListener()
+        setUpResponsesListener()
+        setUpViewsListener()
+        // Makes changes to the Post's (Binary) responses, viewCounter, comments, responseResult1, responseResult2
+
     }
+    
+    func setUpCommentsListener() {
+        // Cancel current listeners (if there are ones)
+        currentFeedPostCommentsListener?.remove()
+//        currentFeedPostResponsesListener?.remove()
+//        currentFeedPostViewsListener?.remove()
+
+        // Setup listener for new index 0 subcollections
+        var currentPost = feedPosts[0]
+        let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
+        currentFeedPostCommentsListener = postRef.collection("COMMENTS").addSnapshotListener { snapshot, error in
+            guard let snapshot = snapshot else { return }
+            
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+                for diff in snapshot.documentChanges {
+                    if diff.type == .added {
+                        print("New comment: \(diff.document.data())")
+                        let newCommentDoc = diff.document.data()
+                        let id = diff.document.documentID
+                        let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
+                        let newComment = Comment(
+                            commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
+                            userId: id,
+                            date: date,
+                            commentId: id,
+                            likes: newCommentDoc["likes"] as? [String] ?? [],
+                            dislikes: newCommentDoc["dislikes"] as? [String] ?? [],
+                            content: newCommentDoc["content"] as? String ?? ""
+                            )
+                            currentPost.comments.append(newComment)
+
+                    } else if diff.type == .removed {
+                        print("Comment removed: \(diff.document.documentID)")
+                        currentPost.comments.removeAll { $0.commentId == diff.document.documentID }
+                    } else if diff.type == .modified {
+                        print("Comment modified: \(diff.document.documentID)")
+                        currentPost.comments.removeAll { $0.commentId == diff.document.documentID }
+                        let newCommentDoc = diff.document.data()
+                        let id = diff.document.documentID
+                        let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
+                        let newComment = Comment(
+                            commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
+                            userId: id,
+                            date: date,
+                            commentId: id,
+                            likes: newCommentDoc["likes"] as? [String] ?? [],
+                            dislikes: newCommentDoc["dislikes"] as? [String] ?? [],
+                            content: newCommentDoc["content"] as? String ?? ""
+                            )
+                            currentPost.comments.append(newComment)
+                    }
+                }
+            }
+        }
+        // Save the comment listener in the variables
+        // Makes changes to the Post's comments
+    }
+    
+    func setUpResponsesListener() {
+        currentFeedPostResponsesListener?.remove()
+        
+        var currentPost = feedPosts[0]
+        let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
+        currentFeedPostCommentsListener = postRef.collection("RESPONSES").addSnapshotListener { snapshot, error in
+            guard let snapshot = snapshot else { return }
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+                for diff in snapshot.documentChanges {
+                    if diff.type == .added {
+                        print("New Response: \(diff.document.data())")
+                        let newResponseDoc = diff.document.data()
+                        let id = diff.document.documentID
+                        let newResponse = Response(
+                            responseId: id,
+                            userId: newResponseDoc["userId"] as? String ?? "",
+                            responseOption: newResponseDoc["responseOption"] as? String ?? ""
+                        )
+                        currentPost.responses.append(newResponse)
+                        if let binaryPost = currentPost as? BinaryPost {
+                            if newResponse.responseOption == binaryPost.responseOption1 {
+                                binaryPost.responseResult1 = binaryPost.responseResult1 + 1
+                            } else if newResponse.responseOption == binaryPost.responseOption2 {
+                                binaryPost.responseResult2 = binaryPost.responseResult2 + 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func setUpViewsListener() {
+        currentFeedPostViewsListener?.remove()
+        var currentPost = feedPosts[0]
+        let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
+        currentFeedPostCommentsListener = postRef.collection("VIEWS").addSnapshotListener { snapshot, error in
+            guard let snapshot = snapshot else { return }
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+                let viewCount = snapshot.documents.count
+                currentPost.viewCounter = viewCount
+            }
+        }
+                
+    }
+
+        
     
     func watchForNewPosts(user: User) {
         let allPosts: [String] = user.myViews + user.myResponses
@@ -159,7 +270,7 @@ class PostFirebase: ObservableObject {
         let commentRef = Firebase.db.collection("POSTS")
             .document(postId)
             .collection("COMMENTS")
-            .document(commentId)       
+            .document(commentId)
       
         commentRef.updateData([
             "likes": FieldValue.arrayUnion([userId])
@@ -682,3 +793,4 @@ class PostFirebase: ObservableObject {
         }
     }
 }
+
