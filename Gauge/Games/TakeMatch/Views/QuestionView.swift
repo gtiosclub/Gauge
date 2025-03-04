@@ -12,14 +12,10 @@ struct QuestionView: View {
     var question: String
     @Binding var inputText: String
     var onSubmit: () -> Void
-    
     @State var guessedMatches: [String:String] = [:]
     @State var submitAnswer = false
-    
     @Environment(\.dismiss) private var dismiss
-
     @FocusState private var isTextFieldFocused: Bool
-
 
     var body: some View {
         VStack(spacing: 12) {

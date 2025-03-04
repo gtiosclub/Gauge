@@ -9,8 +9,8 @@ import SwiftUI
 
 struct TakeMatchView: View {
     @ObservedObject var mcManager: MCManager
-    @ObservedObject  var gameSettings: TakeMatchSettingsVM
-  
+    @ObservedObject var gameSettings = TakeMatchSettingsVM.shared
+
     @State private var currentScreen: Int = 1
     @State private var selectedTopic: String = ""
 
@@ -24,8 +24,9 @@ struct TakeMatchView: View {
         VStack {
             switch currentScreen {
             case 1:
-                QuestionView(mcManager: mcManager, question: question, inputText: $inputText) {
+                QuestionView(mcManager: mcManager, question: gameSettings.question, inputText: $inputText) {
                 //QuestionView(question: gameSettings.question, inputText: $inputText) {
+                    mcManager.submitAnswer(inputText)
                     responses[players[responses.count]] = inputText
                     inputText = ""
                     if responses.count == players.count {
@@ -53,6 +54,6 @@ struct TakeMatchView: View {
 }
 
 #Preview {
-    TakeMatchView(mcManager: MCManager(yourName: "test"))
+    TakeMatchView(mcManager: MCManager(yourName: "test"), gameSettings: TakeMatchSettingsVM.shared)
     //TakeMatchView(gameSettings: TakeMatchSettingsVM())
 }

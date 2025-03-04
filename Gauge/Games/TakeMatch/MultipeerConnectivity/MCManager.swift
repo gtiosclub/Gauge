@@ -17,7 +17,7 @@ class MCManager: NSObject, ObservableObject {
     let myPeerID: MCPeerID
     var nearbyServiceAdvertiser: MCNearbyServiceAdvertiser
     let nearbyServiceBrowser: MCNearbyServiceBrowser
-    
+
     @Published var username: String
     @Published var connectedPeers: [MCPeerID] = []
     @Published var discoveredPeers: [MCPeerID: AdvertisedInfo] = [:]
@@ -153,7 +153,18 @@ class MCManager: NSObject, ObservableObject {
             }
         }
     }
-    
+
+    func broadcastQuestion(_ questionText: String) {
+        do {
+            let data = try JSONEncoder().encode(["question": questionText])
+            try session.send(data, toPeers: session.connectedPeers, with: .reliable)
+        } catch {
+            print("Error sending question: \(error)")
+        }
+    }
+
+
+
     func broadcastGoToResults() {
         
         let message="goToResults"
@@ -247,6 +258,12 @@ extension MCManager: MCSessionDelegate {
             } else {
                 // Handle other messages (like answers) here.
                 do {
+                    let decodedData = try JSONDecoder().decode([String: String].self, from: data)
+                    if let receivedQuestion = decodedData["question"] {
+                        DispatchQueue.main.async {
+                            TakeMatchSettingsVM.shared.question = receivedQuestion
+                        }
+                    }
                     let answer = try JSONDecoder().decode(Answer.self, from: data)
                     DispatchQueue.main.async {
                         self.takeMatchAnswers.append(answer)

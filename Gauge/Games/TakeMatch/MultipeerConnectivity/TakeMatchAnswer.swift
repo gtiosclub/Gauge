@@ -8,8 +8,7 @@
 import Foundation
 
 struct Answer: Identifiable, Codable {
-    
-    let id = UUID()
+    var id = UUID()
     let sender: String
     let text: String
 }

@@ -29,7 +29,7 @@ struct ResultsView: View {
         }
         .navigationBarBackButtonHidden()
         .navigationDestination(isPresented: $navigateToHome) {
-            TakeMatchHome()
+            GamesHome()
         }
     }
 }

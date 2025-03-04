@@ -10,7 +10,7 @@ import SwiftUI
 struct TakeMatchRoomView: View {
     @ObservedObject var mcManager: MCManager
 
-    @StateObject private var gameSettings = TakeMatchSettingsVM()
+    @ObservedObject var gameSettings = TakeMatchSettingsVM.shared
     @StateObject private var chatGPTVM = ChatGPTVM()
     
     @State var showSettings: Bool = false
@@ -28,7 +28,6 @@ struct TakeMatchRoomView: View {
         NavigationStack {
             VStack(spacing: 20) {
                 Spacer()
-                // Display the room code
                 Text(isHost ? "Hosting Room: \(roomCode)" : "Joined Room: \(roomCode)")
                     .font(.title)
                     .bold()
@@ -36,21 +35,18 @@ struct TakeMatchRoomView: View {
                 if isHost {
                     
                     Button("Start") {
-                        mcManager.broadcastStartGame()
-                        mcManager.gameStarted = true
-//                     Button("Start") {
-//                         //select random topic from selected categories
-//                         //use to generate a question and navigate to takematch game
-//                         if let topic = gameSettings.selectedCategories.randomElement() {
-//                             gameSettings.selectedTopic = topic
-//                             Task {
-//                                 await chatGPTVM.generateQuestion(from: [topic])
-//                                 if let question = chatGPTVM.storedQuestions.last {
-//                                     gameSettings.question = question
-//                                     navigateToTakeMatch = true
-//                                 }
-//                             }
-//                         }
+                         if let topic = gameSettings.selectedCategories.randomElement() {
+                             gameSettings.selectedTopic = topic
+                             Task {
+                                 await chatGPTVM.generateQuestion(from: [topic])
+                                 if let question = chatGPTVM.storedQuestions.last {
+                                     gameSettings.question = question
+                                     mcManager.broadcastStartGame()
+                                     mcManager.gameStarted = true
+                                     mcManager.broadcastQuestion(question)
+                                 }
+                             }
+                         }
                     }
                     .padding()
                     .frame(width: 80, height: 30)
@@ -59,9 +55,7 @@ struct TakeMatchRoomView: View {
                 } else {
                     Text("Waiting for host...")
                 }
-                
                 Spacer()
-                
                 HStack {
                     VStack {
                         
@@ -115,37 +109,29 @@ struct TakeMatchRoomView: View {
                 }
             }
             .sheet(isPresented: $showSettings) {
-                GameSettingsView(gameSettings: gameSettings)
+                GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings)
                     .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
-            .navigationDestination(isPresented: $mcManager.gameStarted) {
-                QuestionView(
-                    mcManager: mcManager,
-                    question: "What is your favorite color?",
-                    inputText: $answerText,
-                    onSubmit: {
-                        mcManager.submitAnswer(answerText)
-                        answerText = ""
-                    }
-                )
-            }
-//                 GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings)
-//                     .presentationDetents([.medium])
-//                     .presentationDragIndicator(.visible)
-//             }
-//             .onDisappear {
-//                 if !isHost {
-//                     mcManager.session.disconnect()
-//                 }
-//                 mcManager.isAvailableToPlay = false
-//                 mcManager.stopBrowsing()
-//             }
-//             .navigationDestination(isPresented: $navigateToTakeMatch) {
-//                 TakeMatchView(gameSettings: gameSettings)
-//             }
+
+//            .navigationDestination(isPresented: $mcManager.gameStarted) {
+//                QuestionView(
+//                    mcManager: mcManager,
+//                    question: "What is your favorite color?",
+//                    inputText: $answerText,
+//                    onSubmit: {
+//                        mcManager.submitAnswer(answerText)
+//                        answerText = ""
+//                    }
+//                )
+//            }
         }
+        .navigationDestination(isPresented: $mcManager.gameStarted) {
+            TakeMatchView(mcManager: mcManager, gameSettings: gameSettings)
+        }
+
     }
+    
 }
 
 #Preview {
@@ -185,7 +171,7 @@ struct CategoryView: View{
 //game settings sheet
 struct GameSettingsView: View {
     
-    @StateObject var gameSettings = TakeMatchSettingsVM()
+    @ObservedObject var gameSettings = TakeMatchSettingsVM.shared
     @Binding var showSettings: Bool
 
     let categories: [String] = ["Sports", "Food", "Music", "Pop Culture", "TV Shows", "Movies/Film", "Celebrities"]

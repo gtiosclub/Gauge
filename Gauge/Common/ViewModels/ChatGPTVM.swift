@@ -77,7 +77,7 @@ class ChatGPTVM: ObservableObject {
         }
         if categories.isEmpty {
             //generate random question if no topic is selected
-            let prompt = "Generate a fun, short, light-hearted, open-ended, opinion-based question about anything that could divide opinions and spark discussion among friends."
+            let prompt = "Generate a short, fun, and light-hearted open-ended question about anything that sparks discussion among friends. Avoid yes/no or either-or questions. The question should prompt answers that are short and quick, rather than lengthy explanations, don't ask why or how."
             self.isQuerying = true
             do {
                 let response = try await gptKey.sendMessage(text: prompt)
@@ -92,7 +92,7 @@ class ChatGPTVM: ObservableObject {
             }
         } else {
             for category in categories {
-                let prompt = "Generate a fun, short, light-hearted, open-ended, opinion-based question about \(category) that could divide opinions and spark discussion among friends."
+                let prompt = "Generate a short, fun, and light-hearted open-ended question about \(category) that sparks discussion among friends. Avoid yes/no or either-or questions. The question should prompt answers that are short and quick, rather than lengthy explanations, don't ask why or how."
                 self.isQuerying = true
                 do {
                     let response = try await gptKey.sendMessage(text: prompt)
