@@ -9,11 +9,17 @@ import SwiftUI
 
 struct TakeMatchRoomView: View {
     @ObservedObject var mcManager: MCManager
-    @State var showSettings: Bool = false
+
     @StateObject private var gameSettings = TakeMatchSettingsVM()
+    @StateObject private var chatGPTVM = ChatGPTVM()
+    
+    @State var showSettings: Bool = false
     @State var isHost: Bool
+    @State private var navigateToTakeMatch = false
+    
     var roomCode: String
     var onExit: () -> Void
+  
     @Environment(\.dismiss) private var dismiss
     
     @State var answerText: String = ""
@@ -32,6 +38,19 @@ struct TakeMatchRoomView: View {
                     Button("Start") {
                         mcManager.broadcastStartGame()
                         mcManager.gameStarted = true
+//                     Button("Start") {
+//                         //select random topic from selected categories
+//                         //use to generate a question and navigate to takematch game
+//                         if let topic = gameSettings.selectedCategories.randomElement() {
+//                             gameSettings.selectedTopic = topic
+//                             Task {
+//                                 await chatGPTVM.generateQuestion(from: [topic])
+//                                 if let question = chatGPTVM.storedQuestions.last {
+//                                     gameSettings.question = question
+//                                     navigateToTakeMatch = true
+//                                 }
+//                             }
+//                         }
                     }
                     .padding()
                     .frame(width: 80, height: 30)
@@ -111,6 +130,20 @@ struct TakeMatchRoomView: View {
                     }
                 )
             }
+//                 GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings)
+//                     .presentationDetents([.medium])
+//                     .presentationDragIndicator(.visible)
+//             }
+//             .onDisappear {
+//                 if !isHost {
+//                     mcManager.session.disconnect()
+//                 }
+//                 mcManager.isAvailableToPlay = false
+//                 mcManager.stopBrowsing()
+//             }
+//             .navigationDestination(isPresented: $navigateToTakeMatch) {
+//                 TakeMatchView(gameSettings: gameSettings)
+//             }
         }
     }
 }
@@ -120,33 +153,111 @@ struct TakeMatchRoomView: View {
         TakeMatchRoomView(mcManager: MCManager(yourName: "test"), isHost: true, roomCode: "ABCD", onExit: {})
     }
 }
+struct CategoryView: View{
+    @Binding var selectedCategories: [String]
+    var categoryName: String
+    var isSelected: Bool {
+        selectedCategories.contains(categoryName)
+    }
+    var body: some View {
+        Text(categoryName)
+            .font(.body)
+            .foregroundColor(.black)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(isSelected ? Color.blue.opacity(0.2) : Color.white)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(Color.black, lineWidth: 1)
+            )
+            .onTapGesture {
+                if selectedCategories.contains(categoryName) {
+                    selectedCategories.removeAll(where: {$0 == categoryName})
+                } else {
+                    selectedCategories.append(categoryName)
+                }
+
+            }
+    }
+}
 
 //game settings sheet
 struct GameSettingsView: View {
     
     @StateObject var gameSettings = TakeMatchSettingsVM()
+    @Binding var showSettings: Bool
+
+    let categories: [String] = ["Sports", "Food", "Music", "Pop Culture", "TV Shows", "Movies/Film", "Celebrities"]
+
     
     var body: some View {
         
         VStack() {
-            
-            Text("Customize Game")
-                .font(.headline)
+            Text("Game Settings")
+                .font(.title)
+                .bold()
                 .padding()
             
             Form {
-                
-                Section {
-                    
-                    Picker("Rounds", selection: $gameSettings.numRounds) {
+                HStack() {
+                    Text("# of Rounds").font(.headline)
+                    Section {
                         
-                        ForEach(1...5, id: \.self) { round in
-                            Text("\(round)").tag(round)
+                        Picker("", selection: $gameSettings.numRounds) {
+                            
+                            ForEach(1...5, id: \.self) { round in
+                                Text("\(round)").tag(round)
+                            }
+                        }
+                        
+                    }
+                    .listRowBackground(Color(.systemGray4))
+                }
+                HStack() {
+                    Text("Round Length").font(.headline)
+                    Section {
+                        
+                        Picker("", selection: $gameSettings.roundLen) {
+                            
+                            ForEach([15,30,45,60], id: \.self) { length in
+                                Text("\(length)s").tag(length)
+                            }
+                        }
+                        
+                    }
+                    .listRowBackground(Color(.systemGray4))
+                }
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Categories")
+                        .font(.headline)
+                    //can select multiple categories, depending on number of rounds & randomness not all categories may be used
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                        ForEach(categories, id: \.self) { category in
+                            CategoryView(selectedCategories: $gameSettings.selectedCategories, categoryName: category)
                         }
                     }
-                    
                 }
-                .listRowBackground(Color(.systemGray4))
+                .padding(.horizontal)
+                
+                Text("Looking good?")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                
+                Button(action: {
+                    // Handle done action
+                    showSettings = false
+                }) {
+                    Text("DONE")
+                        .font(.headline)
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(.systemGray3))
+                        .cornerRadius(8)
+                        .foregroundColor(.black)
+                }
+               
             }
             .scrollContentBackground(.hidden)
             .background(.white)
@@ -155,9 +266,9 @@ struct GameSettingsView: View {
         .background(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
+    
+
 }
 
-#Preview {
-    GameSettingsView()
-}
+
 
