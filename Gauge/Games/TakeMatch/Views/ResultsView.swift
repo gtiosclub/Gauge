@@ -20,7 +20,7 @@ struct ResultsView: View {
                 HStack {
                     Text("\(player): \(responses[player] ?? "")")
                     Spacer()
-                    Text(guessedMatches[responses[player] ?? ""] == player ? "✅" : "❌")
+                    Text(guessedMatches[player] == responses[player] ? "✅" : "❌")
                 }
             }
             Button(action: {navigateToHome = onRestart()}) {

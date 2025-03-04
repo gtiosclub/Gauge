@@ -28,7 +28,7 @@ struct TakeMatchView: View {
                     }
                 }
             case 2:
-                MatchingView(responses: Array(responses.values), playerPictures: players, guessedMatches: $guessedMatches) {
+                MatchingView(mcManager: mcManager, responses: Array(responses.values), playerPictures: players, guessedMatches: $guessedMatches) {
                     currentScreen = 3
                 }
             case 3:

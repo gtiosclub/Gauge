@@ -12,10 +12,12 @@ struct QuestionView: View {
     var question: String
     @Binding var inputText: String
     var onSubmit: () -> Void
+    
+    @State var guessedMatches: [String:String] = [:]
     @State var submitAnswer = false
+    
     @Environment(\.dismiss) private var dismiss
 
-    
     @FocusState private var isTextFieldFocused: Bool
 
 
@@ -59,13 +61,15 @@ struct QuestionView: View {
             
             let responses = Dictionary(uniqueKeysWithValues: mcManager.takeMatchAnswers.map { ($0.sender, $0.text) })
             if (mcManager.connectedPeers.count + 1 <= responses.count) {
-                ResultsView(
-                    responses: responses,
-                    guessedMatches: [:],
-                    onRestart: {
-                        return true
-                    }
-                )
+                let filteredResponses = responses.filter { $0.key != mcManager.username }
+                MatchingView(mcManager: mcManager, responses: Array(filteredResponses.values), playerPictures: Array(filteredResponses.keys), guessedMatches: $guessedMatches, onSubmit: { })
+//                ResultsView(
+//                    responses: responses,
+//                    guessedMatches: [:],
+//                    onRestart: {
+//                        return true
+//                    }
+//                )
             } else {
                 
                 WaitingView(mcManager: mcManager, expectedCount: mcManager.connectedPeers.count)

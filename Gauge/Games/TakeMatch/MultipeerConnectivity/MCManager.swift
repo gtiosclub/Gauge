@@ -5,6 +5,11 @@ extension String {
     static var serviceName = "takematch"
 }
 
+struct AdvertisedInfo {
+    let roomCode: String?
+    let username: String
+}
+
 class MCManager: NSObject, ObservableObject {
     
     let serviceType = String.serviceName
@@ -13,8 +18,9 @@ class MCManager: NSObject, ObservableObject {
     var nearbyServiceAdvertiser: MCNearbyServiceAdvertiser
     let nearbyServiceBrowser: MCNearbyServiceBrowser
     
+    @Published var username: String
     @Published var connectedPeers: [MCPeerID] = []
-    @Published var discoveredPeers: [MCPeerID: String] = [:]
+    @Published var discoveredPeers: [MCPeerID: AdvertisedInfo] = [:]
     @Published var receivedInvite: Bool = false
     @Published var receievedInviteFrom: MCPeerID?
     @Published var invitationHandler: ((Bool, MCSession?) -> Void)?
@@ -35,6 +41,7 @@ class MCManager: NSObject, ObservableObject {
     
     init(yourName: String) {
         
+        self.username = yourName
         myPeerID = MCPeerID(displayName: yourName)
         session = MCSession(peer: myPeerID)
         nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: nil, serviceType: serviceType)
@@ -94,16 +101,28 @@ class MCManager: NSObject, ObservableObject {
 //        stopAdvertising()
 //    }
     
+    func setUsername(username: String) {
+        self.username = username
+        nearbyServiceAdvertiser.stopAdvertisingPeer()
+        nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(
+            peer: myPeerID,
+            discoveryInfo: ["username": username],
+            serviceType: serviceType
+        )
+        nearbyServiceAdvertiser.delegate = self
+        startAdvertising()
+    }
+    
     func startHosting(with roomCode: String) {
         stopAdvertising()
-        nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: ["roomCode": roomCode], serviceType: serviceType)
+        nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: ["roomCode": roomCode, "username": username], serviceType: serviceType)
         nearbyServiceAdvertiser.delegate = self
         startAdvertising()
     }
     
     func joinRoom(with code: String) {
         
-        if let targetPeer = discoveredPeers.first(where: { $0.value == code })?.key {
+        if let targetPeer = discoveredPeers.first(where: { $0.value.roomCode == code })?.key {
             nearbyServiceBrowser.invitePeer(targetPeer, to: session, withContext: nil, timeout: 10)
         } else {
             print("No host found with room code: \(code)")
@@ -111,7 +130,7 @@ class MCManager: NSObject, ObservableObject {
     }
     
     func submitAnswer(_ answerText: String) {
-        let answer = Answer(sender: myPeerID.displayName, text: answerText)
+        let answer = Answer(sender: username, text: answerText)
         self.takeMatchAnswers.append(answer)
         // Then send the data asynchronously if needed
         if !session.connectedPeers.isEmpty {
@@ -154,9 +173,10 @@ extension MCManager: MCNearbyServiceBrowserDelegate {
         
         DispatchQueue.main.async {
             
-            if let room = info?["roomCode"] {
-                self.discoveredPeers[peerID] = room
-            }
+            let roomCode = info?["roomCode"] // might be nil for joiners
+            let username = info?["username"] ?? peerID.displayName
+            let advertisedInfo = AdvertisedInfo(roomCode: roomCode, username: username)
+            self.discoveredPeers[peerID] = advertisedInfo
         }
     }
     

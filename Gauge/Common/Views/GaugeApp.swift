@@ -41,6 +41,7 @@ struct GaugeApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationPath, root: {
+//                MatchingView(mcManager: MCManager(yourName: "Test"), responses: ["Pizza", "Hamburgers", "Fried Chicken", "Ice Cream"], playerPictures: ["Test0", "Test1", "Test2"], guessedMatches: .constant([:]), onSubmit: { })
                 TakeMatchHome()
             })
         }

@@ -49,11 +49,11 @@ struct TakeMatchRoomView: View {
                         Text("Participants:")
                             .font(.headline)
                         
-                        Text("You: \(mcManager.myPeerID.displayName)")
+                        Text("You: \(mcManager.username)")
                             .foregroundColor(.blue)
                         
                         ForEach(mcManager.connectedPeers, id:\.self) { peer in
-                            Text(peer.displayName)
+                            Text(mcManager.discoveredPeers[peer]?.username ?? peer.displayName)
                         }
                     }
                 }

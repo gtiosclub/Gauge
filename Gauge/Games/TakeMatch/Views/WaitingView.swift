@@ -14,6 +14,7 @@ struct WaitingView: View {
         }
     var expectedCount: Int
     
+    @State var guessedMatches: [String:String] = [:]
     @State var navigateToResults = false
     
     @Environment(\.dismiss) private var dismiss
@@ -36,13 +37,8 @@ struct WaitingView: View {
             }
         }
         .navigationDestination(isPresented: $navigateToResults) {
-            ResultsView(
-                responses: responses,
-                guessedMatches: [:],
-                onRestart: {
-                    return true
-                }
-            )
+            let filteredResponses = responses.filter { $0.key != mcManager.username }
+            MatchingView(mcManager: mcManager, responses: Array(filteredResponses.values), playerPictures: Array(filteredResponses.keys), guessedMatches: $guessedMatches, onSubmit: { })
         }
         .navigationBarBackButtonHidden()
         
