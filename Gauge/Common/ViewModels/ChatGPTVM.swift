@@ -75,9 +75,9 @@ class ChatGPTVM: ObservableObject {
             latestAIResponse = "Please select a topic."
             return
         }
-            
-        for category in categories {
-            let prompt = "Generate a divisive opinion-based question about \(category)"
+        if categories.isEmpty {
+            //generate random question if no topic is selected
+            let prompt = "Generate a fun, short, light-hearted divisive opinion-based question about anything to ask friends"
             self.isQuerying = true
             do {
                 let response = try await gptKey.sendMessage(text: prompt)
@@ -87,8 +87,24 @@ class ChatGPTVM: ObservableObject {
                 self.isQuerying = false
             } catch {
                     // Update UI state on the main thread
-                self.latestAIResponse = "Error generating question for \(category): \(error.localizedDescription)"
+                self.latestAIResponse = "Error generating random question: \(error.localizedDescription)"
                 self.isQuerying = false
+            }
+        } else {
+            for category in categories {
+                let prompt = "Generate a fun, short, light-hearted divisive opinion-based question about \(category) to ask friends"
+                self.isQuerying = true
+                do {
+                    let response = try await gptKey.sendMessage(text: prompt)
+                    
+                    // Update UI state on the main thread
+                    self.storedQuestions.append(response)
+                    self.isQuerying = false
+                } catch {
+                        // Update UI state on the main thread
+                    self.latestAIResponse = "Error generating question for \(category): \(error.localizedDescription)"
+                    self.isQuerying = false
+                }
             }
         }
     }
