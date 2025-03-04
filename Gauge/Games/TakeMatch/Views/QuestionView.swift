@@ -13,7 +13,7 @@ struct QuestionView: View {
     var onSubmit: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 20) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color(.secondarySystemFill))
@@ -21,12 +21,12 @@ struct QuestionView: View {
                 Text(question).font(.title)
                     .padding()
             }
-            InfoField(title: "A:", text: $inputText)
+            InfoField(text: $inputText)
             Button(action: {
                 onSubmit()
             }) {
                 Text("Submit")
-                    .font(.headline)
+                    .font(.title)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -37,39 +37,46 @@ struct QuestionView: View {
             }
             .buttonStyle(PressEffectButtonStyle())
             .padding(.horizontal, 40)
-            .padding(.top, 20)
-
         }.padding()
     }
 }
 
-#Preview {
-    QuestionView(question: "Q: Some question about this person's preferences", inputText: .constant(""), onSubmit: { })
-}
-
 struct InfoField: View {
-    let title:String
-    @Binding var text:String
-    @FocusState var isTyping:Bool
+    @Binding var text: String
+    @FocusState private var isTyping: Bool
+    let title: String = "A:"
+    
     var body: some View {
         ZStack(alignment: .leading) {
-            TextField("", text: $text).padding(.leading)
-                .frame(height: 250).focused($isTyping)
-                .background(isTyping ? .black : Color(.gray),in:RoundedRectangle(cornerRadius: 14).stroke(lineWidth: 2))
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(lineWidth: 2)
+                .foregroundColor(isTyping ? .black : .gray)
+                .frame(height: 250)
+            
+            TextEditor(text: $text)
+                .padding(.horizontal, 10)
+                .focused($isTyping)
+                .frame(height: max(250, min(50, dynamicHeight())))
                 .font(.title)
+                .opacity(text.isEmpty ? 0.8 : 1)
 
-
-            Text(title).padding(.horizontal, 5)
-                .background(.white.opacity(isTyping || !text.isEmpty ? 1 : 0))
-                .foregroundStyle(isTyping ? .black : .black)
-                .padding(.leading).offset(y: isTyping || !text.isEmpty ? -27 : 0)
-                .onTapGesture {
-                    isTyping.toggle()
-                }
-                .font(.title)
-
+            if text.isEmpty {
+                Text(title)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal, 14)
+                    .font(.title)
+                    .onTapGesture {
+                        isTyping = true
+                    }
+            }
         }
-        .animation(.linear(duration: 0.2), value: isTyping)
+        .animation(.easeInOut(duration: 0.2), value: isTyping)
+        .padding()
+    }
+
+    private func dynamicHeight() -> CGFloat {
+        let lineCount = CGFloat(text.split(separator: "\n").count + 1)
+        return min(250, max(50, lineCount * 30))
     }
 }
 

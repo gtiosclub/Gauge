@@ -1,113 +1,102 @@
-//
-//  TakeMatchMatchingView.swift
-//  Gauge
-//
-//  Created by Seohyun Park on 2/11/25.
-//
-
 import SwiftUI
 
-struct MatchingView: View {
-    var responses: [String]
-    var playerPictures: [String]
-    @Binding var guessedMatches: [String: String]
-
-    @State private var dragOffset = CGSize.zero
-    @State private var lastPosition = CGSize.zero
-    @State private var isDragging = false
-    @State private var hoveredResponse: String? = nil
-    @State private var selectedImage: String? = nil
-
+struct MatchView: View {
+    @Binding var iconBank: [String]
+    @Binding var responseGuesses: [String?]
+    @Binding var isTargeted: [Bool]
+    var responses: [String] // Add this parameter
     var onSubmit: () -> Void
 
+    // Adaptive column setup for wrapping behavior
+    let columns = [
+        GridItem(.adaptive(minimum: 150, maximum: 200), spacing: 30)
+    ]
+
     var body: some View {
-        VStack {
-            Text("Match").font(.largeTitle.bold())
-            HStack {
-                ForEach(playerPictures, id: \.self) { imageName in
-                    Image("TestProfile")
-                        .resizable()
-                        .frame(width: 80, height: 80)
-                        .clipShape(Circle())
-                        .shadow(radius: 1.5, x: 1.5, y: 1.5)
-                        .foregroundColor(.yellow)
-                        .scaleEffect(isDragging && selectedImage == imageName ? 1.2 : 1.0)
-                        .opacity(isDragging && selectedImage == imageName ? 0.8 : 1.0)
-                        .offset(x: lastPosition.width + dragOffset.width,
-                                y: lastPosition.height + dragOffset.height)
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        dragOffset = value.translation
-                                        isDragging = true
-                                        selectedImage = imageName
-
-                                        let dragPosition = CGPoint(
-                                            x: value.location.x + lastPosition.width,
-                                            y: value.location.y + lastPosition.height
-                                        )
-                                        hoveredResponse = responseAtPosition(dragPosition)
-                                    }
-                                }
-                                .onEnded { value in
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        lastPosition.width += dragOffset.width
-                                        lastPosition.height += dragOffset.height
-                                        dragOffset = .zero
-                                        isDragging = false
-
-                                        if let hoveredResponse = hoveredResponse, let selectedImage = selectedImage {
-                                            guessedMatches[selectedImage] = hoveredResponse
-                                        }
-
-                                        hoveredResponse = nil
-                                        selectedImage = nil
-                                    }
-                                }
-                        )
-                }
-            }
-            .zIndex(1)
-            ZStack {
-                VStack(spacing: 12) {
-                    ForEach(responses, id: \.self) { response in
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(hoveredResponse == response ? Color.green : Color.gray)
-                                .shadow(radius: 1.5, x: 1.5, y: 1.5)
-                                .frame(height: 100)
-                            Text(response)
-                                .font(.title)
+        VStack(spacing: 20) {
+            // Icon Bank (Unassigned Icons)
+            ResponseView(response: "", icons: iconBank, isTargeted: false)
+                .dropDestination(for: String.self) { droppedIcons, _ in
+                    for icon in droppedIcons {
+                        if let responseIndex = responseGuesses.firstIndex(where: { $0 == icon }) {
+                            responseGuesses[responseIndex] = nil
                         }
-                        .background(GeometryReader { geometry in
-                            Color.clear
-                                .onAppear {
-                                    responseFrames[response] = geometry.frame(in: .global)
-                                }
-                        })
+                        if !iconBank.contains(icon) { // Prevent duplicates
+                            iconBank.append(icon)
+                        }
                     }
-                    Spacer()
+                    return true
                 }
-                .padding(.vertical)
+            
+            // Response Boxes Grid
+            LazyVGrid(columns: columns, spacing: 20) {
+                ForEach(Array(responses.enumerated()), id: \.offset) { index, response in
+                    ResponseView(response: response, icons: responseGuesses[index] == nil ? [] : [responseGuesses[index]!], isTargeted: isTargeted[index])
+                        .dropDestination(for: String.self) { droppedIcons, _ in
+                            guard let newIcon = droppedIcons.first else { return false }
+                            if let oldIndex = responseGuesses.firstIndex(where: { $0 == newIcon }) {
+                                responseGuesses[oldIndex] = responseGuesses[index]
+                            } else {
+                                iconBank.removeAll { $0 == newIcon }
+                            }
+                            if let existingIcon = responseGuesses[index] {
+                                if !iconBank.contains(existingIcon) && !responseGuesses.contains(existingIcon) {
+                                    iconBank.append(existingIcon)
+                                }
+                            }
+                            responseGuesses[index] = newIcon
+                            return true
+                        } isTargeted: { targeted in
+                            isTargeted[index] = targeted
+                        }
+                }
             }
             .padding(.horizontal)
-            Spacer()
-        }
-    }
-
-    @State private var responseFrames: [String: CGRect] = [:]
-
-    private func responseAtPosition(_ position: CGPoint) -> String? {
-        for (response, frame) in responseFrames {
-            if frame.contains(position) {
-                return response
+            Button(action: {
+                onSubmit()
+            }) {
+                Text("Submit")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.gray)
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 2, y: 2)
+                    .scaleEffect(1.0)
             }
+            .buttonStyle(PressEffectButtonStyle())
+            .padding(.horizontal, 40)
+            .padding(.top, 20)
         }
-        return nil
+        .padding()
     }
 }
 
-#Preview {
-    MatchingView(responses: ["Pizza", "Hamburgers", "Fried Chicken", "Ice Cream"], playerPictures: ["TestProfile"], guessedMatches: .constant([:]), onSubmit: { })
+struct ResponseView: View {
+    let response: String
+    let icons: [String]
+    let isTargeted: Bool
+
+    var body: some View {
+        VStack {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .frame(width: 160, height: 160)
+                    .foregroundColor(isTargeted ? .teal.opacity(0.2) : Color(.secondarySystemFill))
+                Text(response)
+                    .font(.title)
+                    .frame(maxWidth: 160)
+                    ForEach(icons, id: \.self) { icon in
+                        Text(icon)
+                            .padding(12)
+                            .background(Color.gray)
+                            .cornerRadius(8)
+                            .shadow(radius: 1, x: 1, y: 1)
+                            .draggable(icon)
+                }
+            }
+        }
+        .frame(width: 160)
+    }
 }

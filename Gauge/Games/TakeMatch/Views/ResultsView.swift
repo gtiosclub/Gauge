@@ -15,11 +15,11 @@ struct ResultsView: View {
     var body: some View {
         VStack {
             Text("Results").font(.title)
-            List(responses.keys.sorted(), id: \..self) { player in
+            List(responses.keys.sorted(), id: \.self) { player in
                 HStack {
                     Text("\(player): \(responses[player] ?? "")")
                     Spacer()
-                    Text(guessedMatches[responses[player] ?? ""] == player ? "✅" : "❌")
+                    Text(guessedMatches[player] == responses[player] ? "✅" : "❌")
                 }
             }
             Button("Again?", action: onRestart)
@@ -27,7 +27,3 @@ struct ResultsView: View {
     }
 }
 
-
-#Preview {
-    ResultsView(responses: ["Player": "Answer"], guessedMatches: ["Answer": "Player"], onRestart: { })
-}
