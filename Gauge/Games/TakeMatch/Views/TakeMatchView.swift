@@ -12,7 +12,7 @@ struct TakeMatchView: View {
     @State private var question: String = "What's the most overrated food?"
     @State private var responses: [String: String] = [:]
     @State private var guessedMatches: [String: String] = [:]
-    @State private var players: [String] = ["Nikola", "Soy", "Dahyun", "Ethan", "Akshat"]
+    @State private var players: [String] = ["Player1", "Player2"]
     @State private var inputText: String = ""
     
     var body: some View {
