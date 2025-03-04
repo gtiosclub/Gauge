@@ -75,6 +75,8 @@ struct BinaryFeedPost: View {
                                 .font(optionSelected == 1 ? .title : .title2)
                                 .opacity(dragAmount.width < 0.0 ? (1.0 - (dragAmount.width / 150.0).magnitude) : 1.0)
                                 .frame(width: 150.0, alignment: .leading)
+                                .minimumScaleFactor(0.75)
+                                .lineLimit(1)
                             
                             
                             Spacer()
@@ -94,6 +96,8 @@ struct BinaryFeedPost: View {
                                 .font(optionSelected == 2 ? .title : .title2)
                                 .opacity(dragAmount.width > 0.0 ? (1.0 - dragAmount.width / 100.0) : 1.0)
                                 .frame(width: 150.0, alignment: .trailing)
+                                .minimumScaleFactor(0.75)
+                                .lineLimit(1)
                         }
                         .padding(.horizontal)
                         .opacity(0.5)
@@ -106,6 +110,8 @@ struct BinaryFeedPost: View {
                                 HStack {
                                     Text(post.responseOption1)
                                         .font(.system(size: 30))
+                                        .minimumScaleFactor(0.75)
+                                        .lineLimit(1)
                                     
                                     Image(systemName: "arrow.left")
                                         .resizable()
@@ -127,6 +133,8 @@ struct BinaryFeedPost: View {
                                     
                                     Text(post.responseOption2)
                                         .font(.system(size: 30))
+                                        .minimumScaleFactor(0.75)
+                                        .lineLimit(1)
                                 }
                                 .opacity(dragAmount.width / 100.0)
                                 .foregroundStyle(.green)
@@ -141,7 +149,7 @@ struct BinaryFeedPost: View {
                         Ellipse()
                             .fill(
                                 RadialGradient(
-                                    gradient: Gradient(colors: [.red.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .white]),
+                                    gradient: Gradient(colors: [.red.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
                                     center: .center,
                                     startRadius: 10,
                                     endRadius: 400
@@ -153,7 +161,7 @@ struct BinaryFeedPost: View {
                         Ellipse()
                             .fill(
                                 RadialGradient(
-                                    gradient: Gradient(colors: dragAmount.width == 0.0 ? [.clear] : [.green.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .white]),
+                                    gradient: Gradient(colors: dragAmount.width == 0.0 ? [.clear] : [.green.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
                                     center: .center,
                                     startRadius: 10,
                                     endRadius: 400
@@ -164,7 +172,7 @@ struct BinaryFeedPost: View {
                     )
                 )
                 
-                Spacer(minLength: 50.0)
+                Spacer(minLength: 100.0)
                 
                 if optionSelected != 0 {
                     HStack {
@@ -174,24 +182,25 @@ struct BinaryFeedPost: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 30, height: 30, alignment: .center)
-                            .foregroundColor(dragAmount.height == 0.0 ? .gray : (optionSelected == 1 ? .red : .green))
+                            .foregroundColor(dragAmount.height == 0.0 || dragAmount.height > 0 ? .gray : (optionSelected == 1 ? .red : .green))
                             .opacity(0.5)
                         
                         Spacer()
                     }
                 }
-                
+                                
                 Text("\(post.responseResult1 + post.responseResult2) votes")
                     .foregroundColor(.gray)
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
             }
         }
-//        .background {
-//            RoundedRectangle(cornerRadius: 10.0)
-//                .padding()
-//                .foregroundStyle(.white)
-//        }
+        .padding()
+        .background {
+            RoundedRectangle(cornerRadius: 10.0)
+                .padding()
+                .foregroundStyle(.white)
+        }
         .overlay(
             RoundedRectangle(cornerRadius: 10.0)
                 .stroke(optionSelected == 1 ? .red : .green, lineWidth: 5)

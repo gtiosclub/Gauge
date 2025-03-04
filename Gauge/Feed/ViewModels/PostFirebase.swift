@@ -35,7 +35,7 @@ class PostFirebase: ObservableObject {
         // Append a new post from allQueriedPosts (just index 0 for now)
     }
     
-    func watchForCurrentFeedPostChanegs() {
+    func watchForCurrentFeedPostChanges() {
         setUpCommentsListener()
         setUpResponsesListener()
         setUpViewsListener()
@@ -266,6 +266,16 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    func addView(responseOption: Int) {
+        if let post = feedPosts.first as? BinaryPost {
+            if responseOption == 1 {
+                post.responseResult1 += 1
+            } else if responseOption == 2 {
+                post.responseResult2 += 1
+            }
+        }
+    }
+    
     func likeComment(postId: String, commentId: String, userId: String){
         let commentRef = Firebase.db.collection("POSTS")
             .document(postId)
@@ -327,8 +337,7 @@ class PostFirebase: ObservableObject {
             "userId": post.userId,
             "categories": post.categories,
             "viewCounter": post.viewCounter,
-            //"postDateAndTime": DateConverter.convertStringToDate(change.document.data()["postDateAndTime"] as? String ?? "") ?? Date(),
-
+            "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
             "responseOption1": post.responseOption1,
             "responseOption2": post.responseOption2,
