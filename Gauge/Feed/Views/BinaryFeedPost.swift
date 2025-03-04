@@ -16,6 +16,15 @@ struct BinaryFeedPost: View {
     @Binding var dragAmount: CGSize
     @Binding var optionSelected: Int
     
+    var computedOpacity: Binding<Double> {
+        Binding<Double>(
+            get: {
+                return dragAmount.height > 0 || optionSelected == 0 ? 0.0 : min(abs(dragAmount.height) / 100.0, 1.0)
+            },
+            set: { _ in }
+        )
+    }
+    
     var body: some View {
         VStack(alignment: .leading) {
             if index == 0 {
@@ -76,7 +85,7 @@ struct BinaryFeedPost: View {
                                 .opacity(dragAmount.width < 0.0 ? (1.0 - (dragAmount.width / 150.0).magnitude) : 1.0)
                                 .frame(width: 150.0, alignment: .leading)
                                 .minimumScaleFactor(0.75)
-                                .lineLimit(1)
+                                .lineLimit(2)
                             
                             
                             Spacer()
@@ -97,7 +106,7 @@ struct BinaryFeedPost: View {
                                 .opacity(dragAmount.width > 0.0 ? (1.0 - dragAmount.width / 100.0) : 1.0)
                                 .frame(width: 150.0, alignment: .trailing)
                                 .minimumScaleFactor(0.75)
-                                .lineLimit(1)
+                                .lineLimit(2)
                         }
                         .padding(.horizontal)
                         .opacity(0.5)
@@ -111,7 +120,7 @@ struct BinaryFeedPost: View {
                                     Text(post.responseOption1)
                                         .font(.system(size: 30))
                                         .minimumScaleFactor(0.75)
-                                        .lineLimit(1)
+                                        .lineLimit(2)
                                     
                                     Image(systemName: "arrow.left")
                                         .resizable()
@@ -134,7 +143,7 @@ struct BinaryFeedPost: View {
                                     Text(post.responseOption2)
                                         .font(.system(size: 30))
                                         .minimumScaleFactor(0.75)
-                                        .lineLimit(1)
+                                        .lineLimit(2)
                                 }
                                 .opacity(dragAmount.width / 100.0)
                                 .foregroundStyle(.green)
@@ -181,31 +190,26 @@ struct BinaryFeedPost: View {
                         Image(systemName: "arrow.up")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 30, height: 30, alignment: .center)
+                            .frame(width: 30 + (dragAmount.height > 0.0 ? 0.0 : dragAmount.height * -1 / 5), height: 30 + (dragAmount.height > 0.0 ? 0.0 : dragAmount.height * -1 / 5), alignment: .center)
                             .foregroundColor(dragAmount.height == 0.0 || dragAmount.height > 0 ? .gray : (optionSelected == 1 ? .red : .green))
                             .opacity(0.5)
                         
                         Spacer()
                     }
                 }
-                                
-                Text("\(post.responseResult1 + post.responseResult2) votes")
-                    .foregroundColor(.gray)
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
+                
+                NavigationLink(destination: {
+                    HomeView()
+                }, label: {
+                    Text("\(post.responseResult1 + post.responseResult2) votes")
+                        .foregroundColor(.gray)
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                })
             }
         }
         .padding()
-        .background {
-            RoundedRectangle(cornerRadius: 10.0)
-                .padding()
-                .foregroundStyle(.white)
-        }
-        .overlay(
-            RoundedRectangle(cornerRadius: 10.0)
-                .stroke(optionSelected == 1 ? .red : .green, lineWidth: 5)
-                .opacity(dragAmount.height < 0 && optionSelected != 0 ? 0.7 : 0.0)
-        )
+        .gradientBorder(borderWidth: 15, color: optionSelected == 1 ? .red : .green, cornerRadius: 10, opacity: computedOpacity)
     }
     
     var profileImage: some View {
@@ -238,6 +242,57 @@ struct BinaryFeedPost: View {
             }
     }
 }
+
+extension View {
+    func gradientBorder(borderWidth: CGFloat = 20, color: Color = .red, cornerRadius: CGFloat = 10, opacity: Binding<Double>) -> some View {
+        self
+            // Top border overlay
+            .overlay(
+                LinearGradient(
+                    gradient: Gradient(colors: [color.opacity(opacity.wrappedValue), .clear]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: borderWidth)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius)),
+                alignment: .top
+            )
+            // Bottom border overlay
+            .overlay(
+                LinearGradient(
+                    gradient: Gradient(colors: [.clear, color.opacity(opacity.wrappedValue)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: borderWidth)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius)),
+                alignment: .bottom
+            )
+            // Left border overlay
+            .overlay(
+                LinearGradient(
+                    gradient: Gradient(colors: [color.opacity(opacity.wrappedValue), .clear]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: borderWidth)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius)),
+                alignment: .leading
+            )
+            // Right border overlay
+            .overlay(
+                LinearGradient(
+                    gradient: Gradient(colors: [.clear, color.opacity(opacity.wrappedValue)]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: borderWidth)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius)),
+                alignment: .trailing
+            )
+    }
+}
+
 
 
 #Preview {

@@ -21,9 +21,7 @@ struct CommentsView: View {
                 LazyVStack {
                     ForEach(comments, id: \.self) { comment in
                         CommentView(comment: comment)
-                            .transaction { transaction in
-                                transaction.animation = .easeInOut
-                            }
+                            
                     }
                 }
             }

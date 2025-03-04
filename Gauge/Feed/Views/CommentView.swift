@@ -86,7 +86,7 @@ struct CommentView: View {
                             .fontWeight(.semibold)
                     }
                     
-                    Text("\(comment.likes.count)")
+                    Text("\(comment.likes.count - comment.dislikes.count)")
                         .font(.callout)
                     
                     Button(action: {}) {
