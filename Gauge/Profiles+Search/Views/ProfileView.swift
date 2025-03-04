@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @State private var selectedTab: String = "Takes"
-
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -55,12 +55,39 @@ struct ProfileView: View {
                     .padding(.horizontal)
                 }
                 .padding(.top, 10)
-                VStack {
-                    Text("\(selectedTab) Content Here")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(UIColor.systemGray6))
+                
+                ScrollView {
+                    if selectedTab == "Votes" {
+                        VStack(spacing: 16) {
+                            VoteCard(
+                                username: "username1",
+                                timeAgo: "24h ago",
+                                tags: ["tag1", "tag2", "tag3"],
+                                vote: "Yes",
+                                content: "username1's own personal take on something controversial",
+                                comments: 10,
+                                views: 200,
+                                votes: 100
+                            )
+                            VoteCard(
+                                username: "username2",
+                                timeAgo: "54h ago",
+                                tags: ["tag1", "tag2", "tag3"],
+                                vote: "No",
+                                content: "username2's own personal take on something controversial",
+                                comments: 5,
+                                views: 150,
+                                votes: 50
+                            )
+                        }
+                        .padding()
+                    } else {
+                        Text("\(selectedTab) Content Here")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color(UIColor.systemGray6))
+                    }
                 }
                 .cornerRadius(10)
                 .padding()
@@ -91,7 +118,7 @@ struct TabButton: View {
         }) {
             VStack(spacing: 0) {
                 Text(title)
-                    .font(.system(size: 25))
+                    .font(.system(size: 20))
                     .foregroundColor(selectedTab == title ? .black : .gray)
                     .fontWeight(selectedTab == title ? .bold : .regular)
                 
