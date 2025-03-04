@@ -22,9 +22,7 @@ struct GaugeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            
-        ])
+        let schema = Schema([UserResponses.self])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
@@ -47,5 +45,6 @@ struct GaugeApp: App {
         .modelContainer(sharedModelContainer)
         .environmentObject(userVM)
         .environmentObject(postVM)
+        .modelContainer(for: [UserResponses.self])
     }
 }
