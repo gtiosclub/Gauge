@@ -142,7 +142,7 @@ class PostFirebase: ObservableObject {
             "userId": post.userId,
             "categories": post.categories,
             "viewCounter": post.viewCounter,
-            "postDateAndTime": DateConverter.convertStringToDate(change.document.data()["postDateAndTime"] as? String ?? "") ?? Date(),
+            //"postDateAndTime": DateConverter.convertStringToDate(change.document.data()["postDateAndTime"] as? String ?? "") ?? Date(),
 
             "question": post.question,
             "responseOption1": post.responseOption1,
