@@ -66,6 +66,16 @@ final class GaugeTests: XCTestCase {
         } catch {
             print("error")
         }
-
+    }
+    
+    func testPostFromId() async {
+        let postId = "B597D305-121B-4D95-8D4A-954386D50F5F"
+        let viewModel = SearchViewModel()
+        let question = await viewModel.getPostQuestion(postId: postId)
+        let postDate = await viewModel.getPostDateTime(postId: postId)
+        let options = await viewModel.getPostOptions(postId: postId)
+        print(question)
+        print(postDate)
+        print(options)
     }
 }
