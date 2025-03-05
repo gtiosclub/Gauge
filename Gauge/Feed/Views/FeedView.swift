@@ -34,25 +34,31 @@ struct FeedView: View {
                             .stroke(Color.black, lineWidth: 0.5)
                     )
                     .padding(.horizontal, 8)
-                    .offset(y: dragOffset.height > 0 ? dragOffset.height / 15 : 0.0)
-                    
-                RoundedRectangle(cornerRadius: 10)
-                    .foregroundStyle(Color(red: (min(255.0, 187.0 + dragOffset.height) / 255), green: (min(255.0, 187.0 + dragOffset.height) / 255), blue: (min(255.0, 187.0 + dragOffset.height) / 255)))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.black, lineWidth: 0.5)
-                    )
-                    .padding(.horizontal, 4)
-                    .offset(y: 10 + (dragOffset.height > 0 ? dragOffset.height / 15 : 0.0))
+                    .offset(y: dragOffset.height > 0 && dragOffset.height != 800.0 ? dragOffset.height / 15 : 0.0)
+                
+                if postVM.feedPosts.indices.contains(1), let post = postVM.feedPosts[hasSkipped ? 0 : 1] as? BinaryPost {
+                    BinaryFeedPost(post: post, dragAmount: .constant(CGSize(width: 0.0, height: 0.0)), optionSelected: .constant(0), skipping: $hasSkipped)
+                        .frame(width: max(0, geo.size.width))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.black, lineWidth: 0.5)
+                        )
+                        .offset(y: 10 + (dragOffset.height > 0 && dragOffset.height != 800.0 ? dragOffset.height / 15 : 0.0) + (hasSkipped ? 10 : 0))
+                        .background {
+                            RoundedRectangle(cornerRadius: 10.0)
+                                .fill(Color(red: (min(255.0, 187.0 + dragOffset.height) / 255), green: (min(255.0, 187.0 + dragOffset.height) / 255), blue: (min(255.0, 187.0 + dragOffset.height) / 255)))
+                        }
+//                        .padding(.horizontal, 4)
+                        .frame(width: min(geo.size.width - 8, UIScreen.main.bounds.width - 8))
+                }
                 
                 VStack {
                     if let post = postVM.feedPosts.first as? BinaryPost {
                         ZStack(alignment: .top) {
                             if isConfirmed {
-                                BinaryFeedResults(post: post)
+                                BinaryFeedResults(post: post, optionSelected: optionSelected)
                             } else {
-                                BinaryFeedPost(post: post, index: postVM.feedPosts.firstIndex(where: {$0.postId == post.postId})!, dragAmount: $dragOffset, optionSelected: $optionSelected)
-                                    .rotatedBy(at: postVM.feedPosts.firstIndex(where: {$0.postId == post.postId})!, offset: $dragOffset)
+                                BinaryFeedPost(post: post, dragAmount: $dragOffset, optionSelected: $optionSelected, skipping: $hasSkipped)
                                     .frame(width: max(0, geo.size.width))
                             }
                             
@@ -88,15 +94,19 @@ struct FeedView: View {
                                 .frame(width: max(0, geo.size.width))
                             }
                         }
-//                        .frame(width: max(0, geo.size.width), height: max(0, geo.size.height - 20))
                     }
+                    
+                    RoundedRectangle(cornerRadius: 10.0)
+                        .fill(.white)
+                        .frame(height: 1000.0)
                 }
-                .frame(width: max(0, geo.size.width), height: max(0, geo.size.height - 20))
+                .rotatedBy(offset: $dragOffset)
+                .frame(width: max(0, geo.size.width), height: max(0, geo.size.height + 1000))
                 .background {
                     RoundedRectangle(cornerRadius: 10.0)
                         .fill(Color.white)
                 }
-                .offset(y: dragOffset.height + 10)
+                .offset(y: dragOffset.height + 20)
                 .gesture(
                     DragGesture()
                         .onChanged { gesture in
@@ -105,7 +115,7 @@ struct FeedView: View {
                                     if !hasSkipped {
                                         dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
                                     } else {
-                                        dragOffset = CGSize(width: 0.0, height: 0.0)
+                                        dragOffset = CGSize(width: 0.0, height: 800.0)
                                     }
                                     
                                     if dragOffset.height < -150 {
@@ -157,8 +167,10 @@ struct FeedView: View {
                             hasSkipped = false
                         }
                 )
+                .opacity(hasSkipped ? 0.0 : 1.0)
             }
             .frame(width: min(geo.size.width, UIScreen.main.bounds.width))
+            .background(.black)
         }
         .onAppear() {
             postVM.addDummyPosts()
@@ -167,12 +179,8 @@ struct FeedView: View {
 }
 
 extension View {
-    func rotatedBy(at position: Int, offset: Binding<CGSize>) -> some View {
-        if position == 0 {
-            return self.rotationEffect(.degrees(offset.wrappedValue.width / 10.0))
-        } else {
-            return self.rotationEffect(.degrees(0.0))
-        }
+    func rotatedBy(offset: Binding<CGSize>) -> some View {
+        return self.rotationEffect(.degrees(offset.wrappedValue.width / 10.0))
     }
 }
 

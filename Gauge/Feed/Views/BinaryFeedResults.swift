@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BinaryFeedResults: View {
     var post: BinaryPost
+    var optionSelected: Int
     
     var body: some View {
         VStack {
@@ -51,12 +52,14 @@ struct BinaryFeedResults: View {
                     .padding(.top, 10)
                     .font(.system(size: 25))
                     .frame(alignment: .leading)
+                    .fontWeight(.bold)
                     
                 Spacer()
             }
             .padding(.horizontal)
             
-            BinaryResultView(post: post)
+            BinaryResultView(post: post, optionSelected: optionSelected)
+                .padding(.top, 10)
                 
             Text("\(post.responseResult1 + post.responseResult2) votes")
                 .foregroundColor(.gray)
@@ -76,7 +79,7 @@ struct BinaryFeedResults: View {
                 .scaledToFit()
                 .frame(width: 18, height: 18)
                 .background(Circle()
-                    .fill(Color.gray)
+                    .fill(Color.gray.opacity(0.7))
                     .frame(width:28, height: 28)
                     .opacity(0.6)
                 )
@@ -101,5 +104,5 @@ struct BinaryFeedResults: View {
 }
 
 #Preview {
-    BinaryFeedResults(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"))
+    BinaryFeedResults(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), optionSelected: 1)
 }

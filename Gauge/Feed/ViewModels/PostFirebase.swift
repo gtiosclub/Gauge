@@ -42,7 +42,7 @@ class PostFirebase: ObservableObject {
             responseOption1: "TF no",
             responseOption2: "Yeah...",
             responseResult1: 467,
-            responseResult2: 358,
+            responseResult2: 35,
             favoritedBy: ["user001", "user004", "user008"]
         ))
 
@@ -66,7 +66,7 @@ class PostFirebase: ObservableObject {
             categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)],
             viewCounter: 1_020,
             postDateAndTime: Date(),
-            question: "Jimmy Kimmel is the best talk show host?",
+            question: "Jimmy Kimmel is the best talk show host",
             responseOption1: "Nah",
             responseOption2: "Yupppp",
             responseResult1: 575,
