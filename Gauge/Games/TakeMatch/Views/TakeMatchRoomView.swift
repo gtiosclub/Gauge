@@ -47,6 +47,7 @@ struct TakeMatchRoomView: View {
                                  }
                              }
                          }
+                        gameSettings.clearCategories()
                     }
                     .padding()
                     .frame(width: 80, height: 30)
