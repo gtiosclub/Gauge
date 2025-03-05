@@ -8,7 +8,7 @@ import FirebaseFirestore
 import Firebase
 import Foundation
 
-class SearchViewModel {
+class SearchViewModel: ObservableObject {
     private let vectorSearchCollection = "_firestore-vector-search"
     
     func searchSimilarQuestions(query: String) async throws -> [String] {

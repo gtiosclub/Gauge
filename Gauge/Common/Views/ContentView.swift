@@ -9,9 +9,11 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isSigningUp = false
+    @State private var authVM = AuthenticationVM()
     
     var body: some View {
         VStack {
+            // SearchView() after commenting everything here
             if isSigningUp {
                 SignUpView()
             } else {
