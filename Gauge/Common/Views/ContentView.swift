@@ -13,7 +13,7 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
-            // SearchView() after commenting everything here
+//             SearchView() // after commenting everything here
             if isSigningUp {
                 SignUpView()
             } else {

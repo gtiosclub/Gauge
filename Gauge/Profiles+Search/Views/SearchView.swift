@@ -44,7 +44,7 @@ struct SearchView: View {
                                     showResults = true
                                     Task {
                                         do {
-                                            let results = try await searchVM.searchSimilarQuestions(query: searchText)
+                                            let results = try await searchVM.searchQuestions(for: searchText)
                                             await MainActor.run {
                                                 searchResults = results
                                                 isLoading = false

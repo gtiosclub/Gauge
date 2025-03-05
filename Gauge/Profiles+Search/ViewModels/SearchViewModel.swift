@@ -64,12 +64,12 @@ class SearchViewModel: ObservableObject {
         }
     }
     
-    func getPostDateTime(postId: String) async -> Date? {
+    func getPostDateTime(postId: String) async -> String? {
         do {
             let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
             guard let postData = document.data() else { return nil}
-            guard let postDateAndTime = postData["postDateAndTime"] as? Timestamp else { return nil }
-            return postDateAndTime.dateValue()
+            guard let postDateAndTime = postData["postDateAndTime"] as? String else { return nil }
+            return DateConverter.timeAgo(from: DateConverter.convertStringToDate(postDateAndTime) ?? Date())
         } catch {
             return nil
         }
@@ -85,5 +85,18 @@ class SearchViewModel: ObservableObject {
         } catch {
             return nil
         }
+    }
+    
+    func searchQuestions(for query: String) async throws -> [String] {
+        let postIds = try await searchSimilarQuestions(query: query)
+        var questions: [String] = []
+        
+        for postId in postIds {
+            if let question = await getPostQuestion(postId: postId) {
+                questions.append(question)
+            }
+        }
+        
+        return questions
     }
 }
