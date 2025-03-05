@@ -17,5 +17,9 @@ class TakeMatchSettingsVM: ObservableObject {
     @Published var selectedTopic: String = "No topic selected"
 
     private init() {}
+    
+    func clearCategories() {
+        selectedCategories = []
+    }
 }
 
