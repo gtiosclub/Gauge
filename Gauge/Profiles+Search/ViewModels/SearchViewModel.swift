@@ -99,4 +99,20 @@ class SearchViewModel: ObservableObject {
         
         return questions
     }
+    
+    func searchPosts(for query: String) async throws -> [PostResult] {
+        let postIds = try await searchSimilarQuestions(query: query)
+        var results: [PostResult] = []
+        
+        for postId in postIds {
+            if let question = await getPostQuestion(postId: postId) {
+                let options = await getPostOptions(postId: postId) ?? []
+                let timeAgo = await getPostDateTime(postId: postId) ?? "Just now"
+                results.append(PostResult(id: postId, question: question, options: options, timeAgo: timeAgo))
+            }
+        }
+        
+        return results
+    }
+
 }
