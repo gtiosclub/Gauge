@@ -2,10 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs to access your local network to discover nearby devices.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>App requires Bluetooth to connect with nearby devices.</string>
 	<key>NSBonjourServices</key>
 	<array>
-		<string>_takegames._tcp</string>
-		<string>_takegames._udp</string>
+		<string>_takematch._tcp</string>
+		<string>_takematch._udp</string>
 	</array>
 </dict>
 </plist>
