@@ -24,7 +24,7 @@ protocol Post: ObservableObject, Identifiable {
 //class AnyObservablePost: ObservableObject, Identifiable {
 //    let postId: String
 //    let wrappedPost: any Post
-//    
+//
 //    init(_ post: any Post) {
 //        self.postId = post.postId
 //        self.wrappedPost = post

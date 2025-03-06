@@ -1049,4 +1049,3 @@ class PostFirebase: ObservableObject {
         print("Restored skipped post: \(skipped.postId)")
     }
 }
-

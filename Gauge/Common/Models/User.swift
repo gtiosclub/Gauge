@@ -79,4 +79,3 @@ class User: Equatable, Identifiable {
     }
 }
 
-

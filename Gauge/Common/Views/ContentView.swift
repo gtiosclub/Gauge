@@ -39,7 +39,8 @@ struct ContentView: View {
                             }
                             .tag(0)
                         
-                        Text("Search")
+//                        Text("Search")
+                        SearchView()
                             .tabItem {
                                 Image(systemName: "magnifyingglass")
                                 Text("Search")
@@ -53,7 +54,8 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-                        Text("Profile")
+//                        Text("Profile")
+                        ProfileView()
                             .tabItem {
                                 Image(systemName: "person.circle")
                                 Text("Profile")

@@ -9,11 +9,12 @@ import SwiftUI
 import SwiftData
 
 struct DemoView: View {
+    @Environment(\.modelContext) private var modelContext
     @StateObject var firebaseVM = FirebaseDemoVM()
-    @StateObject var userVM = UserFirebase()
 
     var body: some View {
         VStack(spacing: 20) {
+            
             Section("Write Data") {
                 Button("Add User Austin") {
                     firebaseVM.addUserAustin()
