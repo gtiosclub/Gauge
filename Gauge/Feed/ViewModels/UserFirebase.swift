@@ -300,16 +300,13 @@ class UserFirebase: ObservableObject {
         //lastest: given the dictionary of last session of interest category from user
         //currentIntegerList: this is the current category list
         
-        //testing
-        let tastest = ["Sport": 50, "Beauty": 2, "skin care":30, "health care": 20, "studying": 2]
-        let currentInterestList = ["Beauty", "studying", "oral care", "skin care"]
-        
+        let lastestSorted = lastest.sorted{$0.value > $1.value}
         //get the OpenAI token
         let token = ChatGPTAPI(apiKey:Keys.openAIKey)
         //assigning prompt to the OpenAI
-        var prompt:String = """
-        I will give you 2 lists, where a dictionary list to store the interests point of the user lastest interactions with the categories, and another list of current catgories. Please based on the significant interest points, what we mean significant is only move categories up or down if the interactions make it very apparent the user has interest/disinterest in a category. And return the reordered the category list. The returned format would be: [String]
-        lastest interaction categories: \(lastest)
+        let prompt:String = """
+        I will give you 2 lists, where a dictionary list to store the interests point of the user lastest interactions with the categories, and another list of current catgories. Please based on the significant interest points, what we mean significant is only move the current categories up or down if the interactions make it very apparent the user has interest/disinterest in a category. And need to combine the current category list order which also takes into account of weight. Return the reordered the category list. to better perform this task, sorting the lastest interaction first (I help you sorted already), and remove all the categories that does not consist in the current list, after that reordering based on the point. The returned format would be: [String]. Do not give me any sentence but the string list as a return prompt. Any category that does not exist in the current list do not be included in the return list.
+        lastest interaction categories: \(lastestSorted)
         current list of category: \(currentInterestList)
         """
         
