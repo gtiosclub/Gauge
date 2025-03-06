@@ -87,7 +87,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .onChange(of: authVM.currentUser, initial: false) { oldUser, newUser in
+            .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
                 if let signedInUser = newUser {
                     userVM.user = signedInUser
                 }

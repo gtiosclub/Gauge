@@ -7,11 +7,11 @@
 
 import Foundation
 
-class User: Equatable, Identifiable {
+class User: Equatable, Identifiable, ObservableObject {
     // MARK: MANDATORY
     var id: String { userId } // Derived attribute from userId to conform to Equatable, does NOT need to be in init
-    var userId: String
-    var username: String
+    @Published var userId: String
+    @Published var username: String
     var email: String
     var lastLogin: Date
     var lastFeedRefresh: Date
