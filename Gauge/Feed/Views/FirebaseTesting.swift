@@ -206,7 +206,7 @@ struct FirebaseTesting: View {
                     
                     Section("View Data") {
                         Button("Fetch Favorited Posts") {
-                            userVM.getUserFavorites(userId: "ExampleUser")
+                            userVM.getUserFavorites(userId: "ExampleUser"){ favorites in }
                         }
                         
                         ForEach(postVM.allQueriedPosts, id: \.postId) { post in

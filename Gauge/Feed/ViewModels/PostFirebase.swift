@@ -248,9 +248,11 @@ class PostFirebase: ObservableObject {
     }
     
     func watchForCurrentFeedPostChanges() {
-        setUpCommentsListener()
-        setUpResponsesListener()
-        setUpViewsListener()
+        if !feedPosts.isEmpty {
+            setUpCommentsListener()
+            setUpResponsesListener()
+            setUpViewsListener()
+        }
         // Makes changes to the Post's (Binary) responses, viewCounter, comments, responseResult1, responseResult2
 
     }

@@ -41,18 +41,20 @@ class UserFirebase: ObservableObject {
         }
     }
     
-    func getUserPostInteractions() {
+    func getUserPostInteractions(completion: @escaping ([String], [String], [String]) -> Void) {
         // create variables to store subcollection info
         var responsePostIDs: [String] = []
         var commentPostIDs: [String] = []
         var viewPostIDs: [String] = []
         
+        
+
         // traverse through POSTS collection
         Firebase.db.collection("POSTS").getDocuments { snapshot, error in
             if let documents = snapshot?.documents {
+                
                 for document in documents {
                     let documentRef = Firebase.db.collection("POSTS").document(document.documentID)
-                    
                     
                     let subcollections = ["RESPONSES", "COMMENTS", "VIEWS"]
                     
@@ -74,6 +76,9 @@ class UserFirebase: ObservableObject {
                                     }
                                 }
                             }
+                        if(currentSubcollection == "VIEWS") {
+                            completion(responsePostIDs, commentPostIDs, viewPostIDs)
+                        }
                     }
                 }
             }
@@ -81,6 +86,7 @@ class UserFirebase: ObservableObject {
             print("Responses: \(responsePostIDs)")
             print("Comments: \(commentPostIDs)")
             print("Views: \(viewPostIDs)")
+            
         }
     }
 
@@ -160,7 +166,7 @@ class UserFirebase: ObservableObject {
         }
     }
     
-    func getUserFavorites(userId: String) {
+    func getUserFavorites(userId: String, completion: @escaping ([String]) -> Void) {
         // Create an array to store favorite postId
         var allFavoritePosts: [String] = []
         // fetch all documents in the "POSTS" collection
@@ -170,10 +176,12 @@ class UserFirebase: ObservableObject {
             .getDocuments { (snapshot, error) in
                 if let error = error {
                     print("Error getting favorite posts: \(error)")
+                    completion([])
                 } else {
                     for document in snapshot!.documents {
                         allFavoritePosts.append(document.documentID)
                     }
+                    completion(allFavoritePosts)
                 }
             }
     }
