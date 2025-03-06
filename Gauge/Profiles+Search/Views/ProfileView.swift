@@ -227,7 +227,9 @@ struct TabButton: View {
 
     var body: some View {
         Button(action: {
-            selectedTab = title
+            withAnimation {
+                selectedTab = title
+            }
         }) {
             VStack(spacing: 0) {
                 Text(title)

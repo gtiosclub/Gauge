@@ -25,7 +25,7 @@ struct ContentView: View {
             }
             .background(.red)
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     showSplashScreen = false
                 }
             }
