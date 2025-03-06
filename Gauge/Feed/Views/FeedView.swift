@@ -19,37 +19,55 @@ struct FeedView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .foregroundStyle(Color(red: 187.0 / 255, green: 187.0 / 255, blue: 187.0 / 255))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.black, lineWidth: 0.5)
-                    )
-                    .padding(.horizontal, 12)
-                
-                RoundedRectangle(cornerRadius: 10)
-                    .foregroundStyle(Color(red: 187.0 / 255, green: 187.0 / 255, blue: 187.0 / 255))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.black, lineWidth: 0.5)
-                    )
-                    .padding(.horizontal, 8)
-                    .offset(y: dragOffset.height > 0 && dragOffset.height != 800.0 ? dragOffset.height / 15 : 0.0)
-                
-                if postVM.feedPosts.indices.contains(1), let post = postVM.feedPosts[hasSkipped ? 0 : 1] as? BinaryPost {
-                    BinaryFeedPost(post: post, dragAmount: .constant(CGSize(width: 0.0, height: 0.0)), optionSelected: .constant(0), skipping: $hasSkipped)
-                        .frame(width: max(0, geo.size.width))
+                HStack {
+                    RoundedRectangle(cornerRadius: 20.0)
+                        .frame(width: geo.size.width - 26 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 8) : 8.0) : 0.0))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 20.0)
+                                .fill(Color.mediumGray)
+                        }
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10)
+                            RoundedRectangle(cornerRadius: 20)
                                 .stroke(Color.black, lineWidth: 0.5)
                         )
-                        .offset(y: 10 + (dragOffset.height > 0 && dragOffset.height != 800.0 ? dragOffset.height / 15 : 0.0) + (hasSkipped ? 10 : 0))
-                        .background {
-                            RoundedRectangle(cornerRadius: 10.0)
-                                .fill(Color(red: (min(255.0, 187.0 + dragOffset.height) / 255), green: (min(255.0, 187.0 + dragOffset.height) / 255), blue: (min(255.0, 187.0 + dragOffset.height) / 255)))
+                        .frame(width: geo.size.width - 32 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 8) : 8.0) : 0.0))
+                }
+                
+                HStack {
+                    RoundedRectangle(cornerRadius: 20.0)
+                        .frame(width: geo.size.width - 18 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 10) : 10.0) : 0.0))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 20.0)
+                                .fill(Color.mediumGray)
                         }
-//                        .padding(.horizontal, 4)
-                        .frame(width: min(geo.size.width - 8, UIScreen.main.bounds.width - 8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.black, lineWidth: 0.5)
+                        )
+                        .offset(y: dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0)
+                }
+                .frame(maxWidth: geo.size.width - 24 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 8) : 8.0) : 0.0))
+                
+                withAnimation(.none) {
+                    HStack {
+                        if postVM.feedPosts.indices.contains(1), let post = postVM.feedPosts[1] as? BinaryPost {
+                            BinaryFeedPost(post: post, dragAmount: .constant(CGSize(width: 0.0, height: 0.0)), optionSelected: .constant(0), skipping: $hasSkipped)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20.0)
+                                        .fill(Color(red: (min(255.0, 187.0 + dragOffset.height) / 255),
+                                                    green: (min(255.0, 187.0 + dragOffset.height) / 255),
+                                                    blue: (min(255.0, 187.0 + dragOffset.height) / 255)))
+                                )
+                                .frame(width: max(0, geo.size.width - 6 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 20.0, 6.0) : 6.0) : 0.0)))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.black.opacity(hasSkipped ? 0.0 : dragOffset.height > 0 ? (dragOffset.height < 150.0 ? max(100 - dragOffset.height / 150.0, 0.0) : 0.0) : 1.0), lineWidth: 0.5)
+                                )
+                                .offset(y: 10 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0))
+                                .mask(RoundedRectangle(cornerRadius: 20.0).offset(y: 10))
+                        }
+                        
+                    }
                 }
                 
                 VStack {
@@ -71,7 +89,7 @@ struct FeedView: View {
                                     startPoint: .top,
                                     endPoint: .bottom
                                 )
-                                .cornerRadius(10.0)
+                                .cornerRadius(20.0)
                                 .overlay(alignment: .top) {
                                     VStack {
                                         Text(!isConfirmed ? "SKIP" : "NEXT")
@@ -98,14 +116,15 @@ struct FeedView: View {
                     
                     RoundedRectangle(cornerRadius: 10.0)
                         .fill(.white)
-                        .frame(height: 1000.0)
+                        .frame(height: 1008.0)
                 }
-                .rotatedBy(offset: $dragOffset)
+                
                 .frame(width: max(0, geo.size.width), height: max(0, geo.size.height + 1000))
                 .background {
-                    RoundedRectangle(cornerRadius: 10.0)
+                    RoundedRectangle(cornerRadius: 20.0)
                         .fill(Color.white)
                 }
+                .rotatedBy(offset: $dragOffset)
                 .offset(y: dragOffset.height + 20)
                 .gesture(
                     DragGesture()
@@ -115,7 +134,9 @@ struct FeedView: View {
                                     if !hasSkipped {
                                         dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
                                     } else {
-                                        dragOffset = CGSize(width: 0.0, height: 800.0)
+                                        withAnimation(.smooth(duration: 0.5)) {
+                                            dragOffset = CGSize(width: 0.0, height: 800.0)
+                                        }
                                     }
                                     
                                     if dragOffset.height < -150 {
@@ -136,13 +157,6 @@ struct FeedView: View {
                                     if dragOffset.height > 150 && !hasSkipped {
                                         hasSkipped = true
                                         optionSelected = 0
-                                        if isConfirmed {
-                                            // Next post logic
-                                            postVM.feedPosts.remove(at: 0)
-                                        } else {
-                                            // Skip logic
-                                            postVM.feedPosts.remove(at: 0)
-                                        }
                                         isConfirmed = false
                                     }
                                     
@@ -163,8 +177,21 @@ struct FeedView: View {
                             }
                         }
                         .onEnded { gesture in
-                            dragOffset = .zero
-                            hasSkipped = false
+                            if dragOffset.height > 150 && hasSkipped {
+                                if isConfirmed {
+                                    // Next post logic
+                                    postVM.feedPosts.remove(at: 0)
+                                } else {
+                                    // Skip logic
+                                    postVM.feedPosts.remove(at: 0)
+                                }
+                                isConfirmed = false
+                            }
+                            
+//                            withAnimation(.none) {
+                                dragOffset = .zero
+                                hasSkipped = false
+//                            }
                         }
                 )
                 .opacity(hasSkipped ? 0.0 : 1.0)

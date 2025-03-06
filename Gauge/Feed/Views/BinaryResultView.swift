@@ -59,12 +59,18 @@ struct BinaryResultView: View {
                     Text("\(post.responseOption1)")
                         .foregroundColor(optionSelected == 1 ? .darkRed : .darkGray)
                         .fontWeight(optionSelected == 1 ? .bold : .regular)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.80)
                     
-                    Spacer()
+                    Spacer(minLength: 20.0)
                     
                     Text("\(post.responseOption2)")
                         .foregroundColor(optionSelected == 2 ? .darkGreen : .darkGray)
                         .fontWeight(optionSelected == 2 ? .bold : .regular)
+                        .multilineTextAlignment(.trailing)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.80)
                 }
             }
             .frame(width: min(geometry.size.width, UIScreen.main.bounds.width), height: 40)
