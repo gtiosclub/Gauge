@@ -35,7 +35,7 @@ struct FeedView: View {
                 
                 HStack {
                     RoundedRectangle(cornerRadius: 20.0)
-                        .frame(width: geo.size.width - 18 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 10) : 10.0) : 0.0))
+                        .frame(width: geo.size.width - 18 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 12) : 12.0) : 0.0))
                         .overlay {
                             RoundedRectangle(cornerRadius: 20.0)
                                 .fill(Color.mediumGray)
@@ -46,7 +46,7 @@ struct FeedView: View {
                         )
                         .offset(y: dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0)
                 }
-                .frame(maxWidth: geo.size.width - 24 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 8) : 8.0) : 0.0))
+                .frame(maxWidth: geo.size.width - 24 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 12.0) : 12.0) : 0.0))
                 
                 withAnimation(.none) {
                     HStack {
