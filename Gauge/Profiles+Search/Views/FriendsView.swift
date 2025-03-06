@@ -5,7 +5,6 @@ struct FriendsView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationView {
             VStack(spacing: 0) {
                 SearchBar(searchText: $searchText)
                     .padding(.horizontal)
@@ -61,22 +60,10 @@ struct FriendsView: View {
                 }
             }
             .navigationBarTitle("Friends", displayMode: .inline)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        HStack {
-                            Image(systemName: "chevron.left")
-                            Text("Profile")
-                        }
-                    }
-                }
-            }
+            .navigationBarBackButtonHidden(false)
+            
         }
     }
-}
 
 struct CustomSearchBar: View {
     @Binding var text: String
