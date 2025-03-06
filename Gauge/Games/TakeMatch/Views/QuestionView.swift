@@ -89,6 +89,7 @@ struct QuestionView: View {
         mcManager: MCManager(yourName: "test"),
         question: "Some question about this person's preferences",
         inputText: .constant(""), onSubmit: {})
+
 }
 
 struct PressEffectButtonStyle: ButtonStyle {

@@ -20,8 +20,10 @@ struct MatchingView: View {
     @State private var lastPosition = CGSize.zero
     @State private var isDragging = false
     @State private var hoveredResponse: String? = nil // Track hovered response
+
     @State var guesses: [String: String] = [:]
     @State var navigateToResults = false
+
 
     var onSubmit: () -> Void
     var body: some View {
@@ -47,7 +49,6 @@ struct MatchingView: View {
                     .padding(.vertical)
                 }.padding(.horizontal)
             }
-            
             Spacer()
             Button(action: {
                 onSubmit()

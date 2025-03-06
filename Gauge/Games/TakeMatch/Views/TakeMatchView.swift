@@ -56,5 +56,4 @@ struct TakeMatchView: View {
 
 #Preview {
     TakeMatchView(mcManager: MCManager(yourName: "test"), gameSettings: TakeMatchSettingsVM.shared)
-    //TakeMatchView(gameSettings: TakeMatchSettingsVM())
 }

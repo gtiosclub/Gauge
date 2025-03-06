@@ -51,6 +51,7 @@ struct GamesHome: View {
                     .padding()
                 }
 
+
                 if showingPopover {
                     ZStack {
                         Color.black.opacity(0.3)
@@ -214,6 +215,7 @@ struct GameCardView: View {
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(radius: 5)
+
     }
 }
 

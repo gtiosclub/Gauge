@@ -24,7 +24,7 @@ struct ContentView: View {
             }
             .background(.red)
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     showSplashScreen = false
                 }
             }
@@ -32,7 +32,7 @@ struct ContentView: View {
             VStack {
                 if authVM.currentUser != nil {
                     TabView(selection: $selectedTab) {
-                        HomeView()
+                        FeedView()
                             .tabItem {
                                 Image(systemName: "house")
                                 Text("Home")
@@ -60,6 +60,17 @@ struct ContentView: View {
                             }
                             .tag(3)
                     }
+                    .background(.white)
+                    .onAppear {
+                        // correct the transparency bug for Tab bars
+                        let tabBarAppearance = UITabBarAppearance()
+                        tabBarAppearance.configureWithOpaqueBackground()
+                        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+                        // correct the transparency bug for Navigation bars
+                        let navigationBarAppearance = UINavigationBarAppearance()
+                        navigationBarAppearance.configureWithOpaqueBackground()
+                        UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
+                    }
                 } else {
                     if isSigningUp {
                         SignUpView()
@@ -74,10 +85,15 @@ struct ContentView: View {
                     }
                 }
             }
-            .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
+            .onChange(of: authVM.currentUser, initial: false) { oldUser, newUser in
                 if let signedInUser = newUser {
                     userVM.user = signedInUser
                 }
+                // populate the user data
+                // call watchForNewPosts
+                // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
+                // call the watchForCurrentFeedPostChanges
+                // call functions to fill out a user's AI Algo variables
             }
         }
     }

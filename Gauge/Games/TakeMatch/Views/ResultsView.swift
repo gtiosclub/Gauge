@@ -20,6 +20,7 @@ struct ResultsView: View {
                 HStack {
                     Text("\(player): \(responses[player] ?? "")")
                     Spacer()
+
                     Text(guessedMatches[player] == responses[player] ? "✅" : "❌")
                 }
             }

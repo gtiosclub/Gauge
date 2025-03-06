@@ -201,15 +201,16 @@ struct UserRowView: View {
 //game settings sheet
 struct GameSettingsView: View {
     
+
     @ObservedObject var gameSettings = TakeMatchSettingsVM.shared
     @Binding var showSettings: Bool
 
     let categories: [String] = ["Sports", "Food", "Music", "Pop Culture", "TV Shows", "Movies/Film", "Celebrities"]
-
     
     var body: some View {
         
         VStack() {
+
             Spacer()
             Text("Game Settings")
                 .font(.title)
@@ -277,14 +278,10 @@ struct GameSettingsView: View {
             }
             .scrollContentBackground(.hidden)
             .background(.white)
-
         }
         .background(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
-    
 
 }
-
-
 
