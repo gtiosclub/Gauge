@@ -7,35 +7,66 @@
 
 import Foundation
 
-class BinaryPost: Post {
-    var postId: String
+class BinaryPost: Post, Equatable {
+    // Post protocol attributes
+    @Published var postId: String
     var userId: String
-    var comments: [Comment]
-    var responses: [Response]
-    var category: Category
-    var viewCounter: Int
-    var responseCounter: Int
+    var username: String = "" // NOT stored in Firebase
+    var profilePhoto: String = "" // NOT stored in Firebase
+    var categories: [Category]
     var postDateAndTime: Date
     
-    var question: String
+    // From subcollection
+    @Published var responses: [Response]
+    @Published var viewCounter: Int
+    @Published var comments: [Comment]
+    
+    // Binary post specific attributes
     var responseOption1: String
     var responseOption2: String
-    var responseResult1: Int
-    var responseResult2: Int
+    @Published var responseResult1: Int
+    @Published var responseResult2: Int
     
-    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, responseResult1: Int, responseResult2: Int) {
+    // Initializing locally
+    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String) {
+        // Post protocol attributes
         self.postId = postId
         self.userId = userId
+        self.comments = []
+        self.responses = []
+        self.categories = categories
+        self.viewCounter = 0
+        self.postDateAndTime = postDateAndTime
+        self.favoritedBy = []
+        self.question = question
+        
+        // Binary post specific attributes
+        self.responseOption1 = responseOption1
+        self.responseOption2 = responseOption2
+        self.responseResult1 = 0
+        self.responseResult2 = 0
+    }
+    
+    // Initializing from Firebase
+    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], viewCounter: Int = 0, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, responseResult1: Int = 0, responseResult2: Int = 0, favoritedBy: [String]) {
+        // Post protocol attributes
+        self.postId = postId
+        self.userId = userId
+        self.username = username
+        self.profilePhoto = profilePhoto
         self.comments = comments
         self.responses = responses
         self.category = category
         self.viewCounter = viewCounter
-        self.responseCounter = responseCounter
         self.postDateAndTime = postDateAndTime
         self.question = question
         self.responseOption1 = responseOption1
         self.responseOption2 = responseOption2
         self.responseResult1 = responseResult1
         self.responseResult2 = responseResult2
+    }
+    
+    static func == (lhs: BinaryPost, rhs: BinaryPost) -> Bool {
+        return lhs.postId == rhs.postId
     }
 }

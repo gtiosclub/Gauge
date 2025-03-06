@@ -7,14 +7,15 @@
 
 import Foundation
 
-class SliderPost: Post {
-    var postId: String
+class SliderPost: Post, Equatable {
+    @Published var postId: String
     var userId: String
+    var username: String = "" // NOT stored in Firebase
+    var profilePhoto: String = "" // NOT stored in Firebase
     var comments: [Comment]
     var responses: [Response]
     var category: Category
     var viewCounter: Int
-    var responseCounter: Int
     var postDateAndTime: Date
     
     var question: String
@@ -22,22 +23,47 @@ class SliderPost: Post {
     var upperBoundValue: Double
     var lowerBoundLabel: String
     var upperBoundLabel: String
-    var responseResults: [Double]
     
-    init(postId: String, userId: String, comments: [Comment], responses: [Response], category: Category, viewCounter: Int, responseCounter: Int, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, responseResults: [Double]) {
+    // Initializing locally
+    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, lowerBoundLabel: String, upperBoundLabel: String, lowerBoundValue: Double, upperBoundValue: Double) {
+        // Post protocol attributes
         self.postId = postId
         self.userId = userId
+        self.comments = []
+        self.responses = []
+        self.categories = categories
+        self.viewCounter = 0
+        self.postDateAndTime = postDateAndTime
+        self.favoritedBy = []
+        self.question = question
+        
+        // Slider post specific attributes
+        self.lowerBoundLabel = lowerBoundLabel
+        self.upperBoundLabel = upperBoundLabel
+        self.lowerBoundValue = lowerBoundValue
+        self.upperBoundValue = upperBoundValue
+    }
+    
+    // Initializing from Firebase
+    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], viewCounter: Int = 0, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, favoritedBy: [String]) {
+        // Post protocol attributes
+        self.postId = postId
+        self.userId = userId
+        self.username = username
+        self.profilePhoto = profilePhoto
         self.comments = comments
         self.responses = responses
         self.category = category
         self.viewCounter = viewCounter
-        self.responseCounter = responseCounter
         self.postDateAndTime = postDateAndTime
         self.question = question
         self.lowerBoundValue = lowerBoundValue
         self.upperBoundValue = upperBoundValue
         self.lowerBoundLabel = lowerBoundLabel
         self.upperBoundLabel = upperBoundLabel
-        self.responseResults = responseResults
+    }
+    
+    static func == (lhs: SliderPost, rhs: SliderPost) -> Bool {
+        return lhs.postId == rhs.postId
     }
 }

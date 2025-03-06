@@ -34,6 +34,11 @@ class User: Equatable, Identifiable {
     var myComments: [String] = []
     // MARK: AI Algorithm Variables - Ignore for now
     
+    // MARK: STATS
+    var numUserResponses: Int = 0
+    var numUserViews: Int = 0
+    // MARK: STATS
+    
     init(userId: String, username: String, email: String) {
         self.userId = userId
         self.username = username
@@ -70,3 +75,5 @@ class User: Equatable, Identifiable {
         lhs.id == rhs.id && lhs.username == rhs.username && lhs.phoneNumber == rhs.phoneNumber
     }
 }
+
+
