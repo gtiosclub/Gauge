@@ -46,7 +46,7 @@ struct ContentView: View {
                             }
                             .tag(1)
                         
-                        Text("Games")
+                        GamesHome()
                             .tabItem {
                                 Image(systemName: "person.line.dotted.person.fill")
                                 Text("Games")
