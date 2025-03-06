@@ -12,7 +12,7 @@ struct SearchView: View {
     @State private var searchText: String = ""
     @FocusState private var isSearchFieldFocused: Bool
     @State private var selectedTab: String = "Topics"
-    @State private var searchResults: [String] = []
+    @State private var searchResults: [PostResult] = []
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
     @State private var showResults: Bool = false
@@ -44,7 +44,7 @@ struct SearchView: View {
                                     showResults = true
                                     Task {
                                         do {
-                                            let results = try await searchVM.searchQuestions(for: searchText)
+                                            let results = try await searchVM.searchPosts(for: searchText)
                                             await MainActor.run {
                                                 searchResults = results
                                                 isLoading = false
@@ -58,6 +58,7 @@ struct SearchView: View {
                                     }
                                 }
                             }
+
                         
                         if !searchText.isEmpty {
                             Button(action: {
@@ -101,9 +102,13 @@ struct SearchView: View {
                                     .foregroundStyle(.red)
                                     .padding()
                             } else if !searchResults.isEmpty {
-                                List(searchResults, id: \.self) { result in
-                                    Text(result)
+                                List {
+                                    ForEach(searchResults) { result in
+                                        PostResultRow(result: result)
+                                            .listRowSeparator(.hidden)
+                                    }
                                 }
+                                .listStyle(PlainListStyle())
                             } else {
                                 Text("No results found.")
                                     .padding()
@@ -257,6 +262,9 @@ struct RecentSearchesView: View {
         }
     }
 }
+
+
+
 
 #Preview {
     SearchView()
