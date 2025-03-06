@@ -2,8 +2,10 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject var userVM: UserFirebase
-    @State private var selectedTab: String = "Badges"
+    @EnvironmentObject var postVM: PostFirebase
+    @State private var selectedTab: String = "Takes"
     @State private var selectedBadge: BadgeModel? = nil
+    let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
 
     var body: some View {
         NavigationView {
@@ -39,14 +41,30 @@ struct ProfileView: View {
                             .font(.title2)
                             .fontWeight(.bold)
                         
+                        NavigationLink(destination: FriendsView()) {
+                            Image(systemName: "person.2.fill")
+                                .foregroundColor(.gray)
+                            Text("27")
+                                .foregroundColor(.black)
+                        }
+                        
+                        HStack {
+                            ForEach(userTags, id: \.self) { tag in
+                                Text(tag)
+                                    .padding(.horizontal, 0)
+                                    .padding(.vertical, 6)
+                                    .font(.system(size: 14))
+                                    .background(Color.gray.opacity(0.2))
+                                    .foregroundColor(.black)
+                                    .cornerRadius(10)}
+                        }
+                        
+                        Text("a short bio that describes the user")
+                        
                         NavigationLink(destination: ProfileEditView()) {
-                            Text("Edit Profile")
-                                .font(.caption)
+                            Text("edit profile")
+                                .font(.system(size: 15))
                                 .padding(8)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.black, lineWidth: 1)
-                                )
                         }
                     }
                     Spacer()
@@ -77,7 +95,12 @@ struct ProfileView: View {
                     BadgesView(onBadgeTap: { badge in
                         selectedBadge = badge
                     })
-                } else if selectedTab == "Statistics" {
+                } else if selectedTab == "Votes" {
+                    VoteCardsView()
+                } else if selectedTab == "Takes" {
+                    TakesView()
+                }
+                else if selectedTab == "Statistics" {
                     VStack(alignment: .leading, spacing: 0) {
                         Text("Username Statistics")
                             .font(.system(size:21))
@@ -94,7 +117,7 @@ struct ProfileView: View {
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("50 Votes")
+                                    Text("100 Votes")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -114,7 +137,7 @@ struct ProfileView: View {
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("50 Takes")
+                                    Text("25 Takes")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -134,7 +157,7 @@ struct ProfileView: View {
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("50 Votes")
+                                    Text("275 Votes")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -147,14 +170,13 @@ struct ProfileView: View {
                             
                             Divider().padding(.horizontal)
                             
-                            // Total Comments Made
                             HStack {
                                 Text("Total Comments Made")
                                     .font(.system(size: 17))
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("20 Comments")
+                                    Text("110 Comments")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -167,14 +189,13 @@ struct ProfileView: View {
                             
                             Divider().padding(.horizontal)
                             
-                            // Ratio View/Response
                             HStack {
                                 Text("Ratio View/Response")
                                     .font(.system(size: 17))
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("20 Comments")
+                                    Text("0.75")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -255,9 +276,22 @@ struct SettingsView: View {
     }
 }
 
+struct VoteCardsView: View {
+    var body: some View {
+        ScrollView {
+            VStack {
+                VoteCard(username: "User1", timeAgo: "1 hour ago", tags: ["swiftui", "ios"], vote: "Yes", content: "This is a sample vote card content.", comments: 10, views: 100, votes: 25)
+                VoteCard(username: "User2", timeAgo: "2 hours ago", tags: ["programming", "swift"], vote: "No", content: "Another vote card example.", comments: 5, views: 50, votes: 10)
+            }
+            .padding()
+        }
+    }
+}
+
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileView()
             .environmentObject(UserFirebase())
+            .environmentObject(PostFirebase())
     }
 }
