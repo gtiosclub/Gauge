@@ -36,7 +36,7 @@ struct PostResultRow: View {
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.vertical, 8)
-                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 16)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color(.systemGray5))
@@ -44,7 +44,9 @@ struct PostResultRow: View {
                 }
             }
         }
-        .padding()
+
+        .padding(.vertical, 16)
+        .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 10)
@@ -52,6 +54,6 @@ struct PostResultRow: View {
                 .shadow(color: Color.black.opacity(0.1),
                         radius: 3, x: 0, y: 2)
         )
-        .padding(.horizontal)
+        .padding(.horizontal, 8)
     }
 }
