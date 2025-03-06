@@ -19,7 +19,7 @@ struct VotingProgressView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Text("\(mcManager.votes)")
+                //Text("\(mcManager.votes)")
                 Text("Nice! Let's wait and see what everyone voted for.")
                     .font(.title2)
                     .multilineTextAlignment(.center)
