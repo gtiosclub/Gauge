@@ -18,7 +18,8 @@ struct SearchView: View {
     @State private var showResults: Bool = false
     @State private var isSearchActive: Bool = false
 
-    @State var items = Array(1...50).map { "Category \($0)" }
+//    @State var items = Array(1...50).map { "Category \($0)" }
+    @State var items = Array(Category.allCategoryStrings.shuffled().prefix(through: 19))
     
     var body: some View {
         NavigationStack {
