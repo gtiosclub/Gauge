@@ -91,31 +91,36 @@ struct ContentView: View {
             .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
                 if let signedInUser = newUser {
                     userVM.user = signedInUser
+                    
+                    // populate the user data
+                    userVM.getAllUserData(userId: userVM.user.userId, completion: { user in
+                        userVM.user = user
+                    })
+                    
+                    // call watchForNewPosts
+    //                postVM.watchForNewPosts(user: userVM.user)
+                    
+                    // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
+    //                postVM.feedPosts = postVM.allQueriedPosts.filter { userVM.user.myNextPosts.contains($0.postId) }
+                    
+                    // call the watchForCurrentFeedPostChanges
+    //                postVM.watchForCurrentFeedPostChanges()
+                    
+                    // call functions to fill out a user's AI Algo variables
+                    userVM.getPosts(userId: userVM.user.userId) { posts in
+                        userVM.user.myPosts = posts
+                    }
+                    
+                    userVM.getUserPostInteractions{responsePostIDs, commentPostIDs, viewPostIDs in
+                        userVM.user.myResponses = responsePostIDs
+                        userVM.user.myComments = commentPostIDs
+                        userVM.user.myViews = viewPostIDs
+                    }
+                    
+                    userVM.getUserFavorites(userId: userVM.user.userId) { favorites in
+                        userVM.user.myFavorites = favorites
+                    }
                 }
-                // populate the user data
-                userVM.updateUserFields(user: userVM.user)
-                
-                // call watchForNewPosts
-                postVM.watchForNewPosts(user: userVM.user)
-                // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
-                postVM.feedPosts = postVM.allQueriedPosts.filter { userVM.user.myNextPosts.contains($0.postId) }
-                
-                // call the watchForCurrentFeedPostChanges
-                postVM.watchForCurrentFeedPostChanges()
-                
-                // call functions to fill out a user's AI Algo variables
-                userVM.getPosts(userId: userVM.user.userId) { posts in
-                    userVM.user.myPosts = posts
-                }
-                userVM.getUserPostInteractions{responsePostIDs, commentPostIDs, viewPostIDs in
-                    userVM.user.myResponses = responsePostIDs
-                    userVM.user.myComments = commentPostIDs
-                    userVM.user.myViews = viewPostIDs
-                }
-                userVM.getUserFavorites(userId: userVM.user.userId) { favorites in
-                    userVM.user.myFavorites = favorites
-                }
-                
                 //ADD FUNCTIONS FOR SEARCH AND ACCESSED
 
             }
