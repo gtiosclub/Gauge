@@ -452,11 +452,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Gauge/Preview Content\"";
-<<<<<<< HEAD
-				DEVELOPMENT_TEAM = QN7G4L9LF7;
-=======
 				DEVELOPMENT_TEAM = 5GCQR6W96Y;
->>>>>>> 61e27b71bbd5cb50f96db22fbee2c8de901c764b
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Gauge/Info.plist;
@@ -470,11 +466,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-<<<<<<< HEAD
-				PRODUCT_BUNDLE_IDENTIFIER = com.akshatshenoi.Gauge;
-=======
 				PRODUCT_BUNDLE_IDENTIFIER = com.austinhuguenard.Gauge2;
->>>>>>> 61e27b71bbd5cb50f96db22fbee2c8de901c764b
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -490,11 +482,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Gauge/Preview Content\"";
-<<<<<<< HEAD
-				DEVELOPMENT_TEAM = QN7G4L9LF7;
-=======
 				DEVELOPMENT_TEAM = 5GCQR6W96Y;
->>>>>>> 61e27b71bbd5cb50f96db22fbee2c8de901c764b
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Gauge/Info.plist;
@@ -508,11 +496,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-<<<<<<< HEAD
-				PRODUCT_BUNDLE_IDENTIFIER = com.akshatshenoi.Gauge;
-=======
 				PRODUCT_BUNDLE_IDENTIFIER = com.austinhuguenard.Gauge2;
->>>>>>> 61e27b71bbd5cb50f96db22fbee2c8de901c764b
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

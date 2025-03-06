@@ -194,7 +194,6 @@ struct GameCardView: View {
                 .fill(Color.gray.opacity(0.3))
                 .frame(height: 100)  // Placeholder for image
 
-
             HStack(spacing: 10) {
                 Text(gameTitle)
                     .font(.title)
