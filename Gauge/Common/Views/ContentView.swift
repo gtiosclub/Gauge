@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var authVM = AuthenticationVM()
     @EnvironmentObject var userVM: UserFirebase
+    @EnvironmentObject var postVM: PostFirebase
     @State private var isSigningUp = false
     @State private var selectedTab: Int = 0
     @State private var showSplashScreen: Bool = true
@@ -87,15 +88,41 @@ struct ContentView: View {
                     }
                 }
             }
-            .onChange(of: authVM.currentUser, initial: false) { oldUser, newUser in
+            .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
                 if let signedInUser = newUser {
                     userVM.user = signedInUser
+                    
+                    // populate the user data
+                    userVM.getAllUserData(userId: userVM.user.userId, completion: { user in
+                        userVM.user = user
+                    })
+                    
+                    // call watchForNewPosts
+    //                postVM.watchForNewPosts(user: userVM.user)
+                    
+                    // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
+    //                postVM.feedPosts = postVM.allQueriedPosts.filter { userVM.user.myNextPosts.contains($0.postId) }
+                    
+                    // call the watchForCurrentFeedPostChanges
+    //                postVM.watchForCurrentFeedPostChanges()
+                    
+                    // call functions to fill out a user's AI Algo variables
+                    userVM.getPosts(userId: userVM.user.userId) { posts in
+                        userVM.user.myPosts = posts
+                    }
+                    
+                    userVM.getUserPostInteractions{responsePostIDs, commentPostIDs, viewPostIDs in
+                        userVM.user.myResponses = responsePostIDs
+                        userVM.user.myComments = commentPostIDs
+                        userVM.user.myViews = viewPostIDs
+                    }
+                    
+                    userVM.getUserFavorites(userId: userVM.user.userId) { favorites in
+                        userVM.user.myFavorites = favorites
+                    }
                 }
-                // populate the user data
-                // call watchForNewPosts
-                // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
-                // call the watchForCurrentFeedPostChanges
-                // call functions to fill out a user's AI Algo variables
+                //ADD FUNCTIONS FOR SEARCH AND ACCESSED
+
             }
         }
     }
