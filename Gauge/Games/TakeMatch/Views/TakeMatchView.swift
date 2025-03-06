@@ -10,10 +10,9 @@ import SwiftUI
 struct TakeMatchView: View {
     @ObservedObject var mcManager: MCManager
     @ObservedObject var gameSettings = TakeMatchSettingsVM.shared
-
+    @State private var questionOptions: [String] =  []
     @State private var currentScreen: Int = 1
     @State private var selectedTopic: String = ""
-
     @State private var question: String = "Loading..."
     @State private var responses: [String: String] = [:]
     @State private var guessedMatches: [String: String] = [:]
@@ -24,6 +23,8 @@ struct TakeMatchView: View {
         VStack {
             switch currentScreen {
             case 1:
+                QuestionPickerView(mcManager: mcManager, questionOptions: gameSettings.questionOptions)
+            case 2:
                 QuestionView(mcManager: mcManager, question: gameSettings.question, inputText: $inputText) {
                 //QuestionView(question: gameSettings.question, inputText: $inputText) {
                     mcManager.submitAnswer(inputText)
@@ -33,11 +34,11 @@ struct TakeMatchView: View {
                         currentScreen = 2
                     }
                 }
-            case 2:
+            case 3:
                 MatchingView(mcManager: mcManager, responses: Array(responses.values), playerPictures: players, guessedMatches: $guessedMatches) {
                     currentScreen = 3
                 }
-            case 3:
+            case 4:
                 ResultsView(responses: responses, guessedMatches: guessedMatches) {
                     responses = [:]
                     guessedMatches = [:]

@@ -13,7 +13,8 @@ class TakeMatchSettingsVM: ObservableObject {
     @Published var numRounds: Int = 3
     @Published var roundLen: Int = 30
     @Published var selectedCategories: [String] = []
-    @Published var question: String = "No question"
+    @Published var questionOptions: [String] = []
+    @Published var question: String = ""
     @Published var selectedTopic: String = "No topic selected"
 
     private init() {}

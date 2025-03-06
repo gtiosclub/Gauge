@@ -18,14 +18,28 @@ struct WaitingView: View {
     @State var navigateToResults = false
     
     @Environment(\.dismiss) private var dismiss
-    
+
+    var voteProgress: Double {
+        return Double(responses.count) / Double(mcManager.session.connectedPeers.count + 1)
+    }
+
+
     var body: some View {
         VStack {
-            
-            Text("Waiting for players...")
+            Text("Are you excited to see how well your friends know you?")
                 .font(.title2)
+                .multilineTextAlignment(.center)
                 .padding()
-            
+            ProgressView("Waiting...")
+                .progressViewStyle(CircularProgressViewStyle())
+                .padding()
+
+            ProgressView(value: voteProgress, total: 1.0)
+                .progressViewStyle(LinearProgressViewStyle())
+                .padding()
+
+            Text("\(responses.count)/\(mcManager.session.connectedPeers.count + 1)")
+
             var _ = print(responses)
             
         }

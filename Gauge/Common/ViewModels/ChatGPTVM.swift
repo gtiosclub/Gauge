@@ -75,40 +75,47 @@ class ChatGPTVM: ObservableObject {
             latestAIResponse = "Please select a topic."
             return
         }
-        if categories.isEmpty {
-            //generate random question if no topic is selected
-            let prompt = "Generate a short, fun, and light-hearted open-ended question about anything that sparks discussion among friends. Avoid yes/no or either-or questions. The question should prompt answers that are short and quick, rather than lengthy explanations, don't ask why or how."
-            self.isQuerying = true
-            do {
-                let response = try await gptKey.sendMessage(text: prompt)
-                
-                // Update UI state on the main thread
-                self.storedQuestions.append(response)
+
+        self.isQuerying = true
+        self.storedQuestions.removeAll() // Clear previous questions
+
+        // Ensure we have exactly 4 topics (repeat or shuffle if necessary)
+        var selectedCategories = categories
+        while selectedCategories.count < 4 {
+            selectedCategories.append(categories.randomElement() ?? "random topic") // Fill up to 4
+        }
+        selectedCategories.shuffle() // Shuffle to add randomness
+
+        do {
+            // Generate 4 questions concurrently
+            let q1 = try await gptKey.sendMessage(text: generatePrompt(for: selectedCategories[0]))
+            let q2 = try await gptKey.sendMessage(text: generatePrompt(for: selectedCategories[1]))
+            let q3 = try await gptKey.sendMessage(text: generatePrompt(for: selectedCategories[2]))
+            let q4 = try await gptKey.sendMessage(text: generatePrompt(for: selectedCategories[3]))
+//            let q1 = "Does pineapple belong on pizza?"
+//            let q2 = "What is the most interesting fact about sloths?"
+//            let q3 = "Can you name 5 things that are both edible and poisonous?"
+//            let q4 = "What is the most spontaneous thing you have ever done?"
+
+            let responses = [q1, q2, q3, q4] // Wait for all responses
+
+
+            self.storedQuestions = responses
+            self.isQuerying = false
+
+        } catch {
+            DispatchQueue.main.async {
+                self.latestAIResponse = "Error generating questions: \(error.localizedDescription)"
                 self.isQuerying = false
-            } catch {
-                    // Update UI state on the main thread
-                self.latestAIResponse = "Error generating random question: \(error.localizedDescription)"
-                self.isQuerying = false
-            }
-        } else {
-            for category in categories {
-                let prompt = "Generate a short, fun, and light-hearted open-ended question about \(category) that sparks discussion among friends. Avoid yes/no or either-or questions. The question should prompt answers that are short and quick, rather than lengthy explanations, don't ask why or how."
-                self.isQuerying = true
-                do {
-                    let response = try await gptKey.sendMessage(text: prompt)
-                    
-                    // Update UI state on the main thread
-                    self.storedQuestions.append(response)
-                    self.isQuerying = false
-                } catch {
-                        // Update UI state on the main thread
-                    self.latestAIResponse = "Error generating question for \(category): \(error.localizedDescription)"
-                    self.isQuerying = false
-                }
             }
         }
     }
-            
+
+    // Helper function to generate a question prompt
+    private func generatePrompt(for category: String) -> String {
+        return "Generate a short, fun, and light-hearted open-ended question about \(category) that sparks discussion among friends. Avoid yes/no or either-or questions. The question should prompt answers that are short and quick, rather than lengthy explanations. Don't ask why or how the questions shouldn't be more than 12 words each."
+    }
+
         
     
     func startNewChat() {

@@ -12,3 +12,8 @@ struct Answer: Identifiable, Codable {
     let sender: String
     let text: String
 }
+
+struct Vote: Codable {
+    let question: String
+    let sender: String
+}

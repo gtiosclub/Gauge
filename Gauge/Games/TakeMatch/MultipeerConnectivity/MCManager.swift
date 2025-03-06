@@ -27,7 +27,56 @@ class MCManager: NSObject, ObservableObject {
     @Published var paired: Bool = false
     @Published var takeMatchAnswers: [Answer] = []
     @Published var gameStarted: Bool = false
-    
+    @Published var votes: [String: Int] = [:]
+
+    func voteForQuestion(_ question: String) {
+            let vote = Vote(question: question, sender: username)
+            if let currentVoteCount = self.votes[vote.question] {
+                self.votes[vote.question] = currentVoteCount + 1
+            } else {
+                self.votes[vote.question] = 1
+            }
+            do {
+                let data = try JSONEncoder().encode(vote)
+                try session.send(data, toPeers: session.connectedPeers, with: .reliable)
+            } catch {
+                print("Error sending vote: \(error)")
+            }
+        }
+
+    func handleReceivedVote(_ vote: Vote) {
+        DispatchQueue.main.async {
+            if let currentVoteCount = self.votes[vote.question] {
+                self.votes[vote.question] = currentVoteCount + 1
+            } else {
+                self.votes[vote.question] = 1
+            }
+        }
+    }
+
+    func tabulateVotes() {
+        // Find the most-voted question
+        let mostVotedQuestion = votes.max { a, b in a.value < b.value }?.key
+        print(votes)
+        if let question = mostVotedQuestion {
+            TakeMatchSettingsVM.shared.question = question
+            broadcastSelectedQuestion(question)
+        }
+    }
+
+    func broadcastSelectedQuestion(_ question: String) {
+        do {
+            // Prepare the data to send the selected question
+            let data = try JSONEncoder().encode(["selectedQuestion": question])
+
+            // Send the data to all connected peers
+            try session.send(data, toPeers: session.connectedPeers, with: .reliable)
+            print("Broadcasting selected question: \(question)")
+        } catch {
+            print("Error sending selected question: \(error)")
+        }
+    }
+
     var isAvailableToPlay: Bool = false {
         didSet {
             
@@ -154,12 +203,12 @@ class MCManager: NSObject, ObservableObject {
         }
     }
 
-    func broadcastQuestion(_ questionText: String) {
+    func broadcastQuestions(_ questions: [String]) {
         do {
-            let data = try JSONEncoder().encode(["question": questionText])
+            let data = try JSONEncoder().encode(["questions": questions])
             try session.send(data, toPeers: session.connectedPeers, with: .reliable)
         } catch {
-            print("Error sending question: \(error)")
+            print("Error sending questions: \(error)")
         }
     }
 
@@ -246,35 +295,41 @@ extension MCManager: MCSessionDelegate {
             }
         }
     }
-    
+
+
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        // Try to interpret the data as a string
         if let message = String(data: data, encoding: .utf8) {
             if message == "startGame" {
-                // When a joiner receives the start signal, update gameStarted.
-                DispatchQueue.main.async {
-                    self.gameStarted = true
-                }
+                self.gameStarted = true
             } else {
-                // Handle other messages (like answers) here.
-                do {
-                    let decodedData = try JSONDecoder().decode([String: String].self, from: data)
-                    if let receivedQuestion = decodedData["question"] {
-                        DispatchQueue.main.async {
-                            TakeMatchSettingsVM.shared.question = receivedQuestion
-                        }
-                    }
-                    let answer = try JSONDecoder().decode(Answer.self, from: data)
+                if let decodedVote = try? JSONDecoder().decode(Vote.self, from: data) {
+                    self.handleReceivedVote(decodedVote)
+                } else if let decodedAnswer = try? JSONDecoder().decode(Answer.self, from: data) {
                     DispatchQueue.main.async {
-                        self.takeMatchAnswers.append(answer)
+                        self.takeMatchAnswers.append(decodedAnswer)
                     }
-                } catch {
-                    print("Error decoding answer: \(error)")
+                } else {
+                    do {
+                        let decodedData = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+
+                        if let decodedData = decodedData {
+                            if let receivedQuestions = decodedData["questions"] as? [String] {
+                                TakeMatchSettingsVM.shared.questionOptions = receivedQuestions
+                            }
+                            else if let selectedQuestion = decodedData["selectedQuestion"] as? String {
+                                DispatchQueue.main.async {
+                                    TakeMatchSettingsVM.shared.question = selectedQuestion
+                                }
+                            }
+                        }
+                    } catch {
+                        print("Error decoding data: \(error)")
+                    }
                 }
             }
         }
     }
-    
+
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
         
     }

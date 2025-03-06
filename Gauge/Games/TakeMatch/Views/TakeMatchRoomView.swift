@@ -27,56 +27,55 @@ struct TakeMatchRoomView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                Spacer()
-                Text(isHost ? "Hosting Room: \(roomCode)" : "Joined Room: \(roomCode)")
+                Text(roomCode)
                     .font(.title)
                     .bold()
                 
                 if isHost {
-                    
-                    Button("Start") {
-                         if let topic = gameSettings.selectedCategories.randomElement() {
-                             gameSettings.selectedTopic = topic
-                             Task {
-                                 await chatGPTVM.generateQuestion(from: [topic])
-                                 if let question = chatGPTVM.storedQuestions.last {
-                                     gameSettings.question = question
-                                     mcManager.broadcastStartGame()
-                                     mcManager.gameStarted = true
-                                     mcManager.broadcastQuestion(question)
-                                 }
-                             }
-                         }
+                    Button(action: {
+                            Task {
+                                await chatGPTVM.generateQuestion(from: gameSettings.selectedCategories)
+                                let questions = chatGPTVM.storedQuestions
+                                gameSettings.questionOptions = questions
+                                mcManager.broadcastQuestions(questions)
+                                mcManager.broadcastStartGame()
+                                mcManager.gameStarted = true
+
+                            }
+                    }) {
+                        Text("Start")
+                            .font(.title3)
+                            .foregroundColor(.black)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 25)
+                            .background(Color(.secondarySystemFill))
+                            .cornerRadius(12)
+                            .scaleEffect(1.0)
                     }
-                    .padding()
-                    .frame(width: 80, height: 30)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(PressEffectButtonStyle())
                 } else {
-                    Text("Waiting for host...")
+                    Text("Waiting for host to start...")
                 }
-                Spacer()
+                Divider()
                 HStack {
                     VStack {
-                        
-                        Text("Participants:")
-                            .font(.headline)
-                        
-                        Text("You: \(mcManager.username)")
-                            .foregroundColor(.blue)
-                        
+                        UserRowView(isHost: isHost, username: mcManager.username)
+
                         ForEach(mcManager.connectedPeers, id:\.self) { peer in
-                            Text(mcManager.discoveredPeers[peer]?.username ?? peer.displayName)
+                            UserRowView(isHost: false, username: mcManager.discoveredPeers[peer]?.username ?? peer.displayName)
                         }
+                        Spacer()
                     }
+                    .padding()
                 }
                 .frame(maxWidth: .infinity, alignment: .top)
-                .frame(height: UIScreen.main.bounds.height / 2)
+                .frame(maxHeight: .infinity)
                 .background(.white)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .navigationTitle(Text("Take Match"))
-            .background(Color(.systemGray3))
+            .background(Color.white)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .onDisappear {
@@ -110,7 +109,7 @@ struct TakeMatchRoomView: View {
             }
             .sheet(isPresented: $showSettings) {
                 GameSettingsView(gameSettings: gameSettings, showSettings: $showSettings)
-                    .presentationDetents([.medium])
+                    .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
             }
 
@@ -168,6 +167,37 @@ struct CategoryView: View{
     }
 }
 
+struct UserRowView: View {
+    @State var isHost: Bool
+    @State var username: String
+    var body: some View {
+        ZStack {
+
+            HStack {
+                Circle()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(.gray)
+                Text(username)
+                    .font(.title2)
+                    .padding(.leading, 10)
+                Spacer()
+                if (isHost) {
+                    Image(systemName: "crown")
+                        .font(.title)
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.white)
+                    .stroke(Color.black)
+            )
+        }
+        .padding(.horizontal, 5)
+    }
+
+}
+
 //game settings sheet
 struct GameSettingsView: View {
     
@@ -180,9 +210,9 @@ struct GameSettingsView: View {
     var body: some View {
         
         VStack() {
+            Spacer()
             Text("Game Settings")
                 .font(.title)
-                .bold()
                 .padding()
             
             Form {
@@ -200,20 +230,20 @@ struct GameSettingsView: View {
                     }
                     .listRowBackground(Color(.systemGray4))
                 }
-                HStack() {
-                    Text("Round Length").font(.headline)
-                    Section {
-                        
-                        Picker("", selection: $gameSettings.roundLen) {
-                            
-                            ForEach([15,30,45,60], id: \.self) { length in
-                                Text("\(length)s").tag(length)
-                            }
-                        }
-                        
-                    }
-                    .listRowBackground(Color(.systemGray4))
-                }
+//                HStack() {
+//                    Text("Round Length").font(.headline)
+//                    Section {
+//                        
+//                        Picker("", selection: $gameSettings.roundLen) {
+//                            
+//                            ForEach([15,30,45,60], id: \.self) { length in
+//                                Text("\(length)s").tag(length)
+//                            }
+//                        }
+//                        
+//                    }
+//                    .listRowBackground(Color(.systemGray4))
+//                }
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Categories")
                         .font(.headline)
@@ -224,7 +254,6 @@ struct GameSettingsView: View {
                         }
                     }
                 }
-                .padding(.horizontal)
                 
                 Text("Looking good?")
                     .font(.headline)
@@ -243,11 +272,12 @@ struct GameSettingsView: View {
                         .cornerRadius(8)
                         .foregroundColor(.black)
                 }
-               
+                Spacer()
+
             }
             .scrollContentBackground(.hidden)
             .background(.white)
-            
+
         }
         .background(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)

@@ -126,9 +126,10 @@ struct GamesHome: View {
                                 )
                                 if showingJoin {
                                     HStack {
-                                        TextField(
-                                            "Room Code", text: $roomCode
-                                        )
+                                        TextField("Room Code", text: $roomCode)
+                                            .onChange(of: roomCode) { newValue in
+                                                roomCode = newValue.uppercased()
+                                            }
                                         .font(.title2)
                                         .textFieldStyle(
                                             RoundedBorderTextFieldStyle()
@@ -136,10 +137,10 @@ struct GamesHome: View {
                                         let roomAvailable = !roomCode.isEmpty && mcManager.discoveredPeers.values.contains { $0.roomCode == roomCode }
                                         Button(action: {
                                             if roomAvailable {
-                                                mcManager.username = username
-                                                navigateToRoom = true
+                                                mcManager.setUsername(username: username)
                                                 isHost = false
                                                 mcManager.joinRoom(with: roomCode)
+                                                navigateToRoom = true
                                             }
                                         }) {
                                             Image(systemName: "arrow.right")
