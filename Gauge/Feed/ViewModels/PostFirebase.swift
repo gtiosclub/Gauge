@@ -237,6 +237,13 @@ class PostFirebase: ObservableObject {
             responseOption1: "Easy money",
             responseOption2: "No, I'm addicted"
         ))
+        
+        
+//        for post in feedPosts {
+//            if let binarypost = post as? BinaryPost {
+//                createBinaryPost(userId: binarypost.userId, categories: binarypost.categories, question: binarypost.question, responseOption1: binarypost.responseOption1, responseOption2: binarypost.responseOption2)
+//            }
+//        }
 
     }
     
@@ -248,9 +255,11 @@ class PostFirebase: ObservableObject {
     }
     
     func watchForCurrentFeedPostChanges() {
-        setUpCommentsListener()
-        setUpResponsesListener()
-        setUpViewsListener()
+        if !feedPosts.isEmpty {
+            setUpCommentsListener()
+            setUpResponsesListener()
+            setUpViewsListener()
+        }
         // Makes changes to the Post's (Binary) responses, viewCounter, comments, responseResult1, responseResult2
 
     }
@@ -542,12 +551,13 @@ class PostFirebase: ObservableObject {
         
         // Create document in Firebase
         let documentRef = Firebase.db.collection("POSTS").document(post.postId)
+        let categoryStrings = post.categories.map{$0.rawValue}
 
         documentRef.setData([
             "type": PostType.BinaryPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "categories": post.categories,
+            "categories": categoryStrings,
             "viewCounter": post.viewCounter,
             "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
