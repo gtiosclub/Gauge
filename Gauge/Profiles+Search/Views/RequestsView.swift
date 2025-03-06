@@ -13,7 +13,7 @@ struct RequestsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                SearchBar(text: $searchText)
+                CustomSearchBar(text: $searchText)
                     .padding(.horizontal)
                     .padding(.top, 8)
                     .frame(height: 36)

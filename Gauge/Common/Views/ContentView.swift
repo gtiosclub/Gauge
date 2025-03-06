@@ -8,16 +8,19 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var authVM = AuthenticationVM()
+    @EnvironmentObject var userVM: UserFirebase
     @State private var isSigningUp = false
-    @State private var authVM = AuthenticationVM()
+    @State private var selectedTab: Int = 0
+    @State private var showSplashScreen: Bool = true
     
     var body: some View {
-        VStack {
-//             SearchView() // after commenting everything here
-            if isSigningUp {
-                SignUpView()
-            } else {
-                SignInView()
+        if showSplashScreen {
+            ZStack {
+                Image(systemName: "gauge.open.with.lines.needle.84percent.exclamation")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
             }
             .background(.red)
             .onAppear {
@@ -36,7 +39,8 @@ struct ContentView: View {
                             }
                             .tag(0)
                         
-                        Text("Search")
+//                        Text("Search")
+                        SearchView()
                             .tabItem {
                                 Image(systemName: "magnifyingglass")
                                 Text("Search")
@@ -50,7 +54,8 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-                        Text("Profile")
+//                        Text("Profile")
+                        ProfileView()
                             .tabItem {
                                 Image(systemName: "person.circle")
                                 Text("Profile")

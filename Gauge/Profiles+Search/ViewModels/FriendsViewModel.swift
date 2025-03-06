@@ -110,23 +110,39 @@ class FriendsViewModel: ObservableObject {
             let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
             guard let userData = document.data() else {return nil}
             
-            guard let name = userData["name"] as? String else { return nil }
+            guard let username = userData["username"] as? String else { return nil }
             guard let email = userData["email"] as? String else { return nil }
-            
+
             let phoneNumber = userData["phoneNumber"] as? String ?? ""
             let friendIn = userData["friendIn"] as? [String : [String]] ?? [:]
             let friendOut = userData["friendOut"] as? [String: [String]] ?? [:]
             let friends = userData["friends"] as? [String: [String]] ?? [:]
             let myPosts = userData["myPosts"] as? [String] ?? []
             let myResponses = userData["myResponses"] as? [String] ?? []
-            let myReactions = userData["myReactions"] as? [String] ?? []
+            let myFavorites = userData["myFavorites"] as? [String] ?? []
             let mySearches = userData["mySearches"] as? [String] ?? []
             let myComments = userData["myComments"] as? [String] ?? []
             let myCategories = userData["myCategories"] as? [String] ?? []
             let badges = userData["badges"] as? [String] ?? []
             let streak = userData["streak"] as? Int ?? 0
-            
-            let outputUser = try User(userId: userId, username: name, phoneNumber: phoneNumber, email: email,friendIn: friendIn, friendOut: friendOut, friends: friends, myPosts: myPosts, myResponses: myResponses, myReactions: myReactions, mySearches: mySearches, myComments: myComments, myCategories: myCategories, badges: badges, streak: streak)
+
+            let outputUser = try User(
+                userId: userId,
+                username: username,
+                phoneNumber: phoneNumber,
+                email: email,
+                friendIn: friendIn,
+                friendOut: friendOut,
+                friends: friends,
+                myPosts: myPosts,
+                myResponses: myResponses,
+                myFavorites: myFavorites,
+                mySearches: mySearches,
+                myComments: myComments,
+                myCategories: myCategories,
+                badges: badges,
+                streak: streak
+            )
             return outputUser
                 
         } catch {

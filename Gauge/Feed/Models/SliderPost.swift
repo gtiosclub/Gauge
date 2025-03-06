@@ -14,11 +14,13 @@ class SliderPost: Post, Equatable {
     var profilePhoto: String = "" // NOT stored in Firebase
     var comments: [Comment]
     var responses: [Response]
-    var category: Category
+    var categories: [Category]
     var viewCounter: Int
     var postDateAndTime: Date
-    
+    var favoritedBy: [String]
     var question: String
+    
+    // Slider post specific attributes
     var lowerBoundValue: Double
     var upperBoundValue: Double
     var lowerBoundLabel: String
@@ -53,10 +55,13 @@ class SliderPost: Post, Equatable {
         self.profilePhoto = profilePhoto
         self.comments = comments
         self.responses = responses
-        self.category = category
+        self.categories = categories
         self.viewCounter = viewCounter
         self.postDateAndTime = postDateAndTime
+        self.favoritedBy = favoritedBy
         self.question = question
+        
+        // Slider post specific attributes
         self.lowerBoundValue = lowerBoundValue
         self.upperBoundValue = upperBoundValue
         self.lowerBoundLabel = lowerBoundLabel

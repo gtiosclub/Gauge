@@ -15,6 +15,8 @@ class BinaryPost: Post, Equatable {
     var profilePhoto: String = "" // NOT stored in Firebase
     var categories: [Category]
     var postDateAndTime: Date
+    var favoritedBy: [String]
+    var question: String
     
     // From subcollection
     @Published var responses: [Response]
@@ -56,10 +58,13 @@ class BinaryPost: Post, Equatable {
         self.profilePhoto = profilePhoto
         self.comments = comments
         self.responses = responses
-        self.category = category
+        self.categories = categories
         self.viewCounter = viewCounter
         self.postDateAndTime = postDateAndTime
+        self.favoritedBy = favoritedBy
         self.question = question
+        
+        // Binary post specific attributes
         self.responseOption1 = responseOption1
         self.responseOption2 = responseOption2
         self.responseResult1 = responseResult1

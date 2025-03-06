@@ -15,11 +15,13 @@ class RankPost: Post, Equatable {
     var profilePhoto: String = "" // NOT stored in Firebase
     var comments: [Comment]
     var responses: [Response]
-    var category: Category
+    var categories: [Category]
     var viewCounter: Int
     var postDateAndTime: Date
-    
+    var favoritedBy: [String]
     var question: String
+    
+    // Rank post specific attributes
     var responseOptions: [String]
     
     // Initializing locally
@@ -48,10 +50,13 @@ class RankPost: Post, Equatable {
         self.profilePhoto = profilePhoto
         self.comments = comments
         self.responses = responses
-        self.category = category
+        self.categories = categories
         self.viewCounter = viewCounter
         self.postDateAndTime = postDateAndTime
+        self.favoritedBy = favoritedBy
         self.question = question
+        
+        // Rank post specific attributes
         self.responseOptions = responseOptions
     }
     

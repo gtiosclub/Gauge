@@ -7,7 +7,7 @@ struct FriendsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                SearchBar(text: $searchText)
+                SearchBar(searchText: $searchText)
                     .padding(.horizontal)
                     .padding(.top, 8)
                     .frame(height: 36)
@@ -78,7 +78,7 @@ struct FriendsView: View {
     }
 }
 
-struct SearchBar: View {
+struct CustomSearchBar: View {
     @Binding var text: String
     
     var body: some View {

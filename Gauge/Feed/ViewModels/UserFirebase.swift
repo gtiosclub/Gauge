@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
-class UserFirebase {
+class UserFirebase: ObservableObject {
+    @Published var user: User = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
     
     func getAllUserData(userId: String, completion: @escaping (User) -> Void) {
         Firebase.db.collection("USERS").document(userId).getDocument { document, error in
@@ -282,5 +284,7 @@ class UserFirebase {
                 }
         }
     }
+
+
 
 }

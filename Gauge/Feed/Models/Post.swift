@@ -14,15 +14,17 @@ protocol Post: ObservableObject, Identifiable {
     var profilePhoto: String {get set}
     var comments: [Comment] {get set}
     var responses: [Response] {get set}
-    var category: Category {get set} // String in Firebase
+    var categories: [Category] {get set} // String in Firebase
     var viewCounter: Int {get set}
     var postDateAndTime: Date {get set} // String in Firebase
+    var favoritedBy: [String] {get set} // UserIds of users that have favorited
+    var question: String {get set}
 }
 
 //class AnyObservablePost: ObservableObject, Identifiable {
 //    let postId: String
 //    let wrappedPost: any Post
-//    
+//
 //    init(_ post: any Post) {
 //        self.postId = post.postId
 //        self.wrappedPost = post

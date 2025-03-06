@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Firebase
 
 class PostFirebase: ObservableObject {
     @Published var feedPosts: [any Post] = []
@@ -1048,4 +1049,3 @@ class PostFirebase: ObservableObject {
         print("Restored skipped post: \(skipped.postId)")
     }
 }
-

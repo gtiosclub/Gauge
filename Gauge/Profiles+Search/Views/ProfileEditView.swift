@@ -10,7 +10,8 @@ import SwiftUI
 
 struct ProfileEditView: View {
     @StateObject var profileViewModel = ProfileViewModel()
-    let userID: String
+    @EnvironmentObject var userVM: UserFirebase  // Shared environment object for user data
+    @Environment(\.dismiss) var dismiss          // To dismiss the view
     
     // Local states
     @State private var username: String = ""
@@ -21,27 +22,7 @@ struct ProfileEditView: View {
     
     var body: some View {
         VStack {
-            // Navigation Bar Section
-            Section {
-                HStack {
-                    Button("Cancel") {
-                        // Dismiss or pop the view
-                    }
-                    Spacer()
-                    Button("Save") {
-                        Task {
-                            if profileImage == nil {
-                                let _ = await profileViewModel.removeProfilePicture(userID: userID)
-                            } else if let newImage = selectedImage {
-                                await profileViewModel.updateProfilePicture(userID: userID, image: newImage)
-                            }
-                            // add additional updates for username or other fields here
-                        }
-                    }
-                }
-                .padding(.horizontal)
-            }
-            
+            // Profile Image and Photo Options
             ZStack {
                 if let profileImage = profileImage {
                     Image(uiImage: profileImage)
@@ -63,7 +44,6 @@ struct ProfileEditView: View {
                         Circle()
                             .fill(Color.black)
                             .frame(width: 30, height: 30)
-                        
                         Image(systemName: "pencil")
                             .foregroundColor(.white)
                             .font(.system(size: 14, weight: .bold))
@@ -84,7 +64,7 @@ struct ProfileEditView: View {
                     profileImage = nil
                     selectedImage = nil
                 }
-                Button("Cancel", role: .cancel) {}
+                Button("Cancel", role: .cancel) { }
             }
             .sheet(isPresented: $showingImagePicker) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: .photoLibrary)
@@ -97,8 +77,9 @@ struct ProfileEditView: View {
             
             Spacer().frame(height: 50)
             
+            // Form Content
             VStack(alignment: .leading, spacing: 10) {
-                // Username
+                // Username Field
                 HStack(spacing: 20) {
                     Text("Username")
                         .frame(width: 80, alignment: .leading)
@@ -109,103 +90,102 @@ struct ProfileEditView: View {
                 .padding(.leading, 20)
                 .padding(.vertical, 5)
                 Divider()
-                // Pronouns
-               HStack(spacing: 20) {
-                   Text("Pronouns")
-                       .frame(width: 80, alignment: .leading)
-                   TextField("Pronouns", text: $username)
-                       .textFieldStyle(PlainTextFieldStyle())
-                       .foregroundColor(.primary)
-               }
-               .padding(.leading, 20)
-               .padding(.vertical, 5)
-               Divider()
-                               
-               // Bio
-               HStack(spacing: 20) {
-                   Text("Bio")
-                       .frame(width: 80, alignment: .leading)
-                   TextField("a short bio that describes the user", text: $username)
-                       .textFieldStyle(PlainTextFieldStyle())
-                       .foregroundColor(.primary)
-               }
-               .padding(.leading, 20)
-               .padding(.vertical, 5)
-               Divider()
-                               
-               // User Tags
-               HStack {
-                   Text("User Tags")
-                   Spacer()
-                   NavigationLink(destination: Text("User Tags Screen")) {
-                       HStack {
-                           Text("4")
-                           Image(systemName: "chevron.right")
-                       }
-                   }
-               }
-               .padding(.horizontal, 20)
-               .padding(.vertical, 5)
-               Divider()
-                               
-               // Badges
-               HStack {
-                   Text("Badges")
-                   Spacer()
-                   NavigationLink(destination: Text("Badges Screen")) {
-                       HStack {
-                           Text("5")
-                           Image(systemName: "chevron.right")
-                       }
-                   }
-               }
-               .padding(.horizontal, 20)
-               .padding(.vertical, 5)
+                // Pronouns Field
+                HStack(spacing: 20) {
+                    Text("Pronouns")
+                        .frame(width: 80, alignment: .leading)
+                    TextField("Pronouns", text: $username)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .foregroundColor(.primary)
+                }
+                .padding(.leading, 20)
+                .padding(.vertical, 5)
+                Divider()
+                // Bio Field
+                HStack(spacing: 20) {
+                    Text("Bio")
+                        .frame(width: 80, alignment: .leading)
+                    TextField("a short bio that describes the user", text: $username)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .foregroundColor(.primary)
+                }
+                .padding(.leading, 20)
+                .padding(.vertical, 5)
+                Divider()
+                // User Tags NavigationLink
+                HStack {
+                    Text("User Tags")
+                    Spacer()
+                    NavigationLink(destination: Text("User Tags Screen")) {
+                        HStack {
+                            Text("4")
+                            Image(systemName: "chevron.right")
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 5)
+                Divider()
+                // Badges NavigationLink
+                HStack {
+                    Text("Badges")
+                    Spacer()
+                    NavigationLink(destination: Text("Badges Screen")) {
+                        HStack {
+                            Text("5")
+                            Image(systemName: "chevron.right")
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 5)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer()
             
-            Divider()
-            HStack {
-                VStack {
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.gray)
-                        .font(.system(size: 24))
-                    Text("Tab Name")
-                        .foregroundColor(.gray)
-                        .font(.system(size: 12))
-                }
-                Spacer()
-                VStack {
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.gray)
-                        .font(.system(size: 24))
-                    Text("Tab Name")
-                        .foregroundColor(.gray)
-                        .font(.system(size: 12))
-                }
-                Spacer()
-                VStack {
-                    Image(systemName: "person.fill")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 24))
-                    Text("Profile")
-                        .foregroundColor(.blue)
-                        .font(.system(size: 12))
-                }
-            }
-            .padding(.horizontal, 40)
+            
         }
         .task {
-            profileImage = await profileViewModel.getProfilePicture(userID: userID)
+            profileImage = await profileViewModel.getProfilePicture(userID: userVM.user.userId)
+        }
+
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                        Text("Cancel")
+                    }
+                }
+            }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Save") {
+                    Task {
+                        if profileImage == nil {
+                            let _ = await profileViewModel.removeProfilePicture(userID: userVM.user.userId)
+                        } else if let newImage = selectedImage {
+                            if let newPhotoURL = await profileViewModel.updateProfilePicture(userID: userVM.user.userId, image: newImage) {
+                                userVM.user.profilePhoto = newPhotoURL
+                            }
+                        }
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview {
-    ProfileEditView(userID: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1")
+    ProfileEditView()
+        .environmentObject(UserFirebase())
 }
+
 
 
 

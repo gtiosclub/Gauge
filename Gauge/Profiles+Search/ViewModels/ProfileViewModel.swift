@@ -69,20 +69,23 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    func updateProfilePicture(userID: String, image: UIImage) async {
+    func updateProfilePicture(userID: String, image: UIImage) async -> String? {
         guard let profilePhotoURL = await storeImageAndReturnURL(userId: userID, image: image) else {
             print("Failed to get download URL")
-            return
+            return nil
         }
         
         let userDocument = Firebase.db.collection("USERS").document(userID)
         do {
             try await userDocument.updateData(["profilePhoto": profilePhotoURL])
             print("Document successfully updated")
+            return profilePhotoURL 
         } catch {
             print("Error updating document: \(error.localizedDescription)")
+            return nil
         }
     }
+
     
     func removeProfilePicture(userID: String) async -> Bool {
         let userDocument = Firebase.db.collection("USERS").document(userID)
