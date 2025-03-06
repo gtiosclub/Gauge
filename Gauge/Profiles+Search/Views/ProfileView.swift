@@ -11,7 +11,6 @@ struct ProfileView: View {
         NavigationView {
             VStack {
                 HStack {
- 
                     if let url = URL(string: userVM.user.profilePhoto), !userVM.user.profilePhoto.isEmpty {
                         AsyncImage(url: url) { phase in
                             if let image = phase.image {
@@ -47,25 +46,23 @@ struct ProfileView: View {
                             Text("27")
                                 .foregroundColor(.black)
                         }
+        
                         
-                        HStack {
-                            ForEach(userTags, id: \.self) { tag in
-                                Text(tag)
-                                    .padding(.horizontal, 0)
-                                    .padding(.vertical, 6)
-                                    .font(.system(size: 14))
-                                    .background(Color.gray.opacity(0.2))
-                                    .foregroundColor(.black)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                ForEach(userTags, id: \.self) { tag in
+                                    Text(tag)
+                                        .padding(.horizontal, 15)
+                                        .padding(.vertical, 6)
+                                        .font(.system(size: 14))
+                                        .background(Color.gray.opacity(0.2))
+                                        .foregroundColor(.black)
                                     .cornerRadius(10)}
+                            }
                         }
                         
                         Text("a short bio that describes the user")
-                        
-                        NavigationLink(destination: ProfileEditView()) {
-                            Text("edit profile")
-                                .font(.system(size: 15))
-                                .padding(8)
-                        }
+                         
                     }
                     Spacer()
                 }
@@ -223,9 +220,7 @@ struct ProfileView: View {
                     .padding()
                 }
 
-                Spacer()
             }
-            .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -234,6 +229,14 @@ struct ProfileView: View {
                             .foregroundColor(.black)
                     }
                 }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: ProfileEditView()) {
+                        Text("edit profile")
+                            .font(.system(size: 15))
+                    }
+                }
+                
             }
             .sheet(item: $selectedBadge) { badge in
                 BadgeDetailView(badge: badge)
