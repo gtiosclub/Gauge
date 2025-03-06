@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseFirestore
+import ChatGPTSwift
 
 class UserFirebase: ObservableObject {
     @Published var user: User = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
@@ -294,7 +295,61 @@ class UserFirebase: ObservableObject {
                 }
         }
     }
+    
+    func reorderUserCategory(lastest : [String: Int], currentInterestList: [String], completion: @escaping ([String]) -> Void){
+        //lastest: given the dictionary of last session of interest category from user
+        //currentIntegerList: this is the current category list
+        
+        //testing
+        let tastest = ["Sport": 50, "Beauty": 2, "skin care":30, "health care": 20, "studying": 2]
+        let currentInterestList = ["Beauty", "studying", "oral care", "skin care"]
+        
+        //get the OpenAI token
+        let token = ChatGPTAPI(apiKey:Keys.openAIKey)
+        //assigning prompt to the OpenAI
+        var prompt:String = """
+        I will give you 2 lists, where a dictionary list to store the interests point of the user lastest interactions with the categories, and another list of current catgories. Please based on the significant interest points, what we mean significant is only move categories up or down if the interactions make it very apparent the user has interest/disinterest in a category. And return the reordered the category list. The returned format would be: [String]
+        lastest interaction categories: \(lastest)
+        current list of category: \(currentInterestList)
+        """
+        
+        //making the call
+        
+        Task{
+            do{
+                let response = try await token.sendMessage(text: prompt,
+                                                           model: ChatGPTModel.gpt_hyphen_4o_hyphen_mini,
+                                                           systemText: "You are a reordering expert",
+                                                           temperature: 0.5)
+                
+                if let data = response.data(using: .utf8),
+                   let jsonArray = try? JSONDecoder().decode([String].self, from: data) {
+                    //return the string list
+                    completion(jsonArray)
+                } else {
+                    print("Failed to parse OpenAI response")
+                    completion([])
+                }
+                
+                
+            }catch {
+                print("Error fetching reordered categories: \(error.localizedDescription)")
+                completion([]) 
+            }
+            
+            
+        }
+        
+        }
+        
+        
+        
+        
+        
+        
+        
+    }
 
 
 
-}
+
