@@ -117,16 +117,19 @@ class FriendsViewModel: ObservableObject {
             let friendIn = userData["friendIn"] as? [String : [String]] ?? [:]
             let friendOut = userData["friendOut"] as? [String: [String]] ?? [:]
             let friends = userData["friends"] as? [String: [String]] ?? [:]
-            let myPosts = userData["myPosts"] as? [String] ?? []
+            let myNextPosts = userData["myNextPosts"] as? [String] ?? []
             let myResponses = userData["myResponses"] as? [String] ?? []
             let myFavorites = userData["myFavorites"] as? [String] ?? []
             let mySearches = userData["mySearches"] as? [String] ?? []
             let myComments = userData["myComments"] as? [String] ?? []
             let myCategories = userData["myCategories"] as? [String] ?? []
+            let myAccessedProfiles = userData["myAccessedProfiles"] as? [String] ?? []
             let badges = userData["badges"] as? [String] ?? []
             let streak = userData["streak"] as? Int ?? 0
+            let lastLogin = DateConverter.convertStringToDate(userData["lastLogin"] as? String ?? "") ?? Date()
+            let lastFeedRefresh = DateConverter.convertStringToDate(userData["lastFeedRefresh"] as? String ?? "") ?? Date()
 
-            let outputUser = try User(
+            let outputUser = User(
                 userId: userId,
                 username: username,
                 phoneNumber: phoneNumber,
@@ -134,14 +137,17 @@ class FriendsViewModel: ObservableObject {
                 friendIn: friendIn,
                 friendOut: friendOut,
                 friends: friends,
-                myPosts: myPosts,
+                myNextPosts: myNextPosts,
                 myResponses: myResponses,
                 myFavorites: myFavorites,
                 mySearches: mySearches,
                 myComments: myComments,
                 myCategories: myCategories,
                 badges: badges,
-                streak: streak
+                streak: streak,
+                myAccessedProfiles: myAccessedProfiles,
+                lastLogin: lastLogin,
+                lastFeedRefresh: lastFeedRefresh
             )
             return outputUser
                 

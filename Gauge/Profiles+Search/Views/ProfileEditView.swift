@@ -69,7 +69,7 @@ struct ProfileEditView: View {
             .sheet(isPresented: $showingImagePicker) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: .photoLibrary)
             }
-            .onChange(of: selectedImage) { newImage in
+            .onChange(of: selectedImage) { oldImage, newImage in
                 if let newImage = newImage {
                     profileImage = newImage
                 }

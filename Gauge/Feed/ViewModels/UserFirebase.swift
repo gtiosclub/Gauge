@@ -18,21 +18,23 @@ class UserFirebase: ObservableObject {
             } else {
                 if let data = document?.data() {
                     let userObj = User(
-                        userId: data["userId"] as? String ?? "",
+                        userId: document!.documentID,
                         username: data["username"] as? String ?? "",
                         phoneNumber: data["phoneNumber"] as? String ?? "",
                         email: data["email"] as? String ?? "",
                         friendIn: data["friendIn"] as? [String: [String]] ?? [:],
                         friendOut: data["friendOut"] as? [String: [String]] ?? [:],
                         friends: data["friends"] as? [String: [String]] ?? [:],
-                        myPosts: data["myPosts"] as? [String] ?? [],
-                        myResponses: data["myResponses"] as? [String] ?? [],
+                        myNextPosts: data["myNextPosts"] as? [String] ?? [],
                         myFavorites: data["myFavorites"] as? [String] ?? [],
                         mySearches: data["mySearches"] as? [String] ?? [],
-                        myComments: data["myComments"] as? [String] ?? [],
                         myCategories: data["myCategories"] as? [String] ?? [],
                         badges: data["badges"] as? [String] ?? [],
-                        streak: data["streak"] as? Int ?? 0
+                        streak: data["streak"] as? Int ?? 0,
+                        profilePhoto: data["profilePhoto"] as? String ?? "",
+                        myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
+                        lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
+                        lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date()
                     )
                     
                     completion(userObj)

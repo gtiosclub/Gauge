@@ -22,7 +22,7 @@ class User: Equatable, Identifiable, ObservableObject {
     var friendOut: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
     var friends: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
     var badges: [String] = []
-    var profilePhoto: String = ""
+    var profilePhoto: String
     var phoneNumber: String = ""
     var myCategories: [String] = []
     var myNextPosts: [String] = []
@@ -34,7 +34,7 @@ class User: Equatable, Identifiable, ObservableObject {
     var myFavorites: [String] = [] // PostIds of those favorited
     var myComments: [String] = [] // PostIds of those commented on
     var mySearches: [String] = [] // Search queries
-    var myAccessedProfiles: [String] = [] // UserIDs of other users, sorted by profile accesses
+    var myAccessedProfiles: [String] // UserIDs of other users, sorted by profile accesses
     // MARK: AI Algorithm Variables
     
     // MARK: STATS
@@ -49,9 +49,11 @@ class User: Equatable, Identifiable, ObservableObject {
         self.lastLogin = Date()
         self.streak = 0
         self.lastFeedRefresh = Date()
+        self.profilePhoto = ""
+        self.myAccessedProfiles = []
     }
     
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myPosts: [String], myResponses: [String], myFavorites: [String], mySearches: [String], myComments: [String], myCategories: [String], badges: [String], streak: Int) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String], mySearches: [String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String = "", myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -59,17 +61,19 @@ class User: Equatable, Identifiable, ObservableObject {
         self.friendIn = friendIn
         self.friendOut = friendOut
         self.friends = friends
-        self.myPosts = myPosts
+        self.myNextPosts = myNextPosts
         self.myResponses = myResponses
         self.myFavorites = myFavorites
         self.mySearches = mySearches
         self.myComments = myComments
         self.myCategories = myCategories
         self.badges = badges
+        self.profilePhoto = profilePhoto
+        self.myAccessedProfiles = myAccessedProfiles
+        self.lastLogin = lastLogin
+        self.lastFeedRefresh = lastFeedRefresh
         
-        // Add function to update last login + last feed refresh in Firebase
-        self.lastLogin = Date()
-        self.lastFeedRefresh = Date()
+        
         // Add logic to add one to streak if it is maintained, update in Firebase
         self.streak = streak
     }
