@@ -165,7 +165,7 @@ enum Category: Hashable {
         case rant = "😡 Rant"
         case conspiraryTheories = "🕵️ Conspiracy Theories"
         case rememberWhen = "🔙 Remember When"
-        case adviceColumns = "📝 Advice Columns"
+        case advice = "📝 Advice"
         case randomThoughts = "💭 Random Thoughts"
         case motivationalQuotes = "🌟 Motivational Quotes"
     }

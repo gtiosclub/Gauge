@@ -46,9 +46,8 @@ class SearchViewModel: ObservableObject {
                 }
                 break
             }
-
         }
-//        try await queryDocRef.delete()
+        try await queryDocRef.delete()
         
         return postIds
     }
@@ -56,9 +55,8 @@ class SearchViewModel: ObservableObject {
     func getPostQuestion(postId: String) async -> String? {
         do {
             let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
-            guard let postData = document.data() else {return nil}
-            guard let question = postData["question"] as? String else { return nil }
-            return question
+            guard let postData = document.data() else { return nil }
+            return postData["question"] as? String
         } catch {
             return nil
         }
@@ -67,7 +65,7 @@ class SearchViewModel: ObservableObject {
     func getPostDateTime(postId: String) async -> String? {
         do {
             let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
-            guard let postData = document.data() else { return nil}
+            guard let postData = document.data() else { return nil }
             guard let postDateAndTime = postData["postDateAndTime"] as? String else { return nil }
             return DateConverter.timeAgo(from: DateConverter.convertStringToDate(postDateAndTime) ?? Date())
         } catch {
@@ -78,13 +76,37 @@ class SearchViewModel: ObservableObject {
     func getPostOptions(postId: String) async -> [String]? {
         do {
             let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
-            guard let postData = document.data() else {return nil}
+            guard let postData = document.data() else { return nil }
             guard let option1 = postData["responseOption1"] as? String else { return nil }
             guard let option2 = postData["responseOption2"] as? String else { return nil }
             return [option1, option2]
         } catch {
             return nil
         }
+    }
+    
+    /// Combines the three awaits into one function that returns a PostResult.
+    func getPostDetails(for postId: String) async -> PostResult? {
+        async let question = getPostQuestion(postId: postId)
+        async let options = getPostOptions(postId: postId)
+        async let timeAgo = getPostDateTime(postId: postId)
+        
+        let (q, opts, ta) = await (question, options, timeAgo)
+        guard let q = q else { return nil }
+        return PostResult(id: postId, question: q, options: opts ?? [], timeAgo: ta ?? "Just now")
+    }
+    
+    func searchPosts(for query: String) async throws -> [PostResult] {
+        let postIds = try await searchSimilarQuestions(query: query)
+        var results: [PostResult] = []
+        
+        for postId in postIds {
+            if let details = await getPostDetails(for: postId) {
+                results.append(details)
+            }
+        }
+        
+        return results
     }
     
     func searchQuestions(for query: String) async throws -> [String] {
@@ -99,20 +121,4 @@ class SearchViewModel: ObservableObject {
         
         return questions
     }
-    
-    func searchPosts(for query: String) async throws -> [PostResult] {
-        let postIds = try await searchSimilarQuestions(query: query)
-        var results: [PostResult] = []
-        
-        for postId in postIds {
-            if let question = await getPostQuestion(postId: postId) {
-                let options = await getPostOptions(postId: postId) ?? []
-                let timeAgo = await getPostDateTime(postId: postId) ?? "Just now"
-                results.append(PostResult(id: postId, question: question, options: options, timeAgo: timeAgo))
-            }
-        }
-        
-        return results
-    }
-
 }

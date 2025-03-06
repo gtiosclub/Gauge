@@ -18,7 +18,7 @@ struct SearchView: View {
     @State private var showResults: Bool = false
     @State private var isSearchActive: Bool = false
 
-    @State var items = Array(1...50).map { "Category \($0)" }
+    @State var items = Array(Category.allCategoryStrings.shuffled().prefix(through: 19))
     
     var body: some View {
         NavigationStack {
@@ -59,7 +59,6 @@ struct SearchView: View {
                                 }
                             }
 
-                        
                         if !searchText.isEmpty {
                             Button(action: {
                                 searchText = ""
@@ -71,7 +70,7 @@ struct SearchView: View {
                             }
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 4)  // Reduced horizontal padding
                     .padding(.vertical, 5)
                     .background(Color(.systemGray5))
                     .cornerRadius(12)
@@ -87,7 +86,7 @@ struct SearchView: View {
                         .foregroundColor(.blue)
                     }
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 4)
                 .padding(.top, 1)
                 .padding(.bottom, 10)
                 
@@ -106,9 +105,10 @@ struct SearchView: View {
                                     ForEach(searchResults) { result in
                                         PostResultRow(result: result)
                                             .listRowSeparator(.hidden)
+                                            .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
                                     }
                                 }
-                                .listStyle(PlainListStyle())
+                                .listStyle(.plain)
                             } else {
                                 Text("No results found.")
                                     .padding()
@@ -128,6 +128,7 @@ struct SearchView: View {
         }
     }
 }
+
 
 struct CategoriesView: View {
     @Binding var items: [String]

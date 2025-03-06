@@ -117,7 +117,7 @@ struct ProfileView: View {
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("50 Votes")
+                                    Text("100 Votes")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -137,7 +137,7 @@ struct ProfileView: View {
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("50 Takes")
+                                    Text("25 Takes")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -157,7 +157,7 @@ struct ProfileView: View {
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("50 Votes")
+                                    Text("275 Votes")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -170,14 +170,13 @@ struct ProfileView: View {
                             
                             Divider().padding(.horizontal)
                             
-                            // Total Comments Made
                             HStack {
                                 Text("Total Comments Made")
                                     .font(.system(size: 17))
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("20 Comments")
+                                    Text("110 Comments")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -190,14 +189,13 @@ struct ProfileView: View {
                             
                             Divider().padding(.horizontal)
                             
-                            // Ratio View/Response
                             HStack {
                                 Text("Ratio View/Response")
                                     .font(.system(size: 17))
                                     .fontWeight(.regular)
                                 Spacer()
                                 HStack {
-                                    Text("20 Comments")
+                                    Text("0.75")
                                         .font(.system(size: 17))
                                         .foregroundColor(.gray)
                                     Image(systemName: "chevron.right")
@@ -250,7 +248,9 @@ struct TabButton: View {
 
     var body: some View {
         Button(action: {
-            selectedTab = title
+            withAnimation {
+                selectedTab = title
+            }
         }) {
             VStack(spacing: 0) {
                 Text(title)
