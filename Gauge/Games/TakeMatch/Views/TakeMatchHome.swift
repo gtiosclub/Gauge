@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct TakeMatchHome: View {
-    @StateObject private var mcManager = MCManager.shared
     @State var roomCode: String = ""
     @State var showJoinRoom: Bool = false
     @State var navigateToRoom = false
@@ -17,9 +16,7 @@ struct TakeMatchHome: View {
                 HStack {
                     // Create Room
                     Button(action: {
-                        mcManager.startHosting()
-                        isHost = true
-                        navigateToRoom = true
+                        
                     }) {
                         Text("Create Room")
                             .padding()
@@ -30,8 +27,7 @@ struct TakeMatchHome: View {
 
                     // Join Room Button
                     Button(action: {
-                        showJoinRoom.toggle()
-                        isHost = false
+                        
                     }) {
                         Text("Join Room")
                             .padding()
@@ -48,13 +44,7 @@ struct TakeMatchHome: View {
                             .padding()
 
                         Button(action: {
-                            mcManager.startBrowsing(forRoomCode: roomCode)
-                            if mcManager.availableRooms[roomCode] != nil {
-                                navigateToRoom = true
-                                isHost = false
-                                mcManager.sendMessage("RequestRoomCode")
-
-                            }
+                           
                         }) {
                             Image(systemName: "arrow.right")
                         }
@@ -64,15 +54,7 @@ struct TakeMatchHome: View {
                     }
                 }
             }
-            .navigationDestination(isPresented: $navigateToRoom) {
-                TakeMatchRoomView(isHost: isHost)
-            }
         }
     }
 }
 
-#Preview {
-    NavigationStack {
-        TakeMatchHome()
-    }
-}
