@@ -72,6 +72,7 @@ struct BinaryFeedPost: View {
             VStack {
                 Text(post.question)
                     .padding(.top, 15)
+                    .padding(.horizontal)
                     .bold()
                     .font(.system(size: 35))
                     .frame(alignment: .leading)

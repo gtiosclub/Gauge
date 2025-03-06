@@ -104,7 +104,8 @@ struct CommentView: View {
         }
         .padding(.horizontal, 25)
         .onAppear {
-            fetchUserInfo()
+//            fetchUserInfo()
+            username = comment.username
         }
     }
 }
