@@ -2,10 +2,10 @@ import SwiftUI
 
 struct BadgesView: View {
     let badges: [BadgeModel] = [
-        BadgeModel(id: 1, title: "Fire Voter", description: "Voted on 500 takes"),
-        BadgeModel(id: 2, title: "Posting Warrior", description: "Posted 50 takes"),
-        BadgeModel(id: 3, title: "Rising Star", description: "Gained 25 followers"),
-        BadgeModel(id: 4, title: "Top Rank", description: "Top 1% of Voters"),
+        BadgeModel(id: 1, title: "Fire Voter", description: "Voted on 500 takes", emoji: "🔥"),
+        BadgeModel(id: 2, title: "Posting Warrior", description: "Posted 50 takes", emoji: "⚔️"),
+        BadgeModel(id: 3, title: "Rising Star", description: "Gained 25 followers", emoji: "☄️"),
+        BadgeModel(id: 4, title: "Top Rank", description: "Top 1% of Voters", emoji: "👑"),
     ]
     
     var onBadgeTap: (BadgeModel) -> Void
@@ -51,6 +51,7 @@ struct BadgeModel: Identifiable {
     let id: Int
     let title: String
     let description: String
+    let emoji: String
 }
 
 struct BadgeView: View {
@@ -58,10 +59,15 @@ struct BadgeView: View {
     
     var body: some View {
         VStack {
-            Diamond()
-                .frame(width: 80, height: 80)
-                .foregroundColor(Color(UIColor.systemGray5))
-                .shadow(radius: 1)
+            ZStack {
+                Diamond()
+                    .frame(width: 80, height: 80)
+                    .foregroundColor(Color(UIColor.systemGray5))
+                    .shadow(radius: 1)
+                
+                Text(badge.emoji)
+                    .font(.system(size: 30))
+            }
             
             Text(badge.title)
                 .font(.system(size:16))
@@ -91,14 +97,12 @@ struct Diamond: Shape {
     }
 }
 
-
 struct BadgeDetailView: View {
     let badge: BadgeModel
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         VStack {
-            // Close button (X) in top right corner
             HStack {
                 Spacer()
                 Button(action: {
@@ -111,18 +115,19 @@ struct BadgeDetailView: View {
                 }
             }
             
-            // Badge image (larger, centered)
             Circle()
                 .frame(width: 150, height: 150)
                 .foregroundColor(Color(UIColor.systemGray5))
+                .overlay(
+                    Text(badge.emoji)
+                        .font(.system(size: 70))
+                )
             
-            // Badge title
             Text(badge.title)
                 .font(.title)
                 .fontWeight(.bold)
                 .padding(.top)
             
-            // Badge description
             Text(badge.description)
                 .font(.body)
                 .multilineTextAlignment(.center)
