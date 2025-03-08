@@ -44,22 +44,28 @@ struct PostTypeOption: View {
             
             Spacer()
             
-            Image(systemName: isSelected ? "checkmark.circle.fill" : "checkmark.circle")
+            Image(systemName: "checkmark.circle.fill")
                 .foregroundColor(isSelected ? .black : .gray.opacity(0.8))
+                .opacity(isSelected ? 1.0 : 0.0)
+                .background(
+                    Image(systemName: "checkmark.circle")
+                        .foregroundColor(isSelected ? .black : .gray.opacity(0.8))
+                        .opacity(isSelected ? 0.0 : 1.0)
+                )
         }
-        .padding()
-        .padding(.horizontal, isSelected ? 10 : 0)
+        .padding(.vertical, 20)
+        .padding(.horizontal, isSelected ? 20 : 0)
         .background(
             RoundedRectangle(cornerRadius: 25)
-                .fill(isSelected ? Color.gray.opacity(0.1) : Color.clear)
+                .fill(isSelected ? Color.gray.opacity(0.08) : Color.clear)
                 .shadow(radius: isSelected ? 5 : 0)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 25)
                 .stroke(isSelected ? Color.gray : Color.clear, lineWidth: 1)
         )
-        .onTapGesture(perform: action)
         .contentShape(Rectangle())
+        .onTapGesture(perform: action)
 
     }
 }
@@ -68,7 +74,7 @@ struct SelectPostType: View {
     @State var selectedPostType: PostType?
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             HStack {
                 Text("Choose type")
                     .font(.system(size: 16))
@@ -76,7 +82,7 @@ struct SelectPostType: View {
                 
                 Spacer()
             }
-            .padding(.bottom, 20)
+            .padding(.bottom, 30)
             
             if selectedPostType != .BinaryPost {
                 FadingDivider()
@@ -90,7 +96,7 @@ struct SelectPostType: View {
                 name: "Binary",
                 isSelected: selectedPostType == .BinaryPost,
                 action: {
-                    withAnimation {
+                    withAnimation(.easeInOut(duration: 0.2)) {
                         selectedPostType = .BinaryPost
                     }
                 }
@@ -98,6 +104,9 @@ struct SelectPostType: View {
 
             if selectedPostType == nil {
                 FadingDivider()
+            } else {
+                Color.clear
+                    .frame(height: 1)
             }
             
             PostTypeOption(
@@ -105,7 +114,7 @@ struct SelectPostType: View {
                 name: "Slider",
                 isSelected: selectedPostType == .SliderPost,
                 action: {
-                    withAnimation {
+                    withAnimation(.easeInOut(duration: 0.2)) {
                         selectedPostType = .SliderPost
                     }
                 }
@@ -118,6 +127,7 @@ struct SelectPostType: View {
                     .frame(height: 1)
             }
         }
+        .padding(.horizontal)
     }
 }
 
