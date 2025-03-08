@@ -23,68 +23,43 @@ struct FadingDivider: View {
     }
 }
 
-struct UnselectedType: View {
-    var icon: String
-    var name: String
+struct PostTypeOption: View {
+    let icon: String
+    let name: String
+    let isSelected: Bool
+    let action: () -> Void
     
     var body: some View {
         HStack {
             Image(systemName: icon)
                 .resizable()
-                .font(.title)
-                .frame(width: 30, height: 30)
-                .foregroundColor(.gray.opacity(0.8))
+                .frame(width: 25, height: 25)
+                .foregroundColor(isSelected ? .black : .gray.opacity(0.8))
                 .fontWeight(.medium)
             
             Text(name)
-                .font(.largeTitle)
-                .foregroundColor(.gray.opacity(0.8))
+                .font(.system(size: 24))
+                .foregroundColor(isSelected ? .black : .gray.opacity(0.8))
                 .fontWeight(.medium)
             
             Spacer()
             
-            Image(systemName: "checkmark.circle")
-                .foregroundColor(.gray.opacity(0.8))
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "checkmark.circle")
+                .foregroundColor(isSelected ? .black : .gray.opacity(0.8))
         }
         .padding()
-        .contentShape(Rectangle())
-    }
-}
-
-struct SelectedType: View {
-    var icon: String
-    var name: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .resizable()
-                .font(.title)
-                .frame(width: 30, height: 30)
-                .foregroundColor(.black)
-                .fontWeight(.medium)
-            
-            Text(name)
-                .font(.largeTitle)
-                .foregroundColor(.black)
-                .fontWeight(.medium)
-            
-            Spacer()
-            
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.black)
-        }
-        .padding()
+        .padding(.horizontal, isSelected ? 10 : 0)
         .background(
             RoundedRectangle(cornerRadius: 25)
-                .fill(Color.gray.opacity(0.1))
-                .shadow(radius: 5)
+                .fill(isSelected ? Color.gray.opacity(0.1) : Color.clear)
+                .shadow(radius: isSelected ? 5 : 0)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 25)
-                .stroke(Color.gray, lineWidth: 1)
+                .stroke(isSelected ? Color.gray : Color.clear, lineWidth: 1)
         )
-        .padding(.horizontal, 10)
+        .onTapGesture(perform: action)
+        .contentShape(Rectangle())
 
     }
 }
@@ -96,46 +71,52 @@ struct SelectPostType: View {
         VStack {
             HStack {
                 Text("Choose type")
-                    .font(.title2)
+                    .font(.system(size: 16))
                     .fontWeight(.bold)
                 
                 Spacer()
             }
-            .padding(.bottom, 30)
+            .padding(.bottom, 20)
             
-            if (selectedPostType == .BinaryPost) {
-                SelectedType(icon: "rectangle.split.2x1", name: "Binary")
-            } else {
-                
+            if selectedPostType != .BinaryPost {
                 FadingDivider()
-                
-                UnselectedType(icon: "rectangle.split.2x1", name: "Binary")
-                    .onTapGesture {
-                        withAnimation {
-                            selectedPostType = .BinaryPost
-                        }
-                    }
-            }
-
-            if let postType = selectedPostType {
             } else {
-                FadingDivider()
+                Color.clear
+                    .frame(height: 1)
             }
             
-            if (selectedPostType == .SliderPost) {
-                SelectedType(icon: "arrow.left.and.right.square", name: "Slider")
-            } else {
-                UnselectedType(icon: "arrow.left.and.right.square", name: "Slider")
-                    .onTapGesture {
-                        withAnimation {
-                            selectedPostType = .SliderPost
-                        }
+            PostTypeOption(
+                icon: "rectangle.split.2x1",
+                name: "Binary",
+                isSelected: selectedPostType == .BinaryPost,
+                action: {
+                    withAnimation {
+                        selectedPostType = .BinaryPost
                     }
-    
+                }
+            )
+
+            if selectedPostType == nil {
                 FadingDivider()
             }
-
-
+            
+            PostTypeOption(
+                icon: "arrow.left.and.right.square",
+                name: "Slider",
+                isSelected: selectedPostType == .SliderPost,
+                action: {
+                    withAnimation {
+                        selectedPostType = .SliderPost
+                    }
+                }
+            )
+            
+            if selectedPostType != .SliderPost {
+                FadingDivider()
+            } else {
+                Color.clear
+                    .frame(height: 1)
+            }
         }
     }
 }
