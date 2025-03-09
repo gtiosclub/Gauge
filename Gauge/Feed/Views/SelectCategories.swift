@@ -37,14 +37,6 @@ struct SelectCategories: View {
         ZStack {
             VStack(spacing: 25) {
                 HStack {
-                    Text("Select categories")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Spacer()
-                }
-                
-                HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
                     
