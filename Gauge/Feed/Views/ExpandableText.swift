@@ -22,40 +22,46 @@ struct ExpandableText: View {
     init(_ text: String) {
         self.text = text
     }
+    
+    private func determineTruncation(_ geometry: GeometryProxy) {
+        // Calculate the bounding box we'd need to render the
+        // text given the width from the GeometryReader.
+        let total = self.text.boundingRect(
+            with: CGSize(
+                width: geometry.size.width,
+                height: .greatestFiniteMagnitude
+            ),
+            options: .usesLineFragmentOrigin,
+            attributes: [.font: UIFont.systemFont(ofSize: 16)],
+            context: nil
+        )
+
+        if total.size.height > geometry.size.height {
+            self.truncated = true
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading) {
             Text(text)
                 .lineLimit(expanded ? nil : lineLimit)
-//                .transaction { transaction in
-//                    transaction.animation = .easeInOut
-//                }
-            
-            //                    .background(
-            //                        Text(text).lineLimit(lineLimit)
-            //                            .background(GeometryReader { displayedGeometry in
-            //                                ZStack {
-            //                                    Text(self.text)
-            //                                        .background(GeometryReader { fullGeometry in
-            //                                            Color.clear.onAppear {
-            //                                                self.truncated = fullGeometry.size.height > displayedGeometry.size.height
-            //                                            }
-            //                                        })
-            //                                }
-            //                                .frame(height: .greatestFiniteMagnitude)
-            //                            })
-            //                            .hidden()
-            //                    )
-            
-            toggleButton
+                .background(GeometryReader { geometry in
+                    Color.clear.onAppear {
+                        self.determineTruncation(geometry)
+                    }
+                })
+
+            if self.truncated {
+                toggleButton
+            }
         }
     }
 
     var toggleButton: some View {
         Button(action: {
-//            withAnimation(.) {
+            withAnimation() {
                 self.expanded.toggle()
-//            }
+            }
         }) {
             Text(self.expanded ? "Show less" : "Show more")
                 .font(.caption)
@@ -64,5 +70,5 @@ struct ExpandableText: View {
 }
 
 #Preview {
-    ExpandableText("Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community.")
+    ExpandableText("Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Co")
 }

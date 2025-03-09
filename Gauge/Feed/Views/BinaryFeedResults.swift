@@ -31,6 +31,8 @@ struct BinaryFeedResults: View {
                 Spacer()
             }
             
+            Spacer(minLength: 30.0)
+            
             HStack {
                 profileImage
                 

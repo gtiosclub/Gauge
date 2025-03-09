@@ -72,6 +72,7 @@ struct BinaryFeedPost: View {
             VStack {
                 Text(post.question)
                     .padding(.top, 15)
+                    .padding(.horizontal)
                     .bold()
                     .font(.system(size: 35))
                     .frame(alignment: .leading)
@@ -211,8 +212,10 @@ struct BinaryFeedPost: View {
             if (postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 0 == 1 || postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 1 == 0 && skipping) {
                 Spacer(minLength: 1008.0)
             }
+            
+            Spacer(minLength: 20.0)
         }
-        .padding()
+//        .padding()
         .frame(width: UIScreen.main.bounds.width)
         .gradientBorder(borderWidth: 15, color: optionSelected == 1 ? .darkRed : .darkGreen, cornerRadius: 10, opacity: computedOpacity)
     }
