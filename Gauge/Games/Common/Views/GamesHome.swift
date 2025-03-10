@@ -87,7 +87,7 @@ struct GamesHome: View {
                                     .padding()
                                 HStack {
                                     Button(action: {
-                                        mcManager.setUsernameAndProfile(username: username, profileLink: "Profile Link")
+                                        mcManager.setUsername(username: username)
                                         isHost = true
                                         roomCode = generateRoomCode()
                                         navigateToRoom = true
