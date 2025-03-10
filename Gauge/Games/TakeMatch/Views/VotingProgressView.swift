@@ -8,7 +8,7 @@ struct VotingProgressView: View {
     @State private var inputText: String = ""
 
     var allVotesReceived: Bool {
-        return mcManager.votes.values.reduce(0, +) == mcManager.session.connectedPeers.count + 1
+        return mcManager.votes.values.reduce(0, +) >= mcManager.session.connectedPeers.count + 1
     }
 
     var voteProgress: Double {
