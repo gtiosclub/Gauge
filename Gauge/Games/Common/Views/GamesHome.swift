@@ -27,6 +27,7 @@ struct GamesHome: View {
                         Button(action: {
                             selectedGame = "Take Match"
                             withAnimation {
+                                username = userVM.user.username
                                 self.showingPopover.toggle()
                             }
                         }) {
