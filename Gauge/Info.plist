@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>This app needs local network access.</string>
+	<string>This app needs permission to connect to other users.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_takematch._tcp</string>
