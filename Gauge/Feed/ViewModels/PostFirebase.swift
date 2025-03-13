@@ -36,7 +36,9 @@ class PostFirebase: ObservableObject {
                             let post = BinaryPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
-                                                  postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                                  postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
+                                                      ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
+                                                      ?? Date(),
                                                   question: newPostData["question"] as? String ?? "",
                                                   responseOption1: newPostData["responseOption1"] as? String ?? "",
                                                   responseOption2: newPostData["responseOption2"] as? String ?? "",
@@ -48,7 +50,9 @@ class PostFirebase: ObservableObject {
                             let post = SliderPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
-                                                  postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                                  postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
+                                                      ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
+                                                      ?? Date(),
                                                   question: newPostData["question"] as? String ?? "",
                                                   lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
                                                   upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
@@ -62,7 +66,9 @@ class PostFirebase: ObservableObject {
                             let post = RankPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
-                                                  postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
+                                                postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
+                                                    ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
+                                                    ?? Date(),
                                                   question: newPostData["question"] as? String ?? "",
                                                   responseOptions: newPostData["responseOptions"] as? [String] ?? [],
                                                   favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
