@@ -121,4 +121,26 @@ class SearchViewModel: ObservableObject {
         
         return questions
     }
+    
+    func fetchUsers(for query: String) async throws-> [UserResult] {
+        let userRef = Firebase.db.collection("USERS")
+        let firebaseQuery = userRef
+            .whereField("username", isGreaterThanOrEqualTo: query)
+            .whereField("username", isLessThan: query + "\u{f8ff}")
+            .order(by: "username")
+            .limit(to: 10)
+        
+        let snapshot = try await firebaseQuery.getDocuments()
+        var users: [UserResult] = []
+        
+        for userDocument in snapshot.documents {
+            let userId = userDocument.documentID
+            let username = userDocument["username"] as! String
+            let profilePhoto = userDocument["profilePhoto"] as? String ?? ""
+            let lightweightUser = UserResult(userId: userId, username: username, profilePhoto: profilePhoto)
+            users.append(lightweightUser)
+        }
+        
+        return users
+    }
 }
