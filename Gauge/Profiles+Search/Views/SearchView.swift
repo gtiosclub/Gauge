@@ -12,7 +12,8 @@ struct SearchView: View {
     @State private var searchText: String = ""
     @FocusState private var isSearchFieldFocused: Bool
     @State private var selectedTab: String = "Topics"
-    @State private var searchResults: [PostResult] = []
+    @State private var postSearchResults: [PostResult] = []
+    @State private var userSearchResults: [UserResult] = []
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
     @State private var showResults: Bool = false
@@ -33,26 +34,47 @@ struct SearchView: View {
                             .foregroundColor(Color(.black))
                             .focused($isSearchFieldFocused)
                             .submitLabel(.search)
-                            .onChange(of: isSearchFieldFocused) { focused in
+                            .onChange(of: isSearchFieldFocused, initial: false) { _, focused in
                                 if focused {
                                     isSearchActive = true
                                 }
                             }
-                            .onSubmit {
-                                if !searchText.isEmpty {
+                            .onChange(of: searchText, initial: false) { _, text in
+                                if (selectedTab == "Users") {
                                     isLoading = true
                                     showResults = true
                                     Task {
                                         do {
-                                            let results = try await searchVM.searchPosts(for: searchText)
+                                            let userSeach = try await searchVM.fetchUsers(for: searchText)
                                             await MainActor.run {
-                                                searchResults = results
+                                                userSearchResults = userSeach
                                                 isLoading = false
                                             }
                                         } catch {
                                             await MainActor.run {
                                                 errorMessage = "Search failed: \(error.localizedDescription)"
-                                                isLoading = false
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            .onSubmit {
+                                if (selectedTab == "Topics") {
+                                    if !searchText.isEmpty {
+                                        isLoading = true
+                                        showResults = true
+                                        Task {
+                                            do {
+                                                let results = try await searchVM.searchPosts(for: searchText)
+                                                await MainActor.run {
+                                                    postSearchResults = results
+                                                    isLoading = false
+                                                }
+                                            } catch {
+                                                await MainActor.run {
+                                                    errorMessage = "Search failed: \(error.localizedDescription)"
+                                                    isLoading = false
+                                                }
                                             }
                                         }
                                     }
@@ -63,7 +85,7 @@ struct SearchView: View {
                             Button(action: {
                                 searchText = ""
                                 showResults = false
-                                searchResults = []
+                                postSearchResults = []
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(Color(.systemGray))
@@ -80,7 +102,7 @@ struct SearchView: View {
                             isSearchActive = false
                             isSearchFieldFocused = false
                             searchText = ""
-                            searchResults = []
+                            postSearchResults = []
                             showResults = false
                         }
                         .foregroundColor(.blue)
@@ -93,26 +115,7 @@ struct SearchView: View {
                 Group {
                     if isSearchActive {
                         if showResults {
-                            if isLoading {
-                                ProgressView("Searching...")
-                                    .padding()
-                            } else if let errorMessage = errorMessage {
-                                Text(errorMessage)
-                                    .foregroundStyle(.red)
-                                    .padding()
-                            } else if !searchResults.isEmpty {
-                                List {
-                                    ForEach(searchResults) { result in
-                                        PostResultRow(result: result)
-                                            .listRowSeparator(.hidden)
-                                            .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
-                                    }
-                                }
-                                .listStyle(.plain)
-                            } else {
-                                Text("No results found.")
-                                    .padding()
-                            }
+                            SearchResultsView(selectedTab: $selectedTab, isLoading: $isLoading, errorMessage: $errorMessage, postSearchResults: $postSearchResults, userSearchResults: $userSearchResults)
                         } else {
                             RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused,
                                                searchText: $searchText,
@@ -129,6 +132,50 @@ struct SearchView: View {
     }
 }
 
+struct SearchResultsView: View {
+    @Binding var selectedTab: String
+    @Binding var isLoading: Bool
+    @Binding var errorMessage: String?
+    @Binding var postSearchResults: [PostResult]
+    @Binding var userSearchResults: [UserResult]
+    
+    var body: some View {
+        if isLoading {
+            ProgressView("Searching...")
+                .padding()
+        } else if let errorMessage = errorMessage {
+            Text(errorMessage)
+                .foregroundStyle(.red)
+                .padding()
+        } else if (selectedTab == "Topics" && !postSearchResults.isEmpty) {
+            List {
+                ForEach(postSearchResults) { result in
+                    PostResultRow(result: result)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                }
+            }
+            .listStyle(.plain)
+        } else if (selectedTab == "Users" && !userSearchResults.isEmpty) {
+            ForEach(userSearchResults) { user in
+                HStack {
+                    Circle()
+                        .fill(Color(.systemGray))
+                        .frame(width: 30, height: 30)
+                    
+                    Text(user.username)
+                        .padding(5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                }
+            }
+        } else {
+            Text("No results found.")
+                .padding()
+        }
+    }
+}
 
 struct CategoriesView: View {
     @Binding var items: [String]
@@ -262,11 +309,4 @@ struct RecentSearchesView: View {
             .padding()
         }
     }
-}
-
-
-
-
-#Preview {
-    SearchView()
 }
