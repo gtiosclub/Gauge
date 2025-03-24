@@ -15,6 +15,7 @@ struct SearchView: View {
     @State private var selectedTab: String = "Topics"
     @State private var postSearchResults: [PostResult] = []
     @State private var userSearchResults: [UserResult] = []
+    @State private var userSearchProfileImages: [String: UIImage] = [:]
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
     @State private var showResults: Bool = false
@@ -47,6 +48,11 @@ struct SearchView: View {
                                     Task {
                                         do {
                                             let userSeach = try await searchVM.fetchUsers(for: searchText.lowercased()) // assuming usernames will be lowercased
+                                            for user in userSeach {
+                                                if user.profilePhotoUrl != "" && !userSearchProfileImages.keys.contains(user.id) {
+                                                    userSearchProfileImages[user.id] = await profileVM.getProfilePicture(userID: user.id)
+                                                }
+                                            }
                                             await MainActor.run {
                                                 userSearchResults = userSeach
                                                 isLoading = false
@@ -116,7 +122,7 @@ struct SearchView: View {
                 Group {
                     if isSearchActive {
                         if showResults {
-                            SearchResultsView(selectedTab: $selectedTab, isLoading: $isLoading, errorMessage: $errorMessage, postSearchResults: $postSearchResults, userSearchResults: $userSearchResults)
+                            SearchResultsView(selectedTab: $selectedTab, isLoading: $isLoading, errorMessage: $errorMessage, postSearchResults: $postSearchResults, userSearchResults: $userSearchResults, userSearchProfileImages: $userSearchProfileImages)
                         } else {
                             RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused,
                                                searchText: $searchText,
@@ -139,6 +145,7 @@ struct SearchResultsView: View {
     @Binding var errorMessage: String?
     @Binding var postSearchResults: [PostResult]
     @Binding var userSearchResults: [UserResult]
+    @Binding var userSearchProfileImages: [String: UIImage]
     
     var body: some View {
         if isLoading {
@@ -162,7 +169,7 @@ struct SearchResultsView: View {
                 ForEach(userSearchResults) { user in
                     HStack {
                         ZStack {
-                            if let userProfileImage = user.profileImage {
+                            if let userProfileImage = userSearchProfileImages[user.id] {
                                 Image(uiImage: userProfileImage)
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)

@@ -142,12 +142,7 @@ class SearchViewModel: ObservableObject {
             let profilePhotoUrl = userDocument["profilePhoto"] as? String ?? ""
             
             var lightweightUser = UserResult(userId: userId, username: username, profilePhotoUrl: profilePhotoUrl)
-            
-            if profilePhotoUrl != "" {
-                let profileImage = await profileVM.getProfilePicture(userID: userId)
-                lightweightUser.updateProfileImage(profileImage: profileImage)
-            }
-            
+
             users.append(lightweightUser)
         }
         
