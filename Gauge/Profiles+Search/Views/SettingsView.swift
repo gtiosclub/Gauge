@@ -19,7 +19,7 @@ struct SwiftUIView: View {
                         .foregroundColor(.black)
                     Text("Account Privacy")
                     Spacer()
-                    NavigationLink(destination: Text("User Tags Screen")) {
+                    NavigationLink(destination: Text("Account Privacy Screen")) {
                         Image(systemName: "chevron.right")
                             .foregroundColor(.gray)
                     }
@@ -36,7 +36,7 @@ struct SwiftUIView: View {
                         .foregroundColor(.black)
                     Text("Notifications")
                     Spacer()
-                    NavigationLink(destination: Text("Badges Screen")) {
+                    NavigationLink(destination: Text("Notifications Screen")) {
                         Image(systemName: "chevron.right")
                             .foregroundColor(.gray)
                     }
