@@ -7,6 +7,7 @@
 import FirebaseFirestore
 import Firebase
 import Foundation
+import UIKit
 
 class SearchViewModel: ObservableObject {
     private let vectorSearchCollection = "_firestore-vector-search"
@@ -123,6 +124,8 @@ class SearchViewModel: ObservableObject {
     }
     
     func fetchUsers(for query: String) async throws-> [UserResult] {
+        let profileVM = ProfileViewModel()
+        
         let userRef = Firebase.db.collection("USERS")
         let firebaseQuery = userRef
             .whereField("username", isGreaterThanOrEqualTo: query)
@@ -136,8 +139,15 @@ class SearchViewModel: ObservableObject {
         for userDocument in snapshot.documents {
             let userId = userDocument.documentID
             let username = userDocument["username"] as! String
-            let profilePhoto = userDocument["profilePhoto"] as? String ?? ""
-            let lightweightUser = UserResult(userId: userId, username: username, profilePhoto: profilePhoto)
+            let profilePhotoUrl = userDocument["profilePhoto"] as? String ?? ""
+            
+            var lightweightUser = UserResult(userId: userId, username: username, profilePhotoUrl: profilePhotoUrl)
+            
+            if profilePhotoUrl != "" {
+                let profileImage = await profileVM.getProfilePicture(userID: userId)
+                lightweightUser.updateProfileImage(profileImage: profileImage)
+            }
+            
             users.append(lightweightUser)
         }
         

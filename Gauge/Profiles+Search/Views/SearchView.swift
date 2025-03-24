@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SearchView: View {
     @StateObject private var searchVM = SearchViewModel()
+    @StateObject var profileVM = ProfileViewModel()
     @State private var searchText: String = ""
     @FocusState private var isSearchFieldFocused: Bool
     @State private var selectedTab: String = "Topics"
@@ -45,7 +46,7 @@ struct SearchView: View {
                                     showResults = true
                                     Task {
                                         do {
-                                            let userSeach = try await searchVM.fetchUsers(for: searchText)
+                                            let userSeach = try await searchVM.fetchUsers(for: searchText.lowercased()) // assuming usernames will be lowercased
                                             await MainActor.run {
                                                 userSearchResults = userSeach
                                                 isLoading = false
@@ -157,19 +158,32 @@ struct SearchResultsView: View {
             }
             .listStyle(.plain)
         } else if (selectedTab == "Users" && !userSearchResults.isEmpty) {
-            ForEach(userSearchResults) { user in
-                HStack {
-                    Circle()
-                        .fill(Color(.systemGray))
-                        .frame(width: 30, height: 30)
-                    
-                    Text(user.username)
-                        .padding(5)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white)
-                        .cornerRadius(10)
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(userSearchResults) { user in
+                    HStack {
+                        ZStack {
+                            if let userProfileImage = user.profileImage {
+                                Image(uiImage: userProfileImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 40, height: 40)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color.gray)
+                                    .frame(width: 40, height: 40)
+                            }
+                        }
+                        
+                        Text(user.username)
+                            .padding(5)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                    }
                 }
             }
+            .padding()
         } else {
             Text("No results found.")
                 .padding()
@@ -273,7 +287,7 @@ struct RecentSearchesView: View {
                             HStack {
                                 Circle()
                                     .fill(Color(.systemGray))
-                                    .frame(width: 30, height: 30)
+                                    .frame(width: 40, height: 40)
                                 
                                 Text(user)
                                     .padding(5)
