@@ -4,16 +4,30 @@ struct SwiftUIView: View {
     var body: some View {
         VStack(spacing: 10) {
             // Header
-            HStack(spacing: 50) {
-                Text("Settings and Activity")
+            GeometryReader { geometry in
+                HStack {
+                    NavigationLink(destination: Text("previous page")) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.blue)
+                            .padding(.horizontal, 10)
+                    }
+                    .frame(width: geometry.size.width * 0.2, alignment: .leading)
+
+                    Text("Settings and Activity")
+                        .frame(width: geometry.size.width * 0.55, alignment: .center)
+
+                    // Empty space on the right to balance the chevron
+                    Spacer()
+                        .frame(width: geometry.size.width * 0.2)
+                }
             }
+            .frame(height: 20) // header height
             
             Spacer()
                 .frame(height: 20)
             
             // Settings Section
             VStack {
-                // Account Privacy Row
                 HStack {
                     Image(systemName: "lock")
                         .foregroundColor(.black)
@@ -26,11 +40,10 @@ struct SwiftUIView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 5)
-                
+
                 Divider()
                     .padding(.horizontal, 20)
-                
-                // Notifications Row
+
                 HStack {
                     Image(systemName: "bell")
                         .foregroundColor(.black)
@@ -43,16 +56,13 @@ struct SwiftUIView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 5)
-                
+
                 Divider()
                     .padding(.horizontal, 20)
             }
-            
-  
-            
+
             Spacer()
-            
-            // Log Out Button
+
             NavigationLink(destination: Text("Log out")) {
                 HStack {
                     Text("Log out")
