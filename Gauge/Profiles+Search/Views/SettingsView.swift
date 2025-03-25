@@ -4,9 +4,16 @@ struct SwiftUIView: View {
     var body: some View {
         VStack(spacing: 10) {
             // Header
-            HStack(spacing: 50) {
+            HStack(alignment: .lastTextBaseline) {
+                NavigationLink(destination: Text("previous page")) {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, -100)
+                }
+                
                 Text("Settings and Activity")
             }
+            
             
             Spacer()
                 .frame(height: 20)
