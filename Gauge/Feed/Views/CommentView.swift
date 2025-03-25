@@ -9,10 +9,12 @@ import SwiftUI
 
 struct CommentView: View {
     @EnvironmentObject private var userVm: UserFirebase
+    @EnvironmentObject private var postVm: PostFirebase
     let comment: Comment
     let profilePhotoSize: CGFloat = 30
     @State private var username: String = ""
     @State private var profilePhoto: String = ""
+    @State var userLiked = 0
     
     func fetchUserInfo() {
         userVm.getUsernameAndPhoto(userId: comment.userId) { info in
@@ -80,32 +82,49 @@ struct CommentView: View {
                 
                 
                 VStack(spacing: 7) {
-                    Button(action: {}) {
+                    Button(action: {
+                        if userLiked != 1 {
+                            postVm.likeComment(postId: comment.postId, commentId: comment.commentId, userId: comment.userId)
+                            userLiked = 1
+                        } else {
+                            postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: comment.userId)
+                            userLiked = 0
+                        }
+                        
+                    }) {
                         Image(systemName: "arrow.up")
                             .resizable()
                             .frame(width: 11, height: 13)
                             .fontWeight(.semibold)
+                            .foregroundColor(userLiked == 1 ? .blue : .black)
                     }
                     
-                    Text("\(comment.likes.count - comment.dislikes.count)")
+                    Text("\(comment.likes.count - comment.dislikes.count + userLiked)")
                         .font(.callout)
                     
-                    Button(action: {}) {
+                    Button(action: {
+                        if userLiked != -1 {
+                            postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: comment.userId)
+                            userLiked = -1
+                        } else  {
+                            postVm.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: comment.userId)
+                            userLiked = 0
+                        }
+                    }) {
                         Image(systemName: "arrow.down")
                             .resizable()
                             .frame(width: 11, height: 13)
                             .fontWeight(.semibold)
+                            .foregroundColor(userLiked == -1 ? .blue : .black)
                     }
                 }
-                //.position(x: 365, y: 70)
                 .foregroundColor(.black)
             }
             Spacer()
         }
         .padding(.horizontal, 25)
         .onAppear {
-//            fetchUserInfo()
-            username = comment.username
+            fetchUserInfo()
         }
     }
 }
@@ -113,12 +132,14 @@ struct CommentView: View {
 #Preview {
     CommentView(comment: Comment(
         commentType: .text,
-        userId: "Lv72Qz7Qc4TC2vDeE94q",
+        postId: "81915E51-E823-4D73-B7C3-201EF39DD675",
+        userId: "uCLGAxWCWFMRm4Qlt06z",
         date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
-        commentId: "",
+        commentId: "WiIaeW7EIlTr7Mq97PkI",
         likes: [],
         dislikes: [],
         content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
     ))
     .environmentObject(UserFirebase())
+    .environmentObject(PostFirebase())
 }
