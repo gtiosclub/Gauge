@@ -22,6 +22,141 @@ class PostFirebase: ObservableObject {
     
     func addDummyPosts() {
         feedPosts.append(BinaryPost(
+            postId: "555555555",
+            userId: "conspiracy_theorist",
+            username: "MoonShotDebunker",
+            comments: [
+                Comment(
+                    commentType: .text,
+                    userId: "user101",
+                    username: "ApolloCritic",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm001",
+                    likes: ["user202", "user404", "user777"],
+                    dislikes: ["user303", "user888"],
+                    content: "I’ve watched every frame of the footage in slow motion. Totally staged!"
+                ),
+                Comment(
+                    commentType: .text,
+                    userId: "user202",
+                    username: "Rover4Real",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm002",
+                    likes: ["user101", "user404", "user777", "user999"],
+                    dislikes: ["user303", "user101"],
+                    content: "But what about the laser reflectors they left on the Moon? That can’t be fake, right?"
+                ),
+                Comment(
+                    commentType: .text,
+                    userId: "user303",
+                    username: "EarthboundFella",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm003",
+                    likes: ["user888"],
+                    dislikes: ["user101", "user202", "user404"],
+                    content: "I don’t trust NASA. All that money and they send grainy footage? Suspicious."
+                ),
+                Comment(
+                    commentType: .text,
+                    userId: "user404",
+                    username: "SpaceCadet",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm004",
+                    likes: ["user101", "user777", "user888", "user999"],
+                    dislikes: ["user202"],
+                    content: "How do you explain the Moon rocks that were studied worldwide?"
+                ),
+                Comment(
+                    commentType: .text,
+                    userId: "user555",
+                    username: "LunarLegacy",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm005",
+                    likes: ["user101", "user202", "user404", "user888"],
+                    dislikes: ["user303", "user777"],
+                    content: "Come on, it’s 2023. People still think it was a hoax?"
+                )
+            ],
+            responses: [
+                Response(
+                    responseId: "resp001",
+                    userId: "user777",
+                    responseOption: "Yes, obviously"
+                ),
+                Response(
+                    responseId: "resp002",
+                    userId: "user888",
+                    responseOption: "Touch grass"
+                )
+            ],
+            categories: [.other(.conspiraryTheories), .other(.funny)],
+            viewCounter: 257,
+            postDateAndTime: Date(),
+            question: "Was the moon landing fake? 🌕🚀",
+            responseOption1: "Yes, obviously",
+            responseOption2: "Touch grass",
+            responseResult1: 152,
+            responseResult2: 89,
+            favoritedBy: ["user404", "user999"]
+        ))
+        
+        feedPosts.append(BinaryPost(
+            postId: "21341234",
+            userId: "anotherone",
+            username: "TalkShowConnoisseur",
+            comments: [
+                Comment(commentType: .text, userId: "user005", username: "KimmelFan", profilePhoto: "", date: Date(), commentId: "comm015", likes: ["user012", "user016"], dislikes: ["user017"], content: "Kimmel is a legend. Every show feels like a casual conversation, dude’s a natural. I also love his content covering recent events in the White House. He has no filter and it is the best way to wind down for the day."),
+                Comment(commentType: .text, userId: "user006", username: "ConanCultist", profilePhoto: "", date: Date(), commentId: "comm016", likes: ["user013"], dislikes: ["user005"], content: "Jimmy Kimmel is okay, but Conan O’Brien carried late-night TV on his back."),
+                Comment(commentType: .text, userId: "user007", username: "LettermanLoyalist", profilePhoto: "", date: Date(), commentId: "comm017", likes: ["user014"], dislikes: [], content: "Kimmel is good, but no one will ever top Letterman. The man had no filter."),
+                Comment(commentType: .text, userId: "user008", username: "ColbertConvert", profilePhoto: "", date: Date(), commentId: "comm018", likes: ["user015"], dislikes: ["user006"], content: "Kimmel’s great, but if we’re being honest, Stephen Colbert is running the game right now."),
+                Comment(commentType: .text, userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment."),
+                Comment(commentType: .text, userId: "user010", username: "MyMom", profilePhoto: "", date: Date(), commentId: "comm020", likes: ["user010", "user011", "user010", "user011", "user010", "user011"], dislikes: [], content: "MY FAVVVV!"),
+                Comment(commentType: .text, userId: "user011", username: "YourMom", profilePhoto: "", date: Date(), commentId: "comm021", likes: [], dislikes: ["user010", "user011", "user010", "user011"], content: "Man sucks.")
+            ],
+            responses: [
+                Response(responseId: "resp013", userId: "user012", responseOption: "Nah"),
+                Response(responseId: "resp014", userId: "user013", responseOption: "Yupppp")
+            ],
+            categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)],
+            viewCounter: 1_020,
+            postDateAndTime: Date(),
+            question: "Jimmy Kimmel is the best talk show host",
+            responseOption1: "Nah",
+            responseOption2: "Yupppp",
+            responseResult1: 575,
+            responseResult2: 445,
+            favoritedBy: ["user006", "user007", "user008"]
+        ))
+        
+        feedPosts.append(BinaryPost(
+            postId: "777123999",
+            userId: "starbucksoverlord",
+            username: "CaffeineAddict",
+            comments: [
+                Comment(commentType: .text, userId: "user321", username: "NetflixJunkie", profilePhoto: "", date: Date(), commentId: "comm009", likes: ["user654"], dislikes: [], content: "I need my shows. Coffee is replaceable."),
+                Comment(commentType: .text, userId: "user654", username: "JavaFiend", profilePhoto: "", date: Date(), commentId: "comm010", likes: ["user321"], dislikes: [], content: "If you think I can function without coffee, you’ve never met me.")
+            ],
+            responses: [
+                Response(responseId: "resp009", userId: "user111", responseOption: "Goodbye Netflix"),
+                Response(responseId: "resp010", userId: "user333", responseOption: "I'd rather perish")
+            ],
+            categories: [.lifestyle(.finances), .other(.funny)],
+            viewCounter: 612,
+            postDateAndTime: Date(),
+            question: "Would you rather give up coffee or streaming services? ☕📺",
+            responseOption1: "Goodbye Netflix",
+            responseOption2: "I'd rather perish",
+            responseResult1: 300,
+            responseResult2: 312,
+            favoritedBy: ["user321", "user654"]
+        ))
+        
+        feedPosts.append(BinaryPost(
             postId: "834729384",
             userId: "myman",
             username: "CozyKing",
@@ -44,34 +179,6 @@ class PostFirebase: ObservableObject {
             responseResult1: 467,
             responseResult2: 35,
             favoritedBy: ["user001", "user004", "user008"]
-        ))
-
-        feedPosts.append(BinaryPost(
-            postId: "21341234",
-            userId: "anotherone",
-            username: "TalkShowConnoisseur",
-            comments: [
-                Comment(commentType: .text, userId: "user005", username: "KimmelFan", profilePhoto: "", date: Date(), commentId: "comm015", likes: ["user012", "user016"], dislikes: ["user017"], content: "Kimmel is a legend. Every show feels like a casual conversation, dude’s a natural."),
-                Comment(commentType: .text, userId: "user006", username: "ConanCultist", profilePhoto: "", date: Date(), commentId: "comm016", likes: ["user013"], dislikes: ["user005"], content: "Jimmy Kimmel is okay, but Conan O’Brien carried late-night TV on his back."),
-                Comment(commentType: .text, userId: "user007", username: "LettermanLoyalist", profilePhoto: "", date: Date(), commentId: "comm017", likes: ["user014"], dislikes: [], content: "Kimmel is good, but no one will ever top Letterman. The man had no filter."),
-                Comment(commentType: .text, userId: "user008", username: "ColbertConvert", profilePhoto: "", date: Date(), commentId: "comm018", likes: ["user015"], dislikes: ["user006"], content: "Kimmel’s great, but if we’re being honest, Stephen Colbert is running the game right now."),
-                Comment(commentType: .text, userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment."),
-                Comment(commentType: .text, userId: "user010", username: "MyMom", profilePhoto: "", date: Date(), commentId: "comm020", likes: ["user010", "user011", "user010", "user011", "user010", "user011"], dislikes: [], content: "MY FAVVVV!"),
-                Comment(commentType: .text, userId: "user011", username: "YourMom", profilePhoto: "", date: Date(), commentId: "comm021", likes: [], dislikes: ["user010", "user011", "user010", "user011"], content: "Man sucks.")
-            ],
-            responses: [
-                Response(responseId: "resp013", userId: "user012", responseOption: "Nah"),
-                Response(responseId: "resp014", userId: "user013", responseOption: "Yupppp")
-            ],
-            categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)],
-            viewCounter: 1_020,
-            postDateAndTime: Date(),
-            question: "Jimmy Kimmel is the best talk show host",
-            responseOption1: "Nah",
-            responseOption2: "Yupppp",
-            responseResult1: 575,
-            responseResult2: 445,
-            favoritedBy: ["user006", "user007", "user008"]
         ))
         
         feedPosts.append(BinaryPost(
@@ -176,16 +283,6 @@ class PostFirebase: ObservableObject {
         ))
 
         feedPosts.append(BinaryPost(
-            postId: "555555555",
-            userId: "conspiracy_theorist",
-            categories: [.other(.conspiraryTheories), .other(.funny)],
-            postDateAndTime: Date(),
-            question: "Was the moon landing fake? 🌕🚀",
-            responseOption1: "Yes, obviously",
-            responseOption2: "Touch grass"
-        ))
-
-        feedPosts.append(BinaryPost(
             postId: "666777888",
             userId: "gymbro69",
             categories: [.lifestyle(.fitness), .other(.funny)],
@@ -203,29 +300,6 @@ class PostFirebase: ObservableObject {
             question: "Is 0.999... equal to 1? 🤯",
             responseOption1: "Yes, mathematically",
             responseOption2: "No, that's a scam"
-        ))
-
-        feedPosts.append(BinaryPost(
-            postId: "777123999",
-            userId: "starbucksoverlord",
-            username: "CaffeineAddict",
-            comments: [
-                Comment(commentType: .text, userId: "user321", username: "NetflixJunkie", profilePhoto: "", date: Date(), commentId: "comm009", likes: ["user654"], dislikes: [], content: "I need my shows. Coffee is replaceable."),
-                Comment(commentType: .text, userId: "user654", username: "JavaFiend", profilePhoto: "", date: Date(), commentId: "comm010", likes: ["user321"], dislikes: [], content: "If you think I can function without coffee, you’ve never met me.")
-            ],
-            responses: [
-                Response(responseId: "resp009", userId: "user111", responseOption: "Goodbye Netflix"),
-                Response(responseId: "resp010", userId: "user333", responseOption: "I'd rather perish")
-            ],
-            categories: [.lifestyle(.finances), .other(.funny)],
-            viewCounter: 612,
-            postDateAndTime: Date(),
-            question: "Would you rather give up coffee or streaming services? ☕📺",
-            responseOption1: "Goodbye Netflix",
-            responseOption2: "I'd rather perish",
-            responseResult1: 300,
-            responseResult2: 312,
-            favoritedBy: ["user321", "user654"]
         ))
 
         feedPosts.append(BinaryPost(
