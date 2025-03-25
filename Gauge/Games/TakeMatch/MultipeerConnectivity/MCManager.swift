@@ -13,8 +13,8 @@ struct AdvertisedInfo {
 class MCManager: NSObject, ObservableObject {
     
     let serviceType = String.serviceName
-    let session: MCSession
-    let myPeerID: MCPeerID
+    var session: MCSession
+    var myPeerID: MCPeerID
     var nearbyServiceAdvertiser: MCNearbyServiceAdvertiser
     let nearbyServiceBrowser: MCNearbyServiceBrowser
 
@@ -28,6 +28,11 @@ class MCManager: NSObject, ObservableObject {
     @Published var takeMatchAnswers: [Answer] = []
     @Published var gameStarted: Bool = false
     @Published var votes: [String: Int] = [:]
+
+    var openRoomsCount: Int {
+        let uniqueRoomCodes = Set(discoveredPeers.values.compactMap { $0.roomCode })
+        return uniqueRoomCodes.count
+    }
 
     func voteForQuestion(_ question: String) {
             let vote = Vote(question: question, sender: username)
@@ -132,7 +137,6 @@ class MCManager: NSObject, ObservableObject {
     }
     
     func stopBrowsing() {
-        
         nearbyServiceBrowser.stopBrowsingForPeers()
         discoveredPeers.removeAll()
     }
@@ -225,6 +229,31 @@ class MCManager: NSObject, ObservableObject {
             }
         }
     }
+
+    func deleteRoom() {
+        stopAdvertising()
+        stopBrowsing()
+        paired = false
+        gameStarted = false
+        votes.removeAll()
+        takeMatchAnswers.removeAll()
+        receivedInvite = false
+        receievedInviteFrom = nil
+        invitationHandler = nil
+        discoveredPeers.removeAll()
+        print("Room deleted.")
+    }
+
+    func disconnectFromSession() {
+        username = ""
+        session.disconnect() // Disconnect all peers
+        session.delegate = nil // Remove delegate to prevent callbacks
+        session = MCSession(peer: myPeerID, securityIdentity: nil, encryptionPreference: .none) // Reset session
+        stopAdvertising()
+        stopBrowsing()
+        connectedPeers.removeAll()
+        print("Disconnected from session.")
+    }
 }
 
 extension MCManager: MCNearbyServiceBrowserDelegate {
@@ -237,6 +266,7 @@ extension MCManager: MCNearbyServiceBrowserDelegate {
             let username = info?["username"] ?? peerID.displayName
             let advertisedInfo = AdvertisedInfo(roomCode: roomCode, username: username)
             self.discoveredPeers[peerID] = advertisedInfo
+            print("Open rooms: \(self.openRoomsCount)")
         }
     }
     
@@ -281,8 +311,15 @@ extension MCManager: MCSessionDelegate {
             switch state {
             case .notConnected:
                 DispatchQueue.main.async {
+                    if let index = self.connectedPeers.firstIndex(of: peerID) {
+                        self.connectedPeers.remove(at: index)
+                    }
                     self.paired = false
                     self.isAvailableToPlay = true
+                    if self.connectedPeers.isEmpty {
+                        print("All peers disconnected. Stopping room.")
+                        self.deleteRoom()
+                    }
                 }
             case .connected:
                 DispatchQueue.main.async {
@@ -300,7 +337,10 @@ extension MCManager: MCSessionDelegate {
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         if let message = String(data: data, encoding: .utf8) {
             if message == "startGame" {
-                self.gameStarted = true
+                DispatchQueue.main.async {
+                    self.gameStarted = true
+                }
+
             } else {
                 if let decodedVote = try? JSONDecoder().decode(Vote.self, from: data) {
                     self.handleReceivedVote(decodedVote)
