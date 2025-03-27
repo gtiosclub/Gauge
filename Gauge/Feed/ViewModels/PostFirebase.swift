@@ -325,6 +325,7 @@ class PostFirebase: ObservableObject {
         // Pop index 0 of feedPosts
         feedPosts.remove(at: 0)
         feedPosts.append(allQueriedPosts[0])
+        allQueriedPosts.remove(at: 0)
         // Append a new post from allQueriedPosts (just index 0 for now)
     }
     
@@ -345,7 +346,7 @@ class PostFirebase: ObservableObject {
 //        currentFeedPostViewsListener?.remove()
 
         // Setup listener for new index 0 subcollections
-        var currentPost = feedPosts[0]
+        let currentPost = feedPosts[0]
         let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
         currentFeedPostCommentsListener = postRef.collection("COMMENTS").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else { return }
@@ -399,7 +400,7 @@ class PostFirebase: ObservableObject {
     func setUpResponsesListener() {
         currentFeedPostResponsesListener?.remove()
         
-        var currentPost = feedPosts[0]
+        let currentPost = feedPosts[0]
         let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
         currentFeedPostCommentsListener = postRef.collection("RESPONSES").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else { return }
@@ -431,7 +432,7 @@ class PostFirebase: ObservableObject {
     
     func setUpViewsListener() {
         currentFeedPostViewsListener?.remove()
-        var currentPost = feedPosts[0]
+        let currentPost = feedPosts[0]
         let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
         currentFeedPostCommentsListener = postRef.collection("VIEWS").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else { return }
@@ -447,7 +448,7 @@ class PostFirebase: ObservableObject {
         
     
     func watchForNewPosts(user: User) {
-        let allPosts: [String] = user.myViews + user.myResponses
+        let allPosts: [String] = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
         Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else {
                 print("Error fetching post updates: \(error!)")

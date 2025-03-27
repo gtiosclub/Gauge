@@ -8,11 +8,15 @@
 import Foundation
 import SwiftData
 class UserResponses {
-    var userResponses: [String : Int] // String is Category name .rawValue, Int is number of times interacted in session
+    var userCategoryResponses: [String : Int] // String is Category name .rawValue, Int is number of times interacted in session
+    var userTopicResponses: [String : Int] // String is Topic name, Int is number of times interacted in session
     var currentUserCategories: [String] // Current category list (as rawValues) in Firebase
-    init(userResponses: [String : Int], currentUserCategories: [String]) {
-        self.userResponses = userResponses
+    var currentUserTopics: [String] // Current topic list in Firebase
+    init(userCategoryResponses: [String : Int], userTopicResponses: [String : Int], currentUserCategories: [String], currentUserTopics: [String]) {
+        self.userCategoryResponses = userCategoryResponses
+        self.userTopicResponses = userTopicResponses
         self.currentUserCategories = currentUserCategories
+        self.currentUserTopics = currentUserTopics
     }
     
 }
