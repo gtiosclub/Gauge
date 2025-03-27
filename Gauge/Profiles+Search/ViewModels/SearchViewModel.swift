@@ -125,7 +125,6 @@ class SearchViewModel: ObservableObject {
     func searchPostsByCategory(_ category: Category) async throws -> [PostResult] {
             let querySnapshot = try await Firebase.db.collection("POSTS")
                 .whereField("category", isEqualTo: category.rawValue)
-                .order(by: "postDateAndTime", descending: true)
                 .getDocuments()
             
             return await withTaskGroup(of: PostResult?.self) { group in
