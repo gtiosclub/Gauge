@@ -14,12 +14,19 @@ struct CommentView: View {
     let profilePhotoSize: CGFloat = 30
     @State private var username: String = ""
     @State private var profilePhoto: String = ""
-    @State var userLiked = 0
-    
+    @State var userStatus = "none"
+
     func fetchUserInfo() {
         userVm.getUsernameAndPhoto(userId: comment.userId) { info in
             username = info["username"] ?? ""
             profilePhoto = info["profilePhoto"] ?? ""
+        }
+        
+        if comment.likes.contains(userVm.user.id) {
+            userStatus = "liked"
+        } else if comment.dislikes.contains(userVm.user.id) {
+            userStatus = "disliked"
+        } else {
         }
     }
     
@@ -83,12 +90,12 @@ struct CommentView: View {
                 
                 VStack(spacing: 7) {
                     Button(action: {
-                        if userLiked != 1 {
-                            postVm.likeComment(postId: comment.postId, commentId: comment.commentId, userId: comment.userId)
-                            userLiked = 1
+                        if userStatus != "liked" {
+                            postVm.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                            userStatus = "liked"
                         } else {
-                            postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: comment.userId)
-                            userLiked = 0
+                            postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                            userStatus = "none"
                         }
                         
                     }) {
@@ -96,26 +103,26 @@ struct CommentView: View {
                             .resizable()
                             .frame(width: 11, height: 13)
                             .fontWeight(.semibold)
-                            .foregroundColor(userLiked == 1 ? .blue : .black)
+                            .foregroundColor(userStatus == "liked" ? .blue : .black)
                     }
                     
-                    Text("\(comment.likes.count - comment.dislikes.count + userLiked)")
+                    Text("\(comment.likes.count - comment.dislikes.count)")
                         .font(.callout)
                     
                     Button(action: {
-                        if userLiked != -1 {
-                            postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: comment.userId)
-                            userLiked = -1
+                        if userStatus != "disliked" {
+                            postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                            userStatus = "disliked"
                         } else  {
-                            postVm.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: comment.userId)
-                            userLiked = 0
+                            postVm.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                            userStatus = "none"
                         }
                     }) {
                         Image(systemName: "arrow.down")
                             .resizable()
                             .frame(width: 11, height: 13)
                             .fontWeight(.semibold)
-                            .foregroundColor(userLiked == -1 ? .blue : .black)
+                            .foregroundColor(userStatus == "disliked" ? .blue : .black)
                     }
                 }
                 .foregroundColor(.black)
