@@ -39,6 +39,7 @@ struct CommentsView: View {
         comments: [
             Comment(
                 commentType: .text,
+                postId: "555555555",
                 userId: "Lv72Qz7Qc4TC2vDeE94q",
                 date: Date(),
                 commentId: "",
@@ -48,6 +49,7 @@ struct CommentsView: View {
             ),
             Comment(
                 commentType: .text,
+                postId: "555555555",
                 userId: "Lv72Qz7Qc4TC2vDeE94q",
                 date: Date(),
                 commentId: "",
