@@ -61,7 +61,7 @@ struct ProfileView: View {
                             }
                         }
                         
-                        Text("a short bio that describes the user")
+                        Text("i have many hot takes to make")
                          
                     }
                     Spacer()
