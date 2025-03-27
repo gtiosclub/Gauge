@@ -65,6 +65,7 @@ class User: Equatable, Identifiable, ObservableObject {
         self.myResponses = myResponses
         self.myFavorites = myFavorites
         self.mySearches = mySearches
+        //myPostSearches && myProfileSearches will be added
         self.myComments = myComments
         self.myCategories = myCategories
         self.badges = badges
