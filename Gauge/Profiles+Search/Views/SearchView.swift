@@ -17,13 +17,14 @@ struct SearchView: View {
     @State private var errorMessage: String? = nil
     @State private var showResults: Bool = false
     @State private var isSearchActive: Bool = false
+    @State private var selectedCategory: Category? = nil
 
-    @State var items = Array(Category.allCategoryStrings.shuffled().prefix(through: 19))
+    @State var items = Array(Category.allCases.shuffled().prefix(through: min(7, Category.allCases.count - 1)))
     
     var body: some View {
         NavigationStack {
             VStack {
-                // Search Bar
+                // Search Bar (unchanged)
                 HStack {
                     HStack {
                         Image(systemName: "magnifyingglass")
@@ -36,26 +37,12 @@ struct SearchView: View {
                             .onChange(of: isSearchFieldFocused) { focused in
                                 if focused {
                                     isSearchActive = true
+                                    selectedCategory = nil
                                 }
                             }
                             .onSubmit {
                                 if !searchText.isEmpty {
-                                    isLoading = true
-                                    showResults = true
-                                    Task {
-                                        do {
-                                            let results = try await searchVM.searchPosts(for: searchText)
-                                            await MainActor.run {
-                                                searchResults = results
-                                                isLoading = false
-                                            }
-                                        } catch {
-                                            await MainActor.run {
-                                                errorMessage = "Search failed: \(error.localizedDescription)"
-                                                isLoading = false
-                                            }
-                                        }
-                                    }
+                                    performSearch()
                                 }
                             }
 
@@ -64,13 +51,14 @@ struct SearchView: View {
                                 searchText = ""
                                 showResults = false
                                 searchResults = []
+                                selectedCategory = nil
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(Color(.systemGray))
                             }
                         }
                     }
-                    .padding(.horizontal, 4)  // Reduced horizontal padding
+                    .padding(.horizontal, 4)
                     .padding(.vertical, 5)
                     .background(Color(.systemGray5))
                     .cornerRadius(12)
@@ -82,6 +70,7 @@ struct SearchView: View {
                             searchText = ""
                             searchResults = []
                             showResults = false
+                            selectedCategory = nil
                         }
                         .foregroundColor(.blue)
                     }
@@ -91,51 +80,145 @@ struct SearchView: View {
                 .padding(.bottom, 10)
                 
                 Group {
-                    if isSearchActive {
+                    if let category = selectedCategory {
+                        categoryPostsView(category: category)
+                    } else if isSearchActive {
                         if showResults {
-                            if isLoading {
-                                ProgressView("Searching...")
-                                    .padding()
-                            } else if let errorMessage = errorMessage {
-                                Text(errorMessage)
-                                    .foregroundStyle(.red)
-                                    .padding()
-                            } else if !searchResults.isEmpty {
-                                List {
-                                    ForEach(searchResults) { result in
-                                        PostResultRow(result: result)
-                                            .listRowSeparator(.hidden)
-                                            .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
-                                    }
-                                }
-                                .listStyle(.plain)
-                            } else {
-                                Text("No results found.")
-                                    .padding()
-                            }
+                            searchResultsView()
                         } else {
-                            RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused,
-                                               searchText: $searchText,
-                                               selectedTab: $selectedTab)
+                            RecentSearchesView(
+                                isSearchFieldFocused: $isSearchFieldFocused,
+                                searchText: $searchText,
+                                selectedTab: $selectedTab
+                            )
                         }
                     } else {
-                        CategoriesView(items: $items)
+                        CategoriesView(
+                            categories: $items,
+                            selectedCategory: $selectedCategory,
+                            isLoading: $isLoading,
+                            searchResults: $searchResults,
+                            errorMessage: $errorMessage
+                        )
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
-            .navigationTitle(isSearchActive ? "" : "Explore")
+            .navigationTitle(selectedCategory != nil ? selectedCategory!.rawValue : (isSearchActive ? "" : "Explore"))
+            .toolbar {
+                if selectedCategory != nil {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            selectedCategory = nil
+                        } label: {
+                            Image(systemName: "arrow.left")
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func categoryPostsView(category: Category) -> some View {
+        if isLoading {
+            ProgressView("Loading posts...")
+                .padding()
+        } else if let errorMessage = errorMessage {
+            Text(errorMessage)
+                .foregroundStyle(.red)
+                .padding()
+        } else if !searchResults.isEmpty {
+            List {
+                ForEach(searchResults) { result in
+                    PostResultRow(result: result)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                }
+            }
+            .listStyle(.plain)
+        } else {
+            Text("No posts found in this category.")
+                .padding()
+        }
+    }
+    
+    @ViewBuilder
+    private func searchResultsView() -> some View {
+        if isLoading {
+            ProgressView("Searching...")
+                .padding()
+        } else if let errorMessage = errorMessage {
+            Text(errorMessage)
+                .foregroundStyle(.red)
+                .padding()
+        } else if !searchResults.isEmpty {
+            List {
+                ForEach(searchResults) { result in
+                    PostResultRow(result: result)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                }
+            }
+            .listStyle(.plain)
+        } else {
+            Text("No results found.")
+                .padding()
+        }
+    }
+    
+    private func performSearch() {
+        isLoading = true
+        showResults = true
+        Task {
+            do {
+                let results = try await searchVM.searchPosts(for: searchText)
+                await MainActor.run {
+                    searchResults = results
+                    isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Search failed: \(error.localizedDescription)"
+                    isLoading = false
+                }
+            }
+        }
+    }
+    
+    private func loadCategoryPosts(category: Category) {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                let results = try await searchVM.searchPostsByCategory(category)
+                await MainActor.run {
+                    searchResults = results
+                    isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Failed to load category posts: \(error.localizedDescription)"
+                    isLoading = false
+                }
+            }
         }
     }
 }
 
-
 struct CategoriesView: View {
-    @Binding var items: [String]
+    @Binding var categories: [Category]
+    @Binding var selectedCategory: Category?
+    @Binding var isLoading: Bool
+    @Binding var searchResults: [PostResult]
+    @Binding var errorMessage: String?
+    
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text("Categories")
@@ -145,35 +228,43 @@ struct CategoriesView: View {
             
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(items.indices, id: \.self) { index in
-                        if index < 2 {
-                            // Large Categoryies
-                            Section {
-                                
-                            } header: {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color(.systemGray5))
-                                        .frame(height: 100)
-                                    Text(items[index])
-                                        .foregroundColor(Color(.black))
-                                        .font(.headline)
-                                }
-                            }
-                        } else {
-                            // Small Categories
+                    ForEach(categories, id: \.self) { category in
+                        Button(action: {
+                            selectedCategory = category
+                            loadCategoryPosts(category: category)
+                        }) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
                                     .fill(Color(.systemGray5))
                                     .frame(height: 100)
-                                Text(items[index])
+                                Text(category.rawValue)
                                     .foregroundColor(.black)
                                     .font(.headline)
                             }
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
                 .padding(.horizontal)
+            }
+        }
+    }
+    
+    private func loadCategoryPosts(category: Category) {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                let results = try await SearchViewModel().searchPostsByCategory(category)
+                await MainActor.run {
+                    searchResults = results
+                    isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Failed to load category posts: \(error.localizedDescription)"
+                    isLoading = false
+                }
             }
         }
     }
@@ -263,9 +354,6 @@ struct RecentSearchesView: View {
         }
     }
 }
-
-
-
 
 #Preview {
     SearchView()
