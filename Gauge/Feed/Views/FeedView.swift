@@ -25,6 +25,9 @@ struct FeedView: View {
                         print("Filter Button")
                     } label: {
                         Image(systemName: "line.3.horizontal.decrease")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 13, height: 13)
                             .foregroundStyle(.white)
                     }
                     
@@ -33,6 +36,9 @@ struct FeedView: View {
                         print("Create Button")
                     } label: {
                         Image(systemName: "plus.square")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 18, height: 18)
                             .foregroundStyle(.white)
                     }
                     
@@ -41,10 +47,14 @@ struct FeedView: View {
                         print("Undo Button")
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 18, height: 18)
                             .foregroundStyle((postVM.skippedPost == nil) ? .gray : .white)
                     }
                     .disabled((postVM.skippedPost == nil))
                 }
+                .bold()
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .padding(.bottom, 10)
                 
