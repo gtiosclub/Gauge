@@ -10,6 +10,7 @@ import SwiftUI
 struct SearchView: View {
     @StateObject private var searchVM = SearchViewModel()
     @StateObject var profileVM = ProfileViewModel()
+    @StateObject var searchedUserVM = UserFirebase()
     @State private var searchText: String = ""
     @FocusState private var isSearchFieldFocused: Bool
     @State private var selectedTab: String = "Topics"
@@ -20,6 +21,7 @@ struct SearchView: View {
     @State private var errorMessage: String? = nil
     @State private var showResults: Bool = false
     @State private var isSearchActive: Bool = false
+    @State private var navigateToSearchedUser: Bool = false
 
     @State var items = Array(Category.allCategoryStrings.shuffled().prefix(through: 19))
     
@@ -43,25 +45,29 @@ struct SearchView: View {
                             }
                             .onChange(of: searchText, initial: false) { _, text in
                                 if (selectedTab == "Users") {
-                                    isLoading = true
-                                    showResults = true
-                                    Task {
-                                        do {
-                                            let userSeach = try await searchVM.fetchUsers(for: searchText.lowercased()) // assuming usernames will be lowercased
-                                            for user in userSeach {
-                                                if user.profilePhotoUrl != "" && !userSearchProfileImages.keys.contains(user.id) {
-                                                    userSearchProfileImages[user.id] = await profileVM.getProfilePicture(userID: user.id)
+                                    if !searchText.isEmpty {
+                                        isLoading = true
+                                        showResults = true
+                                        Task {
+                                            do {
+                                                let userSeach = try await searchVM.fetchUsers(for: searchText.lowercased()) // assuming usernames will be lowercased
+                                                for user in userSeach {
+                                                    if user.profilePhotoUrl != "" && !userSearchProfileImages.keys.contains(user.id) {
+                                                        userSearchProfileImages[user.id] = await profileVM.getProfilePicture(userID: user.id)
+                                                    }
+                                                }
+                                                await MainActor.run {
+                                                    userSearchResults = userSeach
+                                                    isLoading = false
+                                                }
+                                            } catch {
+                                                await MainActor.run {
+                                                    errorMessage = "Search failed: \(error.localizedDescription)"
                                                 }
                                             }
-                                            await MainActor.run {
-                                                userSearchResults = userSeach
-                                                isLoading = false
-                                            }
-                                        } catch {
-                                            await MainActor.run {
-                                                errorMessage = "Search failed: \(error.localizedDescription)"
-                                            }
                                         }
+                                    } else {
+                                        showResults = false
                                     }
                                 }
                             }
@@ -87,7 +93,7 @@ struct SearchView: View {
                                     }
                                 }
                             }
-
+                        
                         if !searchText.isEmpty {
                             Button(action: {
                                 searchText = ""
@@ -115,14 +121,14 @@ struct SearchView: View {
                         .foregroundColor(.blue)
                     }
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 12)
                 .padding(.top, 1)
                 .padding(.bottom, 10)
                 
                 Group {
                     if isSearchActive {
                         if showResults {
-                            SearchResultsView(selectedTab: $selectedTab, isLoading: $isLoading, errorMessage: $errorMessage, postSearchResults: $postSearchResults, userSearchResults: $userSearchResults, userSearchProfileImages: $userSearchProfileImages)
+                            SearchResultsView(searchedUserVM: searchedUserVM, selectedTab: $selectedTab, isLoading: $isLoading, errorMessage: $errorMessage, postSearchResults: $postSearchResults, userSearchResults: $userSearchResults, userSearchProfileImages: $userSearchProfileImages, navigateToSearchedUser: $navigateToSearchedUser)
                         } else {
                             RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused,
                                                searchText: $searchText,
@@ -135,17 +141,23 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .navigationTitle(isSearchActive ? "" : "Explore")
+            .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(isPresented: $navigateToSearchedUser) {
+                ProfileView(userVM: searchedUserVM, isCurrentUser: false)
+            }
         }
     }
 }
 
 struct SearchResultsView: View {
+    @ObservedObject var searchedUserVM: UserFirebase
     @Binding var selectedTab: String
     @Binding var isLoading: Bool
     @Binding var errorMessage: String?
     @Binding var postSearchResults: [PostResult]
     @Binding var userSearchResults: [UserResult]
     @Binding var userSearchProfileImages: [String: UIImage]
+    @Binding var navigateToSearchedUser: Bool
     
     var body: some View {
         if isLoading {
@@ -181,12 +193,19 @@ struct SearchResultsView: View {
                                     .frame(width: 40, height: 40)
                             }
                         }
-                        
                         Text(user.username)
                             .padding(5)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.white)
                             .cornerRadius(10)
+                    }
+                    .onTapGesture {
+                        Task {
+                            searchedUserVM.getAllUserData(userId: user.id, completion: { user in
+                                searchedUserVM.user = user
+                            })
+                            navigateToSearchedUser = true
+                        }
                     }
                 }
             }

@@ -138,7 +138,7 @@ class SearchViewModel: ObservableObject {
         
         for userDocument in snapshot.documents {
             let userId = userDocument.documentID
-            let username = userDocument["username"] as! String
+            guard let username = userDocument["username"] as? String else {continue}
             let profilePhotoUrl = userDocument["profilePhoto"] as? String ?? ""
             
             var lightweightUser = UserResult(userId: userId, username: username, profilePhotoUrl: profilePhotoUrl)
