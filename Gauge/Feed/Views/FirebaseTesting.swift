@@ -62,6 +62,28 @@ struct FirebaseTesting: View {
                                 responseOption: "Chocolate"
                             )
                         }
+                        Button("Test reordering for category") {
+                            let lastest: [String: Int] = [
+                                "nfl": 120,
+                                "movies": 250,
+                                "education": 20,
+                                "showReccomendations": 30
+                            ]
+                            
+                            let currentInterestList: [String] = [
+                                "showRecommendations",
+                                "education",
+                                "movies"
+                            ]
+
+                            userVM.reorderUserCategory(
+                                lastest: lastest,
+                                currentInterestList: currentInterestList
+                            ) { reorderList in
+                                print("This is the reordered list based on the input: \(reorderList)")
+                            }
+                        }
+
                         
                         Button("test setUserCategories"){
                             userVM.setUserCategories(userId: "austin", category: [Category.educational(.environment), Category.educational(.math)])
