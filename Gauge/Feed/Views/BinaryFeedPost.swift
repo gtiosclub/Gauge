@@ -12,9 +12,9 @@ struct BinaryFeedPost: View {
     @EnvironmentObject var userVM: UserFirebase
     
     let post: BinaryPost
-    let index: Int
     @Binding var dragAmount: CGSize
     @Binding var optionSelected: Int
+    @Binding var skipping: Bool
     
     var computedOpacity: Binding<Double> {
         Binding<Double>(
@@ -27,193 +27,197 @@ struct BinaryFeedPost: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            if index == 0 {
-                HStack{
-                    profileImage
+            Spacer(minLength: 30.0)
+            HStack{
+                profileImage
+                
+                Text(post.userId)
+                    .font(.system(size: 16))
+                    .foregroundStyle(.black)
+                
+                Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.gray)
+            }
+            .padding(.leading)
+            
+            
+            //Category Boxes
+            ScrollView(.horizontal) {
+                HStack {
+                    let categories: [Category] = post.categories
                     
-                    Text(post.userId)
-                        .bold()
-                        .font(.system(size: 16))
+                    ForEach(categories, id: \.self) { category in
+                        Text(category.rawValue)
+                            .padding(.leading, 10)
+                            .padding(.trailing, 10)
+                            .font(.system(size: 14))
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.gray)
+                                    .opacity(0.2)
+                                    .frame(height: 32)
+                            )
+                            .padding(.top, 10)
+                            .frame(minWidth: 40)
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
                     
-                    Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
-                        .font(.system(size: 13))
+                    Spacer()
                 }
+                .padding(.bottom, 10)
                 .padding(.leading)
+            }
+            
+            VStack {
+                Text(post.question)
+                    .padding(.top, 15)
+                    .padding(.horizontal)
+                    .bold()
+                    .font(.system(size: 35))
+                    .frame(alignment: .leading)
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(.black)
                 
+                Spacer()
                 
-                //Category Boxes
-                ScrollView(.horizontal) {
+                ZStack {
                     HStack {
-                        let categories: [Category] = post.categories
+                        Text(post.responseOption1)
+                            .foregroundColor(optionSelected == 1 ? .darkRed : .gray)
+                            .font(.system(size: optionSelected == 1 ? 50 : 30))
+                            .font(optionSelected == 1 ? .title : .title2)
+                            .opacity(max(0.0, (optionSelected == 1 && dragAmount.width == 0.0 ? 1.0 : 0.5) - (dragAmount.width / 125.0).magnitude))
+                            .frame(width: 150.0, alignment: .leading)
+                            .minimumScaleFactor(0.75)
+                            .lineLimit(2)
                         
-                        ForEach(categories, id: \.self) { category in
-                            Text(category.rawValue)
-                                .padding(.leading, 10)
-                                .padding(.trailing, 10)
-                                .font(.system(size: 14))
-                                .background(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.gray)
-                                        .opacity(0.2)
-                                        .frame(height: 32)
-                                )
-                                .padding(.top, 10)
-                                .frame(minWidth: 40)
-                                .fixedSize(horizontal: true, vertical: false)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "arrow.left.and.right")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(.gray)
+                            .opacity(0.5 - (dragAmount.width / 125.0).magnitude)
+                        
+                        Spacer()
+                        
+                        Text(post.responseOption2)
+                            .foregroundColor(optionSelected == 2 ? .darkGreen : .gray)
+                            .font(.system(size: optionSelected == 2 ? 50 : 30))
+                            .font(optionSelected == 2 ? .title : .title2)
+                            .opacity(max(0.0, (optionSelected == 2 && dragAmount.width == 0.0 ? 1.0 : 0.5) - (dragAmount.width / 125.0).magnitude))
+                            .frame(width: 150.0, alignment: .trailing)
+                            .minimumScaleFactor(0.75)
+                            .lineLimit(2)
+                    }
+                    .padding(.horizontal)
+                    
+                    HStack {
+                        Spacer()
+                        
+                        if dragAmount.width < 0.0 {
+                            HStack {
+                                Text(post.responseOption1)
+                                    .font(.system(size: 30))
+                                    .minimumScaleFactor(0.75)
+                                    .lineLimit(2)
+                                
+                                Image(systemName: "arrow.left")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50, height: 50)
+                            }
+                            .opacity((dragAmount.width / 100.0).magnitude)
+                            .foregroundStyle(Color.darkRed)
+                        }
+                        
+                        Spacer(minLength: 20.0)
+                        
+                        if dragAmount.width > 0.0 {
+                            HStack {
+                                Image(systemName: "arrow.right")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50, height: 50)
+                                
+                                Text(post.responseOption2)
+                                    .font(.system(size: 30))
+                                    .minimumScaleFactor(0.75)
+                                    .lineLimit(2)
+                            }
+                            .opacity(dragAmount.width / 100.0)
+                            .foregroundStyle(Color.darkGreen)
                         }
                         
                         Spacer()
                     }
-                    .padding(.bottom, 10)
-                    .padding(.leading)
                 }
-                
-                VStack {
-                    Text(post.question)
-                        .padding(.top, 15)
-                        .bold()
-                        .font(.system(size: 35))
-                        .frame(alignment: .leading)
-                        .multilineTextAlignment(.leading)
-                    
-                    Spacer()
-                    
-                    ZStack {
-                        HStack {
-                            Text(post.responseOption1)
-                                .foregroundColor(.gray)
-                                .font(.system(size: optionSelected == 1 ? 50 : 30))
-                                .font(optionSelected == 1 ? .title : .title2)
-                                .opacity(dragAmount.width < 0.0 ? (1.0 - (dragAmount.width / 150.0).magnitude) : 1.0)
-                                .frame(width: 150.0, alignment: .leading)
-                                .minimumScaleFactor(0.75)
-                                .lineLimit(2)
-                            
-                            
-                            Spacer()
-                            
-                            Image(systemName: "arrow.left.and.right")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50, height: 50)
-                                .foregroundColor(.gray)
-                                .opacity(1.0 - (dragAmount.width / 100.0).magnitude)
-                            
-                            Spacer()
-                            
-                            Text(post.responseOption2)
-                                .foregroundColor(.gray)
-                                .font(.system(size: optionSelected == 2 ? 50 : 30))
-                                .font(optionSelected == 2 ? .title : .title2)
-                                .opacity(dragAmount.width > 0.0 ? (1.0 - dragAmount.width / 100.0) : 1.0)
-                                .frame(width: 150.0, alignment: .trailing)
-                                .minimumScaleFactor(0.75)
-                                .lineLimit(2)
-                        }
-                        .padding(.horizontal)
-                        .opacity(0.5)
-                        
-                        
-                        HStack {
-                            Spacer()
-                            
-                            if dragAmount.width < 0.0 {
-                                HStack {
-                                    Text(post.responseOption1)
-                                        .font(.system(size: 30))
-                                        .minimumScaleFactor(0.75)
-                                        .lineLimit(2)
-                                    
-                                    Image(systemName: "arrow.left")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 50, height: 50)
-                                }
-                                .opacity((dragAmount.width / 100.0).magnitude)
-                                .foregroundStyle(.red)
-                            }
-                            
-                            Spacer(minLength: 20.0)
-                            
-                            if dragAmount.width > 0.0 {
-                                HStack {
-                                    Image(systemName: "arrow.right")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 50, height: 50)
-                                    
-                                    Text(post.responseOption2)
-                                        .font(.system(size: 30))
-                                        .minimumScaleFactor(0.75)
-                                        .lineLimit(2)
-                                }
-                                .opacity(dragAmount.width / 100.0)
-                                .foregroundStyle(.green)
-                            }
-                            
-                            Spacer()
-                        }
-                    }
-                }
-                .background(
-                    dragAmount.width < 0.0 ? (
-                        AnyView(Ellipse()
-                            .fill(
-                                RadialGradient(
-                                    gradient: Gradient(colors: [.red.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
-                                    center: .center,
-                                    startRadius: 10,
-                                    endRadius: 400
-                                )
+            }
+            .background(
+                dragAmount.width < 0.0 ? (
+                    AnyView(Ellipse()
+                        .fill(
+                            RadialGradient(
+                                gradient: Gradient(colors: [.darkRed.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
+                                center: .center,
+                                startRadius: 10,
+                                endRadius: 400
                             )
+                        )
                             .frame(width: 600, height: 800)
                             .offset(x: -200, y: 200)
                     )) : (
                         dragAmount.width == 0.0 ? AnyView(Ellipse().fill(.clear)) :
-                        AnyView(Ellipse()
-                            .fill(
-                                RadialGradient(
-                                    gradient: Gradient(colors: [.green.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
-                                    center: .center,
-                                    startRadius: 10,
-                                    endRadius: 400
+                            AnyView(Ellipse()
+                                .fill(
+                                    RadialGradient(
+                                        gradient: Gradient(colors: [.darkGreen.opacity(0.4 * ((dragAmount.width / 100.0).magnitude > 1.0 ? 1.0 : (dragAmount.width / 100.0).magnitude)), .clear]),
+                                        center: .center,
+                                        startRadius: 10,
+                                        endRadius: 400
+                                    )
                                 )
-                            )
-                            .frame(width: 600, height: 800)
-                            .offset(x: 200, y: 200)
-                    ))
-                )
+                                    .frame(width: 600, height: 800)
+                                    .offset(x: 200, y: 200)
+                            ))
+            )
+            
+            Spacer(minLength: 150.0)
+            
+            HStack {
+                Spacer()
                 
-                Spacer(minLength: 100.0)
+                Image(systemName: "arrow.up")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30 + (dragAmount.height > 0.0 ? 0.0 : dragAmount.height * -1 / 5), height: 30 + (dragAmount.height > 0.0 ? 0.0 : dragAmount.height * -1 / 5), alignment: .center)
+                    .foregroundColor(dragAmount.height == 0.0 || dragAmount.height > 0 ? .gray : (optionSelected == 1 ? .darkRed : .darkGreen))
+                    .opacity(optionSelected == 0 ? 0.0 : (dragAmount.height == 0.0 || dragAmount.height > 0 ? 0.5 : 1.0))
                 
-                if optionSelected != 0 {
-                    HStack {
-                        Spacer()
-                        
-                        Image(systemName: "arrow.up")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30 + (dragAmount.height > 0.0 ? 0.0 : dragAmount.height * -1 / 5), height: 30 + (dragAmount.height > 0.0 ? 0.0 : dragAmount.height * -1 / 5), alignment: .center)
-                            .foregroundColor(dragAmount.height == 0.0 || dragAmount.height > 0 ? .gray : (optionSelected == 1 ? .red : .green))
-                            .opacity(0.5)
-                        
-                        Spacer()
-                    }
-                }
-                
-                NavigationLink(destination: {
-                    HomeView()
-                }, label: {
-                    Text("\(post.responseResult1 + post.responseResult2) votes")
-                        .foregroundColor(.gray)
-                        .scaledToFit()
-                        .frame(maxWidth: .infinity)
-                })
+                Spacer()
             }
+            
+            NavigationLink(destination: {
+                HomeView()
+            }, label: {
+                Text("\(post.responseResult1 + post.responseResult2) votes")
+                    .foregroundColor(.gray)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+            })
+            
+            if (postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 0 == 1 || postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 1 == 0 && skipping) {
+                Spacer(minLength: 1008.0)
+            }
+            
+            Spacer(minLength: 20.0)
         }
-        .padding()
+//        .padding()
         .frame(width: UIScreen.main.bounds.width)
-        .gradientBorder(borderWidth: 15, color: optionSelected == 1 ? .red : .green, cornerRadius: 10, opacity: computedOpacity)
+        .gradientBorder(borderWidth: 15, color: optionSelected == 1 ? .darkRed : .darkGreen, cornerRadius: 10, opacity: computedOpacity)
     }
     
     var profileImage: some View {
@@ -223,7 +227,7 @@ struct BinaryFeedPost: View {
                 .scaledToFit()
                 .frame(width: 18, height: 18)
                 .background(Circle()
-                    .fill(Color.gray)
+                    .fill(Color.gray.opacity(0.7))
                     .frame(width:28, height: 28)
                     .opacity(0.6)
                    )
@@ -248,7 +252,7 @@ struct BinaryFeedPost: View {
 }
 
 extension View {
-    func gradientBorder(borderWidth: CGFloat = 20, color: Color = .red, cornerRadius: CGFloat = 10, opacity: Binding<Double>) -> some View {
+    func gradientBorder(borderWidth: CGFloat = 20, color: Color = .darkRed, cornerRadius: CGFloat = 10, opacity: Binding<Double>) -> some View {
         self
             // Top border overlay
             .overlay(
@@ -300,7 +304,7 @@ extension View {
 
 
 #Preview {
-    BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), index: 0, dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0)
+    BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0), skipping: .constant(false)
     )
 }
 

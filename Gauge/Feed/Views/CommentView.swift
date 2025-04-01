@@ -9,15 +9,24 @@ import SwiftUI
 
 struct CommentView: View {
     @EnvironmentObject private var userVm: UserFirebase
+    @EnvironmentObject private var postVm: PostFirebase
     let comment: Comment
     let profilePhotoSize: CGFloat = 30
     @State private var username: String = ""
     @State private var profilePhoto: String = ""
-    
+    @State var userStatus = "none"
+
     func fetchUserInfo() {
         userVm.getUsernameAndPhoto(userId: comment.userId) { info in
             username = info["username"] ?? ""
             profilePhoto = info["profilePhoto"] ?? ""
+        }
+        
+        if comment.likes.contains(userVm.user.id) {
+            userStatus = "liked"
+        } else if comment.dislikes.contains(userVm.user.id) {
+            userStatus = "disliked"
+        } else {
         }
     }
     
@@ -80,24 +89,42 @@ struct CommentView: View {
                 
                 
                 VStack(spacing: 7) {
-                    Button(action: {}) {
+                    Button(action: {
+                        if userStatus != "liked" {
+                            postVm.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                            userStatus = "liked"
+                        } else {
+                            postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                            userStatus = "none"
+                        }
+                        
+                    }) {
                         Image(systemName: "arrow.up")
                             .resizable()
                             .frame(width: 11, height: 13)
                             .fontWeight(.semibold)
+                            .foregroundColor(userStatus == "liked" ? .blue : .black)
                     }
                     
                     Text("\(comment.likes.count - comment.dislikes.count)")
                         .font(.callout)
                     
-                    Button(action: {}) {
+                    Button(action: {
+                        if userStatus != "disliked" {
+                            postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                            userStatus = "disliked"
+                        } else  {
+                            postVm.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                            userStatus = "none"
+                        }
+                    }) {
                         Image(systemName: "arrow.down")
                             .resizable()
                             .frame(width: 11, height: 13)
                             .fontWeight(.semibold)
+                            .foregroundColor(userStatus == "disliked" ? .blue : .black)
                     }
                 }
-                //.position(x: 365, y: 70)
                 .foregroundColor(.black)
             }
             Spacer()
@@ -112,12 +139,14 @@ struct CommentView: View {
 #Preview {
     CommentView(comment: Comment(
         commentType: .text,
-        userId: "Lv72Qz7Qc4TC2vDeE94q",
+        postId: "81915E51-E823-4D73-B7C3-201EF39DD675",
+        userId: "uCLGAxWCWFMRm4Qlt06z",
         date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
-        commentId: "",
+        commentId: "WiIaeW7EIlTr7Mq97PkI",
         likes: [],
         dislikes: [],
         content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
     ))
     .environmentObject(UserFirebase())
+    .environmentObject(PostFirebase())
 }

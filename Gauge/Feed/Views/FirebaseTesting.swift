@@ -19,11 +19,11 @@ struct FirebaseTesting: View {
                     Section("Write Data") {
                         Button("Add Binary Post") {
                             postVM.createBinaryPost(
-                                userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
-                                categories: [.sports(.nfl)],
-                                question: "Is pizza the goat food?",
-                                responseOption1: "yes",
-                                responseOption2: "no"
+                                userId: "Zmi5Cgm7dtbqCDbLOrhbbDAq8T92",
+                                categories: [.sports(.nba)],
+                                question: "Is Shai the MVP",
+                                responseOption1: "Nah, free throw merchant🙅‍♂️",
+                                responseOption2: "Stats dont lie"
                             )
                         }
                         

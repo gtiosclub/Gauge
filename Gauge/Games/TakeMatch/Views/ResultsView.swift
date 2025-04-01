@@ -10,7 +10,10 @@ import SwiftUI
 struct ResultsView: View {
     var responses: [String: String]
     var guessedMatches: [String: String]
-    var onRestart: () -> Void
+    @ObservedObject var mcManager: MCManager
+    var onRestart: () -> Bool
+
+    @State var navigateToHome = false
     
     var body: some View {
         VStack {
@@ -19,15 +22,24 @@ struct ResultsView: View {
                 HStack {
                     Text("\(player): \(responses[player] ?? "")")
                     Spacer()
-                    Text(guessedMatches[responses[player] ?? ""] == player ? "✅" : "❌")
+
+                    Text(guessedMatches[player] == responses[player] ? "✅" : "❌")
                 }
             }
-            Button("Again?", action: onRestart)
+            Button(action: {
+                navigateToHome = onRestart()}
+            ) {
+                Text("Again?")
+            }
+        }
+        .navigationBarBackButtonHidden()
+        .navigationDestination(isPresented: $navigateToHome) {
+            GamesHome()
         }
     }
 }
 
 
 #Preview {
-    ResultsView(responses: ["Player": "Answer"], guessedMatches: ["Answer": "Player"], onRestart: { })
+    ResultsView(responses: ["Player": "Answer"], guessedMatches: ["Answer": "Player"], mcManager: MCManager(yourName: "test"), onRestart: { return false })
 }
