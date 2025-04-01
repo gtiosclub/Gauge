@@ -28,6 +28,8 @@ class UserFirebase: ObservableObject {
                         myNextPosts: data["myNextPosts"] as? [String] ?? [],
                         myFavorites: data["myFavorites"] as? [String] ?? [],
                         mySearches: data["mySearches"] as? [String] ?? [],
+                        myPostSearches: data["myPostSearches"] as? [String] ?? [],
+                        myProfileSearches: data["myProfileSearches"] as? [String] ?? [],
                         myCategories: data["myCategories"] as? [String] ?? [],
                         badges: data["badges"] as? [String] ?? [],
                         streak: data["streak"] as? Int ?? 0,

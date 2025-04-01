@@ -13,7 +13,7 @@ struct VectorSearchTestView: View {
     @State private var isSearching = false
     @State private var errorMessage: String?
     
-    private let searchVM = SearchViewModel()
+    private let searchVM = SearchViewModel(user:<#User#>)
     
     var body: some View {
         VStack {
