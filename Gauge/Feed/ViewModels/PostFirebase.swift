@@ -898,6 +898,62 @@ class PostFirebase: ObservableObject {
             return nil
         }
     }
+    
+    func getNextBestPost(user: User)  {
+        var bestScore = 0
+        //var bestPost: (any Post)? = nil
+        var bestIndex = 0
+        
+        for i in 0..<allQueriedPosts.count {
+            let post  = allQueriedPosts[i]
+            var score = 0;
+            //Friends
+            if (user.friends.keys).contains(post.userId) {
+                score += 20;
+            }
+            //Accessed Profiles
+            if(user.myAccessedProfiles.contains(post.userId)) {
+                score+=10;
+            }
+            
+            //Searches
+            if(user.mySearches.contains(post.username)) {
+                score+=20;
+            }
+            
+            //Response Ratio
+            var ratioScore = ((Float(post.responses.count))  / Float(post.viewCounter)) * 20
+            score = score +  Int(ceil(ratioScore))
+            
+            //Hot Take
+            if let binaryPost = post as? BinaryPost {
+                let respose1Ratio = ((Float(binaryPost.responseOption1.count))  / Float(binaryPost.responses.count))
+                if(respose1Ratio < 60 && respose1Ratio > 40) {
+                    score+=100
+                }
+            } else if let sliderPost = post as? SliderPost {
+                //Get sd of responses??
+            }
+            //Call Date Function for date score
+            
+            
+            //Call topics function for topic mathcing score
+            
+            //Call cateogries function for category matching score
+            
+            
+            if score > bestScore {
+                bestScore = score
+                bestIndex = i
+            }
+
+        }
+        let bestPost = allQueriedPosts[bestIndex]
+        allQueriedPosts.remove(at: bestIndex)
+        allQueriedPosts.insert(bestPost, at: 0)
+        }
+            
+    }
 
 
     func removeView(postId: String, userId: String) {
