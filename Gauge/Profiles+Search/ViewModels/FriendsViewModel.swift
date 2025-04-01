@@ -121,6 +121,8 @@ class FriendsViewModel: ObservableObject {
             let myResponses = userData["myResponses"] as? [String] ?? []
             let myFavorites = userData["myFavorites"] as? [String] ?? []
             let mySearches = userData["mySearches"] as? [String] ?? []
+            let myPostSearches = userData["myPostSearches"] as? [String] ?? []
+            let myProfileSearches = userData["myProfileSearches"] as? [String] ?? []
             let myComments = userData["myComments"] as? [String] ?? []
             let myCategories = userData["myCategories"] as? [String] ?? []
             let myAccessedProfiles = userData["myAccessedProfiles"] as? [String] ?? []
@@ -141,6 +143,8 @@ class FriendsViewModel: ObservableObject {
                 myResponses: myResponses,
                 myFavorites: myFavorites,
                 mySearches: mySearches,
+                myPostSearches: myPostSearches,
+                myProfileSearches: myProfileSearches,
                 myComments: myComments,
                 myCategories: myCategories,
                 badges: badges,

@@ -97,6 +97,7 @@ struct TakeMatchRoomView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
                         withAnimation(.easeInOut(duration: 0.4)) {
+                            mcManager.disconnectFromSession()
                             mcManager.isAvailableToPlay = false
                             onExit()
                             dismiss()

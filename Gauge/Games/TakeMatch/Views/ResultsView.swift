@@ -10,7 +10,9 @@ import SwiftUI
 struct ResultsView: View {
     var responses: [String: String]
     var guessedMatches: [String: String]
+    @ObservedObject var mcManager: MCManager
     var onRestart: () -> Bool
+
     @State var navigateToHome = false
     
     var body: some View {
@@ -24,7 +26,9 @@ struct ResultsView: View {
                     Text(guessedMatches[player] == responses[player] ? "✅" : "❌")
                 }
             }
-            Button(action: {navigateToHome = onRestart()}) {
+            Button(action: {
+                navigateToHome = onRestart()}
+            ) {
                 Text("Again?")
             }
         }
@@ -37,5 +41,5 @@ struct ResultsView: View {
 
 
 #Preview {
-    ResultsView(responses: ["Player": "Answer"], guessedMatches: ["Answer": "Player"], onRestart: { return false })
+    ResultsView(responses: ["Player": "Answer"], guessedMatches: ["Answer": "Player"], mcManager: MCManager(yourName: "test"), onRestart: { return false })
 }

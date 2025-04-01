@@ -8,7 +8,7 @@ struct VotingProgressView: View {
     @State private var inputText: String = ""
 
     var allVotesReceived: Bool {
-        return mcManager.votes.values.reduce(0, +) == mcManager.session.connectedPeers.count + 1
+        return mcManager.votes.values.reduce(0, +) >= mcManager.session.connectedPeers.count + 1
     }
 
     var voteProgress: Double {
@@ -19,7 +19,7 @@ struct VotingProgressView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Text("\(mcManager.votes)")
+                //Text("\(mcManager.votes)")
                 Text("Nice! Let's wait and see what everyone voted for.")
                     .font(.title2)
                     .multilineTextAlignment(.center)

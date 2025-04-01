@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct SearchView: View {
-    @StateObject private var searchVM = SearchViewModel()
+    @StateObject private var searchVM = SearchViewModel(user: <#User#>)
+
     @State private var searchText: String = ""
     @FocusState private var isSearchFieldFocused: Bool
     @State private var selectedTab: String = "Topics"
@@ -45,6 +46,19 @@ struct SearchView: View {
                                     Task {
                                         do {
                                             let results = try await searchVM.searchPosts(for: searchText)
+
+                                            // Add to recent post searches if tab == Topics
+                                            if (selectedTab == "Topics") {
+                                                await MainActor.run {
+                                                    searchVM.addRecentlySearchedPost(searchText)
+                                                }
+                                            } else {
+                                                await MainActor.run {
+                                                    searchVM.addRecentlySearchedProfile(searchText)
+                                                }
+                                            }
+                                            
+
                                             await MainActor.run {
                                                 searchResults = results
                                                 isLoading = false
@@ -94,41 +108,56 @@ struct SearchView: View {
                     if isSearchActive {
                         if showResults {
                             if isLoading {
-                                ProgressView("Searching...")
-                                    .padding()
+                                AnyView(
+                                    ProgressView("Searching...")
+                                        .padding()
+                                )
                             } else if let errorMessage = errorMessage {
-                                Text(errorMessage)
-                                    .foregroundStyle(.red)
-                                    .padding()
+                                AnyView(
+                                    Text(errorMessage)
+                                        .foregroundStyle(.red)
+                                        .padding()
+                                )
                             } else if !searchResults.isEmpty {
-                                List {
-                                    ForEach(searchResults) { result in
-                                        PostResultRow(result: result)
-                                            .listRowSeparator(.hidden)
-                                            .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                                AnyView(
+                                    List {
+                                        ForEach(searchResults) { result in
+                                            PostResultRow(result: result)
+                                                .listRowSeparator(.hidden)
+                                                .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                                        }
                                     }
-                                }
-                                .listStyle(.plain)
+                                    .listStyle(.plain)
+                                )
                             } else {
-                                Text("No results found.")
-                                    .padding()
+                                AnyView(
+                                    Text("No results found.")
+                                        .padding()
+                                )
                             }
                         } else {
-                            RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused,
-                                               searchText: $searchText,
-                                               selectedTab: $selectedTab)
+                            AnyView(
+                                RecentSearchesView(
+                                    isSearchFieldFocused: $isSearchFieldFocused,
+                                    searchText: $searchText,
+                                    selectedTab: $selectedTab,
+                                    searchVM: searchVM
+                                )
+                            )
                         }
                     } else {
-                        CategoriesView(items: $items)
+                        AnyView(
+                            CategoriesView(items: $items)
+                        )
                     }
                 }
+
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .navigationTitle(isSearchActive ? "" : "Explore")
         }
     }
 }
-
 
 struct CategoriesView: View {
     @Binding var items: [String]
@@ -184,8 +213,17 @@ struct RecentSearchesView: View {
     @Binding var searchText: String
     @Binding var selectedTab: String
     
-    @State private var recentTopics = ["SwiftUI", "Firebase", "iOS", "Combine", "Xcode"]
-    @State private var recentUsers = ["Datta", "Amber", "Austin", "Akshat", "Shreeya"]
+    @ObservedObject var searchVM: SearchViewModel  // link SearchViewModel
+    
+    var recentTopics: [String] {
+        _ = searchVM.recentSearchesUpdated // forces dependency
+        return Array(searchVM.user.myPostSearches.suffix(5).reversed())
+    }
+
+    var recentUsers: [String] {
+        _ = searchVM.recentSearchesUpdated
+        return Array(searchVM.user.myProfileSearches.suffix(5).reversed())
+    }
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -196,7 +234,7 @@ struct RecentSearchesView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     if selectedTab == "Topics" {
-                        ForEach(Array(recentTopics.enumerated()), id: \.element) { index, topic in
+                        ForEach(recentTopics, id: \.self) { topic in
                             HStack {
                                 Image(systemName: "number")
                                     .font(.system(size: 12, weight: .bold))
@@ -212,7 +250,7 @@ struct RecentSearchesView: View {
                                     .cornerRadius(10)
                                 
                                 Button(action: {
-                                    recentTopics.remove(at: index)
+                                    searchVM.deleteRecentlySearched(topic, isProfileSearch: false)
                                 }) {
                                     Image(systemName: "xmark")
                                         .font(.system(size: 12, weight: .regular))
@@ -222,20 +260,20 @@ struct RecentSearchesView: View {
                             }
                         }
                     } else {
-                        ForEach(Array(recentUsers.enumerated()), id: \.element) { index, user in
+                        ForEach(recentUsers, id: \.self) { username in
                             HStack {
                                 Circle()
                                     .fill(Color(.systemGray))
                                     .frame(width: 30, height: 30)
                                 
-                                Text(user)
+                                Text(username)
                                     .padding(5)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(Color.white)
                                     .cornerRadius(10)
                                 
                                 Button(action: {
-                                    recentUsers.remove(at: index)
+                                    searchVM.deleteRecentlySearched(username, isProfileSearch: true)
                                 }) {
                                     Image(systemName: "xmark")
                                         .font(.system(size: 12, weight: .regular))

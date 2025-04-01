@@ -9,6 +9,12 @@ import Firebase
 import Foundation
 
 class SearchViewModel: ObservableObject {
+    @Published var user: User
+    @Published var recentSearchesUpdated = false // trigger state updates in the search bar (recent searches)
+
+    init(user: User) {
+        self.user = user
+    }
     private let vectorSearchCollection = "_firestore-vector-search"
     
     func searchSimilarQuestions(query: String) async throws -> [String] {
@@ -121,4 +127,60 @@ class SearchViewModel: ObservableObject {
         
         return questions
     }
+    
+    //add recently searched posts
+    func addRecentlySearchedPost(_ search: String, ) {
+        //if search already exists, remove --> do arrayUnion (so search is moved to front/most recent search)
+        if let index = user.myPostSearches.firstIndex(of: search) {
+            user.myPostSearches.remove(at: index)
+        }
+        user.myPostSearches.append(search)
+        
+        // Update Firebase
+        let userRef = Firebase.db.collection("USERS").document(user.userId)
+        userRef.updateData([
+            "myPostSearches": FieldValue.arrayUnion([search])
+        ])
+    }
+    
+    
+    func addRecentlySearchedProfile(_ search: String) {
+        //if search already exists, remove
+        if let index = user.myProfileSearches.firstIndex(of: search) {
+            user.myProfileSearches.remove(at: index)
+        }
+        user.myProfileSearches.append(search)
+        
+        // update Firebase
+        let userRef = Firebase.db.collection("USERS").document(user.userId)
+        userRef.updateData([
+            "myProfileSearches": FieldValue.arrayUnion([search])
+        ])
+    }
+    
+    //delete recent searches
+    func deleteRecentlySearched(_ search: String, isProfileSearch: Bool) {
+        let key = isProfileSearch ? "myProfileSearches" : "myPostSearches"
+        
+        // Remove locally
+        if isProfileSearch {
+            if let index = user.myProfileSearches.firstIndex(of: search) {
+                user.myProfileSearches.remove(at: index)
+            }
+        } else {
+            if let index = user.myPostSearches.firstIndex(of: search) {
+                user.myPostSearches.remove(at: index)
+            }
+        }
+        //retrigger render in view
+        recentSearchesUpdated.toggle()
+        
+        // Remove in Firebase
+        let userRef = Firebase.db.collection("USERS").document(user.userId)
+        userRef.updateData([
+            key: FieldValue.arrayRemove([search])
+        ])
+    }
+
+    
 }
