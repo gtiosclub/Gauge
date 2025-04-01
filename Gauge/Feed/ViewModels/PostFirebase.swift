@@ -28,6 +28,7 @@ class PostFirebase: ObservableObject {
             comments: [
                 Comment(
                     commentType: .text,
+                    postId: "555555555",
                     userId: "user101",
                     username: "ApolloCritic",
                     profilePhoto: "",
@@ -39,6 +40,7 @@ class PostFirebase: ObservableObject {
                 ),
                 Comment(
                     commentType: .text,
+                    postId: "555555555",
                     userId: "user202",
                     username: "Rover4Real",
                     profilePhoto: "",
@@ -50,6 +52,7 @@ class PostFirebase: ObservableObject {
                 ),
                 Comment(
                     commentType: .text,
+                    postId: "555555555",
                     userId: "user303",
                     username: "EarthboundFella",
                     profilePhoto: "",
@@ -61,6 +64,7 @@ class PostFirebase: ObservableObject {
                 ),
                 Comment(
                     commentType: .text,
+                    postId: "555555555",
                     userId: "user404",
                     username: "SpaceCadet",
                     profilePhoto: "",
@@ -72,6 +76,7 @@ class PostFirebase: ObservableObject {
                 ),
                 Comment(
                     commentType: .text,
+                    postId: "555555555",
                     userId: "user555",
                     username: "LunarLegacy",
                     profilePhoto: "",
@@ -110,13 +115,13 @@ class PostFirebase: ObservableObject {
             userId: "anotherone",
             username: "TalkShowConnoisseur",
             comments: [
-                Comment(commentType: .text, userId: "user005", username: "KimmelFan", profilePhoto: "", date: Date(), commentId: "comm015", likes: ["user012", "user016"], dislikes: ["user017"], content: "Kimmel is a legend. Every show feels like a casual conversation, dude’s a natural. I also love his content covering recent events in the White House. He has no filter and it is the best way to wind down for the day."),
-                Comment(commentType: .text, userId: "user006", username: "ConanCultist", profilePhoto: "", date: Date(), commentId: "comm016", likes: ["user013"], dislikes: ["user005"], content: "Jimmy Kimmel is okay, but Conan O’Brien carried late-night TV on his back."),
-                Comment(commentType: .text, userId: "user007", username: "LettermanLoyalist", profilePhoto: "", date: Date(), commentId: "comm017", likes: ["user014"], dislikes: [], content: "Kimmel is good, but no one will ever top Letterman. The man had no filter."),
-                Comment(commentType: .text, userId: "user008", username: "ColbertConvert", profilePhoto: "", date: Date(), commentId: "comm018", likes: ["user015"], dislikes: ["user006"], content: "Kimmel’s great, but if we’re being honest, Stephen Colbert is running the game right now."),
-                Comment(commentType: .text, userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment."),
-                Comment(commentType: .text, userId: "user010", username: "MyMom", profilePhoto: "", date: Date(), commentId: "comm020", likes: ["user010", "user011", "user010", "user011", "user010", "user011"], dislikes: [], content: "MY FAVVVV!"),
-                Comment(commentType: .text, userId: "user011", username: "YourMom", profilePhoto: "", date: Date(), commentId: "comm021", likes: [], dislikes: ["user010", "user011", "user010", "user011"], content: "Man sucks.")
+                Comment(commentType: .text,  postId: "21341234", userId: "user005", username: "KimmelFan", profilePhoto: "", date: Date(), commentId: "comm015", likes: ["user012", "user016"], dislikes: ["user017"], content: "Kimmel is a legend. Every show feels like a casual conversation, dude’s a natural. I also love his content covering recent events in the White House. He has no filter and it is the best way to wind down for the day."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user006", username: "ConanCultist", profilePhoto: "", date: Date(), commentId: "comm016", likes: ["user013"], dislikes: ["user005"], content: "Jimmy Kimmel is okay, but Conan O’Brien carried late-night TV on his back."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user007", username: "LettermanLoyalist", profilePhoto: "", date: Date(), commentId: "comm017", likes: ["user014"], dislikes: [], content: "Kimmel is good, but no one will ever top Letterman. The man had no filter."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user008", username: "ColbertConvert", profilePhoto: "", date: Date(), commentId: "comm018", likes: ["user015"], dislikes: ["user006"], content: "Kimmel’s great, but if we’re being honest, Stephen Colbert is running the game right now."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user010", username: "MyMom", profilePhoto: "", date: Date(), commentId: "comm020", likes: ["user010", "user011", "user010", "user011", "user010", "user011"], dislikes: [], content: "MY FAVVVV!"),
+                Comment(commentType: .text,  postId: "21341234", userId: "user011", username: "YourMom", profilePhoto: "", date: Date(), commentId: "comm021", likes: [], dislikes: ["user010", "user011", "user010", "user011"], content: "Man sucks.")
             ],
             responses: [
                 Response(responseId: "resp013", userId: "user012", responseOption: "Nah"),
@@ -138,8 +143,8 @@ class PostFirebase: ObservableObject {
             userId: "starbucksoverlord",
             username: "CaffeineAddict",
             comments: [
-                Comment(commentType: .text, userId: "user321", username: "NetflixJunkie", profilePhoto: "", date: Date(), commentId: "comm009", likes: ["user654"], dislikes: [], content: "I need my shows. Coffee is replaceable."),
-                Comment(commentType: .text, userId: "user654", username: "JavaFiend", profilePhoto: "", date: Date(), commentId: "comm010", likes: ["user321"], dislikes: [], content: "If you think I can function without coffee, you’ve never met me.")
+                Comment(commentType: .text, postId: "777123999", userId: "user321", username: "NetflixJunkie", profilePhoto: "", date: Date(), commentId: "comm009", likes: ["user654"], dislikes: [], content: "I need my shows. Coffee is replaceable."),
+                Comment(commentType: .text, postId: "777123999", userId: "user654", username: "JavaFiend", profilePhoto: "", date: Date(), commentId: "comm010", likes: ["user321"], dislikes: [], content: "If you think I can function without coffee, you’ve never met me.")
             ],
             responses: [
                 Response(responseId: "resp009", userId: "user111", responseOption: "Goodbye Netflix"),
@@ -161,10 +166,10 @@ class PostFirebase: ObservableObject {
             userId: "myman",
             username: "CozyKing",
             comments: [
-                Comment(commentType: .text, userId: "user001", username: "CarpetDefender", profilePhoto: "", date: Date(), commentId: "comm011", likes: ["user005", "user009"], dislikes: ["user007"], content: "Carpet in the bedroom is elite. Y’all sleeping on hardwood like cavemen."),
-                Comment(commentType: .text, userId: "user002", username: "HardwoodPurist", profilePhoto: "", date: Date(), commentId: "comm012", likes: ["user003", "user008"], dislikes: ["user001"], content: "Carpet is just a bacteria sponge. You ever seen what's in that thing after a year?"),
-                Comment(commentType: .text, userId: "user003", username: "RugLife", profilePhoto: "", date: Date(), commentId: "comm013", likes: ["user006"], dislikes: [], content: "Carpet is great until you drop something. Finding a contact lens on it is a spiritual experience. Or cleaning up spilled Dr. Pepper. That is a real bummer when you have carpet."),
-                Comment(commentType: .text, userId: "user004", username: "BarefootBandit", profilePhoto: "", date: Date(), commentId: "comm014", likes: ["user009"], dislikes: [], content: "If you walk on carpet with socks, you’re living life on easy mode. Hardwood is for risk takers.")
+                Comment(commentType: .text, postId: "834729384", userId: "user001", username: "CarpetDefender", profilePhoto: "", date: Date(), commentId: "comm011", likes: ["user005", "user009"], dislikes: ["user007"], content: "Carpet in the bedroom is elite. Y’all sleeping on hardwood like cavemen."),
+                Comment(commentType: .text, postId: "834729384", userId: "user002", username: "HardwoodPurist", profilePhoto: "", date: Date(), commentId: "comm012", likes: ["user003", "user008"], dislikes: ["user001"], content: "Carpet is just a bacteria sponge. You ever seen what's in that thing after a year?"),
+                Comment(commentType: .text, postId: "834729384", userId: "user003", username: "RugLife", profilePhoto: "", date: Date(), commentId: "comm013", likes: ["user006"], dislikes: [], content: "Carpet is great until you drop something. Finding a contact lens on it is a spiritual experience. Or cleaning up spilled Dr. Pepper. That is a real bummer when you have carpet."),
+                Comment(commentType: .text, postId: "834729384", userId: "user004", username: "BarefootBandit", profilePhoto: "", date: Date(), commentId: "comm014", likes: ["user009"], dislikes: [], content: "If you walk on carpet with socks, you’re living life on easy mode. Hardwood is for risk takers.")
             ],
             responses: [
                 Response(responseId: "resp011", userId: "user010", responseOption: "TF no"),
@@ -186,8 +191,8 @@ class PostFirebase: ObservableObject {
             userId: "roommateFromHell",
             username: "LandlordHater69",
             comments: [
-                Comment(commentType: .text, userId: "user123", username: "CarpetHater", profilePhoto: "", date: Date(), commentId: "comm001", likes: ["user789"], dislikes: [], content: "Carpet in the bathroom should be a felony."),
-                Comment(commentType: .text, userId: "user456", username: "VinylTile4Life", profilePhoto: "", date: Date(), commentId: "comm002", likes: ["user123", "user999"], dislikes: ["user555"], content: "If I see a carpeted bathroom, I'm calling the cops.")
+                Comment(commentType: .text, postId: "123456789", userId: "user123", username: "CarpetHater", profilePhoto: "", date: Date(), commentId: "comm001", likes: ["user789"], dislikes: [], content: "Carpet in the bathroom should be a felony."),
+                Comment(commentType: .text, postId: "123456789", userId: "user456", username: "VinylTile4Life", profilePhoto: "", date: Date(), commentId: "comm002", likes: ["user123", "user999"], dislikes: ["user555"], content: "If I see a carpeted bathroom, I'm calling the cops.")
             ],
             responses: [
                 Response(responseId: "resp001", userId: "user789", responseOption: "Absolutely 🚔"),
@@ -208,8 +213,8 @@ class PostFirebase: ObservableObject {
             userId: "toasterfanatic",
             username: "HotDogDebater",
             comments: [
-                Comment(commentType: .text, userId: "user777", username: "BreadDefender", profilePhoto: "", date: Date(), commentId: "comm003", likes: ["user222"], dislikes: [], content: "A hot dog is NOT a sandwich. Don't start this."),
-                Comment(commentType: .text, userId: "user222", username: "MeatIsMeat", profilePhoto: "", date: Date(), commentId: "comm004", likes: ["user777", "user999"], dislikes: [], content: "If a sub is a sandwich, then so is a hot dog. Wake up, sheeple.")
+                Comment(commentType: .text, postId: "987654321", userId: "user777", username: "BreadDefender", profilePhoto: "", date: Date(), commentId: "comm003", likes: ["user222"], dislikes: [], content: "A hot dog is NOT a sandwich. Don't start this."),
+                Comment(commentType: .text, postId: "987654321", userId: "user222", username: "MeatIsMeat", profilePhoto: "", date: Date(), commentId: "comm004", likes: ["user777", "user999"], dislikes: [], content: "If a sub is a sandwich, then so is a hot dog. Wake up, sheeple.")
             ],
             responses: [
                 Response(responseId: "resp003", userId: "user111", responseOption: "Yes, it's meat between bread"),
@@ -231,8 +236,8 @@ class PostFirebase: ObservableObject {
             userId: "midnightmunchies",
             username: "ChristmasMovieGatekeeper",
             comments: [
-                Comment(commentType: .text, userId: "user555", username: "YippeeKiYay", profilePhoto: "", date: Date(), commentId: "comm005", likes: ["user777"], dislikes: [], content: "If Home Alone counts, so does Die Hard."),
-                Comment(commentType: .text, userId: "user999", username: "HolidayPurist", profilePhoto: "", date: Date(), commentId: "comm006", likes: [], dislikes: ["user555"], content: "Christmas movies need Santa, end of discussion.")
+                Comment(commentType: .text, postId: "246813579", userId: "user555", username: "YippeeKiYay", profilePhoto: "", date: Date(), commentId: "comm005", likes: ["user777"], dislikes: [], content: "If Home Alone counts, so does Die Hard."),
+                Comment(commentType: .text, postId: "246813579", userId: "user999", username: "HolidayPurist", profilePhoto: "", date: Date(), commentId: "comm006", likes: [], dislikes: ["user555"], content: "Christmas movies need Santa, end of discussion.")
             ],
             responses: [
                 Response(responseId: "resp005", userId: "user111", responseOption: "Yes, obviously"),
@@ -264,8 +269,8 @@ class PostFirebase: ObservableObject {
             userId: "theAIoverlords",
             username: "AI_Groom",
             comments: [
-                Comment(commentType: .text, userId: "user888", username: "TechLover", profilePhoto: "", date: Date(), commentId: "comm007", likes: ["user111"], dislikes: [], content: "AI can probably write better vows than me tbh."),
-                Comment(commentType: .text, userId: "user333", username: "FutureDivorcee", profilePhoto: "", date: Date(), commentId: "comm008", likes: [], dislikes: ["user888"], content: "If my spouse uses AI for our vows, I’m filing papers immediately.")
+                Comment(commentType: .text, postId: "192837465", userId: "user888", username: "TechLover", profilePhoto: "", date: Date(), commentId: "comm007", likes: ["user111"], dislikes: [], content: "AI can probably write better vows than me tbh."),
+                Comment(commentType: .text, postId: "192837465", userId: "user333", username: "FutureDivorcee", profilePhoto: "", date: Date(), commentId: "comm008", likes: [], dislikes: ["user888"], content: "If my spouse uses AI for our vows, I’m filing papers immediately.")
             ],
             responses: [
                 Response(responseId: "resp007", userId: "user444", responseOption: "Yes, AI is poetic"),
@@ -360,6 +365,7 @@ class PostFirebase: ObservableObject {
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
+                            postId: currentPost.postId,
                             userId: id,
                             date: date,
                             commentId: id,
@@ -380,6 +386,7 @@ class PostFirebase: ObservableObject {
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
+                            postId: currentPost.postId,
                             userId: id,
                             date: date,
                             commentId: id,
@@ -588,6 +595,23 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    func removeLike(postId: String, commentId: String, userId: String) {
+        let commentRef = Firebase.db.collection("POSTS")
+            .document(postId)
+            .collection("COMMENTS")
+            .document(commentId)
+      
+        commentRef.updateData([
+            "likes": FieldValue.arrayRemove([userId])
+        ]) { error in
+            if let error = error {
+                print("error in liking comment: \(error.localizedDescription)")
+            } else {
+                print("Successfully liked the comment.")
+            }
+        }
+    }
+    
     func dislikeComment(postId: String, commentId: String, userId: String) {
         // Reference a specific comment in the "COMMENTS" collection
         // of a specific post in the "POSTS" collection
@@ -606,7 +630,24 @@ class PostFirebase: ObservableObject {
             if let error = error {
                 print("Error disliking comment: \(error.localizedDescription)")
             } else {
-                print("Successfully disliked the comment.")
+                print("Successfully removed like.")
+            }
+        }
+    }
+    
+    func removeDislike(postId: String, commentId: String, userId: String) {
+        let commentRef = Firebase.db.collection("POSTS")
+            .document(postId)
+            .collection("COMMENTS")
+            .document(commentId)
+      
+        commentRef.updateData([
+            "dislikes": FieldValue.arrayRemove([userId])
+        ]) { error in
+            if let error = error {
+                print("error in liking comment: \(error.localizedDescription)")
+            } else {
+                print("Successfully removed dislike.")
             }
         }
     }
@@ -813,6 +854,7 @@ class PostFirebase: ObservableObject {
                        
                        let commentObj = Comment (
                            commentType: commentType,
+                           postId: postId,
                            userId: data["userId"] as? String ?? "",
                            username:"",
                            profilePhoto: "",

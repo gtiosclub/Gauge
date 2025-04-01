@@ -43,6 +43,7 @@ struct HomeView: View {
                     comments: [
                         Comment(
                             commentType: .text,
+                            postId: "555555555",
                             userId: "Lv72Qz7Qc4TC2vDeE94q",
                             date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
                             commentId: "",
@@ -52,6 +53,7 @@ struct HomeView: View {
                         ),
                         Comment(
                             commentType: .text,
+                            postId: "555555555",
                             userId: "Lv72Qz7Qc4TC2vDeE94q",
                             date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
                             commentId: "",
