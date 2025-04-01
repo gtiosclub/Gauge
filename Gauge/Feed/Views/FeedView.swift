@@ -10,6 +10,7 @@ import SwiftUI
 struct FeedView: View {
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
+    @StateObject private var authVM = AuthenticationVM()
     @State private var dragOffset: CGSize = .zero
     @State private var opacityAmount = 1.0
     @State private var optionSelected: Int = 0
@@ -148,6 +149,16 @@ struct FeedView: View {
                                             }
                                             withAnimation {
                                                 isConfirmed = true
+                                                let user = authVM.currentUser
+                                                if let post = postVM.feedPosts.first as? BinaryPost {
+                                                    var responseChosen = "NA"
+                                                    if(optionSelected == 1 ){
+                                                        responseChosen = post.responseOption1
+                                                    } else if(optionSelected == 2){
+                                                        responseChosen = post.responseOption2
+                                                    }
+                                                    postVM.addResponse(postId: post.postId, userId: user?.userId ?? "N/A", responseOption: responseChosen)
+                                                }
                                             }
                                         }
                                         

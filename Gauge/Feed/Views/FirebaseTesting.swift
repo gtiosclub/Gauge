@@ -10,6 +10,7 @@ import SwiftUI
 struct FirebaseTesting: View {
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
+    @StateObject private var authVM = AuthenticationVM()
     @State private var postIds: [String] = []
     
     var body: some View {
@@ -26,7 +27,12 @@ struct FirebaseTesting: View {
                                 responseOption2: "Stats dont lie"
                             )
                         }
-                        
+                        Button("Add Response to Post"){
+                            
+                            let user = authVM.currentUser
+                        postVM.addResponse(postId: "37459197-11A2-40C9-A569-45043EF523DF", userId: user?.userId ?? "N/A", responseOption: String(0))
+                            
+                        }
                         Button("Add Slider Post") {
                             postVM.createSliderPost(
                                 userId: "austin",
