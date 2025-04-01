@@ -14,6 +14,7 @@ struct GamesHome: View {
     @State private var showingJoin = false
     @State var roomCode = ""
     @State var username: String = ""
+    @State var profileLink: String = "TestProfile"
     @State var isHost = false
     @ObservedObject var mcManager = MCManager(yourName: UIDevice.current.identifierForVendor?.uuidString ?? UIDevice.current.name)
     @State var showJoinRoom: Bool = false
@@ -87,7 +88,7 @@ struct GamesHome: View {
                                     .padding()
                                 HStack {
                                     Button(action: {
-                                        mcManager.setUsername(username: username)
+                                        mcManager.setUsernameAndProfile(username: username, profileLink: profileLink)
                                         isHost = true
                                         roomCode = generateRoomCode()
                                         navigateToRoom = true
@@ -107,7 +108,7 @@ struct GamesHome: View {
                                     Button(action: {
                                         withAnimation {
                                             showingJoin.toggle()
-                                            mcManager.setUsername(username: username)
+                                            mcManager.setUsernameAndProfile(username: username, profileLink: profileLink)
                                             isHost = false
                                             mcManager.startBrowsing()
                                         }
@@ -142,7 +143,7 @@ struct GamesHome: View {
                                         let roomAvailable = !roomCode.isEmpty && mcManager.discoveredPeers.values.contains { $0.roomCode == roomCode }
                                         Button(action: {
                                             if roomAvailable {
-                                                mcManager.setUsername(username: username)
+                                                mcManager.setUsernameAndProfile(username: username, profileLink: profileLink)
                                                 isHost = false
                                                 mcManager.joinRoom(with: roomCode)
                                                 navigateToRoom = true
