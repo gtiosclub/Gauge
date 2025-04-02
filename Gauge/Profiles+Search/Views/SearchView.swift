@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SearchView: View {
+    @EnvironmentObject var userVM: UserFirebase
     @StateObject private var searchVM = SearchViewModel()
     @StateObject var profileVM = ProfileViewModel()
     @StateObject var searchedUserVM = UserFirebase()
@@ -22,6 +23,7 @@ struct SearchView: View {
     @State private var showResults: Bool = false
     @State private var isSearchActive: Bool = false
     @State private var navigateToSearchedUser: Bool = false
+    @State private var searchedUserIsCurrUser: Bool = false
 
     @State var items = Array(Category.allCategoryStrings.shuffled().prefix(through: 19))
     
@@ -128,7 +130,7 @@ struct SearchView: View {
                 Group {
                     if isSearchActive {
                         if showResults {
-                            SearchResultsView(searchedUserVM: searchedUserVM, selectedTab: $selectedTab, isLoading: $isLoading, errorMessage: $errorMessage, postSearchResults: $postSearchResults, userSearchResults: $userSearchResults, userSearchProfileImages: $userSearchProfileImages, navigateToSearchedUser: $navigateToSearchedUser)
+                            SearchResultsView(searchedUserVM: searchedUserVM, selectedTab: $selectedTab, isLoading: $isLoading, errorMessage: $errorMessage, postSearchResults: $postSearchResults, userSearchResults: $userSearchResults, userSearchProfileImages: $userSearchProfileImages, navigateToSearchedUser: $navigateToSearchedUser, searchedUserIsCurrUser: $searchedUserIsCurrUser)
                         } else {
                             RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused,
                                                searchText: $searchText,
@@ -143,13 +145,14 @@ struct SearchView: View {
             .navigationTitle(isSearchActive ? "" : "Explore")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(isPresented: $navigateToSearchedUser) {
-                ProfileView(userVM: searchedUserVM, isCurrentUser: false)
+                ProfileView(userVM: searchedUserVM, isCurrentUser: searchedUserIsCurrUser)
             }
         }
     }
 }
 
 struct SearchResultsView: View {
+    @EnvironmentObject var userVM: UserFirebase
     @ObservedObject var searchedUserVM: UserFirebase
     @Binding var selectedTab: String
     @Binding var isLoading: Bool
@@ -158,6 +161,7 @@ struct SearchResultsView: View {
     @Binding var userSearchResults: [UserResult]
     @Binding var userSearchProfileImages: [String: UIImage]
     @Binding var navigateToSearchedUser: Bool
+    @Binding var searchedUserIsCurrUser: Bool
     
     var body: some View {
         if isLoading {
@@ -204,6 +208,11 @@ struct SearchResultsView: View {
                             searchedUserVM.getAllUserData(userId: user.id, completion: { user in
                                 searchedUserVM.user = user
                             })
+                            if user.id == userVM.user.id {
+                                searchedUserIsCurrUser = true
+                            } else {
+                                searchedUserIsCurrUser = false
+                            }
                             navigateToSearchedUser = true
                         }
                     }
