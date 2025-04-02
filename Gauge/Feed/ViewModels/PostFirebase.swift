@@ -1070,15 +1070,13 @@ class PostFirebase: ObservableObject {
                 bestScore = score
                 bestIndex = i
             }
-
+            
         }
+        
         let bestPost = allQueriedPosts[bestIndex]
         allQueriedPosts.remove(at: bestIndex)
         allQueriedPosts.insert(bestPost, at: 0)
-        }
-            
     }
-
 
     func removeView(postId: String, userId: String) {
         let viewRef = Firebase.db.collection("POSTS")
