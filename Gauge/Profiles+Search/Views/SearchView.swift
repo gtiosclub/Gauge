@@ -1,11 +1,5 @@
-//
-//  SearchView.swift
-//  Gauge
-//
-//  Created by Anthony Le on 2/25/25.
-//
-
 import SwiftUI
+
 
 struct SearchView: View {
     @StateObject private var searchVM = SearchViewModel()
@@ -231,7 +225,7 @@ struct CategoriesView: View {
                     ForEach(categories, id: \.self) { category in
                         Button(action: {
                             selectedCategory = category
-                            loadCategoryPosts(category: category)
+                            loadCategoryPosts(category: category)  // Load posts when category is selected
                         }) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
@@ -259,6 +253,8 @@ struct CategoriesView: View {
                 await MainActor.run {
                     searchResults = results
                     isLoading = false
+                    print("Successfully fetched category posts:", results)
+
                 }
             } catch {
                 await MainActor.run {
@@ -269,6 +265,7 @@ struct CategoriesView: View {
         }
     }
 }
+
 
 struct RecentSearchesView: View {
     @FocusState.Binding var isSearchFieldFocused: Bool

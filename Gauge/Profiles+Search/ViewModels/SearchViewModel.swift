@@ -123,26 +123,39 @@ class SearchViewModel: ObservableObject {
     }
     
     func searchPostsByCategory(_ category: Category) async throws -> [PostResult] {
-            let querySnapshot = try await Firebase.db.collection("POSTS")
-                .whereField("category", isEqualTo: category.rawValue)
-                .getDocuments()
-            
-            return await withTaskGroup(of: PostResult?.self) { group in
-                for document in querySnapshot.documents {
-                    group.addTask {
-                        await self.getPostDetails(for: document.documentID)
-                    }
-                }
-                
-                var results = [PostResult]()
-                for await postResult in group {
-                    if let postResult = postResult {
-                        results.append(postResult)
-                    }
-                }
-                return results
-            }
+        print("Executing searchPostsByCategory for \(category.rawValue)")
+
+        let snapshot = try await Firestore.firestore()
+            .collection("POSTS")
+            .whereField("categories", arrayContains: category.rawValue)
+            .getDocuments()
+
+        print("Firestore returned \(snapshot.documents.count) documents")
+
+        var results: [PostResult] = []
+
+        for document in snapshot.documents {
+            let data = document.data()
+            print("Document Data: \(data)") // Debugging
+
+            guard let question = data["question"] as? String else { continue }
+            let options = [
+                data["responseOption1"] as? String ?? "",
+                data["responseOption2"] as? String ?? ""
+            ]
+            let postId = document.documentID
+            let postDateAndTime = data["postDateAndTime"] as? String ?? ""
+            let timeAgo = DateConverter.timeAgo(from: DateConverter.convertStringToDate(postDateAndTime) ?? Date())
+
+            let postResult = PostResult(id: postId, question: question, options: options, timeAgo: timeAgo)
+            results.append(postResult)
         }
+
+        print("Parsed \(results.count) posts")
+        return results
+    }
+
+
 }
 
 
