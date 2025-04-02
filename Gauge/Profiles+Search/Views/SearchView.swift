@@ -253,7 +253,6 @@ struct CategoriesView: View {
                 await MainActor.run {
                     searchResults = results
                     isLoading = false
-                    print("Successfully fetched category posts:", results)
 
                 }
             } catch {

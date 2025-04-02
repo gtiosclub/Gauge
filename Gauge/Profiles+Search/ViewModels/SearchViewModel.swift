@@ -123,20 +123,17 @@ class SearchViewModel: ObservableObject {
     }
     
     func searchPostsByCategory(_ category: Category) async throws -> [PostResult] {
-        print("Executing searchPostsByCategory for \(category.rawValue)")
 
         let snapshot = try await Firestore.firestore()
             .collection("POSTS")
             .whereField("categories", arrayContains: category.rawValue)
             .getDocuments()
 
-        print("Firestore returned \(snapshot.documents.count) documents")
 
         var results: [PostResult] = []
 
         for document in snapshot.documents {
             let data = document.data()
-            print("Document Data: \(data)") // Debugging
 
             guard let question = data["question"] as? String else { continue }
             let options = [
@@ -151,7 +148,6 @@ class SearchViewModel: ObservableObject {
             results.append(postResult)
         }
 
-        print("Parsed \(results.count) posts")
         return results
     }
 
