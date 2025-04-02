@@ -33,7 +33,8 @@ class User: Equatable, Identifiable, ObservableObject {
     @Published var myViews: [String] = [] // PostIds of those skipped
     @Published var myFavorites: [String] = [] // PostIds of those favorited
     @Published var myComments: [String] = [] // PostIds of those commented on
-    var mySearches: [String] = [] // Search queries
+    var myPostSearches: [String] = [] // Search queries
+    var myProfileSearches: [String] = [] //search queries
     var myAccessedProfiles: [String] // UserIDs of other users, sorted by profile accesses
     // MARK: AI Algorithm Variables
     
@@ -53,7 +54,7 @@ class User: Equatable, Identifiable, ObservableObject {
         self.myAccessedProfiles = []
     }
     
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String], mySearches: [String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String = "", myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String = "", myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -64,7 +65,8 @@ class User: Equatable, Identifiable, ObservableObject {
         self.myNextPosts = myNextPosts
         self.myResponses = myResponses
         self.myFavorites = myFavorites
-        self.mySearches = mySearches
+        self.myPostSearches = myPostSearches
+        self.myProfileSearches = myProfileSearches
         self.myComments = myComments
         self.myCategories = myCategories
         self.badges = badges

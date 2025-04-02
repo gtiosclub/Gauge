@@ -28,7 +28,8 @@ class UserFirebase: ObservableObject {
                         friends: data["friends"] as? [String: [String]] ?? [:],
                         myNextPosts: data["myNextPosts"] as? [String] ?? [],
                         myFavorites: data["myFavorites"] as? [String] ?? [],
-                        mySearches: data["mySearches"] as? [String] ?? [],
+                        myPostSearches: data["myPostSearches"] as? [String] ?? [],
+                        myProfileSearches: data["myProfileSearches"] as? [String] ?? [],
                         myCategories: data["myCategories"] as? [String] ?? [],
                         badges: data["badges"] as? [String] ?? [],
                         streak: data["streak"] as? Int ?? 0,
@@ -95,7 +96,7 @@ class UserFirebase: ObservableObject {
 
     func addUserSearch(search: String) {
         // Update user var
-        user.mySearches.append(search)
+        user.myPostSearches.append(search)
         
         // Update Firebase
         let userRef = Firebase.db.collection("USERS").document(user.userId)
@@ -138,7 +139,8 @@ class UserFirebase: ObservableObject {
                     "phoneNumber": user.phoneNumber,
                     "myCategories": user.myCategories,
                     "myNextPosts": user.myNextPosts,
-                    "mySearches": user.mySearches,
+                    "myPostSearches": user.myPostSearches,
+                    "myProfileSearches": user.myProfileSearches,
                     "myAccessedProfiles": user.myAccessedProfiles
                     
         ] as [String : Any]
