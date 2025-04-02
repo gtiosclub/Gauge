@@ -28,11 +28,11 @@ class User: Equatable, Identifiable, ObservableObject {
     var myNextPosts: [String] = []
     
     // MARK: AI Algorithm Variables
-    var myPosts: [String] = [] // PostIds of the user's posts
-    var myResponses: [String] = [] // PostIds of those responded to
-    var myViews: [String] = [] // PostIds of those skipped
-    var myFavorites: [String] = [] // PostIds of those favorited
-    var myComments: [String] = [] // PostIds of those commented on
+    @Published var myPosts: [String] = [] // PostIds of the user's posts
+    @Published var myResponses: [String] = [] // PostIds of those responded to
+    @Published var myViews: [String] = [] // PostIds of those skipped
+    @Published var myFavorites: [String] = [] // PostIds of those favorited
+    @Published var myComments: [String] = [] // PostIds of those commented on
     var mySearches: [String] = [] // Search queries
     var myAccessedProfiles: [String] // UserIDs of other users, sorted by profile accesses
     // MARK: AI Algorithm Variables
