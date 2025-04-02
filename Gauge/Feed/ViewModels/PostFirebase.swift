@@ -568,6 +568,7 @@ class PostFirebase: ObservableObject {
 
                     } else if change.type == .removed {
                         self.allQueriedPosts = self.allQueriedPosts.filter { $0.postId != change.document.documentID }
+                        self.feedPosts = self.feedPosts.filter { $0.postId != change.document.documentID }
                     }
                 }
                 
@@ -866,7 +867,7 @@ class PostFirebase: ObservableObject {
                            username:"",
                            profilePhoto: "",
                            date: DateConverter.convertStringToDate(data["date"] as? String ?? "") ?? Date(),
-                           commentId: data["commentId"] as? String ??  "",
+                           commentId: document.documentID,
                            likes: data["likes"] as? [String] ?? [],
                            dislikes: data["dislikes"] as? [String] ?? [],
                            content: data["content"] as? String ?? ""

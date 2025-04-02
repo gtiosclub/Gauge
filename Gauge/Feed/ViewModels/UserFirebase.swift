@@ -48,13 +48,10 @@ class UserFirebase: ObservableObject {
         var responsePostIDs: [String] = []
         var commentPostIDs: [String] = []
         var viewPostIDs: [String] = []
-        
-        
 
         // traverse through POSTS collection
         Firebase.db.collection("POSTS").getDocuments { snapshot, error in
             if let documents = snapshot?.documents {
-                
                 for document in documents {
                     let documentRef = Firebase.db.collection("POSTS").document(document.documentID)
                     
@@ -79,6 +76,9 @@ class UserFirebase: ObservableObject {
                                 }
                             }
                         if(currentSubcollection == "VIEWS") {
+                            print("Responses: " + responsePostIDs.joined(separator: ", "))
+                            print("Comments: " + commentPostIDs.joined(separator: ", "))
+                            print("Views: " + viewPostIDs.joined(separator: ", "))
                             completion(responsePostIDs, commentPostIDs, viewPostIDs)
                         }
                     }
