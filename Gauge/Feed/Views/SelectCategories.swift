@@ -13,6 +13,7 @@ struct SelectCategories: View {
     @State var isSearching: Bool = false
     @State var suggestedCategories: [Category] = []
     @Binding var selectedCategories: [Category]
+    @Binding var stepCompleted: Bool
     
     let question: String
     let responseOptions: [String]
@@ -29,8 +30,14 @@ struct SelectCategories: View {
             question: self.question,
             responseOptions: self.responseOptions
         ) { suggestedCategories in
-            self.suggestedCategories = suggestedCategories
+            for category in suggestedCategories {
+                if !selectedCategories.contains(category) {
+                    self.suggestedCategories.append(category)
+                }
+            }
         }
+        
+        stepCompleted = selectedCategories.count > 0
     }
     
     var body: some View {
@@ -66,6 +73,7 @@ struct SelectCategories: View {
                                 withAnimation {
                                     selectedCategories = selectedCategories.filter { $0 != category}
                                 }
+                                stepCompleted = selectedCategories.count > 0
                             }
                             .padding(10)
                             .font(.subheadline)
@@ -96,6 +104,8 @@ struct SelectCategories: View {
                                             selectedCategories.append(category)
                                         }
                                         suggestedCategories = suggestedCategories.filter { $0 != category }
+                                        
+                                        stepCompleted = selectedCategories.count > 0
                                     }
                                 }
                                 .padding(10)
@@ -122,6 +132,7 @@ struct SelectCategories: View {
                                     selectedCategories.append(Category.stringToCategory(category)!)
                                 }
                                 isSearching = false
+                                stepCompleted = selectedCategories.count > 0
                             }
                         }
                         .padding(.vertical, 5)
@@ -154,11 +165,11 @@ struct SelectCategories: View {
 }
 
 #Preview {
-    @Previewable @State var selectedCategories: [Category] = []
-    SelectCategories(
-        selectedCategories: $selectedCategories,
-        question: "Which channel is better?",
-        responseOptions: ["National Geographic", "Animal Planet"]
-    )
-        .environmentObject(PostFirebase())
+//    @Previewable @State var selectedCategories: [Category] = []
+//    SelectCategories(
+//        selectedCategories: $selectedCategories,
+//        question: "Which channel is better?",
+//        responseOptions: ["National Geographic", "Animal Planet"]
+//    )
+//        .environmentObject(PostFirebase())
 }

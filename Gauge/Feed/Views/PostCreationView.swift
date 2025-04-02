@@ -13,6 +13,9 @@ struct PostCreationView: View {
     @State private var currentStep: Int = 1
     @State private var currentStepTitle: String = "New Post"
     @State private var canMoveNext: Bool = false
+    @State private var stepCompleted: Bool = false
+    
+    @State var postQuestion: String = ""
     @State var postCategories: [Category] = []
     @State var postType: PostType?
     
@@ -22,7 +25,7 @@ struct PostCreationView: View {
     var body: some View {
         VStack(spacing: 0) {
            HStack {
-                ProgressIndicator(currentStep: currentStep, totalSteps: totalSteps)
+               ProgressIndicator(stepCompleted: stepCompleted, currentStep: currentStep, totalSteps: totalSteps)
                 
                 Spacer()
                 
@@ -53,13 +56,14 @@ struct PostCreationView: View {
             
             
             if currentStep == 1 {
-                Text("New Post")
+                InputPostQuestion(questionText: $postQuestion, stepCompleted: $stepCompleted)
             } else if currentStep == 2 {
-                SelectPostType(selectedPostType: $postType)
+                SelectPostType(selectedPostType: $postType, stepCompleted: $stepCompleted)
             } else if currentStep == 4 {
                 SelectCategories(
                     selectedCategories: $postCategories,
-                    question: "Which channel is better?",
+                    stepCompleted: $stepCompleted,
+                    question: postQuestion,
                     responseOptions: ["National Geographic", "Animal Planet"]
                 )
                 .frame(height: 200)
@@ -101,6 +105,7 @@ struct PostCreationView: View {
                 Button(action: {
                     withAnimation {
                         currentStep = min(currentStep + 1, totalSteps)
+                        stepCompleted = false
                         
                         if currentStep == 1 {
                             currentStepTitle = "New Post"
@@ -128,6 +133,7 @@ struct PostCreationView: View {
                             }
                         )
                 }
+                .disabled(!stepCompleted)
             }
             .padding(.horizontal)
             .padding(.top, 20)
@@ -139,6 +145,7 @@ struct PostCreationView: View {
 }
 
 struct ProgressIndicator: View {
+    var stepCompleted: Bool
     var currentStep: Int
     var totalSteps: Int
     
@@ -146,7 +153,7 @@ struct ProgressIndicator: View {
         HStack(spacing: 4) {
             ForEach(1...totalSteps, id: \.self) { step in
                 Capsule()
-                    .fill(Color.gray.opacity(step == currentStep ? 0.5 : 0.2))
+                    .fill(stepCompleted && step == currentStep ? Color.blue : Color.gray.opacity(step == currentStep ? 0.5 : 0.2))
                     .frame(width: step == currentStep ? 32 : 12, height: 5)
             }
         }

@@ -72,6 +72,7 @@ struct PostTypeOption: View {
 
 struct SelectPostType: View {
     @Binding var selectedPostType: PostType?
+    @Binding var stepCompleted: Bool
     
     var body: some View {
         VStack(spacing: 0) {
@@ -89,7 +90,9 @@ struct SelectPostType: View {
                 action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         selectedPostType = .BinaryPost
+                        stepCompleted = true
                     }
+                    
                 }
             )
 
@@ -107,6 +110,7 @@ struct SelectPostType: View {
                 action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         selectedPostType = .SliderPost
+                        stepCompleted = true
                     }
                 }
             )
@@ -119,6 +123,9 @@ struct SelectPostType: View {
             }
         }
         .padding(.horizontal)
+        .onAppear {
+            stepCompleted = selectedPostType != nil
+        }
     }
 }
 

@@ -27,11 +27,11 @@ struct HomeView: View {
                 }
                 
                 NavigationLink("Select Categories Screen") {
-                    SelectCategories(
-                        selectedCategories: $selectedCategories,
-                        question: "Which channel is better?",
-                        responseOptions: ["National Geographic", "Animal Planet"]
-                    )
+//                    SelectCategories(
+//                        selectedCategories: $selectedCategories,
+//                        question: "Which channel is better?",
+//                        responseOptions: ["National Geographic", "Animal Planet"]
+//                    )
                 }
                 
                 NavigationLink("Feed View") {
