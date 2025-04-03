@@ -226,4 +226,5 @@ struct GameCardView: View {
 
 #Preview {
     GamesHome()
+        .environmentObject(UserFirebase())
 }
