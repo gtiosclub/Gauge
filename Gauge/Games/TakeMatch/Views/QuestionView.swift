@@ -8,69 +8,88 @@
 import SwiftUI
 
 struct QuestionView: View {
+    @ObservedObject var mcManager: MCManager
     var question: String
     @Binding var inputText: String
     var onSubmit: () -> Void
+    @State var guessedMatches: [String: String] = [:]
+    @State var submitAnswer = false
 
     var body: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemFill))
-                    .frame(height: 250)
-                Text(question).font(.title)
-                    .padding()
-            }
-            InfoField(title: "A:", text: $inputText)
+        VStack(spacing: 30) {
+            Text(question).font(.title)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(.secondarySystemFill))
+                )
+            TextField("", text: $inputText, axis: .vertical)
+                .font(.title)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .multilineTextAlignment(.leading)
+                .lineLimit(2, reservesSpace: true)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white)
+                        .stroke(Color.black)
+                )
             Button(action: {
                 onSubmit()
+                submitAnswer = true
+
             }) {
                 Text("Submit")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
+                    .font(.title2)
+                    .foregroundColor(.black)
                     .padding()
-                    .background(.gray)
+                    .background(Color(.secondarySystemFill))
                     .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.2), radius: 4, x: 2, y: 2)
                     .scaleEffect(1.0)
             }
+            .frame(maxWidth: 400)
             .buttonStyle(PressEffectButtonStyle())
-            .padding(.horizontal, 40)
-            .padding(.top, 20)
 
-        }.padding()
+        }
+        .padding()
+        .navigationTitle(Text("Take Match"))
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $submitAnswer) {
+
+            let responses = Dictionary(
+                uniqueKeysWithValues: mcManager.takeMatchAnswers.map {
+                    ($0.sender, $0.text)
+                })
+            if mcManager.connectedPeers.count + 1 <= responses.count {
+                let filteredResponses = responses.filter {
+                    $0.key != mcManager.username
+                }
+                MatchingView(
+                    mcManager: mcManager,
+                    responses: Array(filteredResponses.values),
+                    playerPictures: Array(filteredResponses.keys),
+                    guessedMatches: $guessedMatches, onSubmit: {})
+            } else {
+
+                WaitingView(
+                    mcManager: mcManager,
+                    expectedCount: mcManager.connectedPeers.count)
+            }
+
+        }
+        .navigationBarBackButtonHidden()
+
     }
 }
 
 #Preview {
-    QuestionView(question: "Q: Some question about this person's preferences", inputText: .constant(""), onSubmit: { })
-}
+    QuestionView(
+        mcManager: MCManager(yourName: "test"),
+        question: "Some question about this person's preferences",
+        inputText: .constant(""), onSubmit: {})
 
-struct InfoField: View {
-    let title:String
-    @Binding var text:String
-    @FocusState var isTyping:Bool
-    var body: some View {
-        ZStack(alignment: .leading) {
-            TextField("", text: $text).padding(.leading)
-                .frame(height: 250).focused($isTyping)
-                .background(isTyping ? .black : Color(.gray),in:RoundedRectangle(cornerRadius: 14).stroke(lineWidth: 2))
-                .font(.title)
-
-
-            Text(title).padding(.horizontal, 5)
-                .background(.white.opacity(isTyping || !text.isEmpty ? 1 : 0))
-                .foregroundStyle(isTyping ? .black : .black)
-                .padding(.leading).offset(y: isTyping || !text.isEmpty ? -27 : 0)
-                .onTapGesture {
-                    isTyping.toggle()
-                }
-                .font(.title)
-
-        }
-        .animation(.linear(duration: 0.2), value: isTyping)
-    }
 }
 
 struct PressEffectButtonStyle: ButtonStyle {
@@ -78,6 +97,7 @@ struct PressEffectButtonStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
             .opacity(configuration.isPressed ? 0.8 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+            .animation(
+                .easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }

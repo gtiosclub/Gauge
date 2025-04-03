@@ -7,11 +7,11 @@
 
 import Foundation
 
-class User: Equatable, Identifiable {
+class User: Equatable, Identifiable, ObservableObject {
     // MARK: MANDATORY
     var id: String { userId } // Derived attribute from userId to conform to Equatable, does NOT need to be in init
-    var userId: String
-    var username: String
+    @Published var userId: String
+    @Published var username: String
     var email: String
     var lastLogin: Date
     var lastFeedRefresh: Date
@@ -22,20 +22,26 @@ class User: Equatable, Identifiable {
     var friendOut: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
     var friends: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
     var badges: [String] = []
-    var profilePhoto: String = ""
+    var profilePhoto: String
     var phoneNumber: String = ""
     var myCategories: [String] = []
     var myNextPosts: [String] = []
     
     // MARK: AI Algorithm Variables
-    var myPosts: [String] = [] // PostIds of the user's posts
-    var myResponses: [String] = [] // PostIds of those responded to
-    var myViews: [String] = [] // PostIds of those skipped
-    var myFavorites: [String] = [] // PostIds of those favorited
-    var myComments: [String] = [] // PostIds of those commented on
-    var mySearches: [String] = [] // Search queries
-    var myAccessedProfiles: [String] = [] // UserIDs of other users, sorted by profile accesses
+    @Published var myPosts: [String] = [] // PostIds of the user's posts
+    @Published var myResponses: [String] = [] // PostIds of those responded to
+    @Published var myViews: [String] = [] // PostIds of those skipped
+    @Published var myFavorites: [String] = [] // PostIds of those favorited
+    @Published var myComments: [String] = [] // PostIds of those commented on
+    var myPostSearches: [String] = [] // Search queries
+    var myProfileSearches: [String] = [] //search queries
+    var myAccessedProfiles: [String] // UserIDs of other users, sorted by profile accesses
     // MARK: AI Algorithm Variables
+    
+    // MARK: STATS
+    var numUserResponses: Int = 0
+    var numUserViews: Int = 0
+    // MARK: STATS
     
     init(userId: String, username: String, email: String) {
         self.userId = userId
@@ -44,9 +50,11 @@ class User: Equatable, Identifiable {
         self.lastLogin = Date()
         self.streak = 0
         self.lastFeedRefresh = Date()
+        self.profilePhoto = ""
+        self.myAccessedProfiles = []
     }
     
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myPosts: [String], myResponses: [String], myFavorites: [String], mySearches: [String], myComments: [String], myCategories: [String], badges: [String], streak: Int) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String = "", myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -54,17 +62,20 @@ class User: Equatable, Identifiable {
         self.friendIn = friendIn
         self.friendOut = friendOut
         self.friends = friends
-        self.myPosts = myPosts
+        self.myNextPosts = myNextPosts
         self.myResponses = myResponses
         self.myFavorites = myFavorites
-        self.mySearches = mySearches
+        self.myPostSearches = myPostSearches
+        self.myProfileSearches = myProfileSearches
         self.myComments = myComments
         self.myCategories = myCategories
         self.badges = badges
+        self.profilePhoto = profilePhoto
+        self.myAccessedProfiles = myAccessedProfiles
+        self.lastLogin = lastLogin
+        self.lastFeedRefresh = lastFeedRefresh
         
-        // Add function to update last login + last feed refresh in Firebase
-        self.lastLogin = Date()
-        self.lastFeedRefresh = Date()
+        
         // Add logic to add one to streak if it is maintained, update in Firebase
         self.streak = streak
     }
@@ -73,5 +84,4 @@ class User: Equatable, Identifiable {
         lhs.id == rhs.id && lhs.username == rhs.username && lhs.phoneNumber == rhs.phoneNumber
     }
 }
-
 

@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseFirestore
+import ChatGPTSwift
 
 class UserFirebase: ObservableObject {
     @Published var user: User = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
@@ -18,21 +19,24 @@ class UserFirebase: ObservableObject {
             } else {
                 if let data = document?.data() {
                     let userObj = User(
-                        userId: data["userId"] as? String ?? "",
+                        userId: document!.documentID,
                         username: data["username"] as? String ?? "",
                         phoneNumber: data["phoneNumber"] as? String ?? "",
                         email: data["email"] as? String ?? "",
                         friendIn: data["friendIn"] as? [String: [String]] ?? [:],
                         friendOut: data["friendOut"] as? [String: [String]] ?? [:],
                         friends: data["friends"] as? [String: [String]] ?? [:],
-                        myPosts: data["myPosts"] as? [String] ?? [],
-                        myResponses: data["myResponses"] as? [String] ?? [],
+                        myNextPosts: data["myNextPosts"] as? [String] ?? [],
                         myFavorites: data["myFavorites"] as? [String] ?? [],
-                        mySearches: data["mySearches"] as? [String] ?? [],
-                        myComments: data["myComments"] as? [String] ?? [],
+                        myPostSearches: data["myPostSearches"] as? [String] ?? [],
+                        myProfileSearches: data["myProfileSearches"] as? [String] ?? [],
                         myCategories: data["myCategories"] as? [String] ?? [],
                         badges: data["badges"] as? [String] ?? [],
-                        streak: data["streak"] as? Int ?? 0
+                        streak: data["streak"] as? Int ?? 0,
+                        profilePhoto: data["profilePhoto"] as? String ?? "",
+                        myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
+                        lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
+                        lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date()
                     )
                     
                     completion(userObj)
@@ -41,18 +45,17 @@ class UserFirebase: ObservableObject {
         }
     }
     
-    func getUserPostInteractions() {
+    func getUserPostInteractions(completion: @escaping ([String], [String], [String]) -> Void) {
         // create variables to store subcollection info
         var responsePostIDs: [String] = []
         var commentPostIDs: [String] = []
         var viewPostIDs: [String] = []
-        
+
         // traverse through POSTS collection
         Firebase.db.collection("POSTS").getDocuments { snapshot, error in
             if let documents = snapshot?.documents {
                 for document in documents {
                     let documentRef = Firebase.db.collection("POSTS").document(document.documentID)
-                    
                     
                     let subcollections = ["RESPONSES", "COMMENTS", "VIEWS"]
                     
@@ -74,6 +77,12 @@ class UserFirebase: ObservableObject {
                                     }
                                 }
                             }
+                        if(currentSubcollection == "VIEWS") {
+                            print("Responses: " + responsePostIDs.joined(separator: ", "))
+                            print("Comments: " + commentPostIDs.joined(separator: ", "))
+                            print("Views: " + viewPostIDs.joined(separator: ", "))
+                            completion(responsePostIDs, commentPostIDs, viewPostIDs)
+                        }
                     }
                 }
             }
@@ -81,12 +90,13 @@ class UserFirebase: ObservableObject {
             print("Responses: \(responsePostIDs)")
             print("Comments: \(commentPostIDs)")
             print("Views: \(viewPostIDs)")
+            
         }
     }
 
     func addUserSearch(search: String) {
         // Update user var
-        user.mySearches.append(search)
+        user.myPostSearches.append(search)
         
         // Update Firebase
         let userRef = Firebase.db.collection("USERS").document(user.userId)
@@ -117,19 +127,20 @@ class UserFirebase: ObservableObject {
     //let attributesList = ["lastLogin", "lastFeedRefresh", "streak", "friendIn", "friendOut", "friends", "badges", "profilePhoto", "phoneNumber", "myCategories", "myNextPosts", "mySearches", "myAccessedProfiles"]
     
 
-    func updateUserFields(user: User){
+    func updateUserFields(user: User) {
         let data = ["lastLogin": DateConverter.convertDateToString(user.lastLogin),
                     "lastFeedRefresh": DateConverter.convertDateToString(user.lastFeedRefresh),
-                    "streak":user.streak,
-                    "friendIn":user.friendIn,
-                    "friendOut":user.friendOut,
-                    "friends":user.friends,
+                    "streak": user.streak,
+                    "friendIn": user.friendIn,
+                    "friendOut": user.friendOut,
+                    "friends": user.friends,
                     "badges": user.badges,
-                    "profilePhoto":user.profilePhoto,
-                    "phoneNumber":user.phoneNumber,
-                    "myCategories":user.myCategories,
-                    "myNextPosts":user.myNextPosts,
-                    "mySearches":user.mySearches,
+                    "profilePhoto": user.profilePhoto,
+                    "phoneNumber": user.phoneNumber,
+                    "myCategories": user.myCategories,
+                    "myNextPosts": user.myNextPosts,
+                    "myPostSearches": user.myPostSearches,
+                    "myProfileSearches": user.myProfileSearches,
                     "myAccessedProfiles": user.myAccessedProfiles
                     
         ] as [String : Any]
@@ -142,7 +153,25 @@ class UserFirebase: ObservableObject {
         }
     }
     
-    func getUserFavorites(userId: String) {
+    func getUsernameAndPhoto(userId: String, completion: @escaping ([String: String]) -> Void) {
+        var nameAndPhoto = ["username": "", "profilePhoto": ""]
+        
+        Firebase.db.collection("USERS").document(userId).getDocument { document, error in
+            if let error = error {
+                print("Error getting user \(error)")
+                return
+            }
+            
+            if let data = document?.data() {
+                nameAndPhoto["username"] = data["username"] as? String ?? ""
+                nameAndPhoto["profilePhoto"] = data["profilePhoto"] as? String ?? ""
+            }
+            
+            completion(nameAndPhoto)
+        }
+    }
+    
+    func getUserFavorites(userId: String, completion: @escaping ([String]) -> Void) {
         // Create an array to store favorite postId
         var allFavoritePosts: [String] = []
         // fetch all documents in the "POSTS" collection
@@ -152,10 +181,12 @@ class UserFirebase: ObservableObject {
             .getDocuments { (snapshot, error) in
                 if let error = error {
                     print("Error getting favorite posts: \(error)")
+                    completion([])
                 } else {
                     for document in snapshot!.documents {
                         allFavoritePosts.append(document.documentID)
                     }
+                    completion(allFavoritePosts)
                 }
             }
     }
@@ -266,6 +297,50 @@ class UserFirebase: ObservableObject {
                 }
         }
     }
+    
+    
+    func reorderUserCategory(lastest : [String: Int], currentInterestList: [String], completion: @escaping ([String]) -> Void){
+            //lastest: given the dictionary of last session of interest category from user
+            //currentIntegerList: this is the current category list
+
+            let lastestSorted = lastest.sorted{$0.value > $1.value}
+            //get the OpenAI token
+            let token = ChatGPTAPI(apiKey:Keys.openAIKey)
+            //assigning prompt to the OpenAI
+            let prompt:String = """
+            I will give you 2 lists, where a dictionary list to store the interests point of the user lastest interactions with the categories, and another list of current catgories. Please based on the significant interest points, what we mean significant is only move the current categories up or down if the interactions make it very apparent the user has interest/disinterest in a category. And need to combine the current category list order which also takes into account of weight. Return the reordered the category list. to better perform this task, sorting the lastest interaction first (I help you sorted already), and remove all the categories that does not consist in the current list, after that reordering based on the point. The returned format would be: [String]. Do not give me any sentence but the string list as a return prompt. Any category that does not exist in the current list do not be included in the return list.
+            lastest interaction categories: \(lastestSorted)
+            current list of category: \(currentInterestList)
+            """
+
+            //making the call
+            
+            Task{
+                do{
+                    let response = try await token.sendMessage(text: prompt,
+                                                               model: ChatGPTModel.gpt_hyphen_4o_hyphen_mini,
+                                                               systemText: "You are a reordering expert",
+                                                               temperature: 0.5)
+                    
+                    if let data = response.data(using: .utf8),
+                       let jsonArray = try? JSONDecoder().decode([String].self, from: data) {
+                        //return the string list
+                        completion(jsonArray)
+                    } else {
+                        print("Failed to parse OpenAI response")
+                        completion([])
+                    }
+                    
+                    
+                }catch {
+                    print("Error fetching reordered categories: \(error.localizedDescription)")
+                    completion([])
+                }
+                
+                
+            }
+            
+            }
 
 
 

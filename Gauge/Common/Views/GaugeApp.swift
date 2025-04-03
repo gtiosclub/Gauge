@@ -22,7 +22,8 @@ struct GaugeApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([UserResponses.self])
+//        let schema = Schema([UserResponses.self])
+        let schema = Schema([])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
@@ -39,12 +40,12 @@ struct GaugeApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationPath, root: {
-                TakeMatchHome()
+                ContentView()
             })
         }
         .modelContainer(sharedModelContainer)
         .environmentObject(userVM)
         .environmentObject(postVM)
-        .modelContainer(for: [UserResponses.self])
+//        .modelContainer(for: [UserResponses.self])
     }
 }

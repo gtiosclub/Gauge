@@ -13,19 +13,21 @@ class BinaryPost: Post, Equatable {
     var userId: String
     var username: String = "" // NOT stored in Firebase
     var profilePhoto: String = "" // NOT stored in Firebase
-    var comments: [Comment]
-    var responses: [Response]
     var categories: [Category]
-    var viewCounter: Int
     var postDateAndTime: Date
     var favoritedBy: [String]
     var question: String
     
+    // From subcollection
+    @Published var responses: [Response]
+    @Published var viewCounter: Int
+    @Published var comments: [Comment]
+    
     // Binary post specific attributes
     var responseOption1: String
     var responseOption2: String
-    var responseResult1: Int
-    var responseResult2: Int
+    @Published var responseResult1: Int
+    @Published var responseResult2: Int
     
     // Initializing locally
     init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String) {

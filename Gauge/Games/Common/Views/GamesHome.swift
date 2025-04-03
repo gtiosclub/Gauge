@@ -8,143 +8,218 @@
 import SwiftUI
 
 struct GamesHome: View {
-    // Will include a tab list view of all the games in the app
-    let games: [String] = [
-        "Game 1",
-        "Game 2",
-        "Game 3",
-        "Game 4",
-        "Game 5",
-    ]
+    @EnvironmentObject var userVM: UserFirebase
     @State private var selectedGame: String? = nil
     @State private var showingPopover = false
     @State private var showingJoin = false
-    @State private var joinCode = ""
+    @State var roomCode = ""
+    @State var username: String = ""
+    @State var isHost = false
+    @ObservedObject var mcManager = MCManager(yourName: UIDevice.current.identifierForVendor?.uuidString ?? UIDevice.current.name)
+    @State var showJoinRoom: Bool = false
+    @State var navigateToRoom = false
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGray5)  // Light gray
-                    .edgesIgnoringSafeArea(.all)  // Fill the entire screen
                 ScrollView {
                     VStack(spacing: 10) {
-                        ForEach(games, id: \.self) { game in
-                            Button(action: {
-                                selectedGame = game
-                                withAnimation {
-                                    self.showingPopover.toggle()
-                                }
-                            }) {
-                                VStack {
-                                    Image("game_image")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(
-                                            width: 300, height: 100,
-                                            alignment: .center
-                                        )
-                                        .foregroundColor(.primary)
-
-                                    Text(game)
-                                        .font(.headline)
-                                        .bold()
-                                        .padding(.top, 8)
-                                    Spacer()
-                                }
-                                .foregroundColor(.primary)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(5)
+                        Button(action: {
+                            selectedGame = "Take Match"
+                            withAnimation {
+                                username = userVM.user.username
+                                self.showingPopover.toggle()
                             }
-                            .buttonStyle(PlainButtonStyle())
-                            .padding(5)
+                        }) {
+                            GameCardView(
+                                gameTitle: "Take Match", playerRange: "3-8",
+                                duration: "15m",
+                                description:
+                                    "Match your friends to their takes!")
+                        }
+                        Button(action: {
+                            selectedGame = "Take Time"
+                            withAnimation {
+                                username = userVM.user.username
+                                self.showingPopover.toggle()
+                            }
+                        }) {
+                            GameCardView(
+                                gameTitle: "Take Time", playerRange: "1",
+                                duration: "5m",
+                                description:
+                                    "Make as many takes as you can!")
                         }
                     }
                     .padding()
                 }
 
-                .navigationTitle(Text("Games"))
-            }
 
-            if showingPopover {
-                VStack {
-                    VStack(spacing: 20) {
-                        HStack {
-                            Button(action: {
+                if showingPopover {
+                    ZStack {
+                        Color.black.opacity(0.3)
+                            .edgesIgnoringSafeArea(.all)
+                            .onTapGesture {
                                 withAnimation {
                                     self.showingPopover = false
                                     self.showingJoin = false
                                 }
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.title2)
-                                    .foregroundColor(.gray)
-                            }
-                            Spacer()
-                        }
-                        Text("Options for \(selectedGame ?? "Game")")
-                            .font(.title2)
-                            .padding()
-                        HStack {
-                            Button(action: {
-                            }) {
-                                NavigationLink(destination: TakeMatchHome())
-                                {
-                                    Text("Create")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
-                                        .padding()
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.blue)
-                                        .cornerRadius(5)
-                                }
                             }
 
-                            Button(action: {
-                                withAnimation {
-                                    self.showingJoin = true
-                                }
-                            }) {
-                                Text("Join")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.green)
-                                    .cornerRadius(5)
-                            }
-                        }
-                        if showingJoin {
-                            HStack {
-                                TextField("Enter room code", text: $joinCode)
-                                    .textFieldStyle(
-                                        RoundedBorderTextFieldStyle()
-                                    )
-                                    .padding()
-                                Button(action: {
-                                }) {
-                                    NavigationLink(
-                                        destination: TakeMatchHome()
-                                    ) {
-                                        Image(systemName: "chevron.right")
+                        VStack {
+                            VStack(spacing: 20) {
+                                HStack {
+                                    Button(action: {
+                                        withAnimation {
+
+                                            self.showingPopover = false
+                                            self.showingJoin = false
+                                        }
+                                    }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.title2)
+                                            .foregroundColor(.gray)
                                     }
+                                    Spacer()
                                 }
+                                Text(selectedGame ?? "")
+                                    .font(.title)
+                                    .padding()
+                                HStack {
+                                    Button(action: {
+                                        mcManager.setUsername(username: username)
+                                        isHost = true
+                                        roomCode = generateRoomCode()
+                                        navigateToRoom = true
+                                        mcManager.startHosting(with: roomCode)
+                                        mcManager.startBrowsing()
+                                    }) {
+                                        Text("Create")
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                            .padding()
+                                            .frame(maxWidth: .infinity)
+                                            .background(Color.blue)
+                                            .cornerRadius(10)
+                                    }
+                                    .disabled(username.isEmpty)
+
+                                    Button(action: {
+                                        withAnimation {
+                                            showingJoin.toggle()
+                                            mcManager.setUsername(username: username)
+                                            isHost = false
+                                            mcManager.startBrowsing()
+                                        }
+                                    }) {
+                                        Text("Join")
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                            .padding()
+                                            .frame(maxWidth: .infinity)
+                                            .background(Color.green)
+                                            .cornerRadius(10)
+                                    }
+                                    .disabled(username.isEmpty)
+                                }
+                                TextField(
+                                    "Username", text: $username
+                                )
+                                .font(.title2)
+                                .textFieldStyle(
+                                    RoundedBorderTextFieldStyle()
+                                )
+                                if showingJoin {
+                                    HStack {
+                                        TextField("Room Code", text: $roomCode)
+                                            .onChange(of: roomCode) { newValue in
+                                                roomCode = newValue.uppercased()
+                                            }
+                                        .font(.title2)
+                                        .textFieldStyle(
+                                            RoundedBorderTextFieldStyle()
+                                        )
+                                        let roomAvailable = !roomCode.isEmpty && mcManager.discoveredPeers.values.contains { $0.roomCode == roomCode }
+                                        Button(action: {
+                                            if roomAvailable {
+                                                mcManager.setUsername(username: username)
+                                                isHost = false
+                                                mcManager.joinRoom(with: roomCode)
+                                                navigateToRoom = true
+                                            }
+                                        }) {
+                                            Image(systemName: "arrow.right")
+                                        }
+                                        .disabled(username.isEmpty || roomCode.isEmpty || !roomAvailable)
+                                        
+                                    }
+
+                                }
+
                             }
-
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .cornerRadius(20)
                         }
-
+                        .padding()
                     }
-                    .padding()
-                    .background(Color(.systemBackground))
-                    .cornerRadius(20)
-                    .shadow(radius: 10)
-                    .padding()
-                    Spacer()
                 }
-                .zIndex(1)  // Ensure the popover is on top
+            }
+            .navigationTitle(Text("Games"))
+            .navigationDestination(isPresented: $navigateToRoom) {
+                TakeMatchRoomView(mcManager: mcManager, isHost: isHost, roomCode: roomCode, onExit: resetHomeState)
+            }
+            .navigationBarBackButtonHidden()
+        }
+    }
+    func generateRoomCode() -> String {
+
+        let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        return String((0..<4).compactMap { _ in letters.randomElement() })
+    }
+
+    func resetHomeState() {
+        roomCode = ""
+        showJoinRoom = false
+        navigateToRoom = false
+        isHost = false
+    }
+}
+
+struct GameCardView: View {
+    var gameTitle: String
+    var playerRange: String
+    var duration: String
+    var description: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.gray.opacity(0.3))
+                .frame(height: 100)  // Placeholder for image
+
+            HStack(spacing: 10) {
+                Text(gameTitle)
+                    .font(.title)
+                    .fontWeight(.bold)
+                Label(playerRange, systemImage: "person.2.fill")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                Label(duration, systemImage: "clock")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
             }
 
+            Text(description)
+                .font(.body)
+                .foregroundColor(.black)
+                .lineLimit(2)
         }
+        .padding()
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(radius: 5)
+
     }
 }
 

@@ -19,11 +19,11 @@ struct FirebaseTesting: View {
                     Section("Write Data") {
                         Button("Add Binary Post") {
                             postVM.createBinaryPost(
-                                userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73",
-                                categories: [.sports(.nfl)],
-                                question: "Is pizza the goat food?",
-                                responseOption1: "yes",
-                                responseOption2: "no"
+                                userId: "Zmi5Cgm7dtbqCDbLOrhbbDAq8T92",
+                                categories: [.sports(.nba)],
+                                question: "Is Shai the MVP",
+                                responseOption1: "Nah, free throw merchant🙅‍♂️",
+                                responseOption2: "Stats dont lie"
                             )
                         }
                         
@@ -62,6 +62,28 @@ struct FirebaseTesting: View {
                                 responseOption: "Chocolate"
                             )
                         }
+                        
+                        Button("Test reordering for category") {
+                           let lastest: [String: Int] = [
+                               "nfl": 120,
+                               "movies": 250,
+                               "education": 20,
+                               "showReccomendations": 30
+                           ]
+
+                           let currentInterestList: [String] = [
+                               "showRecommendations",
+                               "education",
+                               "movies"
+                           ]
+
+                           userVM.reorderUserCategory(
+                               lastest: lastest,
+                               currentInterestList: currentInterestList
+                           ) { reorderList in
+                               print("This is the reordered list based on the input: \(reorderList)")
+                           }
+                       }
                         
                         Button("test setUserCategories"){
                             userVM.setUserCategories(userId: "austin", category: [Category.educational(.environment), Category.educational(.math)])
@@ -107,11 +129,11 @@ struct FirebaseTesting: View {
                     
                     Section("Get Live Data (Great for feed & games!)") {
                         Button("Watch for Posts") {
-                            postVM.getLiveFeedPosts(user: userVM.user)
+                            postVM.watchForNewPosts(user: userVM.user)
                         }
                     }
                     
-                    Section("Read Data") {
+                    Section(header: Text("Read Data")) {
                         Button("Get posts by userId") {
                             userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
                                 self.postIds = postIds
@@ -133,6 +155,27 @@ struct FirebaseTesting: View {
                                 print(results)
                             }
                         }
+                        
+                        Button("Get username and profile picture") {
+                            userVM.getUsernameAndPhoto(userId: "Lv72Qz7Qc4TC2vDeE94q") { object in
+                                print(object)
+                            }
+                        }
+                        
+                        Button("Get number of responses for a list of posts") {
+                            Task {
+                                if let count = await postVM.getUserNumResponses(postIds: [
+                                    "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
+                                    "examplePost"
+                                ]) {
+                                    print("Number of responses: \(count)")
+                                } else {
+                                    print("Failed to get number of responses")
+                                }
+                            }
+                        }
+
+
                     }
                     
                     Section("Update Data") {
@@ -171,18 +214,24 @@ struct FirebaseTesting: View {
                                 search: "friends"
                             )
                         }
+                        
+                        Button("Generate 20 Keywords") {
+                            postVM.generatePostKeywords(postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2")
+                        }
+                        
+                        Button("Remove View") {
+                            postVM.removeView(
+                                postId: "examplePost",
+                                userId: "Jack")
+                        }
                     }
                     
                     Section("View Data") {
                         Button("Fetch Favorited Posts") {
-                            userVM.getUserFavorites(userId: "ExampleUser")
+                            userVM.getUserFavorites(userId: "ExampleUser"){ favorites in }
                         }
                         
-                        Button("Start Listener"){
-                            postVM.getLiveFeedPosts(user: userVM.user)
-                        }
-                        
-                        ForEach(postVM.allQueriedPosts) { post in
+                        ForEach(postVM.allQueriedPosts, id: \.postId) { post in
                             Text(post.postId)
                         }
                     }
