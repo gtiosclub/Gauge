@@ -38,6 +38,7 @@ enum PostType: String {
 struct Comment: Identifiable, Hashable {
     var id: String {commentId}
     var commentType: CommentType // enum (text, GIF), String in Firebase
+    var postId: String
     var userId: String
     var username: String = ""// NOT stored in Firebase
     var profilePhoto: String = ""// NOT stored in Firebase
