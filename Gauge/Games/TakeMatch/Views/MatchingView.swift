@@ -82,6 +82,7 @@ struct MatchingView: View {
             ResultsView(
                 responses: filteredResponses,
                 guessedMatches: guesses,
+                mcManager: mcManager,
                 onRestart: {
                     return true
                 }

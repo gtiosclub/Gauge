@@ -56,7 +56,7 @@ struct ContentView: View {
                             .tag(2)
                         
 //                        Text("Profile")
-                        ProfileView()
+                        ProfileView(userVM: userVM, isCurrentUser: true)
                             .tabItem {
                                 Image(systemName: "person.circle")
                                 Text("Profile")
