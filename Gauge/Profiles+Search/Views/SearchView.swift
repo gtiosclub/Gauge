@@ -8,15 +8,22 @@
 import SwiftUI
 
 struct SearchView: View {
+    @EnvironmentObject var userVM: UserFirebase
     @StateObject private var searchVM = SearchViewModel()
+    @StateObject var profileVM = ProfileViewModel()
+    @StateObject var searchedUserVM = UserFirebase()
     @State private var searchText: String = ""
     @FocusState private var isSearchFieldFocused: Bool
     @State private var selectedTab: String = "Topics"
-    @State private var searchResults: [PostResult] = []
+    @State private var postSearchResults: [PostResult] = []
+    @State private var userSearchResults: [UserResult] = []
+    @State private var userSearchProfileImages: [String: UIImage] = [:]
     @State private var isLoading: Bool = false
     @State private var errorMessage: String? = nil
     @State private var showResults: Bool = false
     @State private var isSearchActive: Bool = false
+    @State private var navigateToSearchedUser: Bool = false
+    @State private var searchedUserIsCurrUser: Bool = false
 
     @State var items = Array(Category.allCategoryStrings.shuffled().prefix(through: 19))
     
@@ -33,37 +40,67 @@ struct SearchView: View {
                             .foregroundColor(Color(.black))
                             .focused($isSearchFieldFocused)
                             .submitLabel(.search)
-                            .onChange(of: isSearchFieldFocused) { focused in
+                            .onChange(of: isSearchFieldFocused, initial: false) { _, focused in
                                 if focused {
                                     isSearchActive = true
                                 }
                             }
-                            .onSubmit {
-                                if !searchText.isEmpty {
-                                    isLoading = true
-                                    showResults = true
-                                    Task {
-                                        do {
-                                            let results = try await searchVM.searchPosts(for: searchText)
-                                            await MainActor.run {
-                                                searchResults = results
-                                                isLoading = false
+                            .onChange(of: searchText, initial: false) { _, text in
+                                if (selectedTab == "Users") {
+                                    if !searchText.isEmpty {
+                                        isLoading = true
+                                        showResults = true
+                                        Task {
+                                            do {
+                                                let userSeach = try await searchVM.fetchUsers(for: searchText.lowercased()) // assuming usernames will be lowercased
+                                                for user in userSeach {
+                                                    if user.profilePhotoUrl != "" && !userSearchProfileImages.keys.contains(user.id) {
+                                                        userSearchProfileImages[user.id] = await profileVM.getProfilePicture(userID: user.id)
+                                                    }
+                                                }
+                                                await MainActor.run {
+                                                    userSearchResults = userSeach
+                                                    isLoading = false
+                                                }
+                                            } catch {
+                                                await MainActor.run {
+                                                    errorMessage = "Search failed: \(error.localizedDescription)"
+                                                }
                                             }
-                                        } catch {
-                                            await MainActor.run {
-                                                errorMessage = "Search failed: \(error.localizedDescription)"
-                                                isLoading = false
+                                        }
+                                    } else {
+                                        showResults = false
+                                    }
+                                }
+                            }
+                            .onSubmit {
+                                if (selectedTab == "Topics") {
+                                    if !searchText.isEmpty {
+                                        isLoading = true
+                                        showResults = true
+                                        Task {
+                                            do {
+                                                let results = try await searchVM.searchPosts(for: searchText)
+                                                await MainActor.run {
+                                                    postSearchResults = results
+                                                    isLoading = false
+                                                }
+                                            } catch {
+                                                await MainActor.run {
+                                                    errorMessage = "Search failed: \(error.localizedDescription)"
+                                                    isLoading = false
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-
+                        
                         if !searchText.isEmpty {
                             Button(action: {
                                 searchText = ""
                                 showResults = false
-                                searchResults = []
+                                postSearchResults = []
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(Color(.systemGray))
@@ -80,39 +117,20 @@ struct SearchView: View {
                             isSearchActive = false
                             isSearchFieldFocused = false
                             searchText = ""
-                            searchResults = []
+                            postSearchResults = []
                             showResults = false
                         }
                         .foregroundColor(.blue)
                     }
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 12)
                 .padding(.top, 1)
                 .padding(.bottom, 10)
                 
                 Group {
                     if isSearchActive {
                         if showResults {
-                            if isLoading {
-                                ProgressView("Searching...")
-                                    .padding()
-                            } else if let errorMessage = errorMessage {
-                                Text(errorMessage)
-                                    .foregroundStyle(.red)
-                                    .padding()
-                            } else if !searchResults.isEmpty {
-                                List {
-                                    ForEach(searchResults) { result in
-                                        PostResultRow(result: result)
-                                            .listRowSeparator(.hidden)
-                                            .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
-                                    }
-                                }
-                                .listStyle(.plain)
-                            } else {
-                                Text("No results found.")
-                                    .padding()
-                            }
+                            SearchResultsView(searchedUserVM: searchedUserVM, selectedTab: $selectedTab, isLoading: $isLoading, errorMessage: $errorMessage, postSearchResults: $postSearchResults, userSearchResults: $userSearchResults, userSearchProfileImages: $userSearchProfileImages, navigateToSearchedUser: $navigateToSearchedUser, searchedUserIsCurrUser: $searchedUserIsCurrUser)
                         } else {
                             RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused,
                                                searchText: $searchText,
@@ -125,10 +143,88 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .navigationTitle(isSearchActive ? "" : "Explore")
+            .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(isPresented: $navigateToSearchedUser) {
+                ProfileView(userVM: searchedUserVM, isCurrentUser: searchedUserIsCurrUser)
+            }
         }
     }
 }
 
+struct SearchResultsView: View {
+    @EnvironmentObject var userVM: UserFirebase
+    @ObservedObject var searchedUserVM: UserFirebase
+    @Binding var selectedTab: String
+    @Binding var isLoading: Bool
+    @Binding var errorMessage: String?
+    @Binding var postSearchResults: [PostResult]
+    @Binding var userSearchResults: [UserResult]
+    @Binding var userSearchProfileImages: [String: UIImage]
+    @Binding var navigateToSearchedUser: Bool
+    @Binding var searchedUserIsCurrUser: Bool
+    
+    var body: some View {
+        if isLoading {
+            ProgressView("Searching...")
+                .padding()
+        } else if let errorMessage = errorMessage {
+            Text(errorMessage)
+                .foregroundStyle(.red)
+                .padding()
+        } else if (selectedTab == "Topics" && !postSearchResults.isEmpty) {
+            List {
+                ForEach(postSearchResults) { result in
+                    PostResultRow(result: result)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                }
+            }
+            .listStyle(.plain)
+        } else if (selectedTab == "Users" && !userSearchResults.isEmpty) {
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(userSearchResults) { user in
+                    HStack {
+                        ZStack {
+                            if let userProfileImage = userSearchProfileImages[user.id] {
+                                Image(uiImage: userProfileImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 40, height: 40)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color.gray)
+                                    .frame(width: 40, height: 40)
+                            }
+                        }
+                        Text(user.username)
+                            .padding(5)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                    }
+                    .onTapGesture {
+                        Task {
+                            searchedUserVM.getAllUserData(userId: user.id, completion: { user in
+                                searchedUserVM.user = user
+                            })
+                            if user.id == userVM.user.id {
+                                searchedUserIsCurrUser = true
+                            } else {
+                                searchedUserIsCurrUser = false
+                            }
+                            navigateToSearchedUser = true
+                        }
+                    }
+                }
+            }
+            .padding()
+        } else {
+            Text("No results found.")
+                .padding()
+        }
+    }
+}
 
 struct CategoriesView: View {
     @Binding var items: [String]
@@ -226,7 +322,7 @@ struct RecentSearchesView: View {
                             HStack {
                                 Circle()
                                     .fill(Color(.systemGray))
-                                    .frame(width: 30, height: 30)
+                                    .frame(width: 40, height: 40)
                                 
                                 Text(user)
                                     .padding(5)
@@ -262,11 +358,4 @@ struct RecentSearchesView: View {
             .padding()
         }
     }
-}
-
-
-
-
-#Preview {
-    SearchView()
 }
