@@ -44,15 +44,11 @@ struct SlideableArrowButton: View {
     let responseOption2: String
     @Binding var isSelected: Int?
     let currentIndex: Int
-
-    @State private var dragOffset: CGFloat = 0
-    @State private var selectedOption: String? = nil
-    //the threshold variable for how intelligence the button in the middle will listen for changing the chosen value when draging
-    let threshold: CGFloat = 20
-
+    
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
+                
                 HStack {
                     Text(responseOption1)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -63,47 +59,33 @@ struct SlideableArrowButton: View {
                 .background(isSelected == currentIndex ? Color.gray.opacity(0.2) : Color.clear)
                 .cornerRadius(40)
 
-                Image(systemName: "arrow.left.and.right")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 40, height: 40)
-                    .padding(12)
-                    .offset(x: dragOffset)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                dragOffset = value.translation.width
-                            }
-                            .onEnded { _ in
-                                if dragOffset > threshold {
-                                    selectedOption = responseOption2
-                                    isSelected = currentIndex
-                                    chosen(option: responseOption2)
-                                } else if dragOffset < -threshold {
-                                    selectedOption = responseOption1
-                                    isSelected = currentIndex
-                                    chosen(option: responseOption1)
-                                }
-                                withAnimation {
-                                    dragOffset = 0
-                                }
-                            }
-                    )
+               
+                Button(action: {
+                    isSelected = currentIndex
+                    //testing whether it works in the console
+                    print("Chosen pair: \(responseOption1) vs \(responseOption2)")
+                }) {
+                    Image(systemName: "arrow.left.and.right")
+                        .resizable()
+                        .foregroundColor(.black)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 40, height: 40)
+                        .padding(12)
+                }
+                .zIndex(1)
             }
             .frame(height: 80)
             .padding(.horizontal)
-            
-//            if let option = selectedOption {
-//                Text("You chose: \(option)")
-//                    .foregroundColor(.black)
-//            }
         }
     }
 
-    func chosen(option: String) {
-        print("Chosen: \(option)")
+    
+    
     }
-}
+
+
+
+
 
 
 #Preview {
