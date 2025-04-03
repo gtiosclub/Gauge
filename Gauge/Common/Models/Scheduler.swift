@@ -27,7 +27,7 @@ class Scheduler: ObservableObject {
     private func checkForInterrupt() {
         let calendar = Calendar.current
         let currentTime = Date()
-        let targetTime = calendar.date(bySettingHour: 15, minute: 0, second: 0, of: currentTime)!
+        let targetTime = calendar.date(bySettingHour: 17, minute: 18, second: 0, of: currentTime)! //Change this to when you want to trigger take time
 
         if calendar.isDate(currentTime, equalTo: targetTime, toGranularity: .minute) {
             triggerInterrupt()
