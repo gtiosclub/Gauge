@@ -561,15 +561,6 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func addView(responseOption: Int) {
-        if let post = feedPosts.first as? BinaryPost {
-            if responseOption == 1 {
-                post.responseResult1 += 1
-            } else if responseOption == 2 {
-                post.responseResult2 += 1
-            }
-        }
-    }
     
     func likeComment(postId: String, commentId: String, userId: String){
         let commentRef = Firebase.db.collection("POSTS")
@@ -943,8 +934,7 @@ class PostFirebase: ObservableObject {
     
     
     func addViewToPost(postId: String, userId: String) {
-        let documentRef = Firebase.db.collection("POSTS").document(postId).collection("VIEWS").document(userId)
-        
+        let documentRef = Firebase.db.collection("POSTS").document(postId).collection("VIEWS").document(userId)        
         documentRef.setData(["userId": userId]) { error in
             if let error = error {
                 print("Error adding view to post: \(error)")
