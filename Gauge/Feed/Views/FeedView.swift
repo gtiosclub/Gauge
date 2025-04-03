@@ -35,9 +35,10 @@ struct FeedView: View {
                         //TODO: Insert Button action here
                         print("Create Button")
                     } label: {
-                        Image(systemName: "plus.square")
+                        Image(systemName: "plus.rectangle")
                             .resizable()
                             .scaledToFill()
+                            .rotationEffect(.degrees(90))
                             .frame(width: 18, height: 18)
                             .foregroundStyle(.white)
                     }
