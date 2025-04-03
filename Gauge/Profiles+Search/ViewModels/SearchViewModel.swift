@@ -123,6 +123,35 @@ class SearchViewModel: ObservableObject {
         return questions
     }
     
+    func searchPostsByCategory(_ category: Category) async throws -> [PostResult] {
+
+        let snapshot = try await Firestore.firestore()
+            .collection("POSTS")
+            .whereField("categories", arrayContains: category.rawValue)
+            .getDocuments()
+
+
+        var results: [PostResult] = []
+
+        for document in snapshot.documents {
+            let data = document.data()
+
+            guard let question = data["question"] as? String else { continue }
+            let options = [
+                data["responseOption1"] as? String ?? "",
+                data["responseOption2"] as? String ?? ""
+            ]
+            let postId = document.documentID
+            let postDateAndTime = data["postDateAndTime"] as? String ?? ""
+            let timeAgo = DateConverter.timeAgo(from: DateConverter.convertStringToDate(postDateAndTime) ?? Date())
+
+            let postResult = PostResult(id: postId, question: question, options: options, timeAgo: timeAgo)
+            results.append(postResult)
+        }
+
+        return results
+    }
+
     func fetchUsers(for query: String) async throws-> [UserResult] {
         let profileVM = ProfileViewModel()
         
@@ -149,3 +178,6 @@ class SearchViewModel: ObservableObject {
         return users
     }
 }
+
+
+
