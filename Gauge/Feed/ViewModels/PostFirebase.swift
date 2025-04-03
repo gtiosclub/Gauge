@@ -1041,7 +1041,7 @@ class PostFirebase: ObservableObject {
             }
             
             //Searches
-            if(user.mySearches.contains(post.username)) {
+            if(user.myProfileSearches.contains(post.username)) {
                 score+=20;
             }
             
