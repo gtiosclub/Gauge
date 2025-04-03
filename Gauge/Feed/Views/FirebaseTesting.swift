@@ -29,7 +29,8 @@ struct FirebaseTesting: View {
                         
                         
                         Button("Date Score Tester") {
-                            let yodate = DateConverter.convertStringToDate("2025-04-01 17:42:22") ?? Date()
+                            print("pleaseeeeeeeee")
+                            let yodate = DateConverter.convertStringToDate("2025-04-01 08:30:22") ?? Date()
                             print(DateConverter.calcDateScore(postDate: yodate))
                         }
                         
