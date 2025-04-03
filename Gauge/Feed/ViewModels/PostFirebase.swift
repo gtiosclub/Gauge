@@ -576,15 +576,7 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func addView(responseOption: Int) {
-        if let post = feedPosts.first as? BinaryPost {
-            if responseOption == 1 {
-                post.responseResult1 += 1
-            } else if responseOption == 2 {
-                post.responseResult2 += 1
-            }
-        }
-    }
+    
     
     func likeComment(postId: String, commentId: String, userId: String){
         let commentRef = Firebase.db.collection("POSTS")
