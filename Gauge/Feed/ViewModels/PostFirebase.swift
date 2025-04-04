@@ -568,6 +568,7 @@ class PostFirebase: ObservableObject {
 
                     } else if change.type == .removed {
                         self.allQueriedPosts = self.allQueriedPosts.filter { $0.postId != change.document.documentID }
+                        self.feedPosts = self.feedPosts.filter { $0.postId != change.document.documentID }
                     }
                 }
                 
@@ -866,7 +867,7 @@ class PostFirebase: ObservableObject {
                            username:"",
                            profilePhoto: "",
                            date: DateConverter.convertStringToDate(data["date"] as? String ?? "") ?? Date(),
-                           commentId: data["commentId"] as? String ??  "",
+                           commentId: document.documentID,
                            likes: data["likes"] as? [String] ?? [],
                            dislikes: data["dislikes"] as? [String] ?? [],
                            content: data["content"] as? String ?? ""
@@ -1040,7 +1041,7 @@ class PostFirebase: ObservableObject {
             }
             
             //Searches
-            if(user.mySearches.contains(post.username)) {
+            if(user.myProfileSearches.contains(post.username)) {
                 score+=20;
             }
             
@@ -1070,13 +1071,16 @@ class PostFirebase: ObservableObject {
                 bestScore = score
                 bestIndex = i
             }
-
+            
         }
+        
         let bestPost = allQueriedPosts[bestIndex]
         allQueriedPosts.remove(at: bestIndex)
         allQueriedPosts.insert(bestPost, at: 0)
+
             
     }
+
 
 
 

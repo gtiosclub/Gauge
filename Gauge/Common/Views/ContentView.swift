@@ -98,7 +98,7 @@ struct ContentView: View {
                     })
                     
                     // call watchForNewPosts
-    //                postVM.watchForNewPosts(user: userVM.user)
+                    postVM.watchForNewPosts(user: userVM.user)
                     
                     // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
     //                postVM.feedPosts = postVM.allQueriedPosts.filter { userVM.user.myNextPosts.contains($0.postId) }
@@ -122,7 +122,21 @@ struct ContentView: View {
                     }
                 }
                 //ADD FUNCTIONS FOR SEARCH AND ACCESSED
-
+            }
+            .onChange(of: userVM.user.myResponses) { oldResponses, newResponses in
+                print(newResponses)
+            }
+            .onChange(of: userVM.user.myComments) { oldComments, newComments in
+                print(newComments)
+            }
+            .onChange(of: userVM.user.myViews) { oldViews, newViews in
+                print(newViews)
+            }
+            .onChange(of: userVM.user.myFavorites) { oldFavorites, newFavorites in
+                print(newFavorites)
+            }
+            .onChange(of: userVM.user.myPosts) { oldPosts, newPosts in
+                print(newPosts)
             }
         }
     }
