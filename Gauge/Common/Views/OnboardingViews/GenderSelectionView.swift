@@ -14,7 +14,7 @@ struct GenderSelectionView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 1, steps: 6, spacing: 8, barFraction: 7 / 8.0)
+            AboutYouProgressBar(progress: 1)
             
             ZStack {
                 Text("About You")
@@ -23,7 +23,7 @@ struct GenderSelectionView: View {
             .padding(.top, 12)
             .padding(.horizontal, 18)
             
-            Spacer().frame(height: 100)
+            Spacer().frame(height: 30)
             
             VStack(alignment: .leading, spacing: 8) {
                 Text("What is your gender?")
@@ -63,7 +63,7 @@ struct GenderSelectionView: View {
             }) {
                 HStack {
                     Spacer()
-                    Text("Next")
+                    Text(genderSelection.isEmpty ? "Skip" : "Next")
                         .foregroundColor(.white)
                         .bold()
                     Image(systemName: "arrow.right")
@@ -72,6 +72,7 @@ struct GenderSelectionView: View {
                 }
                 .padding()
                 .background(Color.blue)
+                .opacity(genderSelection.isEmpty ? 0.4 : 1.0)
                 .cornerRadius(25)
             }
             .padding(.horizontal, 24)
@@ -83,6 +84,35 @@ struct GenderSelectionView: View {
         .navigationDestination(isPresented: $navigateToLocation) {
             LocationSelectionView()
         }
+    }
+}
+
+struct AboutYouProgressBar: View {
+    var progress: Int
+    var steps: Int = 6
+    var spacing: CGFloat = 8
+    var barFraction: CGFloat =  3 / 4
+
+    var body: some View {
+        GeometryReader { geometry in
+            let totalWidth = geometry.size.width * barFraction
+            let capsuleWidth = max(
+                0,
+                (totalWidth - spacing * CGFloat(steps - 1)) / CGFloat(steps)
+            )
+
+            HStack(spacing: spacing) {
+                ForEach(0..<steps, id: \.self) { index in
+                    Capsule()
+                        .fill(index < progress ? Color.blue : Color.gray.opacity(0.3))
+                        .frame(width: capsuleWidth, height: 4)
+                }
+            }
+            .frame(width: totalWidth)
+            .position(x: geometry.size.width / 2, y: 12)
+        }
+        .frame(height: 20)
+        .padding(.top, 8)
     }
 }
 

@@ -9,8 +9,7 @@ import SwiftUI
 
 struct LocationSelectionView: View {
     @Environment(\.dismiss) private var dismiss
-    @FocusState private var isLocationFieldFocused: Bool
-    @State private var navigateToEmojiProfile: Bool = false
+    @State private var navigateToEmojiSelection: Bool = false
     @State private var locationSelection: String = ""
     @State private var query: String = ""
     @State private var showSuggestions: Bool = true
@@ -44,7 +43,7 @@ struct LocationSelectionView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 2, steps: 6, spacing: 8, barFraction: 7 / 8.0)
+            AboutYouProgressBar(progress: 2)
             
             ZStack {
                 HStack {
@@ -63,12 +62,8 @@ struct LocationSelectionView: View {
             .padding(.top, 12)
             .padding(.horizontal, 18)
             
-            if (isLocationFieldFocused || (!filteredLocations.isEmpty && showSuggestions)) {
-                Spacer().frame(height: 30)
-            } else {
-                Spacer().frame(height: 100)
-            }
-            
+            Spacer().frame(height: 30)
+
             VStack(alignment: .leading, spacing: 8) {
                 Text("Where do you live?")
                     .font(.title)
@@ -76,8 +71,7 @@ struct LocationSelectionView: View {
                     .padding(.bottom, 20)
                 
                 TextField("City, State", text: $query)
-                    .focused($isLocationFieldFocused)
-                    .onChange(of: query, initial: false) { _, newValue in
+                    .onChange(of: query, initial: false) { oldValue, newValue in
                         if (query == locationSelection) {
                             toSkip = false
                         } else {
@@ -131,7 +125,7 @@ struct LocationSelectionView: View {
             Spacer()
 
             Button(action: {
-                navigateToEmojiProfile = true
+                navigateToEmojiSelection = true
             }) {
                 HStack {
                     Spacer()
@@ -143,7 +137,8 @@ struct LocationSelectionView: View {
                     Spacer()
                 }
                 .padding()
-                .background(toSkip ? Color(.systemGray2) : Color.blue)
+                .background(Color.blue)
+                .opacity(toSkip ? 0.4 : 1.0)
                 .cornerRadius(25)
             }
             .padding(.horizontal, 24)
@@ -152,7 +147,8 @@ struct LocationSelectionView: View {
             Spacer().frame(height: 0)
         }
         .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $navigateToEmojiProfile) {
+        .navigationDestination(isPresented: $navigateToEmojiSelection) {
+            EmojiSelectionView()
         }
     }
 }

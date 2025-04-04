@@ -14,7 +14,7 @@ struct CreateAccountView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 1, steps: 3, spacing: 8, barFraction: 5 / 8.0)
+            ProgressBar(progress: 1)
             
             ZStack {
                 HStack {
@@ -33,7 +33,7 @@ struct CreateAccountView: View {
             .padding(.top, 12)
             .padding(.horizontal, 18)
             
-            Spacer().frame(height: 100)
+            Spacer().frame(height: 30)
             
             VStack(alignment: .leading, spacing: 8) {
                 Text("What’s your email?")
@@ -88,7 +88,7 @@ struct UsernameCreationView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 2, steps: 3, spacing: 8, barFraction: 5 / 8.0)
+            ProgressBar(progress: 2)
             
             ZStack {
                 HStack {
@@ -107,7 +107,7 @@ struct UsernameCreationView: View {
             .padding(.top, 12)
             .padding(.horizontal, 18)
             
-            Spacer().frame(height: 100)
+            Spacer().frame(height: 30)
             
             VStack(alignment: .leading, spacing: 8) {
                 Text("Create a username.")
@@ -166,7 +166,7 @@ struct PasswwordCreationView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 3, steps: 3, spacing: 8, barFraction: 5 / 8.0)
+            ProgressBar(progress: 3)
             
             ZStack {
                 HStack {
@@ -185,7 +185,7 @@ struct PasswwordCreationView: View {
             .padding(.top, 12)
             .padding(.horizontal, 18)
             
-            Spacer().frame(height: 100)
+            Spacer().frame(height: 30)
             
             VStack(alignment: .leading, spacing: 8) {
                 Text("Create a password")
@@ -221,11 +221,9 @@ struct PasswwordCreationView: View {
             }) {
                 HStack {
                     Spacer()
-                    Text("Next")
+                    Text("Create Account")
                         .foregroundColor(.white)
                         .bold()
-                    Image(systemName: "arrow.right")
-                        .foregroundColor(.white)
                     Spacer()
                 }
                 .padding()
@@ -246,7 +244,7 @@ struct PasswwordCreationView: View {
 
 struct ProgressBar: View {
     var progress: Int
-    var steps: Int
+    var steps: Int = 3
     var spacing: CGFloat = 4
     var barFraction: CGFloat = 5 / 8
 
