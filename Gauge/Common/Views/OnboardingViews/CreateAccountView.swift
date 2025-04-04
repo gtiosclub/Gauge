@@ -160,7 +160,7 @@ struct PasswwordCreationView: View {
     let username: String
     
     @StateObject private var authVM = AuthenticationVM()
-    @State private var navigateToAboutYou: Bool = false
+    @State private var navigateToGenderSelection: Bool = false
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
 
@@ -214,9 +214,9 @@ struct PasswwordCreationView: View {
             Button(action: {
                 if (password == confirmPassword) {
                     Task {
-                        await authVM.signUp(email: email, password: password, username: username)
+                        await authVM.signUp(email: email, password: password, username: username.lowercased())
                     }
-                    navigateToAboutYou = true
+                    navigateToGenderSelection = true
                 }
             }) {
                 HStack {
@@ -238,9 +238,9 @@ struct PasswwordCreationView: View {
             Spacer().frame(height: 0)
         }
         .navigationBarBackButtonHidden(true)
-//        .navigationDestination(isPresented: $navigateToAboutYou) {
-//            //
-//        }
+        .navigationDestination(isPresented: $navigateToGenderSelection) {
+            GenderSelectionView()
+        }
     }
 }
 
