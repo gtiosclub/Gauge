@@ -196,10 +196,10 @@ struct FeedView: View {
                                                     let user = userVM.user
                                                     if let post = postVM.feedPosts.first as? BinaryPost {
                                                         var responseChosen = "NA"
-                                                        if(optionSelected == 1 ){
+                                                        if (optionSelected == 1) {
                                                             responseChosen = post.responseOption1
                                                             post.responseResult1 += 1
-                                                        } else if(optionSelected == 2){
+                                                        } else if (optionSelected == 2) {
                                                             responseChosen = post.responseOption2
                                                             post.responseResult2 += 1
                                                         }
@@ -216,12 +216,6 @@ struct FeedView: View {
                                         
                                         if dragOffset.height > 150 && !hasSkipped {
                                             hasSkipped = true
-                                            if(isConfirmed == false){
-                                                if let post = postVM.feedPosts.first as? BinaryPost {
-                                                    let user = userVM.user
-                                                    postVM.addViewToPost(postId: post.postId, userId: user.userId)
-                                                }
-                                            }
                                             optionSelected = 0
                                             isConfirmed = false
                                         }
