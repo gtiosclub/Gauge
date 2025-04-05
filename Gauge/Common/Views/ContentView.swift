@@ -18,12 +18,14 @@ struct ContentView: View {
     var body: some View {
         if showSplashScreen {
             ZStack {
+                Color.red
+
                 Image(systemName: "gauge.open.with.lines.needle.84percent.exclamation")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                    .frame(width: UIScreen.main.bounds.width - 50)
             }
-            .background(.red)
+            .ignoresSafeArea()
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     showSplashScreen = false
@@ -40,7 +42,6 @@ struct ContentView: View {
                             }
                             .tag(0)
                         
-//                        Text("Search")
                         SearchView()
                             .tabItem {
                                 Image(systemName: "magnifyingglass")
@@ -55,7 +56,6 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-//                        Text("Profile")
                         ProfileView()
                             .tabItem {
                                 Image(systemName: "person.circle")
@@ -90,38 +90,47 @@ struct ContentView: View {
             }
             .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
                 if let signedInUser = newUser {
-                    userVM.user = signedInUser
+                    userVM.replaceCurrentUser(user: signedInUser)
                     
-                    // populate the user data
-                    userVM.getAllUserData(userId: userVM.user.userId, completion: { user in
-                        userVM.user = user
-                    })
+                    print("Signed in as user: " + signedInUser.userId)
                     
-                    // call watchForNewPosts
-                    postVM.watchForNewPosts(user: userVM.user)
-                    
-                    // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
-    //                postVM.feedPosts = postVM.allQueriedPosts.filter { userVM.user.myNextPosts.contains($0.postId) }
-                    
-                    // call the watchForCurrentFeedPostChanges
-    //                postVM.watchForCurrentFeedPostChanges()
-                    
-                    // call functions to fill out a user's AI Algo variables
-                    userVM.getPosts(userId: userVM.user.userId) { posts in
-                        userVM.user.myPosts = posts
-                    }
-                    
-                    userVM.getUserPostInteractions{responsePostIDs, commentPostIDs, viewPostIDs in
-                        userVM.user.myResponses = responsePostIDs
-                        userVM.user.myComments = commentPostIDs
-                        userVM.user.myViews = viewPostIDs
-                    }
-                    
-                    userVM.getUserFavorites(userId: userVM.user.userId) { favorites in
-                        userVM.user.myFavorites = favorites
+                    Task {
+                        async let userData = userVM.getUserData(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userInteractions = userVM.getUserPostInteractions(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userPosts = userVM.getUserPosts(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userFavorites = userVM.getUserFavorites(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userViews = userVM.getUserNumViews(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
+                        
+                        do {
+                            _ = try await userData
+                            
+                            await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
+                            postVM.watchForCurrentFeedPostChanges()
+                            
+                            _ = try await (
+                                userInteractions,
+                                userPosts
+                            )
+                            
+                            await postVM.loadInitialNewPosts(user: userVM.user)
+                            
+                            postVM.watchForNewPosts(user: userVM.user)
+                            
+                            while postVM.feedPosts.count < 5 {
+                                postVM.findNextPost(user: userVM.user)
+                            }
+                            
+                            _ = try await (
+                                userViews,
+                                userResponses,
+                                userFavorites
+                            )
+                        } catch {
+                            print("❌ Error loading user data: \(error)")
+                        }
                     }
                 }
-                //ADD FUNCTIONS FOR SEARCH AND ACCESSED
             }
             .onChange(of: userVM.user.myResponses) { oldResponses, newResponses in
                 print(newResponses)
