@@ -325,7 +325,7 @@ class PostFirebase: ObservableObject {
             }
         }
     }
-    
+  
     func loadInitialNewPosts(user: User) async {
         let allFilteredPosts = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
         let snapshot: QuerySnapshot
