@@ -856,6 +856,7 @@ class PostFirebase: ObservableObject {
                 //Get sd of responses??
             }
             //Call Date Function for date score
+            score += DateConverter.calcDateScore(postDate: post.postDateAndTime)
             
             
             //Call topics function for topic mathcing score
@@ -874,7 +875,15 @@ class PostFirebase: ObservableObject {
         print("Next feed post is " + bestPost.postId + " with a score of " + String(bestScore))
         allQueriedPosts.remove(at: bestIndex)
         allQueriedPosts.insert(bestPost, at: 0)
+
+            
     }
+
+
+
+
+
+
 
     func removeView(postId: String, userId: String) {
         let viewRef = Firebase.db.collection("POSTS")
