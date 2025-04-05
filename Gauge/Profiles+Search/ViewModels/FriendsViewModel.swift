@@ -129,6 +129,7 @@ class FriendsViewModel: ObservableObject {
             let streak = userData["streak"] as? Int ?? 0
             let lastLogin = DateConverter.convertStringToDate(userData["lastLogin"] as? String ?? "") ?? Date()
             let lastFeedRefresh = DateConverter.convertStringToDate(userData["lastFeedRefresh"] as? String ?? "") ?? Date()
+            let profilePhoto = userData["profilePhoto"] as? String ?? ""
 
             let outputUser = User(
                 userId: userId,
@@ -147,6 +148,7 @@ class FriendsViewModel: ObservableObject {
                 myCategories: myCategories,
                 badges: badges,
                 streak: streak,
+                profilePhoto: profilePhoto,
                 myAccessedProfiles: myAccessedProfiles,
                 lastLogin: lastLogin,
                 lastFeedRefresh: lastFeedRefresh

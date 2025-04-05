@@ -43,8 +43,7 @@ struct FeedView: View {
                     }
                     
                     Button {
-                        //TODO: Insert Button action here
-                        print("Undo Button")
+                        postVM.undoSkipPost(userId: userVM.user.userId)
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
                             .resizable()
@@ -152,6 +151,12 @@ struct FeedView: View {
                                     .frame(width: max(0, geo.size.width))
                                 }
                             }
+                        } else if postVM.feedPosts.count == 0 {
+                            Text("Finding Your Optimal Posts...")
+                                .font(.title)
+                            ProgressView()
+                                .scaleEffect(5.0)
+                                .frame(width: 200, height: 200)
                         }
                         
                         RoundedRectangle(cornerRadius: 10.0)
@@ -169,10 +174,16 @@ struct FeedView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { gesture in
+                                if postVM.feedPosts.count == 0 {
+                                    return
+                                }
+                                
                                 withAnimation {
                                     if gesture.translation.height.magnitude > gesture.translation.width.magnitude {
                                         if !hasSkipped {
-                                            dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
+                                            if (optionSelected != 0 && gesture.translation.height < 0) || gesture.translation.height > 0 {
+                                                dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
+                                            }
                                         } else {
                                             withAnimation(.smooth(duration: 0.5)) {
                                                 dragOffset = CGSize(width: 0.0, height: 800.0)
@@ -235,10 +246,11 @@ struct FeedView: View {
                                 if dragOffset.height > 150 && hasSkipped {
                                     if isConfirmed {
                                         // Next post logic
-                                        postVM.feedPosts.remove(at: 0)
+                                        postVM.findNextPost(user: userVM.user)
+                                        postVM.skippedPost = nil
                                     } else {
                                         // Skip logic
-                                        postVM.feedPosts.remove(at: 0)
+                                        postVM.skippedPost = postVM.skipPost(user: userVM.user)
                                     }
                                     isConfirmed = false
                                 }
@@ -255,11 +267,10 @@ struct FeedView: View {
                 .background(.black)
             }
             .background(.black)
-            
         }
-        .onAppear() {
-            postVM.addDummyPosts()
-        }
+//        .onAppear() {
+//            postVM.addDummyPosts()
+//        }
     }
 }
 

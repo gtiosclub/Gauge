@@ -20,320 +20,6 @@ class PostFirebase: ObservableObject {
         Keys.fetchKeys()
     }
     
-    func addDummyPosts() {
-        feedPosts.append(BinaryPost(
-            postId: "555555555",
-            userId: "conspiracy_theorist",
-            username: "MoonShotDebunker",
-            comments: [
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "user101",
-                    username: "ApolloCritic",
-                    profilePhoto: "",
-                    date: Date(),
-                    commentId: "comm001",
-                    likes: ["user202", "user404", "user777"],
-                    dislikes: ["user303", "user888"],
-                    content: "I’ve watched every frame of the footage in slow motion. Totally staged!"
-                ),
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "user202",
-                    username: "Rover4Real",
-                    profilePhoto: "",
-                    date: Date(),
-                    commentId: "comm002",
-                    likes: ["user101", "user404", "user777", "user999"],
-                    dislikes: ["user303", "user101"],
-                    content: "But what about the laser reflectors they left on the Moon? That can’t be fake, right?"
-                ),
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "user303",
-                    username: "EarthboundFella",
-                    profilePhoto: "",
-                    date: Date(),
-                    commentId: "comm003",
-                    likes: ["user888"],
-                    dislikes: ["user101", "user202", "user404"],
-                    content: "I don’t trust NASA. All that money and they send grainy footage? Suspicious."
-                ),
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "user404",
-                    username: "SpaceCadet",
-                    profilePhoto: "",
-                    date: Date(),
-                    commentId: "comm004",
-                    likes: ["user101", "user777", "user888", "user999"],
-                    dislikes: ["user202"],
-                    content: "How do you explain the Moon rocks that were studied worldwide?"
-                ),
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "user555",
-                    username: "LunarLegacy",
-                    profilePhoto: "",
-                    date: Date(),
-                    commentId: "comm005",
-                    likes: ["user101", "user202", "user404", "user888"],
-                    dislikes: ["user303", "user777"],
-                    content: "Come on, it’s 2023. People still think it was a hoax?"
-                )
-            ],
-            responses: [
-                Response(
-                    responseId: "resp001",
-                    userId: "user777",
-                    responseOption: "Yes, obviously"
-                ),
-                Response(
-                    responseId: "resp002",
-                    userId: "user888",
-                    responseOption: "Touch grass"
-                )
-            ],
-            categories: [.other(.conspiraryTheories), .other(.funny)],
-            viewCounter: 257,
-            postDateAndTime: Date(),
-            question: "Was the moon landing fake? 🌕🚀",
-            responseOption1: "Yes, obviously",
-            responseOption2: "Touch grass",
-            responseResult1: 152,
-            responseResult2: 89,
-            favoritedBy: ["user404", "user999"]
-        ))
-        
-        feedPosts.append(BinaryPost(
-            postId: "21341234",
-            userId: "anotherone",
-            username: "TalkShowConnoisseur",
-            comments: [
-                Comment(commentType: .text,  postId: "21341234", userId: "user005", username: "KimmelFan", profilePhoto: "", date: Date(), commentId: "comm015", likes: ["user012", "user016"], dislikes: ["user017"], content: "Kimmel is a legend. Every show feels like a casual conversation, dude’s a natural. I also love his content covering recent events in the White House. He has no filter and it is the best way to wind down for the day."),
-                Comment(commentType: .text,  postId: "21341234", userId: "user006", username: "ConanCultist", profilePhoto: "", date: Date(), commentId: "comm016", likes: ["user013"], dislikes: ["user005"], content: "Jimmy Kimmel is okay, but Conan O’Brien carried late-night TV on his back."),
-                Comment(commentType: .text,  postId: "21341234", userId: "user007", username: "LettermanLoyalist", profilePhoto: "", date: Date(), commentId: "comm017", likes: ["user014"], dislikes: [], content: "Kimmel is good, but no one will ever top Letterman. The man had no filter."),
-                Comment(commentType: .text,  postId: "21341234", userId: "user008", username: "ColbertConvert", profilePhoto: "", date: Date(), commentId: "comm018", likes: ["user015"], dislikes: ["user006"], content: "Kimmel’s great, but if we’re being honest, Stephen Colbert is running the game right now."),
-                Comment(commentType: .text,  postId: "21341234", userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment."),
-                Comment(commentType: .text,  postId: "21341234", userId: "user010", username: "MyMom", profilePhoto: "", date: Date(), commentId: "comm020", likes: ["user010", "user011", "user010", "user011", "user010", "user011"], dislikes: [], content: "MY FAVVVV!"),
-                Comment(commentType: .text,  postId: "21341234", userId: "user011", username: "YourMom", profilePhoto: "", date: Date(), commentId: "comm021", likes: [], dislikes: ["user010", "user011", "user010", "user011"], content: "Man sucks.")
-            ],
-            responses: [
-                Response(responseId: "resp013", userId: "user012", responseOption: "Nah"),
-                Response(responseId: "resp014", userId: "user013", responseOption: "Yupppp")
-            ],
-            categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)],
-            viewCounter: 1_020,
-            postDateAndTime: Date(),
-            question: "Jimmy Kimmel is the best talk show host",
-            responseOption1: "Nah",
-            responseOption2: "Yupppp",
-            responseResult1: 575,
-            responseResult2: 445,
-            favoritedBy: ["user006", "user007", "user008"]
-        ))
-        
-        feedPosts.append(BinaryPost(
-            postId: "777123999",
-            userId: "starbucksoverlord",
-            username: "CaffeineAddict",
-            comments: [
-                Comment(commentType: .text, postId: "777123999", userId: "user321", username: "NetflixJunkie", profilePhoto: "", date: Date(), commentId: "comm009", likes: ["user654"], dislikes: [], content: "I need my shows. Coffee is replaceable."),
-                Comment(commentType: .text, postId: "777123999", userId: "user654", username: "JavaFiend", profilePhoto: "", date: Date(), commentId: "comm010", likes: ["user321"], dislikes: [], content: "If you think I can function without coffee, you’ve never met me.")
-            ],
-            responses: [
-                Response(responseId: "resp009", userId: "user111", responseOption: "Goodbye Netflix"),
-                Response(responseId: "resp010", userId: "user333", responseOption: "I'd rather perish")
-            ],
-            categories: [.lifestyle(.finances), .other(.funny)],
-            viewCounter: 612,
-            postDateAndTime: Date(),
-            question: "Would you rather give up coffee or streaming services? ☕📺",
-            responseOption1: "Goodbye Netflix",
-            responseOption2: "I'd rather perish",
-            responseResult1: 300,
-            responseResult2: 312,
-            favoritedBy: ["user321", "user654"]
-        ))
-        
-        feedPosts.append(BinaryPost(
-            postId: "834729384",
-            userId: "myman",
-            username: "CozyKing",
-            comments: [
-                Comment(commentType: .text, postId: "834729384", userId: "user001", username: "CarpetDefender", profilePhoto: "", date: Date(), commentId: "comm011", likes: ["user005", "user009"], dislikes: ["user007"], content: "Carpet in the bedroom is elite. Y’all sleeping on hardwood like cavemen."),
-                Comment(commentType: .text, postId: "834729384", userId: "user002", username: "HardwoodPurist", profilePhoto: "", date: Date(), commentId: "comm012", likes: ["user003", "user008"], dislikes: ["user001"], content: "Carpet is just a bacteria sponge. You ever seen what's in that thing after a year?"),
-                Comment(commentType: .text, postId: "834729384", userId: "user003", username: "RugLife", profilePhoto: "", date: Date(), commentId: "comm013", likes: ["user006"], dislikes: [], content: "Carpet is great until you drop something. Finding a contact lens on it is a spiritual experience. Or cleaning up spilled Dr. Pepper. That is a real bummer when you have carpet."),
-                Comment(commentType: .text, postId: "834729384", userId: "user004", username: "BarefootBandit", profilePhoto: "", date: Date(), commentId: "comm014", likes: ["user009"], dislikes: [], content: "If you walk on carpet with socks, you’re living life on easy mode. Hardwood is for risk takers.")
-            ],
-            responses: [
-                Response(responseId: "resp011", userId: "user010", responseOption: "TF no"),
-                Response(responseId: "resp012", userId: "user011", responseOption: "Yeah...")
-            ],
-            categories: [.lifestyle(.homeDecor), .other(.funny)],
-            viewCounter: 825,
-            postDateAndTime: Date(),
-            question: "Is it gross to have carpet in your bedroom?",
-            responseOption1: "TF no",
-            responseOption2: "Yeah...",
-            responseResult1: 467,
-            responseResult2: 35,
-            favoritedBy: ["user001", "user004", "user008"]
-        ))
-        
-        feedPosts.append(BinaryPost(
-            postId: "123456789",
-            userId: "roommateFromHell",
-            username: "LandlordHater69",
-            comments: [
-                Comment(commentType: .text, postId: "123456789", userId: "user123", username: "CarpetHater", profilePhoto: "", date: Date(), commentId: "comm001", likes: ["user789"], dislikes: [], content: "Carpet in the bathroom should be a felony."),
-                Comment(commentType: .text, postId: "123456789", userId: "user456", username: "VinylTile4Life", profilePhoto: "", date: Date(), commentId: "comm002", likes: ["user123", "user999"], dislikes: ["user555"], content: "If I see a carpeted bathroom, I'm calling the cops.")
-            ],
-            responses: [
-                Response(responseId: "resp001", userId: "user789", responseOption: "Absolutely 🚔"),
-                Response(responseId: "resp002", userId: "user555", responseOption: "Nah, just a fine")
-            ],
-            categories: [.lifestyle(.homeDecor), .other(.funny)],
-            viewCounter: 305,
-            postDateAndTime: Date(),
-            question: "Should landlords go to prison for putting carpet in bathrooms?",
-            responseOption1: "Absolutely 🚔",
-            responseOption2: "Nah, just a fine",
-            responseResult1: 184,
-            responseResult2: 121,
-            favoritedBy: ["user789", "user456"]))
-
-        feedPosts.append(BinaryPost(
-            postId: "987654321",
-            userId: "toasterfanatic",
-            username: "HotDogDebater",
-            comments: [
-                Comment(commentType: .text, postId: "987654321", userId: "user777", username: "BreadDefender", profilePhoto: "", date: Date(), commentId: "comm003", likes: ["user222"], dislikes: [], content: "A hot dog is NOT a sandwich. Don't start this."),
-                Comment(commentType: .text, postId: "987654321", userId: "user222", username: "MeatIsMeat", profilePhoto: "", date: Date(), commentId: "comm004", likes: ["user777", "user999"], dislikes: [], content: "If a sub is a sandwich, then so is a hot dog. Wake up, sheeple.")
-            ],
-            responses: [
-                Response(responseId: "resp003", userId: "user111", responseOption: "Yes, it's meat between bread"),
-                Response(responseId: "resp004", userId: "user333", responseOption: "NO. Don't start this again.")
-            ],
-            categories: [.lifestyle(.cooking), .other(.funny)],
-            viewCounter: 520,
-            postDateAndTime: Date(),
-            question: "Is a hot dog a sandwich? 🌭",
-            responseOption1: "Yes, it's meat between bread",
-            responseOption2: "NO. Don't start this again.",
-            responseResult1: 258,
-            responseResult2: 262,
-            favoritedBy: ["user111", "user999"]
-        ))
-
-        feedPosts.append(BinaryPost(
-            postId: "246813579",
-            userId: "midnightmunchies",
-            username: "ChristmasMovieGatekeeper",
-            comments: [
-                Comment(commentType: .text, postId: "246813579", userId: "user555", username: "YippeeKiYay", profilePhoto: "", date: Date(), commentId: "comm005", likes: ["user777"], dislikes: [], content: "If Home Alone counts, so does Die Hard."),
-                Comment(commentType: .text, postId: "246813579", userId: "user999", username: "HolidayPurist", profilePhoto: "", date: Date(), commentId: "comm006", likes: [], dislikes: ["user555"], content: "Christmas movies need Santa, end of discussion.")
-            ],
-            responses: [
-                Response(responseId: "resp005", userId: "user111", responseOption: "Yes, obviously"),
-                Response(responseId: "resp006", userId: "user333", responseOption: "No, grow up")
-            ],
-            categories: [.entertainment(.movies), .other(.funny)],
-            viewCounter: 790,
-            postDateAndTime: Date(),
-            question: "Is Die Hard a Christmas movie? 🎄🔫",
-            responseOption1: "Yes, obviously",
-            responseOption2: "No, grow up",
-            responseResult1: 432,
-            responseResult2: 358,
-            favoritedBy: ["user555", "user777"]
-        ))
-
-        feedPosts.append(BinaryPost(
-            postId: "135792468",
-            userId: "toiletphilosopher",
-            categories: [.other(.funny), .lifestyle(.minimalism)],
-            postDateAndTime: Date(),
-            question: "Do you wet the toothbrush before or after putting toothpaste? 🪥",
-            responseOption1: "Before 🧐",
-            responseOption2: "After, obviously"
-        ))
-
-        feedPosts.append(BinaryPost(
-            postId: "192837465",
-            userId: "theAIoverlords",
-            username: "AI_Groom",
-            comments: [
-                Comment(commentType: .text, postId: "192837465", userId: "user888", username: "TechLover", profilePhoto: "", date: Date(), commentId: "comm007", likes: ["user111"], dislikes: [], content: "AI can probably write better vows than me tbh."),
-                Comment(commentType: .text, postId: "192837465", userId: "user333", username: "FutureDivorcee", profilePhoto: "", date: Date(), commentId: "comm008", likes: [], dislikes: ["user888"], content: "If my spouse uses AI for our vows, I’m filing papers immediately.")
-            ],
-            responses: [
-                Response(responseId: "resp007", userId: "user444", responseOption: "Yes, AI is poetic"),
-                Response(responseId: "resp008", userId: "user999", responseOption: "No, I want a divorce already")
-            ],
-            categories: [.educational(.cs), .news(.worldEvents), .other(.funny)],
-            viewCounter: 400,
-            postDateAndTime: Date(),
-            question: "Would you let AI write your wedding vows? 💍🤖",
-            responseOption1: "Yes, AI is poetic",
-            responseOption2: "No, I want a divorce already",
-            responseResult1: 180,
-            responseResult2: 220,
-            favoritedBy: ["user888", "user111"]
-        ))
-
-        feedPosts.append(BinaryPost(
-            postId: "666777888",
-            userId: "gymbro69",
-            categories: [.lifestyle(.fitness), .other(.funny)],
-            postDateAndTime: Date(),
-            question: "Do you skip leg day? 🏋️‍♂️",
-            responseOption1: "Never, bro",
-            responseOption2: "Only on days ending in 'y'"
-        ))
-
-        feedPosts.append(BinaryPost(
-            postId: "314159265",
-            userId: "mathnerd",
-            categories: [.educational(.math), .other(.funny)],
-            postDateAndTime: Date(),
-            question: "Is 0.999... equal to 1? 🤯",
-            responseOption1: "Yes, mathematically",
-            responseOption2: "No, that's a scam"
-        ))
-
-        feedPosts.append(BinaryPost(
-            postId: "888444222",
-            userId: "socialmediaman",
-            categories: [.entertainment(.socialMedia), .other(.funny)],
-            postDateAndTime: Date(),
-            question: "Would you delete social media for $10,000? 📱💰",
-            responseOption1: "Easy money",
-            responseOption2: "No, I'm addicted"
-        ))
-        
-        
-//        for post in feedPosts {
-//            if let binarypost = post as? BinaryPost {
-//                createBinaryPost(userId: binarypost.userId, categories: binarypost.categories, question: binarypost.question, responseOption1: binarypost.responseOption1, responseOption2: binarypost.responseOption2)
-//            }
-//        }
-
-    }
-    
-    func getNextFeedPost() {
-        // Pop index 0 of feedPosts
-        feedPosts.remove(at: 0)
-        feedPosts.append(allQueriedPosts[0])
-        allQueriedPosts.remove(at: 0)
-        // Append a new post from allQueriedPosts (just index 0 for now)
-    }
-    
     func watchForCurrentFeedPostChanges() {
         if !feedPosts.isEmpty {
             setUpCommentsListener()
@@ -451,12 +137,99 @@ class PostFirebase: ObservableObject {
         }
                 
     }
+    
+    func loadFeedPosts(for postIds: [String]) async {
+        await MainActor.run {
+            self.feedPosts = [] // clear current feedPosts
+        }
 
-        
+        // Run fetches in parallel
+        let posts: [(any Post)?] = await withTaskGroup(of: (String, (any Post)?).self) { group in
+            for postId in postIds {
+                group.addTask {
+                    do {
+                        let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
+                        guard let data = document.data() else { return (postId, nil) }
+
+                        let type = data["type"] as? String ?? ""
+
+                        switch type {
+                        case PostType.BinaryPost.rawValue:
+                            let post = BinaryPost(
+                                postId: postId,
+                                userId: data["userId"] as? String ?? "",
+                                categories: data["categories"] as? [Category] ?? [],
+                                postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
+                                    ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
+                                    ?? Date(),
+                                question: data["question"] as? String ?? "",
+                                responseOption1: data["responseOption1"] as? String ?? "",
+                                responseOption2: data["responseOption2"] as? String ?? "",
+                                favoritedBy: data["favoritedBy"] as? [String] ?? []
+                            )
+                            return (postId, post)
+
+                        case PostType.SliderPost.rawValue:
+                            let post = SliderPost(
+                                postId: postId,
+                                userId: data["userId"] as? String ?? "",
+                                categories: data["categories"] as? [Category] ?? [],
+                                postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
+                                    ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
+                                    ?? Date(),
+                                question: data["question"] as? String ?? "",
+                                lowerBoundValue: data["lowerBoundValue"] as? Double ?? 0,
+                                upperBoundValue: data["upperBoundValue"] as? Double ?? 1,
+                                lowerBoundLabel: data["lowerBoundLabel"] as? String ?? "",
+                                upperBoundLabel: data["upperBoundLabel"] as? String ?? "",
+                                favoritedBy: data["favoritedBy"] as? [String] ?? []
+                            )
+                            return (postId, post)
+
+                        case PostType.RankPost.rawValue:
+                            let post = RankPost(
+                                postId: postId,
+                                userId: data["userId"] as? String ?? "",
+                                categories: data["categories"] as? [Category] ?? [],
+                                postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
+                                    ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
+                                    ?? Date(),
+                                question: data["question"] as? String ?? "",
+                                responseOptions: data["responseOptions"] as? [String] ?? [],
+                                favoritedBy: data["favoritedBy"] as? [String] ?? []
+                            )
+                            return (postId, post)
+
+                        default:
+                            return (postId, nil)
+                        }
+                    } catch {
+                        print("❌ Error loading post \(postId): \(error)")
+                        return (postId, nil)
+                    }
+                }
+            }
+
+            var tempMap: [String: any Post] = [:]
+
+            for await (postId, post) in group {
+                if let post = post {
+                    tempMap[postId] = post
+                }
+            }
+
+            // Reconstruct in original order
+            return postIds.map { tempMap[$0] }
+        }
+
+        await MainActor.run {
+            self.feedPosts = posts.compactMap { $0 }
+        }
+    }
     
     func watchForNewPosts(user: User) {
-        let allPosts: [String] = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
-        Firebase.db.collection("POSTS").whereField("postId", notIn: allPosts.isEmpty ? [""] : allPosts).addSnapshotListener { snapshot, error in
+        let allFilteredPosts: [String] = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
+        Firebase.db.collection("POSTS").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else {
                 print("Error fetching post updates: \(error!)")
                 return
@@ -465,9 +238,18 @@ class PostFirebase: ObservableObject {
             DispatchQueue.main.async {
                 self.objectWillChange.send()
                 for change in snapshot.documentChanges {
+                    let newPostData = change.document.data()
+                    guard let postId = newPostData["postId"] as? String else { return }
+
+                    if allFilteredPosts.contains(where: { $0 == postId }) {
+                        return
+                    }
+                    
                     if change.type == .added {
-                        print(change.document.documentID)
-                        let newPostData = change.document.data()
+                        if self.allQueriedPosts.contains(where: { $0.postId == postId }) {
+                            return
+                        }
+                        
                         if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
                             let post = BinaryPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
@@ -498,26 +280,9 @@ class PostFirebase: ObservableObject {
                             
                             self.allQueriedPosts.append(post)
                             self.allQueriedPosts = self.allQueriedPosts
-                        } else if (newPostData["type"] as? String == PostType.RankPost.rawValue){
-                            let post = RankPost(postId: newPostData["postId"] as? String ?? "",
-                                                  userId: newPostData["userId"] as? String ?? "",
-                                                  categories: newPostData["categories"] as? [Category] ?? [],
-                                                postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
-                                                    ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
-                                                    ?? Date(),
-                                                  question: newPostData["question"] as? String ?? "",
-                                                  responseOptions: newPostData["responseOptions"] as? [String] ?? [],
-                                                  favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
-                            
-                            self.allQueriedPosts.append(post)
-                            self.allQueriedPosts = self.allQueriedPosts
                         }
-                        
                     } else if change.type == .modified {
-                        //finds index of modified data in Queue
                         if let index = self.allQueriedPosts.firstIndex(where: { $0.postId == change.document.documentID }) {
-                            let newPostData = change.document.data()
-                            
                             //replaces data at index
                             if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
                                 print("updating binary post")
@@ -549,23 +314,8 @@ class PostFirebase: ObservableObject {
                                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
                                 
                                 self.allQueriedPosts = self.allQueriedPosts
-                            } else if (newPostData["type"] as? String == PostType.RankPost.rawValue){
-                                print("adding rank")
-                                
-                                self.allQueriedPosts[index] = RankPost(
-                                    postId: newPostData["postId"] as? String ?? "",
-                                    userId: newPostData["userId"] as? String ?? "",
-                                    categories: newPostData["categories"] as? [Category] ?? [],
-                                    postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
-                                    question: newPostData["question"] as? String ?? "",
-                                    responseOptions: newPostData["responseOptions"] as? [String] ?? [],
-                                    favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
-                                
-                                self.allQueriedPosts = self.allQueriedPosts
                             }
                         }
-                                                
-
                     } else if change.type == .removed {
                         self.allQueriedPosts = self.allQueriedPosts.filter { $0.postId != change.document.documentID }
                         self.feedPosts = self.feedPosts.filter { $0.postId != change.document.documentID }
@@ -575,8 +325,81 @@ class PostFirebase: ObservableObject {
             }
         }
     }
+  
+    func loadInitialNewPosts(user: User) async {
+        let allFilteredPosts = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
+        let snapshot: QuerySnapshot
+
+        do {
+            snapshot = try await Firebase.db.collection("POSTS").getDocuments()
+        } catch {
+            print("❌ Error fetching initial posts: \(error)")
+            return
+        }
+
+        let addedDocs = snapshot.documents.filter { doc in
+            let postId = doc.data()["postId"] as? String ?? ""
+            return !allFilteredPosts.contains(postId)
+        }
+
+        for doc in addedDocs {
+            let newPostData = doc.data()
+            guard let postId = newPostData["postId"] as? String else { continue }
+
+            if allQueriedPosts.contains(where: { $0.postId == postId }) {
+                continue
+            }
+
+            if newPostData["type"] as? String == PostType.BinaryPost.rawValue {
+                let post = BinaryPost(
+                    postId: postId,
+                    userId: newPostData["userId"] as? String ?? "",
+                    categories: newPostData["categories"] as? [Category] ?? [],
+                    postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
+                        ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
+                        ?? Date(),
+                    question: newPostData["question"] as? String ?? "",
+                    responseOption1: newPostData["responseOption1"] as? String ?? "",
+                    responseOption2: newPostData["responseOption2"] as? String ?? "",
+                    favoritedBy: newPostData["favoritedBy"] as? [String] ?? []
+                )
+                DispatchQueue.main.async {
+                    self.allQueriedPosts.append(post)
+                }
+            } else if newPostData["type"] as? String == PostType.SliderPost.rawValue {
+                let post = SliderPost(
+                    postId: postId,
+                    userId: newPostData["userId"] as? String ?? "",
+                    categories: newPostData["categories"] as? [Category] ?? [],
+                    postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
+                        ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
+                        ?? Date(),
+                    question: newPostData["question"] as? String ?? "",
+                    lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
+                    upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
+                    lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
+                    upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
+                    favoritedBy: newPostData["favoritedBy"] as? [String] ?? []
+                )
+                DispatchQueue.main.async {
+                    self.allQueriedPosts.append(post)
+                }
+            }
+        }
+        DispatchQueue.main.async {
+            self.allQueriedPosts = self.allQueriedPosts // triggers UI update if needed
+        }
+    }
     
-    
+    func addView(responseOption: Int) {
+        if let post = feedPosts.first as? BinaryPost {
+            if responseOption == 1 {
+                post.responseResult1 += 1
+            } else if responseOption == 2 {
+                post.responseResult2 += 1
+            }
+        }
+    }
     
     func likeComment(postId: String, commentId: String, userId: String){
         let commentRef = Firebase.db.collection("POSTS")
@@ -996,31 +819,11 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func getUserNumResponses(postIds: [String]) async -> Int? {
-        do {
-            var totalResponses = 0
-            
-            for postId in postIds {
-                let documentRef = Firebase.db.collection("POSTS").document(postId).collection("RESPONSES")
-                let querySnapshot = try await documentRef.getDocuments()
-                let count = querySnapshot.documents.count
-                print("Number of responses under \(postId): \(count)")
-                totalResponses += count
-            }
-            
-            return totalResponses
-        } catch {
-            print("Error getting responses: \(error)")
-            return nil
-        }
-    }
-    
     func getNextBestPost(user: User)  {
         var bestScore = 0
-        //var bestPost: (any Post)? = nil
         var bestIndex = 0
         
-        for i in 0..<allQueriedPosts.count {
+        for i in 0 ..< allQueriedPosts.count {
             let post  = allQueriedPosts[i]
             var score = 0;
             //Friends
@@ -1038,8 +841,10 @@ class PostFirebase: ObservableObject {
             }
             
             //Response Ratio
-            var ratioScore = ((Float(post.responses.count))  / Float(post.viewCounter)) * 20
-            score = score +  Int(ceil(ratioScore))
+            if post.viewCounter > 0 {
+                let ratioScore = ((Float(post.responses.count))  / Float(post.viewCounter)) * 20
+                score = score +  Int(ceil(ratioScore))
+            }
             
             //Hot Take
             if let binaryPost = post as? BinaryPost {
@@ -1051,6 +856,7 @@ class PostFirebase: ObservableObject {
                 //Get sd of responses??
             }
             //Call Date Function for date score
+            score += DateConverter.calcDateScore(postDate: post.postDateAndTime)
             
             
             //Call topics function for topic mathcing score
@@ -1066,9 +872,18 @@ class PostFirebase: ObservableObject {
         }
         
         let bestPost = allQueriedPosts[bestIndex]
+        print("Next feed post is " + bestPost.postId + " with a score of " + String(bestScore))
         allQueriedPosts.remove(at: bestIndex)
         allQueriedPosts.insert(bestPost, at: 0)
+
+            
     }
+
+
+
+
+
+
 
     func removeView(postId: String, userId: String) {
         let viewRef = Firebase.db.collection("POSTS")
@@ -1195,28 +1010,36 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func skipPost(postId: String, userId: String) {
+    func skipPost(user: User) -> (any Post)? {
         guard !feedPosts.isEmpty else {
             print("No posts in feed to skip.")
-            return
+            return nil
         }
+        
+        // add the post view to Firestore
+        addViewToPost(postId: feedPosts.first!.postId, userId: user.userId)
         
         // Move the post at index 0 to skippedPost
         skippedPost = feedPosts.removeFirst()
         
         print("Skipped post: \(skippedPost?.postId ?? "None")")
 
-        // add the post view to Firestore
-        addViewToPost(postId: postId, userId: userId)
-
+        findNextPost(user: user)
+        
+        return skippedPost
+    }
+    
+    func findNextPost(user: User) {
         // load the next post in the feed
-        getNextFeedPost()
+        getNextBestPost(user: user)
+        feedPosts.append(allQueriedPosts[0])
+        allQueriedPosts.remove(at: 0)
 
         // listen for changes in the new post
         watchForCurrentFeedPostChanges()
     }
     
-    func undoSkipPost(postId: String, userId: String) {
+    func undoSkipPost(userId: String) {
         guard let skipped = skippedPost else {
             print("No post to undo skip.")
             return
@@ -1226,6 +1049,315 @@ class PostFirebase: ObservableObject {
         feedPosts.insert(skipped, at: 0)
         skippedPost = nil
         
+        removeView(postId: feedPosts.first!.postId, userId: userId)
+        
         print("Restored skipped post: \(skipped.postId)")
+    }
+    
+    
+    func addDummyPosts() {
+        feedPosts.append(BinaryPost(
+            postId: "555555555",
+            userId: "conspiracy_theorist",
+            username: "MoonShotDebunker",
+            comments: [
+                Comment(
+                    commentType: .text,
+                    postId: "555555555",
+                    userId: "user101",
+                    username: "ApolloCritic",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm001",
+                    likes: ["user202", "user404", "user777"],
+                    dislikes: ["user303", "user888"],
+                    content: "I’ve watched every frame of the footage in slow motion. Totally staged!"
+                ),
+                Comment(
+                    commentType: .text,
+                    postId: "555555555",
+                    userId: "user202",
+                    username: "Rover4Real",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm002",
+                    likes: ["user101", "user404", "user777", "user999"],
+                    dislikes: ["user303", "user101"],
+                    content: "But what about the laser reflectors they left on the Moon? That can’t be fake, right?"
+                ),
+                Comment(
+                    commentType: .text,
+                    postId: "555555555",
+                    userId: "user303",
+                    username: "EarthboundFella",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm003",
+                    likes: ["user888"],
+                    dislikes: ["user101", "user202", "user404"],
+                    content: "I don’t trust NASA. All that money and they send grainy footage? Suspicious."
+                ),
+                Comment(
+                    commentType: .text,
+                    postId: "555555555",
+                    userId: "user404",
+                    username: "SpaceCadet",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm004",
+                    likes: ["user101", "user777", "user888", "user999"],
+                    dislikes: ["user202"],
+                    content: "How do you explain the Moon rocks that were studied worldwide?"
+                ),
+                Comment(
+                    commentType: .text,
+                    postId: "555555555",
+                    userId: "user555",
+                    username: "LunarLegacy",
+                    profilePhoto: "",
+                    date: Date(),
+                    commentId: "comm005",
+                    likes: ["user101", "user202", "user404", "user888"],
+                    dislikes: ["user303", "user777"],
+                    content: "Come on, it’s 2023. People still think it was a hoax?"
+                )
+            ],
+            responses: [
+                Response(
+                    responseId: "resp001",
+                    userId: "user777",
+                    responseOption: "Yes, obviously"
+                ),
+                Response(
+                    responseId: "resp002",
+                    userId: "user888",
+                    responseOption: "Touch grass"
+                )
+            ],
+            categories: [.other(.conspiraryTheories), .other(.funny)],
+            viewCounter: 257,
+            postDateAndTime: Date(),
+            question: "Was the moon landing fake? 🌕🚀",
+            responseOption1: "Yes, obviously",
+            responseOption2: "Touch grass",
+            responseResult1: 152,
+            responseResult2: 89,
+            favoritedBy: ["user404", "user999"]
+        ))
+        
+        feedPosts.append(BinaryPost(
+            postId: "21341234",
+            userId: "anotherone",
+            username: "TalkShowConnoisseur",
+            comments: [
+                Comment(commentType: .text,  postId: "21341234", userId: "user005", username: "KimmelFan", profilePhoto: "", date: Date(), commentId: "comm015", likes: ["user012", "user016"], dislikes: ["user017"], content: "Kimmel is a legend. Every show feels like a casual conversation, dude’s a natural. I also love his content covering recent events in the White House. He has no filter and it is the best way to wind down for the day."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user006", username: "ConanCultist", profilePhoto: "", date: Date(), commentId: "comm016", likes: ["user013"], dislikes: ["user005"], content: "Jimmy Kimmel is okay, but Conan O’Brien carried late-night TV on his back."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user007", username: "LettermanLoyalist", profilePhoto: "", date: Date(), commentId: "comm017", likes: ["user014"], dislikes: [], content: "Kimmel is good, but no one will ever top Letterman. The man had no filter."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user008", username: "ColbertConvert", profilePhoto: "", date: Date(), commentId: "comm018", likes: ["user015"], dislikes: ["user006"], content: "Kimmel’s great, but if we’re being honest, Stephen Colbert is running the game right now."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user009", username: "CordenCritic", profilePhoto: "", date: Date(), commentId: "comm019", likes: [], dislikes: ["user010", "user011"], content: "Honestly, I’d rather listen to static than watch another Carpool Karaoke segment."),
+                Comment(commentType: .text,  postId: "21341234", userId: "user010", username: "MyMom", profilePhoto: "", date: Date(), commentId: "comm020", likes: ["user010", "user011", "user010", "user011", "user010", "user011"], dislikes: [], content: "MY FAVVVV!"),
+                Comment(commentType: .text,  postId: "21341234", userId: "user011", username: "YourMom", profilePhoto: "", date: Date(), commentId: "comm021", likes: [], dislikes: ["user010", "user011", "user010", "user011"], content: "Man sucks.")
+            ],
+            responses: [
+                Response(responseId: "resp013", userId: "user012", responseOption: "Nah"),
+                Response(responseId: "resp014", userId: "user013", responseOption: "Yupppp")
+            ],
+            categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)],
+            viewCounter: 1_020,
+            postDateAndTime: Date(),
+            question: "Jimmy Kimmel is the best talk show host",
+            responseOption1: "Nah",
+            responseOption2: "Yupppp",
+            responseResult1: 575,
+            responseResult2: 445,
+            favoritedBy: ["user006", "user007", "user008"]
+        ))
+        
+        feedPosts.append(BinaryPost(
+            postId: "777123999",
+            userId: "starbucksoverlord",
+            username: "CaffeineAddict",
+            comments: [
+                Comment(commentType: .text, postId: "777123999", userId: "user321", username: "NetflixJunkie", profilePhoto: "", date: Date(), commentId: "comm009", likes: ["user654"], dislikes: [], content: "I need my shows. Coffee is replaceable."),
+                Comment(commentType: .text, postId: "777123999", userId: "user654", username: "JavaFiend", profilePhoto: "", date: Date(), commentId: "comm010", likes: ["user321"], dislikes: [], content: "If you think I can function without coffee, you’ve never met me.")
+            ],
+            responses: [
+                Response(responseId: "resp009", userId: "user111", responseOption: "Goodbye Netflix"),
+                Response(responseId: "resp010", userId: "user333", responseOption: "I'd rather perish")
+            ],
+            categories: [.lifestyle(.finances), .other(.funny)],
+            viewCounter: 612,
+            postDateAndTime: Date(),
+            question: "Would you rather give up coffee or streaming services? ☕📺",
+            responseOption1: "Goodbye Netflix",
+            responseOption2: "I'd rather perish",
+            responseResult1: 300,
+            responseResult2: 312,
+            favoritedBy: ["user321", "user654"]
+        ))
+        
+        feedPosts.append(BinaryPost(
+            postId: "834729384",
+            userId: "myman",
+            username: "CozyKing",
+            comments: [
+                Comment(commentType: .text, postId: "834729384", userId: "user001", username: "CarpetDefender", profilePhoto: "", date: Date(), commentId: "comm011", likes: ["user005", "user009"], dislikes: ["user007"], content: "Carpet in the bedroom is elite. Y’all sleeping on hardwood like cavemen."),
+                Comment(commentType: .text, postId: "834729384", userId: "user002", username: "HardwoodPurist", profilePhoto: "", date: Date(), commentId: "comm012", likes: ["user003", "user008"], dislikes: ["user001"], content: "Carpet is just a bacteria sponge. You ever seen what's in that thing after a year?"),
+                Comment(commentType: .text, postId: "834729384", userId: "user003", username: "RugLife", profilePhoto: "", date: Date(), commentId: "comm013", likes: ["user006"], dislikes: [], content: "Carpet is great until you drop something. Finding a contact lens on it is a spiritual experience. Or cleaning up spilled Dr. Pepper. That is a real bummer when you have carpet."),
+                Comment(commentType: .text, postId: "834729384", userId: "user004", username: "BarefootBandit", profilePhoto: "", date: Date(), commentId: "comm014", likes: ["user009"], dislikes: [], content: "If you walk on carpet with socks, you’re living life on easy mode. Hardwood is for risk takers.")
+            ],
+            responses: [
+                Response(responseId: "resp011", userId: "user010", responseOption: "TF no"),
+                Response(responseId: "resp012", userId: "user011", responseOption: "Yeah...")
+            ],
+            categories: [.lifestyle(.homeDecor), .other(.funny)],
+            viewCounter: 825,
+            postDateAndTime: Date(),
+            question: "Is it gross to have carpet in your bedroom?",
+            responseOption1: "TF no",
+            responseOption2: "Yeah...",
+            responseResult1: 467,
+            responseResult2: 35,
+            favoritedBy: ["user001", "user004", "user008"]
+        ))
+        
+        feedPosts.append(BinaryPost(
+            postId: "123456789",
+            userId: "roommateFromHell",
+            username: "LandlordHater69",
+            comments: [
+                Comment(commentType: .text, postId: "123456789", userId: "user123", username: "CarpetHater", profilePhoto: "", date: Date(), commentId: "comm001", likes: ["user789"], dislikes: [], content: "Carpet in the bathroom should be a felony."),
+                Comment(commentType: .text, postId: "123456789", userId: "user456", username: "VinylTile4Life", profilePhoto: "", date: Date(), commentId: "comm002", likes: ["user123", "user999"], dislikes: ["user555"], content: "If I see a carpeted bathroom, I'm calling the cops.")
+            ],
+            responses: [
+                Response(responseId: "resp001", userId: "user789", responseOption: "Absolutely 🚔"),
+                Response(responseId: "resp002", userId: "user555", responseOption: "Nah, just a fine")
+            ],
+            categories: [.lifestyle(.homeDecor), .other(.funny)],
+            viewCounter: 305,
+            postDateAndTime: Date(),
+            question: "Should landlords go to prison for putting carpet in bathrooms?",
+            responseOption1: "Absolutely 🚔",
+            responseOption2: "Nah, just a fine",
+            responseResult1: 184,
+            responseResult2: 121,
+            favoritedBy: ["user789", "user456"]))
+
+        feedPosts.append(BinaryPost(
+            postId: "987654321",
+            userId: "toasterfanatic",
+            username: "HotDogDebater",
+            comments: [
+                Comment(commentType: .text, postId: "987654321", userId: "user777", username: "BreadDefender", profilePhoto: "", date: Date(), commentId: "comm003", likes: ["user222"], dislikes: [], content: "A hot dog is NOT a sandwich. Don't start this."),
+                Comment(commentType: .text, postId: "987654321", userId: "user222", username: "MeatIsMeat", profilePhoto: "", date: Date(), commentId: "comm004", likes: ["user777", "user999"], dislikes: [], content: "If a sub is a sandwich, then so is a hot dog. Wake up, sheeple.")
+            ],
+            responses: [
+                Response(responseId: "resp003", userId: "user111", responseOption: "Yes, it's meat between bread"),
+                Response(responseId: "resp004", userId: "user333", responseOption: "NO. Don't start this again.")
+            ],
+            categories: [.lifestyle(.cooking), .other(.funny)],
+            viewCounter: 520,
+            postDateAndTime: Date(),
+            question: "Is a hot dog a sandwich? 🌭",
+            responseOption1: "Yes, it's meat between bread",
+            responseOption2: "NO. Don't start this again.",
+            responseResult1: 258,
+            responseResult2: 262,
+            favoritedBy: ["user111", "user999"]
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "246813579",
+            userId: "midnightmunchies",
+            username: "ChristmasMovieGatekeeper",
+            comments: [
+                Comment(commentType: .text, postId: "246813579", userId: "user555", username: "YippeeKiYay", profilePhoto: "", date: Date(), commentId: "comm005", likes: ["user777"], dislikes: [], content: "If Home Alone counts, so does Die Hard."),
+                Comment(commentType: .text, postId: "246813579", userId: "user999", username: "HolidayPurist", profilePhoto: "", date: Date(), commentId: "comm006", likes: [], dislikes: ["user555"], content: "Christmas movies need Santa, end of discussion.")
+            ],
+            responses: [
+                Response(responseId: "resp005", userId: "user111", responseOption: "Yes, obviously"),
+                Response(responseId: "resp006", userId: "user333", responseOption: "No, grow up")
+            ],
+            categories: [.entertainment(.movies), .other(.funny)],
+            viewCounter: 790,
+            postDateAndTime: Date(),
+            question: "Is Die Hard a Christmas movie? 🎄🔫",
+            responseOption1: "Yes, obviously",
+            responseOption2: "No, grow up",
+            responseResult1: 432,
+            responseResult2: 358,
+            favoritedBy: ["user555", "user777"]
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "135792468",
+            userId: "toiletphilosopher",
+            categories: [.other(.funny), .lifestyle(.minimalism)],
+            postDateAndTime: Date(),
+            question: "Do you wet the toothbrush before or after putting toothpaste? 🪥",
+            responseOption1: "Before 🧐",
+            responseOption2: "After, obviously"
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "192837465",
+            userId: "theAIoverlords",
+            username: "AI_Groom",
+            comments: [
+                Comment(commentType: .text, postId: "192837465", userId: "user888", username: "TechLover", profilePhoto: "", date: Date(), commentId: "comm007", likes: ["user111"], dislikes: [], content: "AI can probably write better vows than me tbh."),
+                Comment(commentType: .text, postId: "192837465", userId: "user333", username: "FutureDivorcee", profilePhoto: "", date: Date(), commentId: "comm008", likes: [], dislikes: ["user888"], content: "If my spouse uses AI for our vows, I’m filing papers immediately.")
+            ],
+            responses: [
+                Response(responseId: "resp007", userId: "user444", responseOption: "Yes, AI is poetic"),
+                Response(responseId: "resp008", userId: "user999", responseOption: "No, I want a divorce already")
+            ],
+            categories: [.educational(.cs), .news(.worldEvents), .other(.funny)],
+            viewCounter: 400,
+            postDateAndTime: Date(),
+            question: "Would you let AI write your wedding vows? 💍🤖",
+            responseOption1: "Yes, AI is poetic",
+            responseOption2: "No, I want a divorce already",
+            responseResult1: 180,
+            responseResult2: 220,
+            favoritedBy: ["user888", "user111"]
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "666777888",
+            userId: "gymbro69",
+            categories: [.lifestyle(.fitness), .other(.funny)],
+            postDateAndTime: Date(),
+            question: "Do you skip leg day? 🏋️‍♂️",
+            responseOption1: "Never, bro",
+            responseOption2: "Only on days ending in 'y'"
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "314159265",
+            userId: "mathnerd",
+            categories: [.educational(.math), .other(.funny)],
+            postDateAndTime: Date(),
+            question: "Is 0.999... equal to 1? 🤯",
+            responseOption1: "Yes, mathematically",
+            responseOption2: "No, that's a scam"
+        ))
+
+        feedPosts.append(BinaryPost(
+            postId: "888444222",
+            userId: "socialmediaman",
+            categories: [.entertainment(.socialMedia), .other(.funny)],
+            postDateAndTime: Date(),
+            question: "Would you delete social media for $10,000? 📱💰",
+            responseOption1: "Easy money",
+            responseOption2: "No, I'm addicted"
+        ))
+        
+        
+//        for post in feedPosts {
+//            if let binarypost = post as? BinaryPost {
+//                createBinaryPost(userId: binarypost.userId, categories: binarypost.categories, question: binarypost.question, responseOption1: binarypost.responseOption1, responseOption2: binarypost.responseOption2)
+//            }
+//        }
+
     }
 }
