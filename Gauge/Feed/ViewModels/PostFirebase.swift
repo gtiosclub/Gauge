@@ -918,7 +918,6 @@ class PostFirebase: ObservableObject {
                 //Get sd of responses??
             }
             //Call Date Function for date score
-            score += DateConverter.calcDateScore(postDate: post.postDateAndTime)
             
             //Call topics function for topic mathcing score
             
