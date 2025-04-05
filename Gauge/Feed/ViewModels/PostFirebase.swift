@@ -388,6 +388,71 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    func loadInitialNewPosts(user: User) async {
+        let allFilteredPosts = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
+        let snapshot: QuerySnapshot
+
+        do {
+            snapshot = try await Firebase.db.collection("POSTS").getDocuments()
+        } catch {
+            print("❌ Error fetching initial posts: \(error)")
+            return
+        }
+
+        let addedDocs = snapshot.documents.filter { doc in
+            let postId = doc.data()["postId"] as? String ?? ""
+            return !allFilteredPosts.contains(postId)
+        }
+
+        for doc in addedDocs {
+            let newPostData = doc.data()
+            guard let postId = newPostData["postId"] as? String else { continue }
+
+            if allQueriedPosts.contains(where: { $0.postId == postId }) {
+                continue
+            }
+
+            if newPostData["type"] as? String == PostType.BinaryPost.rawValue {
+                let post = BinaryPost(
+                    postId: postId,
+                    userId: newPostData["userId"] as? String ?? "",
+                    categories: newPostData["categories"] as? [Category] ?? [],
+                    postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
+                        ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
+                        ?? Date(),
+                    question: newPostData["question"] as? String ?? "",
+                    responseOption1: newPostData["responseOption1"] as? String ?? "",
+                    responseOption2: newPostData["responseOption2"] as? String ?? "",
+                    favoritedBy: newPostData["favoritedBy"] as? [String] ?? []
+                )
+                DispatchQueue.main.async {
+                    self.allQueriedPosts.append(post)
+                }
+            } else if newPostData["type"] as? String == PostType.SliderPost.rawValue {
+                let post = SliderPost(
+                    postId: postId,
+                    userId: newPostData["userId"] as? String ?? "",
+                    categories: newPostData["categories"] as? [Category] ?? [],
+                    postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
+                        ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
+                        ?? Date(),
+                    question: newPostData["question"] as? String ?? "",
+                    lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
+                    upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
+                    lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
+                    upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
+                    favoritedBy: newPostData["favoritedBy"] as? [String] ?? []
+                )
+                DispatchQueue.main.async {
+                    self.allQueriedPosts.append(post)
+                }
+            }
+        }
+        DispatchQueue.main.async {
+            self.allQueriedPosts = self.allQueriedPosts // triggers UI update if needed
+        }
+    }
+    
     func addView(responseOption: Int) {
         if let post = feedPosts.first as? BinaryPost {
             if responseOption == 1 {
@@ -1348,18 +1413,4 @@ class PostFirebase: ObservableObject {
 //        }
 
     }
-    
-    func categoryRanker(user_categories: [String], post_categories: [Category]) -> Int? {
-        let point_distribution = [30, 25, 20, 18, 18, 15, 15, 12, 12, 10, 10, 10, 8, 8, 8, 5, 5, 5, 5, 5]
-        var total_points = 0
-        for (ind, cat) in user_categories.enumerated() {
-            if let cat_object = Category.stringToCategory(cat) {
-                if post_categories.contains(cat_object) {
-                    total_points += point_distribution[ind]
-                }
-            }
-        }
-        return total_points
-    }
-
 }

@@ -102,25 +102,11 @@ struct ContentView: View {
                         async let userInteractions = userVM.getUserPostInteractions(userId: signedInUser.userId, setCurrentUserData: true)
                         async let userPosts = userVM.getUserPosts(userId: signedInUser.userId, setCurrentUserData: true)
                         async let userFavorites = userVM.getUserFavorites(userId: signedInUser.userId, setCurrentUserData: true)
-                        async let userNumViews = userVM.getUserNumViews(userId: signedInUser.userId, setCurrentUserData: true)
-                        async let userNumResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userViews = userVM.getUserNumViews(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
                         
                         do {
                             _ = try await userData
-                            
-                            if let userResponse = userResponses.first {
-                                let newCategories = userVM.user.myCategories
-                                if Set(newCategories) != Set(userResponse.currentUserCategories) {
-                                    userResponse.currentUserCategories = newCategories
-                                    print("Replaced UserResponses current categories with: " + String(describing: newCategories))
-                                }
-                                
-//                                let newTopics = userVM.user.myTopics
-//                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
-//                                    userResponse.currentUserTopics = newTopics
-//                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
-//                                }
-                            }
                             
                             await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
                             postVM.watchForCurrentFeedPostChanges()
@@ -139,8 +125,8 @@ struct ContentView: View {
                             }
                             
                             _ = try await (
-                                userNumViews,
-                                userNumResponses,
+                                userViews,
+                                userResponses,
                                 userFavorites
                             )
                         } catch {
