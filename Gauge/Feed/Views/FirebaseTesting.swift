@@ -91,11 +91,11 @@ struct FirebaseTesting: View {
                     }
                     
                     Section("Read Data") {
-                        Button("Get posts by userId") {
-                            userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
-                                self.postIds = postIds
-                            }
-                        }
+//                        Button("Get posts by userId") {
+//                            userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
+//                                self.postIds = postIds
+//                            }
+//                        }
                         
                         Button("Add Slider Post") {
                             postVM.createSliderPost(
@@ -134,21 +134,21 @@ struct FirebaseTesting: View {
                     }
                     
                     Section(header: Text("Read Data")) {
-                        Button("Get posts by userId") {
-                            userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
-                                self.postIds = postIds
-                            }
-                            
-                            print(postIds.count)
-                        }
-                        
-                        Button("Get all user data by userId") {
-                            let user = userVM.getAllUserData(userId: "austin") { user in
-                                print(user.username)
-                                print(user.badges)
-                                print(user.myCategories)
-                            }
-                        }
+//                        Button("Get posts by userId") {
+//                            userVM.getPosts(userId: "tfeGCRCgt8UbJhCmKgNmuIFVzD73") { postIds in
+//                                self.postIds = postIds
+//                            }
+//                            
+//                            print(postIds.count)
+//                        }
+//                        
+//                        Button("Get all user data by userId") {
+//                            let user = userVM.getAllUserData(userId: "austin") { user in
+//                                print(user.username)
+//                                print(user.badges)
+//                                print(user.myCategories)
+//                            }
+//                        }
                         
                         Button("Get response results from a post") {
                             postVM.getResponses(postId: "examplePost") { results in
@@ -162,18 +162,16 @@ struct FirebaseTesting: View {
                             }
                         }
                         
-                        Button("Get number of responses for a list of posts") {
-                            Task {
-                                if let count = await postVM.getUserNumResponses(postIds: [
-                                    "B2A9F081-A10C-4957-A6B8-0295F0C700A2",
-                                    "examplePost"
-                                ]) {
-                                    print("Number of responses: \(count)")
-                                } else {
-                                    print("Failed to get number of responses")
-                                }
-                            }
-                        }
+//                        Button("Get number of responses for a list of posts") {
+//                            Task {
+//                                let count = try await userVM.getUserNumResponses(userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92")
+//                                if count >= 0 {
+//                                    print("Number of responses: \(count)")
+//                                } else {
+//                                    print("Failed to get number of responses")
+//                                }
+//                            }
+//                        }
 
 
                     }
@@ -210,7 +208,7 @@ struct FirebaseTesting: View {
                         }
                         
                         Button("Update user searches (add)") {
-                            userVM.addUserSearch(
+                            userVM.addUserPostSearch(
                                 search: "friends"
                             )
                         }
@@ -227,9 +225,9 @@ struct FirebaseTesting: View {
                     }
                     
                     Section("View Data") {
-                        Button("Fetch Favorited Posts") {
-                            userVM.getUserFavorites(userId: "ExampleUser"){ favorites in }
-                        }
+//                        Button("Fetch Favorited Posts") {
+//                            userVM.getUserFavorites(userId: "ExampleUser"){ favorites in }
+//                        }
                         
                         ForEach(postVM.allQueriedPosts, id: \.postId) { post in
                             Text(post.postId)
