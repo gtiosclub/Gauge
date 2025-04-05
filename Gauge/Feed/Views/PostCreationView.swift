@@ -63,7 +63,7 @@ struct PostCreationView: View {
             
             if currentStep == 1 {
                 InputPostQuestion(questionText: $postQuestion, stepCompleted: $stepCompleted)
-                    .frame(height: 200)
+                    .frame(height: 300)
             } else if currentStep == 2 {
                 SelectPostType(selectedPostType: $postType, stepCompleted: $stepCompleted)
             } else if currentStep == 4 {
