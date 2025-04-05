@@ -14,7 +14,7 @@ struct InputPostQuestion: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            TextField("What’s your hot take?", text: $questionText)
+            TextField("What’s your hot take?", text: $questionText, axis: .vertical)
                 .font(.title)
                 .foregroundColor(.black)
                 .fontWeight(.bold)
@@ -25,11 +25,6 @@ struct InputPostQuestion: View {
                         questionText = String(questionText.prefix(maxCharacters))
                     }
                     
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        stepCompleted = !questionText.isEmpty
-                    }
-                }
-                .onAppear {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         stepCompleted = !questionText.isEmpty
                     }
@@ -45,6 +40,9 @@ struct InputPostQuestion: View {
                 Spacer()
 
             }
+        }
+        .onAppear {
+                stepCompleted = !questionText.isEmpty
         }
         .padding(.horizontal)
     }

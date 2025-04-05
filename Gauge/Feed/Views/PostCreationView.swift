@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct PostCreationView: View {
+    @Binding var modalSize: CGFloat
+
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var postVM: PostFirebase
     @State private var currentStep: Int = 1
@@ -19,6 +21,10 @@ struct PostCreationView: View {
     @State var postCategories: [Category] = []
     @State var postType: PostType?
     
+    init(modalSize: Binding<CGFloat>) {
+        self._modalSize = modalSize
+    }
+        
     private var totalSteps: Int = 5
     
     
@@ -57,6 +63,7 @@ struct PostCreationView: View {
             
             if currentStep == 1 {
                 InputPostQuestion(questionText: $postQuestion, stepCompleted: $stepCompleted)
+                    .frame(height: 200)
             } else if currentStep == 2 {
                 SelectPostType(selectedPostType: $postType, stepCompleted: $stepCompleted)
             } else if currentStep == 4 {
@@ -78,12 +85,15 @@ struct PostCreationView: View {
                             
                             if currentStep == 1 {
                                 currentStepTitle = "New Post"
+                                modalSize = 380
                             } else if currentStep == 2 {
                                 currentStepTitle = "Choose Type"
+                                modalSize = 340
                             } else if currentStep == 3 {
                                 currentStepTitle = "Pick Options"
                             } else if currentStep == 4 {
                                 currentStepTitle = "Select Categories"
+                                modalSize = 340
                             }
                         }
                     }) {
@@ -109,12 +119,15 @@ struct PostCreationView: View {
                         
                         if currentStep == 1 {
                             currentStepTitle = "New Post"
+                            modalSize = 380
                         } else if currentStep == 2 {
                             currentStepTitle = "Choose Type"
+                            modalSize = 340
                         } else if currentStep == 3 {
                             currentStepTitle = "Pick Options"
                         } else if currentStep == 4 {
                             currentStepTitle = "Select Categories"
+                            modalSize = 340
                         }
                     }
                 }) {
@@ -139,7 +152,7 @@ struct PostCreationView: View {
             .padding(.top, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
         .cornerRadius(30)
     }
 }
@@ -161,6 +174,6 @@ struct ProgressIndicator: View {
 }
 
 #Preview {
-    PostCreationView()
-        .environmentObject(PostFirebase())
+//    PostCreationView()
+//        .environmentObject(PostFirebase())
 }
