@@ -394,24 +394,3 @@ extension MCManager: MCSessionDelegate {
     }
 }
 
-
-
-//// MARK: - MCNearbyServiceBrowserDelegate
-//extension MCManager: MCNearbyServiceBrowserDelegate {
-//    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
-//        if let roomCode = info?["roomCode"] {
-//            DispatchQueue.main.async {
-//                self.availableRooms[roomCode] = peerID
-//                self.foundPeer = peerID
-//                self.isReadyToNavigate = true // Allow navigation once peer is found
-//            }
-//            browser.invitePeer(peerID, to: self.session, withContext: nil, timeout: 10)
-//        }
-//    }
-//    
-//    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-//        DispatchQueue.main.async {
-//            self.availableRooms = self.availableRooms.filter { $0.value != peerID }
-//        }
-//    }
-//}

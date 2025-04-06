@@ -17,6 +17,7 @@ struct GamesHome: View {
     @State var profileLink: String = "TestProfile"
     @State var isHost = false
     @ObservedObject var mcManager = MCManager(yourName: UIDevice.current.identifierForVendor?.uuidString ?? UIDevice.current.name)
+    @ObservedObject var tmManager = TMManager(yourName: UIDevice.current.identifierForVendor?.uuidString ?? UIDevice.current.name)
     @State var showJoinRoom: Bool = false
     @State var navigateToRoom = false
 
@@ -25,6 +26,20 @@ struct GamesHome: View {
             ZStack {
                 ScrollView {
                     VStack(spacing: 10) {
+                        Button(action: {
+                            selectedGame = "Take Master"
+                            withAnimation {
+                                username = userVM.user.username
+                                profileLink = userVM.user.userId
+                                self.showingPopover.toggle()
+                            }
+                        }) {
+                            GameCardView(
+                                gameTitle: "Take Master", playerRange: "4",
+                                duration: "5m",
+                                description:
+                                    "Make as many takes as you can!")
+                        }
                         Button(action: {
                             selectedGame = "Take Match"
                             withAnimation {
@@ -49,7 +64,7 @@ struct GamesHome: View {
                                 gameTitle: "Take Time", playerRange: "1",
                                 duration: "5m",
                                 description:
-                                    "Make as many takes as you can!")
+                                    "Speedrun takes!")
                         }
                     }
                     .padding()
