@@ -16,7 +16,7 @@ struct FirebaseTesting: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 20) {
-                    Section("Write Data") {
+                    Section(header: Text("Write Data")) {
                         Button("Add Binary Post") {
                             postVM.createBinaryPost(
                                 userId: "Zmi5Cgm7dtbqCDbLOrhbbDAq8T92",
@@ -70,26 +70,31 @@ struct FirebaseTesting: View {
                         }
                         
                         Button("Test reordering for category") {
-                           let lastest: [String: Int] = [
-                               "nfl": 120,
-                               "movies": 250,
-                               "education": 20,
-                               "showReccomendations": 30
-                           ]
-
-                           let currentInterestList: [String] = [
-                               "showRecommendations",
-                               "education",
-                               "movies"
-                           ]
-
-                           userVM.reorderUserCategory(
-                               lastest: lastest,
-                               currentInterestList: currentInterestList
-                           ) { reorderList in
-                               print("This is the reordered list based on the input: \(reorderList)")
-                           }
-                       }
+                            let lastest: [String: Int] = [
+                                "nfl": 120,
+                                "movies": 250,
+                                "education": 20,
+                                "showReccomendations": 30
+                            ]
+                            
+                            let currentInterestList: [String] = [
+                                "showRecommendations",
+                                "education",
+                                "movies"
+                            ]
+                            
+                            Task {
+                                do {
+                                    let reorderList = try await userVM.reorderUserCategory(
+                                        latest: lastest,
+                                        currentInterestList: currentInterestList
+                                    )
+                                    print("This is the reordered list based on the input: \(reorderList)")
+                                } catch {
+                                    print("❌ Error reordering categories: \(error)")
+                                }
+                            }
+                        }
                         
                         Button("test setUserCategories"){
                             userVM.setUserCategories(userId: "austin", category: [Category.educational(.environment), Category.educational(.math)])

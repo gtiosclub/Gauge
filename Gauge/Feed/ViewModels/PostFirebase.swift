@@ -33,8 +33,6 @@ class PostFirebase: ObservableObject {
     func setUpCommentsListener() {
         // Cancel current listeners (if there are ones)
         currentFeedPostCommentsListener?.remove()
-//        currentFeedPostResponsesListener?.remove()
-//        currentFeedPostViewsListener?.remove()
 
         // Setup listener for new index 0 subcollections
         let currentPost = feedPosts[0]
@@ -95,7 +93,7 @@ class PostFirebase: ObservableObject {
         
         let currentPost = feedPosts[0]
         let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
-        currentFeedPostCommentsListener = postRef.collection("RESPONSES").addSnapshotListener { snapshot, error in
+        currentFeedPostResponsesListener = postRef.collection("RESPONSES").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else { return }
             DispatchQueue.main.async {
                 self.objectWillChange.send()
@@ -127,7 +125,7 @@ class PostFirebase: ObservableObject {
         currentFeedPostViewsListener?.remove()
         let currentPost = feedPosts[0]
         let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
-        currentFeedPostCommentsListener = postRef.collection("VIEWS").addSnapshotListener { snapshot, error in
+        currentFeedPostViewsListener = postRef.collection("VIEWS").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else { return }
             DispatchQueue.main.async {
                 self.objectWillChange.send()
@@ -135,7 +133,6 @@ class PostFirebase: ObservableObject {
                 currentPost.viewCounter = viewCount
             }
         }
-                
     }
     
     func loadFeedPosts(for postIds: [String]) async {
