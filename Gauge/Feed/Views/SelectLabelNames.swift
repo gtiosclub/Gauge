@@ -13,22 +13,25 @@ struct SlidingOption {
 }
 struct SelectLabelNames: View {
     //when using the variable from BinaryPost, just use the resonseOption1 and responseOption2 and place it here
-    let slidingOptions: [SlidingOption] = [
-        .init(left: "No", right: "Yes"),
-        .init(left: "Hate", right: "Love"),
-        .init(left: "Cringe", right: "Cool")
-    ]
     
-    @State private var selectedIndex: Int? = nil
+    let slidingOptions: [SlidingOption]
+    
+    @Binding var selectedIndex: Int?
+    @Binding var stepCompleted: Bool
 
     var body: some View {
         VStack(spacing: 0) {
             ForEach(slidingOptions.indices, id: \.self) { index in
-                SlideableArrowButton(
-                    responseOption1: slidingOptions[index].left,
-                    responseOption2: slidingOptions[index].right,
-                    isSelected: $selectedIndex,
-                    currentIndex: index
+                BinaryOptionView(
+                    leftOption: slidingOptions[index].left,
+                    rightOption: slidingOptions[index].right,
+                    isSelected: selectedIndex == index,
+                    action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            selectedIndex = index
+                            stepCompleted = true
+                        }
+                    }
                 )
                 if index != slidingOptions.count - 1 {
                     Divider()
@@ -36,58 +39,64 @@ struct SelectLabelNames: View {
             }
         }
         .padding()
+        onAppear {
+            stepCompleted = selectedIndex != nil
+        }
     }
 }
 
-struct SlideableArrowButton: View {
-    let responseOption1: String
-    let responseOption2: String
-    @Binding var isSelected: Int?
-    let currentIndex: Int
+struct BinaryOptionView: View {
+    let leftOption: String
+    let rightOption: String
+    let isSelected: Bool
+    let action: () -> Void
     
     var body: some View {
-        VStack(spacing: 0) {
-            ZStack {
+        ZStack {
+            HStack {
+                Text(leftOption)
+                    .font(.title)
+                    .foregroundColor(isSelected ? .black : .gray.opacity(0.8))
+                    .fontWeight(.medium)
                 
-                HStack {
-                    Text(responseOption1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Text(responseOption2)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                }
-                .padding()
-                .background(isSelected == currentIndex ? Color.gray.opacity(0.2) : Color.clear)
-                .cornerRadius(40)
-
-               
-                Button(action: {
-                    isSelected = currentIndex
-                    //testing whether it works in the console
-                    print("Chosen pair: \(responseOption1) vs \(responseOption2)")
-                }) {
-                    Image(systemName: "arrow.left.and.right")
-                        .resizable()
-                        .foregroundColor(.black)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 40, height: 40)
-                        .padding(12)
-                }
-                .zIndex(1)
+                Spacer()
+    
+                Text(rightOption)
+                    .font(.title)
+                    .foregroundColor(isSelected ? .black : .gray.opacity(0.8))
+                    .fontWeight(.medium)
+                
+                
             }
-            .frame(height: 80)
-            .padding(.horizontal)
+            .padding(.vertical, 20)
+            .padding(.horizontal, isSelected ? 20 : 0)
+            .background(
+                RoundedRectangle(cornerRadius: 25)
+                    .fill(isSelected ? Color.gray.opacity(0.08) : Color.clear)
+                    .shadow(radius: isSelected ? 5 : 0)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 25)
+                    .stroke(isSelected ? Color.gray : Color.clear, lineWidth: 1)
+            )
+            .contentShape(Rectangle())
+            .onTapGesture(perform: action)
+            
+            Image(systemName: "arrow.left.and.right")
+                .resizable()
+                .foregroundColor(isSelected ? .black : .gray)
+                .frame(width: 30, height: 20)
         }
     }
-
-    
-    
-    }
-
-
+}
 
 
 
 
 #Preview {
-    SelectLabelNames()
+//    SelectLabelNames(slidingOptions: [
+//        .init(left: "No", right: "Yes"),
+//        .init(left: "Hate", right: "Love"),
+//        .init(left: "Cringe", right: "Cool")
+//    ])
 }

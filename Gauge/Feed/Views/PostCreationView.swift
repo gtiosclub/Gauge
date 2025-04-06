@@ -20,12 +20,18 @@ struct PostCreationView: View {
     @State var postQuestion: String = ""
     @State var postCategories: [Category] = []
     @State var postType: PostType?
+    @State var optionsSelectedIndex: Int?
     
     init(modalSize: Binding<CGFloat>) {
         self._modalSize = modalSize
     }
         
     private var totalSteps: Int = 5
+    let slidingOptions: [SlidingOption] = [
+        .init(left: "No", right: "Yes"),
+        .init(left: "Hate", right: "Love"),
+        .init(left: "Cringe", right: "Cool")
+    ]
     
     
     var body: some View {
@@ -63,15 +69,17 @@ struct PostCreationView: View {
             
             if currentStep == 1 {
                 InputPostQuestion(questionText: $postQuestion, stepCompleted: $stepCompleted)
-                    .frame(height: 300)
+                    .frame(height: 200)
             } else if currentStep == 2 {
                 SelectPostType(selectedPostType: $postType, stepCompleted: $stepCompleted)
+            } else if currentStep == 3 {
+                SelectLabelNames(slidingOptions: slidingOptions, selectedIndex: $optionsSelectedIndex, stepCompleted: $stepCompleted)
             } else if currentStep == 4 {
                 SelectCategories(
                     selectedCategories: $postCategories,
                     stepCompleted: $stepCompleted,
                     question: postQuestion,
-                    responseOptions: ["National Geographic", "Animal Planet"]
+                    responseOptions: [slidingOptions[optionsSelectedIndex ?? 0].left, slidingOptions[optionsSelectedIndex ?? 0].right]
                 )
                 .frame(height: 200)
             }
@@ -91,6 +99,7 @@ struct PostCreationView: View {
                                 modalSize = 340
                             } else if currentStep == 3 {
                                 currentStepTitle = "Pick Options"
+                                modalSize = 380
                             } else if currentStep == 4 {
                                 currentStepTitle = "Select Categories"
                                 modalSize = 340
