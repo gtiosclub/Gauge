@@ -217,7 +217,6 @@ struct FeedView: View {
                                         if dragOffset.height > 150 && !hasSkipped {
                                             hasSkipped = true
                                             optionSelected = 0
-                                            isConfirmed = false
                                         }
                                         
                                     } else {
@@ -240,6 +239,7 @@ struct FeedView: View {
                                 if dragOffset.height > 150 && hasSkipped {
                                     if isConfirmed {
                                         // Next post logic
+                                        postVM.feedPosts.removeFirst()
                                         postVM.findNextPost(user: userVM.user)
                                         postVM.skippedPost = nil
                                     } else {

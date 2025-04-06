@@ -330,43 +330,44 @@ class UserFirebase: ObservableObject {
         ])
     }
     
-    func reorderUserCategory(lastest : [String: Int], currentInterestList: [String], completion: @escaping ([String]) -> Void){
-        //lastest: given the dictionary of last session of interest category from user
-        //currentIntegerList: this is the current category list
-        
-        let lastestSorted = lastest.sorted{$0.value > $1.value}
-        //get the OpenAI token
-        let token = ChatGPTAPI(apiKey:Keys.openAIKey)
-        //assigning prompt to the OpenAI
-        let prompt:String = """
-            I will give you 2 lists, where a dictionary list to store the interests point of the user lastest interactions with the categories, and another list of current catgories. Please based on the significant interest points, what we mean significant is only move the current categories up or down if the interactions make it very apparent the user has interest/disinterest in a category. And need to combine the current category list order which also takes into account of weight. Return the reordered the category list. to better perform this task, sorting the lastest interaction first (I help you sorted already), and remove all the categories that does not consist in the current list, after that reordering based on the point. The returned format would be: [String]. Do not give me any sentence but the string list as a return prompt. Any category that does not exist in the current list do not be included in the return list.
-            lastest interaction categories: \(lastestSorted)
-            current list of category: \(currentInterestList)
-            """
-        
-        //making the call
-        
-        Task {
-            do {
-                let response = try await token.sendMessage(text: prompt,
-                                                           model: ChatGPTModel.gpt_hyphen_4o_hyphen_mini,
-                                                           systemText: "You are a reordering expert",
-                                                           temperature: 0.5)
-                
-                if let data = response.data(using: .utf8),
-                   let jsonArray = try? JSONDecoder().decode([String].self, from: data) {
-                    //return the string list
-                    completion(jsonArray)
-                } else {
-                    print("Failed to parse OpenAI response")
-                    completion([])
-                }
-                
-                
-            } catch {
-                print("Error fetching reordered categories: \(error.localizedDescription)")
-                completion([])
+    func reorderUserCategory(latest: [String: Int], currentInterestList: [String]) async throws -> [String] {
+        let latestSorted = latest.sorted { $0.value > $1.value }
+
+        let prompt = """
+        I will give you 2 lists: a dictionary of the user's latest category interactions, and a list of current categories. Based on significant interaction scores, reorder the current categories only if the data clearly shows preference or disinterest. Combine the sorted interactions with the current list's original order and weight.
+
+        Only include categories that exist in the current list. Return just a Swift array of strings in this format: ["Category1", "Category2", ...] — no extra explanation or formatting.
+
+        Latest interaction categories: \(latestSorted)
+        Current category list: \(currentInterestList)
+        """
+
+        let token = ChatGPTAPI(apiKey: Keys.openAIKey)
+
+        do {
+            let response = try await token.sendMessage(
+                text: prompt,
+                model: ChatGPTModel.gpt_hyphen_4o_hyphen_mini,
+                systemText: "You are a reordering expert",
+                temperature: 0.5
+            )
+
+            guard let data = response.data(using: .utf8) else {
+                print("⚠️ Could not convert response to UTF-8 data")
+                return []
             }
+
+            do {
+                let decoded = try JSONDecoder().decode([String].self, from: data)
+                return decoded
+            } catch {
+                print("⚠️ Failed to decode JSON: \(error)")
+                return []
+            }
+
+        } catch {
+            print("❌ OpenAI API error: \(error)")
+            return []
         }
     }
 }

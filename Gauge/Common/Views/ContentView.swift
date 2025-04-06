@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     @StateObject private var authVM = AuthenticationVM()
@@ -14,6 +15,8 @@ struct ContentView: View {
     @State private var isSigningUp = false
     @State private var selectedTab: Int = 0
     @State private var showSplashScreen: Bool = true
+    @Environment(\.modelContext) private var modelContext
+    @Query var userResponses: [UserResponses]
     
     var body: some View {
         if showSplashScreen {
@@ -99,11 +102,25 @@ struct ContentView: View {
                         async let userInteractions = userVM.getUserPostInteractions(userId: signedInUser.userId, setCurrentUserData: true)
                         async let userPosts = userVM.getUserPosts(userId: signedInUser.userId, setCurrentUserData: true)
                         async let userFavorites = userVM.getUserFavorites(userId: signedInUser.userId, setCurrentUserData: true)
-                        async let userViews = userVM.getUserNumViews(userId: signedInUser.userId, setCurrentUserData: true)
-                        async let userResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userNumViews = userVM.getUserNumViews(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userNumResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
                         
                         do {
                             _ = try await userData
+                            
+                            if let userResponse = userResponses.first {
+                                let newCategories = userVM.user.myCategories
+                                if Set(newCategories) != Set(userResponse.currentUserCategories) {
+                                    userResponse.currentUserCategories = newCategories
+                                    print("Replaced UserResponses current categories with: " + String(describing: newCategories))
+                                }
+                                
+//                                let newTopics = userVM.user.myTopics
+//                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
+//                                    userResponse.currentUserTopics = newTopics
+//                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
+//                                }
+                            }
                             
                             await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
                             postVM.watchForCurrentFeedPostChanges()
@@ -122,8 +139,8 @@ struct ContentView: View {
                             }
                             
                             _ = try await (
-                                userViews,
-                                userResponses,
+                                userNumViews,
+                                userNumResponses,
                                 userFavorites
                             )
                         } catch {
@@ -132,20 +149,45 @@ struct ContentView: View {
                     }
                 }
             }
-            .onChange(of: userVM.user.myResponses) { oldResponses, newResponses in
-                print(newResponses)
-            }
-            .onChange(of: userVM.user.myComments) { oldComments, newComments in
-                print(newComments)
-            }
-            .onChange(of: userVM.user.myViews) { oldViews, newViews in
-                print(newViews)
-            }
-            .onChange(of: userVM.user.myFavorites) { oldFavorites, newFavorites in
-                print(newFavorites)
-            }
-            .onChange(of: userVM.user.myPosts) { oldPosts, newPosts in
-                print(newPosts)
+            .task {
+                do {
+                    let userResponse: UserResponses
+                    if let existing = userResponses.first {
+                        userResponse = existing
+                    } else {
+                        print("⚠️ No UserResponses found. Creating one.")
+                        let newResponse = UserResponses()
+                        modelContext.insert(newResponse)
+                        userResponse = newResponse
+                    }
+                    
+                    let newCategories = try await userVM.reorderUserCategory(
+                        latest: userResponse.userCategoryResponses,
+                        currentInterestList: userResponse.currentUserCategories
+                    )
+                    
+                    userResponse.currentUserCategories = newCategories.isEmpty
+                    ? userResponse.currentUserCategories
+                    : newCategories
+                    
+                    userResponse.userCategoryResponses = [:]
+                    
+                    /*
+                     let newTopics = try await userVM.reorderUserTopics(
+                     latest: userResponse.userTopicResponses,
+                     currentInterestList: userResponse.currentUserTopics
+                     )
+                     
+                     userResponse.currentUserTopics = newTopics.isEmpty
+                     ? userResponse.currentUserTopics
+                     : newTopics
+                     
+                     userResponse.userTopicResponses = [:]
+                     */
+                    
+                } catch {
+                    print("❌ Error reordering categories: \(error)")
+                }
             }
         }
     }
