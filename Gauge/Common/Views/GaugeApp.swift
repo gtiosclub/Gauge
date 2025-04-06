@@ -59,31 +59,22 @@ struct GaugeApp: App {
         let schema = Schema([])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-    
     @StateObject var userVM: UserFirebase = UserFirebase()
     @StateObject var postVM: PostFirebase = PostFirebase()
     @State private var navigationPath: NavigationPath = NavigationPath()
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $navigationPath, root: {
+            NavigationStack(path: $navigationPath) {
                 ContentView()
-                
                 .fullScreenCover(isPresented: $scheduler.shouldInterrupt) {
                     TakeTimeView()
                         .environmentObject(scheduler)
                     }
             })
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(for: UserResponses.self)
         .environmentObject(userVM)
         .environmentObject(postVM)
-//        .modelContainer(for: [UserResponses.self])
     }
 }

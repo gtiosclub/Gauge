@@ -213,7 +213,7 @@ struct BinaryFeedPost: View {
                 Spacer(minLength: 1008.0)
             }
             
-            Spacer(minLength: 20.0)
+            Spacer(minLength: 50.0)
         }
 //        .padding()
         .frame(width: UIScreen.main.bounds.width)
