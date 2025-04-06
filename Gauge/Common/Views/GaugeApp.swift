@@ -8,45 +8,13 @@
 import SwiftUI
 import SwiftData
 import FirebaseCore
-import FirebaseMessaging
-import UserNotifications
 
-
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
-    
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        FirebaseApp.configure()
-        
-
-        UNUserNotificationCenter.current().delegate = self
-        Messaging.messaging().delegate = self
-        
-        requestPushNotifications(application: application)
-        
-        return true
-    }
-    
-    func requestPushNotifications(application: UIApplication) {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if granted {
-                DispatchQueue.main.async {
-                    application.registerForRemoteNotifications()
-                }
-            }
-        }
-    }
-    
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("FCM Token: \(fcmToken ?? "No Token")")
-    }
-
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.alert, .sound, .badge])
-    }
+class AppDelegate: NSObject, UIApplicationDelegate {
+  func application(_ application: UIApplication,
+                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    FirebaseApp.configure()
+    return true
+  }
 }
 
 @main
