@@ -39,7 +39,7 @@ struct SelectLabelNames: View {
             }
         }
         .padding()
-        onAppear {
+        .onAppear {
             stepCompleted = selectedIndex != nil
         }
     }
@@ -94,9 +94,9 @@ struct BinaryOptionView: View {
 
 
 #Preview {
-//    SelectLabelNames(slidingOptions: [
-//        .init(left: "No", right: "Yes"),
-//        .init(left: "Hate", right: "Love"),
-//        .init(left: "Cringe", right: "Cool")
-//    ])
+    SelectLabelNames(slidingOptions: [
+        .init(left: "No", right: "Yes"),
+        .init(left: "Hate", right: "Love"),
+        .init(left: "Cringe", right: "Cool")
+    ], selectedIndex: .constant(0), stepCompleted: .constant(false))
 }

@@ -183,6 +183,6 @@ struct ProgressIndicator: View {
 }
 
 #Preview {
-//    PostCreationView()
-//        .environmentObject(PostFirebase())
+    PostCreationView(modalSize: .constant(380))
+        .environmentObject(PostFirebase())
 }
