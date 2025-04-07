@@ -82,7 +82,6 @@ final class GaugeTests: XCTestCase {
     func testCategoryRanker() {
         let vm = PostFirebase()
         let userCategories = [
-            "Fake Category to force a result of 25",
             "🎮 Video Games",
             "🎬 Movies",
             "🎵 Music",
@@ -101,6 +100,6 @@ final class GaugeTests: XCTestCase {
         print(userCategories)
         print(postCategories)
         print(result!)
-        XCTAssertEqual(result, 25)
+        XCTAssertEqual(result, 93)
     }
 }
