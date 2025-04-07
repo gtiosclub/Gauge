@@ -78,4 +78,16 @@ final class GaugeTests: XCTestCase {
         print(postDate)
         print(options)
     }
+    
+    func testFetchUserSearch() async {
+        let viewModel = SearchViewModel()
+        do {
+            let userSearchResult = try await viewModel.fetchUsers(for: "test")
+            for user in userSearchResult {
+                print(user.username)
+            }
+        } catch {
+            print("error")
+        }
+    }
 }

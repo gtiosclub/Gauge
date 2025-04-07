@@ -1,10 +1,12 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject var userVM: UserFirebase
-    @EnvironmentObject var postVM: PostFirebase
+    @ObservedObject var userVM: UserFirebase
+    @EnvironmentObject var postVM: PostFirebase // will need to be changed to observed object and passed in on ContentView (like userVM) when postVM is actually used to display posts on profiles
     @State private var selectedTab: String = "Takes"
     @State private var selectedBadge: BadgeModel? = nil
+    @State var isCurrentUser: Bool
+    
     let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
 
     var body: some View {
@@ -223,20 +225,21 @@ struct ProfileView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: SettingsView()) {
-                        Image(systemName: "gearshape")
-                            .foregroundColor(.black)
+                if isCurrentUser {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        NavigationLink(destination: SettingsView()) {
+                            Image(systemName: "gearshape")
+                                .foregroundColor(.black)
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        NavigationLink(destination: ProfileEditView()) {
+                            Text("edit profile")
+                                .font(.system(size: 15))
+                        }
                     }
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: ProfileEditView()) {
-                        Text("edit profile")
-                            .font(.system(size: 15))
-                    }
-                }
-                
             }
             .sheet(item: $selectedBadge) { badge in
                 BadgeDetailView(badge: badge)
@@ -293,8 +296,7 @@ struct VoteCardsView: View {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView()
-            .environmentObject(UserFirebase())
+        ProfileView(userVM: UserFirebase(), isCurrentUser: false)
             .environmentObject(PostFirebase())
     }
 }

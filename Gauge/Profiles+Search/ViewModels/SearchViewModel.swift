@@ -7,6 +7,7 @@
 import FirebaseFirestore
 import Firebase
 import Foundation
+import UIKit
 
 class SearchViewModel: ObservableObject {
     private let vectorSearchCollection = "_firestore-vector-search"
@@ -121,4 +122,62 @@ class SearchViewModel: ObservableObject {
         
         return questions
     }
+    
+    func searchPostsByCategory(_ category: Category) async throws -> [PostResult] {
+
+        let snapshot = try await Firestore.firestore()
+            .collection("POSTS")
+            .whereField("categories", arrayContains: category.rawValue)
+            .getDocuments()
+
+
+        var results: [PostResult] = []
+
+        for document in snapshot.documents {
+            let data = document.data()
+
+            guard let question = data["question"] as? String else { continue }
+            let options = [
+                data["responseOption1"] as? String ?? "",
+                data["responseOption2"] as? String ?? ""
+            ]
+            let postId = document.documentID
+            let postDateAndTime = data["postDateAndTime"] as? String ?? ""
+            let timeAgo = DateConverter.timeAgo(from: DateConverter.convertStringToDate(postDateAndTime) ?? Date())
+
+            let postResult = PostResult(id: postId, question: question, options: options, timeAgo: timeAgo)
+            results.append(postResult)
+        }
+
+        return results
+    }
+
+    func fetchUsers(for query: String) async throws-> [UserResult] {
+        let profileVM = ProfileViewModel()
+        
+        let userRef = Firebase.db.collection("USERS")
+        let firebaseQuery = userRef
+            .whereField("username", isGreaterThanOrEqualTo: query)
+            .whereField("username", isLessThan: query + "\u{f8ff}")
+            .order(by: "username")
+            .limit(to: 10)
+        
+        let snapshot = try await firebaseQuery.getDocuments()
+        var users: [UserResult] = []
+        
+        for userDocument in snapshot.documents {
+            let userId = userDocument.documentID
+            guard let username = userDocument["username"] as? String else {continue}
+            let profilePhotoUrl = userDocument["profilePhoto"] as? String ?? ""
+            
+            var lightweightUser = UserResult(userId: userId, username: username, profilePhotoUrl: profilePhotoUrl)
+
+            users.append(lightweightUser)
+        }
+        
+        return users
+    }
 }
+
+
+
