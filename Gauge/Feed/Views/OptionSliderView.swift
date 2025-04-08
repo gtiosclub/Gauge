@@ -70,12 +70,6 @@ struct OptionSliderView: View {
     }
 }
 
-struct ContentView: View {
-    var body: some View {
-        OptionSliderView()
-    }
-}
-
 #Preview {
-    ContentView()
-} 
+    OptionSliderView()
+}
