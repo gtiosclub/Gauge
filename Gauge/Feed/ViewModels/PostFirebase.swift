@@ -1348,4 +1348,18 @@ class PostFirebase: ObservableObject {
 //        }
 
     }
+    
+    func categoryRanker(user_categories: [String], post_categories: [Category]) -> Int? {
+        let point_distribution = [30, 25, 20, 18, 18, 15, 15, 12, 12, 10, 10, 10, 8, 8, 8, 5, 5, 5, 5, 5]
+        var total_points = 0
+        for (ind, cat) in user_categories.enumerated() {
+            if let cat_object = Category.stringToCategory(cat) {
+                if post_categories.contains(cat_object) {
+                    total_points += point_distribution[ind]
+                }
+            }
+        }
+        return total_points
+    }
+
 }
