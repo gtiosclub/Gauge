@@ -40,7 +40,7 @@ struct GaugeApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationPath, root: {
-                GenderSelectionView()
+                ContentView()
             })
         }
         .modelContainer(sharedModelContainer)
