@@ -9,8 +9,8 @@ import SwiftUI
 
 struct PostCreationView: View {
     @Binding var modalSize: CGFloat
+    @Binding var showCreatePost: Bool
 
-    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
     @State private var currentStep: Int = 1
@@ -23,8 +23,9 @@ struct PostCreationView: View {
     @State var postType: PostType?
     @State var optionsSelectedIndex: Int?
     
-    init(modalSize: Binding<CGFloat>) {
+    init(modalSize: Binding<CGFloat>, showCreatePost: Binding<Bool>) {
         self._modalSize = modalSize
+        self._showCreatePost = showCreatePost
     }
         
     private var totalSteps: Int = 5
@@ -43,7 +44,8 @@ struct PostCreationView: View {
                 Spacer()
                 
                Button(action: {
-                   dismiss()
+                   modalSize = 380
+                   showCreatePost = false
                }) {
                     Circle()
                         .fill(Color.gray.opacity(0.15))
@@ -93,9 +95,8 @@ struct PostCreationView: View {
             HStack {
                 if currentStep > 1 {
                     Button(action: {
+                        currentStep = max(currentStep - 1, 1)
                         withAnimation {
-                            currentStep = max(currentStep - 1, 1)
-                            
                             if currentStep == 1 {
                                 currentStepTitle = "New Post"
                                 modalSize = 380
@@ -131,16 +132,19 @@ struct PostCreationView: View {
                 }
                 
                 Button(action: {
-                    withAnimation {
-                        if (currentStep == 5) {
-                            postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right)
-                            
-                            dismiss()
+                    if (currentStep == 5) {
+                        modalSize = 380
+                        showCreatePost = false
+                        
+                        Task {
+                            await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right)
                         }
+                    }
+                    
+                    currentStep = min(currentStep + 1, totalSteps)
+                    stepCompleted = false
                         
-                        currentStep = min(currentStep + 1, totalSteps)
-                        stepCompleted = false
-                        
+                    withAnimation {
                         if currentStep == 1 {
                             currentStepTitle = "New Post"
                             modalSize = 380
@@ -155,13 +159,15 @@ struct PostCreationView: View {
                             modalSize = 380
                         } else if currentStep == 5 {
                             currentStepTitle = "Review Post"
-                            modalSize = 800
+                            if showCreatePost {
+                                modalSize = 800
+                            }
                             stepCompleted = true
                         }
                     }
                 }) {
                     Capsule()
-                        .fill(Color.blue)
+                        .fill(stepCompleted ? Color.darkBlue : Color.lightBlue)
                         .frame(width: currentStep == 1 ? 329 : 83, height: 43)
                         .overlay(
                             HStack {
@@ -343,7 +349,7 @@ struct BinaryPostPreview: View {
 }
 
 #Preview {
-    PostCreationView(modalSize: .constant(380))
+    PostCreationView(modalSize: .constant(380), showCreatePost: .constant(true))
         .environmentObject(PostFirebase())
         .environmentObject(UserFirebase())
 }

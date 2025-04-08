@@ -16,6 +16,9 @@ struct FeedView: View {
     @State private var isConfirmed: Bool = false
     @State private var hasSkipped: Bool = false
     
+    @State private var showPostCreation: Bool = false
+    @State private var modalSize: CGFloat = 380
+    
     var body: some View {
         GeometryReader { geo in
             VStack {
@@ -33,8 +36,7 @@ struct FeedView: View {
                         }
                         
                         Button {
-                            //TODO: Insert Button action here
-                            print("Create Button")
+                            showPostCreation = true
                         } label: {
                             Image(systemName: "plus.rectangle")
                                 .resizable()
@@ -270,6 +272,16 @@ struct FeedView: View {
                 .background(.black)
             }
             .background(.black)
+            .sheet(isPresented: $showPostCreation) {
+                PostCreationView(modalSize: $modalSize, showCreatePost: $showPostCreation)
+                    .presentationDetents([.height(modalSize)])
+                    .presentationBackground(.clear)
+                    .background(
+                        RoundedRectangle(cornerRadius: 36, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .padding(.horizontal, 10)
+            }
         }
 //        .onAppear() {
 //            postVM.addDummyPosts()

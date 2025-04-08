@@ -15,7 +15,7 @@ class Scheduler: ObservableObject {
     private var timer: Timer?
 
     init() {
-        startDailyInterruptTimer()
+//        startDailyInterruptTimer()
     }
 
     func startDailyInterruptTimer() {

@@ -18,13 +18,15 @@ struct FirebaseTesting: View {
                 VStack(spacing: 20) {
                     Section(header: Text("Write Data")) {
                         Button("Add Binary Post") {
-                            postVM.createBinaryPost(
-                                userId: "Zmi5Cgm7dtbqCDbLOrhbbDAq8T92",
-                                categories: [.sports(.nba)],
-                                question: "Is Shai the MVP",
-                                responseOption1: "Nah, free throw merchant🙅‍♂️",
-                                responseOption2: "Stats dont lie"
-                            )
+                            Task {
+                                await postVM.createBinaryPost(
+                                    userId: "Zmi5Cgm7dtbqCDbLOrhbbDAq8T92",
+                                    categories: [.sports(.nba)],
+                                    question: "Is Shai the MVP",
+                                    responseOption1: "Nah, free throw merchant🙅‍♂️",
+                                    responseOption2: "Stats dont lie"
+                                )
+                            }
                         }
                         
                         
@@ -224,9 +226,9 @@ struct FirebaseTesting: View {
                             )
                         }
                         
-                        Button("Generate 20 Keywords") {
-                            postVM.generatePostKeywords(postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2")
-                        }
+//                        Button("Generate 20 Keywords") {
+//                            postVM.generatePostKeywords(postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2")
+//                        }
                         
                         Button("Remove View") {
                             postVM.removeView(

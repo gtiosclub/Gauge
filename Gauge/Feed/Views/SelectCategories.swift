@@ -131,6 +131,7 @@ struct SelectCategories: View {
                                 if (!selectedCategories.contains(Category.stringToCategory(category)!)) {
                                     selectedCategories.append(Category.stringToCategory(category)!)
                                 }
+                                categoryInput = ""
                                 isSearching = false
                                 stepCompleted = selectedCategories.count > 0
                             }

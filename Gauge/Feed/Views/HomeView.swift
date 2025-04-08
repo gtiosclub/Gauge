@@ -46,7 +46,7 @@ struct HomeView: View {
                 }
             }
             .sheet(isPresented: $showPostCreation) {
-                PostCreationView(modalSize: $modalSize)
+                PostCreationView(modalSize: $modalSize, showCreatePost: $showPostCreation)
                     .presentationDetents([.height(modalSize)])
                     .presentationBackground(.clear)
                     .background(
