@@ -203,7 +203,7 @@ struct BinaryFeedPost: View {
             NavigationLink(destination: {
                 HomeView()
             }, label: {
-                Text("\(post.responseResult1 + post.responseResult2) votes")
+                Text("\(post.calculateResponses().reduce(0, +)) votes")
                     .foregroundColor(.gray)
                     .scaledToFit()
                     .frame(maxWidth: .infinity)

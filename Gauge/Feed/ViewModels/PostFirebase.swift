@@ -108,13 +108,6 @@ class PostFirebase: ObservableObject {
                             responseOption: newResponseDoc["responseOption"] as? String ?? ""
                         )
                         currentPost.responses.append(newResponse)
-                        if let binaryPost = currentPost as? BinaryPost {
-                            if newResponse.responseOption == binaryPost.responseOption1 {
-                                binaryPost.responseResult1 = binaryPost.responseResult1 + 1
-                            } else if newResponse.responseOption == binaryPost.responseOption2 {
-                                binaryPost.responseResult2 = binaryPost.responseResult2 + 1
-                            }
-                        }
                     }
                 }
             }
@@ -156,6 +149,7 @@ class PostFirebase: ObservableObject {
                                 postId: postId,
                                 userId: data["userId"] as? String ?? "",
                                 categories: data["categories"] as? [Category] ?? [],
+                                topics: data["topics"] as? [String] ?? [],
                                 postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
                                     ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
                                     ?? Date(),
@@ -171,6 +165,7 @@ class PostFirebase: ObservableObject {
                                 postId: postId,
                                 userId: data["userId"] as? String ?? "",
                                 categories: data["categories"] as? [Category] ?? [],
+                                topics: data["topics"] as? [String] ?? [],
                                 postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
                                     ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
                                     ?? Date(),
@@ -182,21 +177,6 @@ class PostFirebase: ObservableObject {
                                 favoritedBy: data["favoritedBy"] as? [String] ?? []
                             )
                             return (postId, post)
-
-                        case PostType.RankPost.rawValue:
-                            let post = RankPost(
-                                postId: postId,
-                                userId: data["userId"] as? String ?? "",
-                                categories: data["categories"] as? [Category] ?? [],
-                                postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
-                                    ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
-                                    ?? Date(),
-                                question: data["question"] as? String ?? "",
-                                responseOptions: data["responseOptions"] as? [String] ?? [],
-                                favoritedBy: data["favoritedBy"] as? [String] ?? []
-                            )
-                            return (postId, post)
-
                         default:
                             return (postId, nil)
                         }
@@ -251,9 +231,10 @@ class PostFirebase: ObservableObject {
                             let post = BinaryPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
+                                                  topics: newPostData["topics"] as? [String] ?? [],
                                                   postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
-                                                      ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
-                                                      ?? Date(),
+                                                  ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
+                                                  ?? Date(),
                                                   question: newPostData["question"] as? String ?? "",
                                                   responseOption1: newPostData["responseOption1"] as? String ?? "",
                                                   responseOption2: newPostData["responseOption2"] as? String ?? "",
@@ -265,6 +246,7 @@ class PostFirebase: ObservableObject {
                             let post = SliderPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: newPostData["categories"] as? [Category] ?? [],
+                                                  topics: newPostData["topics"] as? [String] ?? [],
                                                   postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
                                                       ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
                                                       ?? Date(),
@@ -288,6 +270,7 @@ class PostFirebase: ObservableObject {
                                     postId: newPostData["postId"] as? String ?? "",
                                     userId: newPostData["userId"] as? String ?? "",
                                     categories: newPostData["categories"] as? [Category] ?? [],
+                                    topics: newPostData["topics"] as? [String] ?? [],
                                     postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
                                     question: newPostData["question"] as? String ?? "",
                                     responseOption1: newPostData["responseOption1"] as? String ?? "",
@@ -302,6 +285,7 @@ class PostFirebase: ObservableObject {
                                     postId: newPostData["postId"] as? String ?? "",
                                     userId: newPostData["userId"] as? String ?? "",
                                     categories: newPostData["categories"] as? [Category] ?? [],
+                                    topics: newPostData["topics"] as? [String] ?? [],
                                     postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
                                     question: newPostData["question"] as? String ?? "",
                                     lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
@@ -352,6 +336,7 @@ class PostFirebase: ObservableObject {
                     postId: postId,
                     userId: newPostData["userId"] as? String ?? "",
                     categories: newPostData["categories"] as? [Category] ?? [],
+                    topics: newPostData["topics"] as? [String] ?? [],
                     postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
                         ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
                         ?? Date(),
@@ -368,6 +353,7 @@ class PostFirebase: ObservableObject {
                     postId: postId,
                     userId: newPostData["userId"] as? String ?? "",
                     categories: newPostData["categories"] as? [Category] ?? [],
+                    topics: newPostData["topics"] as? [String] ?? [],
                     postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
                         ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
                         ?? Date(),
@@ -385,16 +371,6 @@ class PostFirebase: ObservableObject {
         }
         DispatchQueue.main.async {
             self.allQueriedPosts = self.allQueriedPosts // triggers UI update if needed
-        }
-    }
-    
-    func addView(responseOption: Int) {
-        if let post = feedPosts.first as? BinaryPost {
-            if responseOption == 1 {
-                post.responseResult1 += 1
-            } else if responseOption == 2 {
-                post.responseResult2 += 1
-            }
         }
     }
     
@@ -498,8 +474,6 @@ class PostFirebase: ObservableObject {
             "question": post.question,
             "responseOption1": post.responseOption1,
             "responseOption2": post.responseOption2,
-            "responseResult1": post.responseResult1,
-            "responseResult2": post.responseResult2,
             "favoritedBy": post.favoritedBy
         ]) { error in
             if let error = error {
@@ -564,38 +538,38 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func createRankPost(userId: String, categories: [Category], question: String, responseOptions: [String]) {
-        let post = RankPost(
-            postId: UUID().uuidString,
-            userId: userId,
-            categories: categories,
-            postDateAndTime: Date(),
-            question: question,
-            responseOptions: responseOptions
-        )
-        
-        let documentRef = Firebase.db.collection("POSTS").document(post.postId)
-        
-        // Main post document data
-        documentRef.setData([
-            "type": PostType.RankPost.rawValue,
-            "postId": post.postId,
-            "userId": post.userId,
-            "categories": post.categories,
-            "postDateAndTime": Timestamp(date: post.postDateAndTime),
-            "question": post.question,
-            "responseOptions": post.responseOptions,
-            "viewCounter": 0,
-            "responseCounter": 0,
-            "favoritedBy": post.favoritedBy,
-        ]) { error in
-            if let error = error {
-                print("Error writing RankPost document: \(error)")
-            } else {
-                print("Added new ranked post to POSTS \(documentRef.documentID)")
-            }
-        }
-    }
+//    func createRankPost(userId: String, categories: [Category], question: String, responseOptions: [String]) {
+//        let post = RankPost(
+//            postId: UUID().uuidString,
+//            userId: userId,
+//            categories: categories,
+//            postDateAndTime: Date(),
+//            question: question,
+//            responseOptions: responseOptions
+//        )
+//        
+//        let documentRef = Firebase.db.collection("POSTS").document(post.postId)
+//        
+//        // Main post document data
+//        documentRef.setData([
+//            "type": PostType.RankPost.rawValue,
+//            "postId": post.postId,
+//            "userId": post.userId,
+//            "categories": post.categories,
+//            "postDateAndTime": Timestamp(date: post.postDateAndTime),
+//            "question": post.question,
+//            "responseOptions": post.responseOptions,
+//            "viewCounter": 0,
+//            "responseCounter": 0,
+//            "favoritedBy": post.favoritedBy,
+//        ]) { error in
+//            if let error = error {
+//                print("Error writing RankPost document: \(error)")
+//            } else {
+//                print("Added new ranked post to POSTS \(documentRef.documentID)")
+//            }
+//        }
+//    }
     
     func addResponse(postId: String, userId: String, responseOption: String) {
         let responseId = UUID().uuidString
@@ -856,9 +830,10 @@ class PostFirebase: ObservableObject {
             score += DateConverter.calcDateScore(postDate: post.postDateAndTime)
             
             //Call topics function for topic mathcing score
+            score += topicRanker(user_topics: user.myTopics, post_topics: post.topics) ?? 0
             
             //Call cateogries function for category matching score
-            
+            score += categoryRanker(user_categories: user.myCategories, post_categories: post.categories) ?? 0
             
             if score > bestScore {
                 bestScore = score
@@ -1123,13 +1098,12 @@ class PostFirebase: ObservableObject {
                 )
             ],
             categories: [.other(.conspiraryTheories), .other(.funny)],
+            topics: [],
             viewCounter: 257,
             postDateAndTime: Date(),
             question: "Was the moon landing fake? 🌕🚀",
             responseOption1: "Yes, obviously",
             responseOption2: "Touch grass",
-            responseResult1: 152,
-            responseResult2: 89,
             favoritedBy: ["user404", "user999"]
         ))
         
@@ -1151,13 +1125,12 @@ class PostFirebase: ObservableObject {
                 Response(responseId: "resp014", userId: "user013", responseOption: "Yupppp")
             ],
             categories: [.entertainment(.tvShows), .other(.funny), .news(.politics)],
-            viewCounter: 1_020,
+            topics: [],
+            viewCounter: 1020,
             postDateAndTime: Date(),
             question: "Jimmy Kimmel is the best talk show host",
             responseOption1: "Nah",
             responseOption2: "Yupppp",
-            responseResult1: 575,
-            responseResult2: 445,
             favoritedBy: ["user006", "user007", "user008"]
         ))
         
@@ -1174,13 +1147,12 @@ class PostFirebase: ObservableObject {
                 Response(responseId: "resp010", userId: "user333", responseOption: "I'd rather perish")
             ],
             categories: [.lifestyle(.finances), .other(.funny)],
+            topics: [],
             viewCounter: 612,
             postDateAndTime: Date(),
             question: "Would you rather give up coffee or streaming services? ☕📺",
             responseOption1: "Goodbye Netflix",
             responseOption2: "I'd rather perish",
-            responseResult1: 300,
-            responseResult2: 312,
             favoritedBy: ["user321", "user654"]
         ))
         
@@ -1199,13 +1171,12 @@ class PostFirebase: ObservableObject {
                 Response(responseId: "resp012", userId: "user011", responseOption: "Yeah...")
             ],
             categories: [.lifestyle(.homeDecor), .other(.funny)],
+            topics: [],
             viewCounter: 825,
             postDateAndTime: Date(),
             question: "Is it gross to have carpet in your bedroom?",
             responseOption1: "TF no",
             responseOption2: "Yeah...",
-            responseResult1: 467,
-            responseResult2: 35,
             favoritedBy: ["user001", "user004", "user008"]
         ))
         
@@ -1222,13 +1193,12 @@ class PostFirebase: ObservableObject {
                 Response(responseId: "resp002", userId: "user555", responseOption: "Nah, just a fine")
             ],
             categories: [.lifestyle(.homeDecor), .other(.funny)],
+            topics: [],
             viewCounter: 305,
             postDateAndTime: Date(),
             question: "Should landlords go to prison for putting carpet in bathrooms?",
             responseOption1: "Absolutely 🚔",
             responseOption2: "Nah, just a fine",
-            responseResult1: 184,
-            responseResult2: 121,
             favoritedBy: ["user789", "user456"]))
 
         feedPosts.append(BinaryPost(
@@ -1244,13 +1214,12 @@ class PostFirebase: ObservableObject {
                 Response(responseId: "resp004", userId: "user333", responseOption: "NO. Don't start this again.")
             ],
             categories: [.lifestyle(.cooking), .other(.funny)],
+            topics: [],
             viewCounter: 520,
             postDateAndTime: Date(),
             question: "Is a hot dog a sandwich? 🌭",
             responseOption1: "Yes, it's meat between bread",
             responseOption2: "NO. Don't start this again.",
-            responseResult1: 258,
-            responseResult2: 262,
             favoritedBy: ["user111", "user999"]
         ))
 
@@ -1267,13 +1236,12 @@ class PostFirebase: ObservableObject {
                 Response(responseId: "resp006", userId: "user333", responseOption: "No, grow up")
             ],
             categories: [.entertainment(.movies), .other(.funny)],
+            topics: [],
             viewCounter: 790,
             postDateAndTime: Date(),
             question: "Is Die Hard a Christmas movie? 🎄🔫",
             responseOption1: "Yes, obviously",
             responseOption2: "No, grow up",
-            responseResult1: 432,
-            responseResult2: 358,
             favoritedBy: ["user555", "user777"]
         ))
 
@@ -1300,13 +1268,12 @@ class PostFirebase: ObservableObject {
                 Response(responseId: "resp008", userId: "user999", responseOption: "No, I want a divorce already")
             ],
             categories: [.educational(.cs), .news(.worldEvents), .other(.funny)],
+            topics: [],
             viewCounter: 400,
             postDateAndTime: Date(),
             question: "Would you let AI write your wedding vows? 💍🤖",
             responseOption1: "Yes, AI is poetic",
             responseOption2: "No, I want a divorce already",
-            responseResult1: 180,
-            responseResult2: 220,
             favoritedBy: ["user888", "user111"]
         ))
 
@@ -1361,5 +1328,15 @@ class PostFirebase: ObservableObject {
         }
         return total_points
     }
-
+    
+    func topicRanker(user_topics: [String], post_topics: [String]) -> Int {
+        let point_distribution = [30, 25, 20, 18, 18, 15, 15, 12, 12, 10, 10, 10, 8, 8, 8, 5, 5, 5, 5, 5]
+        var total_points = 0
+        for (ind, cat) in user_topics.enumerated() {
+            if post_topics.contains(cat) {
+                total_points += point_distribution[ind]
+            }
+        }
+        return total_points
+    }
 }

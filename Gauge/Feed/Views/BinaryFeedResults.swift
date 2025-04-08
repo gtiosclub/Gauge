@@ -63,7 +63,7 @@ struct BinaryFeedResults: View {
             BinaryResultView(post: post, optionSelected: optionSelected)
                 .padding(.top, 10)
                 
-            Text("\(post.responseResult1 + post.responseResult2) votes")
+            Text("\(post.calculateResponses().reduce(0, +)) votes")
                 .foregroundColor(.gray)
                 .padding(.top, 10)
                         

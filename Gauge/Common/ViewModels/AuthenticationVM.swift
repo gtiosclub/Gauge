@@ -52,6 +52,7 @@ class AuthenticationVM: ObservableObject {
                             "profilePhoto": tempUser.profilePhoto,
                             "phoneNumber": tempUser.phoneNumber,
                             "myCategories": tempUser.myCategories,
+                            "myCategories": tempUser.myTopics,
                             "myNextPosts": tempUser.myNextPosts,
                             "myPostSearches": tempUser.myPostSearches,
                             "myProfileSearches": tempUser.myProfileSearches,
