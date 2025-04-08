@@ -143,6 +143,15 @@ struct ContentView: View {
                                 userNumResponses,
                                 userFavorites
                             )
+                            
+                            async let updateNextPosts: () = userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
+                            
+                            async let updateStreakAndLogin: () = userVM.updateUserStreakAndLastLogin(user: userVM.user)
+                            
+                            _ = try await (
+                                updateStreakAndLogin,
+                                updateNextPosts
+                            )
                         } catch {
                             print("❌ Error loading user data: \(error)")
                         }

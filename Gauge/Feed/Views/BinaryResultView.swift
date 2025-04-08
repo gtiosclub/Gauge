@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct BinaryResultView: View {
-    let post: BinaryPost
+    @ObservedObject var post: BinaryPost
     let optionSelected: Int
     
     var body: some View {

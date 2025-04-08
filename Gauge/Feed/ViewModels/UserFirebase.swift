@@ -473,4 +473,39 @@ class UserFirebase: ObservableObject {
             return []
         }
     }
+    
+    func updateUserStreakAndLastLogin(user: User) async throws {
+        let hoursSinceLastLogin = Date().timeIntervalSince(user.lastLogin) / 3600
+        
+        if hoursSinceLastLogin > 48 {
+            // Reset streak
+            let now = Date()
+            let updatedData: [String: Any] = [
+                "lastLogin": DateConverter.convertDateToString(now),
+                "streak": 1
+            ]
+            try await Firebase.db.collection("USERS").document(user.userId).updateData(updatedData)
+            print("🔁 Streak reset to 1 and lastLogin updated.")
+            
+        } else if hoursSinceLastLogin > 24 {
+            // Increment streak
+            let now = Date()
+            let updatedData: [String: Any] = [
+                "lastLogin": DateConverter.convertDateToString(now),
+                "streak": user.streak + 1
+            ]
+            try await Firebase.db.collection("USERS").document(user.userId).updateData(updatedData)
+            print("🔥 Streak incremented and lastLogin updated.")
+            
+        }
+    }
+    
+    func updateUserNextPosts(userId: String, postIds: [String]) async throws {        
+        let data: [String: Any] = [
+            "myNextPosts": postIds
+        ]
+
+        try await Firebase.db.collection("USERS").document(userId).updateData(data)
+        print("✅ myNextPosts updated for user \(userId)")
+    }
 }
