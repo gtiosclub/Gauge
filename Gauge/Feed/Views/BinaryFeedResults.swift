@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct BinaryFeedResults: View {
-    var post: BinaryPost
+    @ObservedObject var post: BinaryPost
     var optionSelected: Int
     
     var body: some View {
@@ -69,9 +69,15 @@ struct BinaryFeedResults: View {
                         
             withAnimation(.none, {
                 CommentsView(comments: post.comments)
-            })            
+                    .onChange(of: post.comments) {old, new in
+                            print("recognized  commentschanged")
+                    }
+            })
         }
         .padding()
+        .onAppear() {
+            print(post.responses)
+        }
     }
     
     var profileImage: some View {

@@ -23,9 +23,24 @@ protocol Post: ObservableObject, Identifiable {
     func calculateResponses() -> [Int]
 }
 
+enum PostWrapper: Identifiable {
+    case binary(BinaryPost)
+    case slider(SliderPost)
+    
+    var id: String {
+        switch self {
+        case .binary(let post):
+            return post.postId
+        case .slider(let post):
+            return post.postId
+        }
+    }
+}
+
 //class AnyObservablePost: ObservableObject, Identifiable {
 //    let postId: String
 //    let wrappedPost: any Post
+//    
 //
 //    init(_ post: any Post) {
 //        self.postId = post.postId

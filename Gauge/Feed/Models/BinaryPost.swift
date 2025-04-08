@@ -7,7 +7,7 @@
 
 import Foundation
 
-class BinaryPost: Post, Equatable {
+class BinaryPost: Post, Equatable, ObservableObject {
     // Post protocol attributes
     @Published var postId: String
     var userId: String

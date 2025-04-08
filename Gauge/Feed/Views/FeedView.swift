@@ -19,44 +19,49 @@ struct FeedView: View {
     var body: some View {
         GeometryReader { geo in
             VStack {
-                HStack(spacing: (geo.size.width / 3.0)) {
-                    Button {
-                        //TODO: Insert Button action here
-                        print("Filter Button")
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 13, height: 13)
-                            .foregroundStyle(.white)
+                if !isConfirmed {
+                    HStack(spacing: (geo.size.width / 3.0)) {
+                        Button {
+                            //TODO: Insert Button action here
+                            print("Filter Button")
+                        } label: {
+                            Image(systemName: "line.3.horizontal.decrease")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 13, height: 13)
+                                .foregroundStyle(.white)
+                        }
+                        
+                        Button {
+                            //TODO: Insert Button action here
+                            print("Create Button")
+                        } label: {
+                            Image(systemName: "plus.rectangle")
+                                .resizable()
+                                .scaledToFill()
+                                .rotationEffect(.degrees(90))
+                                .frame(width: 18, height: 18)
+                                .foregroundStyle(.white)
+                        }
+                        
+                        Button {
+                            postVM.undoSkipPost(userId: userVM.user.userId)
+                            Task {
+                                try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
+                            }
+                        } label: {
+                            Image(systemName: "arrow.uturn.backward")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 18, height: 18)
+                                .foregroundStyle((postVM.skippedPost == nil) ? .gray : .white)
+                        }
+                        .disabled((postVM.skippedPost == nil))
                     }
-                    
-                    Button {
-                        //TODO: Insert Button action here
-                        print("Create Button")
-                    } label: {
-                        Image(systemName: "plus.rectangle")
-                            .resizable()
-                            .scaledToFill()
-                            .rotationEffect(.degrees(90))
-                            .frame(width: 18, height: 18)
-                            .foregroundStyle(.white)
-                    }
-                    
-                    Button {
-                        postVM.undoSkipPost(userId: userVM.user.userId)
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 18, height: 18)
-                            .foregroundStyle((postVM.skippedPost == nil) ? .gray : .white)
-                    }
-                    .disabled((postVM.skippedPost == nil))
+                    .bold()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.bottom, 10)
                 }
-                .bold()
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .padding(.bottom, 10)
                 
                 ZStack {
                     HStack {
@@ -245,7 +250,12 @@ struct FeedView: View {
                                         // Skip logic
                                         postVM.skippedPost = postVM.skipPost(user: userVM.user)
                                     }
-                                    isConfirmed = false
+                                    withAnimation {
+                                        isConfirmed = false
+                                    }
+                                    Task {
+                                        try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
+                                    }
                                 }
                                 
                                 //                            withAnimation(.none) {

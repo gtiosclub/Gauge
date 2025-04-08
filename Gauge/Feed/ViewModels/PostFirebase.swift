@@ -35,13 +35,11 @@ class PostFirebase: ObservableObject {
         currentFeedPostCommentsListener?.remove()
 
         // Setup listener for new index 0 subcollections
-        let currentPost = feedPosts[0]
-        let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
+        let postRef = Firebase.db.collection("POSTS").document(feedPosts[0].postId)
         currentFeedPostCommentsListener = postRef.collection("COMMENTS").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else { return }
             
             DispatchQueue.main.async {
-                self.objectWillChange.send()
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
                         print("New comment: \(diff.document.data())")
@@ -50,7 +48,7 @@ class PostFirebase: ObservableObject {
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
-                            postId: currentPost.postId,
+                            postId: self.feedPosts[0].postId,
                             userId: id,
                             date: date,
                             commentId: id,
@@ -58,20 +56,20 @@ class PostFirebase: ObservableObject {
                             dislikes: newCommentDoc["dislikes"] as? [String] ?? [],
                             content: newCommentDoc["content"] as? String ?? ""
                             )
-                            currentPost.comments.append(newComment)
-
+                        
+                        self.feedPosts[0].comments.append(newComment)
                     } else if diff.type == .removed {
                         print("Comment removed: \(diff.document.documentID)")
-                        currentPost.comments.removeAll { $0.commentId == diff.document.documentID }
+                        self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                     } else if diff.type == .modified {
                         print("Comment modified: \(diff.document.documentID)")
-                        currentPost.comments.removeAll { $0.commentId == diff.document.documentID }
+                        self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
-                            postId: currentPost.postId,
+                            postId: self.feedPosts[0].postId,
                             userId: id,
                             date: date,
                             commentId: id,
@@ -79,20 +77,20 @@ class PostFirebase: ObservableObject {
                             dislikes: newCommentDoc["dislikes"] as? [String] ?? [],
                             content: newCommentDoc["content"] as? String ?? ""
                             )
-                            currentPost.comments.append(newComment)
+                        
+                        self.feedPosts[0].comments.append(newComment)
                     }
+//                    self.objectWillChange.send()
+                    self.feedPosts = self.feedPosts
                 }
             }
         }
-        // Save the comment listener in the variables
-        // Makes changes to the Post's comments
     }
     
     func setUpResponsesListener() {
         currentFeedPostResponsesListener?.remove()
         
-        let currentPost = feedPosts[0]
-        let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
+        let postRef = Firebase.db.collection("POSTS").document(feedPosts[0].postId)
         currentFeedPostResponsesListener = postRef.collection("RESPONSES").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else { return }
             DispatchQueue.main.async {
@@ -107,7 +105,9 @@ class PostFirebase: ObservableObject {
                             userId: newResponseDoc["userId"] as? String ?? "",
                             responseOption: newResponseDoc["responseOption"] as? String ?? ""
                         )
-                        currentPost.responses.append(newResponse)
+                        
+                        self.feedPosts[0].responses.append(newResponse)
+                        self.feedPosts = self.feedPosts
                     }
                 }
             }
@@ -116,14 +116,16 @@ class PostFirebase: ObservableObject {
     
     func setUpViewsListener() {
         currentFeedPostViewsListener?.remove()
-        let currentPost = feedPosts[0]
-        let postRef = Firebase.db.collection("POSTS").document(currentPost.postId)
+
+        let postRef = Firebase.db.collection("POSTS").document(feedPosts[0].postId)
         currentFeedPostViewsListener = postRef.collection("VIEWS").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else { return }
             DispatchQueue.main.async {
                 self.objectWillChange.send()
                 let viewCount = snapshot.documents.count
-                currentPost.viewCounter = viewCount
+                self.feedPosts[0].viewCounter = viewCount
+                
+                self.feedPosts = self.feedPosts
             }
         }
     }
@@ -830,10 +832,10 @@ class PostFirebase: ObservableObject {
             score += DateConverter.calcDateScore(postDate: post.postDateAndTime)
             
             //Call topics function for topic mathcing score
-            score += topicRanker(user_topics: user.myTopics, post_topics: post.topics) ?? 0
+            score += topicRanker(user_topics: user.myTopics, post_topics: post.topics)
             
             //Call cateogries function for category matching score
-            score += categoryRanker(user_categories: user.myCategories, post_categories: post.categories) ?? 0
+            score += categoryRanker(user_categories: user.myCategories, post_categories: post.categories)
             
             if score > bestScore {
                 bestScore = score
@@ -842,10 +844,14 @@ class PostFirebase: ObservableObject {
             
         }
         
-        let bestPost = allQueriedPosts[bestIndex]
-        print("Next feed post is " + bestPost.postId + " with a score of " + String(bestScore))
-        allQueriedPosts.remove(at: bestIndex)
-        allQueriedPosts.insert(bestPost, at: 0)
+        if allQueriedPosts.count > 0 {
+            let bestPost = allQueriedPosts[bestIndex]
+            print("Next feed post is " + bestPost.postId + " with a score of " + String(bestScore))
+            allQueriedPosts.remove(at: bestIndex)
+            allQueriedPosts.insert(bestPost, at: 0)
+        } else {
+            print("No more posts available")
+        }
     }
 
     func removeView(postId: String, userId: String) {
@@ -994,9 +1000,11 @@ class PostFirebase: ObservableObject {
     
     func findNextPost(user: User) {
         // load the next post in the feed
-        getNextBestPost(user: user)
-        feedPosts.append(allQueriedPosts[0])
-        allQueriedPosts.remove(at: 0)
+        if feedPosts.count < 5 && !allQueriedPosts.isEmpty {
+            getNextBestPost(user: user)
+            feedPosts.append(allQueriedPosts[0])
+            allQueriedPosts.remove(at: 0)
+        }
 
         // listen for changes in the new post
         watchForCurrentFeedPostChanges()
@@ -1013,6 +1021,7 @@ class PostFirebase: ObservableObject {
         skippedPost = nil
         
         removeView(postId: feedPosts.first!.postId, userId: userId)
+        watchForCurrentFeedPostChanges()
         
         print("Restored skipped post: \(skipped.postId)")
     }
@@ -1316,7 +1325,7 @@ class PostFirebase: ObservableObject {
 
     }
     
-    func categoryRanker(user_categories: [String], post_categories: [Category]) -> Int? {
+    func categoryRanker(user_categories: [String], post_categories: [Category]) -> Int {
         let point_distribution = [30, 25, 20, 18, 18, 15, 15, 12, 12, 10, 10, 10, 8, 8, 8, 5, 5, 5, 5, 5]
         var total_points = 0
         for (ind, cat) in user_categories.enumerated() {
