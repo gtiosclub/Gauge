@@ -25,6 +25,7 @@ class User: Equatable, Identifiable, ObservableObject {
     var profilePhoto: String
     var phoneNumber: String = ""
     var myCategories: [String] = []
+    var myTopics: [String] = [] // List of topics that user is interested in / interact with
     var myNextPosts: [String] = []
     
     // MARK: AI Algorithm Variables
