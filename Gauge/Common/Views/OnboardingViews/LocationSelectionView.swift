@@ -113,10 +113,8 @@ struct LocationSelectionView: View {
                                 }
                             }
                             .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(radius: 2)
                         }
-                        .frame(maxHeight: 150)
+                        .frame(maxHeight: .infinity)
                     }
                 }
             }
@@ -127,19 +125,7 @@ struct LocationSelectionView: View {
             Button(action: {
                 navigateToEmojiSelection = true
             }) {
-                HStack {
-                    Spacer()
-                    Text(toSkip ? "Skip" : "Next")
-                        .foregroundColor(.white)
-                        .bold()
-                    Image(systemName: "arrow.right")
-                        .foregroundColor(.white)
-                    Spacer()
-                }
-                .padding()
-                .background(Color.blue)
-                .opacity(toSkip ? 0.4 : 1.0)
-                .cornerRadius(25)
+                skipOrNextActionButton(toSkip: toSkip)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 8)

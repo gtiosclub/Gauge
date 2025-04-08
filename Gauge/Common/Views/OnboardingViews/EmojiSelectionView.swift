@@ -6,12 +6,7 @@
 //
 
 import SwiftUI
-
-extension String {
-    var containsOnlyEmoji: Bool {
-        return self.count == 1 && self.unicodeScalars.allSatisfy { $0.properties.isEmoji || $0.properties.isEmojiPresentation }
-    }
-}
+import UIKit
 
 struct EmojiSelectionView: View {
     @Environment(\.dismiss) private var dismiss
@@ -50,22 +45,8 @@ struct EmojiSelectionView: View {
                 HStack {
                     Spacer()
                     
-                    TextField("", text: $emoji)
-                        .onChange(of: emoji, initial: false) { _, newValue in
-                            if newValue.count > 1 {
-                                emoji = String(newValue.prefix(1))
-                            }
-                            
-                            if (!emoji.containsOnlyEmoji) {
-                                emoji = ""
-                            }
-                        }
+                    EmojiTextFieldRepresentable(text: $emoji)
                         .frame(width: 168, height: 168)
-                        .background(Color.gray.opacity(0.2))
-                        .multilineTextAlignment(.center)
-                        .clipShape(Circle())
-                        .keyboardType(.default)
-                        .font(.system(size: 120))
                     
                     Spacer()
                 }
@@ -77,19 +58,7 @@ struct EmojiSelectionView: View {
             Button(action: {
                 navigateToBioCreation = true
             }) {
-                HStack {
-                    Spacer()
-                    Text(emoji.isEmpty ? "Skip" : "Next")
-                        .foregroundColor(.white)
-                        .bold()
-                    Image(systemName: "arrow.right")
-                        .foregroundColor(.white)
-                    Spacer()
-                }
-                .padding()
-                .background(Color.blue)
-                .opacity(emoji.isEmpty ? 0.4 : 1.0)
-                .cornerRadius(25)
+                skipOrNextActionButton(toSkip: emoji.isEmpty)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 8)
@@ -102,6 +71,66 @@ struct EmojiSelectionView: View {
         }
     }
 }
+
+extension String {
+    var containsOnlyEmoji: Bool {
+        return self.count == 1 && self.unicodeScalars.allSatisfy { $0.properties.isEmoji || $0.properties.isEmojiPresentation }
+    }
+}
+
+struct EmojiTextFieldRepresentable: UIViewRepresentable {
+    @Binding var text: String
+
+    class Coordinator: NSObject, UITextFieldDelegate {
+        var parent: EmojiTextFieldRepresentable
+
+        init(_ parent: EmojiTextFieldRepresentable) {
+            self.parent = parent
+        }
+
+        func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+            let currentText = textField.text ?? ""
+            let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
+
+            if newText.count > 1 {
+                return false
+            }
+
+            if !newText.isEmpty && !newText.containsOnlyEmoji {
+                return false
+            }
+
+            parent.text = newText
+            return true
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    func makeUIView(context: Context) -> EmojiTextField {
+        let textField = EmojiTextField()
+        textField.delegate = context.coordinator
+        textField.textAlignment = .center
+        textField.font = UIFont.systemFont(ofSize: 120)
+        textField.backgroundColor = UIColor.gray.withAlphaComponent(0.2)
+        textField.layer.cornerRadius = 84
+        textField.clipsToBounds = true
+        return textField
+    }
+
+    func updateUIView(_ uiView: EmojiTextField, context: Context) {
+        uiView.text = text
+    }
+}
+
+class EmojiTextField: UITextField {
+    override var textInputMode: UITextInputMode? {
+        .activeInputModes.first(where: { $0.primaryLanguage == "emoji" })
+    }
+}
+
 
 #Preview {
     EmojiSelectionView()

@@ -35,7 +35,7 @@ struct BioCreationView: View {
             .padding(.top, 12)
             .padding(.horizontal, 18)
             
-            Spacer().frame(height: 100)
+            Spacer().frame(height: 30)
             
             VStack(alignment: .leading, spacing: 8) {
                 Text("Create a bio to display on your profile.")
@@ -44,13 +44,6 @@ struct BioCreationView: View {
                     .padding(.bottom, 20)
                 
                 TextField("This is optional.", text: $bio, axis: .vertical)
-                    .onChange(of: bio, initial: false) { _, newValue in
-                        if (!bio.isEmpty) {
-                            toSkip = false
-                        } else {
-                            toSkip = true
-                        }
-                    }
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(12)
@@ -61,20 +54,9 @@ struct BioCreationView: View {
             Spacer()
 
             Button(action: {
+                
             }) {
-                HStack {
-                    Spacer()
-                    Text(toSkip ? "Skip" : "Next")
-                        .foregroundColor(.white)
-                        .bold()
-                    Image(systemName: "arrow.right")
-                        .foregroundColor(.white)
-                    Spacer()
-                }
-                .padding()
-                .background(Color.blue)
-                .opacity(toSkip ? 0.4 : 1.0)
-                .cornerRadius(25)
+                skipOrNextActionButton(toSkip: bio.isEmpty)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 8)
@@ -83,7 +65,7 @@ struct BioCreationView: View {
         }
         .navigationBarBackButtonHidden(true)
         
-//        add navigation back to main app
+//        add navigation to next step
 //        .navigationDestination(isPresented: $navigateTo) {
 //        }
     }

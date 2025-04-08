@@ -49,8 +49,9 @@ struct GenderSelectionView: View {
                     }
                     .padding()
                     .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray6)) // fill first
+
                     )
                 }
             }
@@ -61,19 +62,7 @@ struct GenderSelectionView: View {
             Button(action: {
                 navigateToLocation = true
             }) {
-                HStack {
-                    Spacer()
-                    Text(genderSelection.isEmpty ? "Skip" : "Next")
-                        .foregroundColor(.white)
-                        .bold()
-                    Image(systemName: "arrow.right")
-                        .foregroundColor(.white)
-                    Spacer()
-                }
-                .padding()
-                .background(Color.blue)
-                .opacity(genderSelection.isEmpty ? 0.4 : 1.0)
-                .cornerRadius(25)
+                skipOrNextActionButton(toSkip: genderSelection.isEmpty)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 8)
@@ -113,6 +102,29 @@ struct AboutYouProgressBar: View {
         }
         .frame(height: 20)
         .padding(.top, 8)
+    }
+}
+
+struct skipOrNextActionButton: View {
+    var toSkip: Bool
+    
+    var body: some View {
+        HStack {
+            Spacer()
+            Text(toSkip ? "Skip" : "Next")
+                .foregroundColor(toSkip ? .blue : .white)
+                .bold()
+            
+            if (!toSkip) {
+                Image(systemName: "arrow.right")
+                    .foregroundColor(.white)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .background(toSkip ? Color(red: 0.843, green: 0.918, blue: 0.996) : Color.blue)
+        .cornerRadius(25)
     }
 }
 
