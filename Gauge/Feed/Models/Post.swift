@@ -14,6 +14,7 @@ protocol Post: ObservableObject, Identifiable {
     var profilePhoto: String {get set}
     var comments: [Comment] {get set}
     var responses: [Response] {get set}
+    var topics: [String] {get set}
     var categories: [Category] {get set} // String in Firebase
     var viewCounter: Int {get set}
     var postDateAndTime: Date {get set} // String in Firebase
