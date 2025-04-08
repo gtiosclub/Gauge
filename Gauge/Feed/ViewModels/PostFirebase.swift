@@ -1295,6 +1295,7 @@ class PostFirebase: ObservableObject {
 
     }
     
+
     func categoryRanker(user_categories: [String], post_categories: [Category]) -> Int {
         let point_distribution = [30, 25, 20, 18, 18, 15, 15, 12, 12, 10, 10, 10, 8, 8, 8, 5, 5, 5, 5, 5]
         var total_points = 0
@@ -1318,4 +1319,50 @@ class PostFirebase: ObservableObject {
         }
         return total_points
     }
+
+    func getUserResponseForCurrentPost(userId: String) -> String? {
+        let current_post = feedPosts[0]
+//        var post_responses : [String: Int] = [:]
+//        getResponses(postId: current_post.postId) { result in
+//            post_responses = result
+//            print("RESULTS")
+//            print(result)
+//        }
+        //        for user in post_responses {
+        //            if user.userId == userId {
+        //                return user.responseOption
+        //            }
+        //        }
+        //        return nil
+        
+        
+//        Firebase.db.collection("POSTS").document(current_post.postId).collection("RESPONSES").getDocuments { (snapshot, error) in
+//            if let error = error{
+//                print("Error getting Post data: \(error)")
+//            } else {
+//                for document in snapshot!.documents {
+//                    let data = document.data()
+//                    print("DATA")
+//                    print(data)
+//                    let data_user = data["userId"] as? String ?? "CANT GET USERID"
+////                    print("\(data_user) is a \(type(of: data_user))")
+//                    if String(data_user) == userId {
+//                        response = data["responseOption"] as? String ?? "CANT GET RESPONSE"
+//                    }
+//                }
+//            }
+//        }
+        var response: String = ""
+        let responses = current_post.responses
+        print("Responses within the method: \n\(responses)")
+        for res in responses {
+            if res.userId == userId {
+                response = res.responseOption
+            }
+        }
+        
+        return response
+    }
+
+
 }
