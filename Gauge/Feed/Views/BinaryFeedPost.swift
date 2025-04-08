@@ -306,5 +306,6 @@ extension View {
 #Preview {
     BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0), skipping: .constant(false)
     )
+    .environmentObject(PostFirebase())
 }
 

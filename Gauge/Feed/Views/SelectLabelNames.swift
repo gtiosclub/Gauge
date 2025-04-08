@@ -21,6 +21,7 @@ struct SelectLabelNames: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            FadingDivider()
             ForEach(slidingOptions.indices, id: \.self) { index in
                 BinaryOptionView(
                     leftOption: slidingOptions[index].left,
@@ -33,12 +34,10 @@ struct SelectLabelNames: View {
                         }
                     }
                 )
-                if index != slidingOptions.count - 1 {
-                    Divider()
-                }
+                
+                FadingDivider()
             }
         }
-        .padding()
         .onAppear {
             stepCompleted = selectedIndex != nil
         }
