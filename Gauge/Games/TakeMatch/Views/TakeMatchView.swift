@@ -39,7 +39,8 @@ struct TakeMatchView: View {
                     currentScreen = 3
                 }
             case 4:
-                ResultsView(responses: responses, guessedMatches: guessedMatches) {
+                ResultsView(responses: responses, guessedMatches: guessedMatches, mcManager: mcManager) {
+                    mcManager.disconnectFromSession()
                     responses = [:]
                     guessedMatches = [:]
                     currentScreen = 1

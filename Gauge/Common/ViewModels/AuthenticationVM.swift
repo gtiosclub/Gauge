@@ -53,7 +53,8 @@ class AuthenticationVM: ObservableObject {
                             "phoneNumber": tempUser.phoneNumber,
                             "myCategories": tempUser.myCategories,
                             "myNextPosts": tempUser.myNextPosts,
-                            "mySearches": tempUser.mySearches,
+                            "myPostSearches": tempUser.myPostSearches,
+                            "myProfileSearches": tempUser.myProfileSearches,
                             "myAccessedProfiles": tempUser.myAccessedProfiles
                         
             ] as [String : Any]
