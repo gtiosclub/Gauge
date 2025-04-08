@@ -124,6 +124,7 @@ class FriendsViewModel: ObservableObject {
             let myProfileSearches = userData["myProfileSearches"] as? [String] ?? []
             let myComments = userData["myComments"] as? [String] ?? []
             let myCategories = userData["myCategories"] as? [String] ?? []
+            let myTopics = userData["myTopics"] as? [String] ?? []
             let myAccessedProfiles = userData["myAccessedProfiles"] as? [String] ?? []
             let badges = userData["badges"] as? [String] ?? []
             let streak = userData["streak"] as? Int ?? 0
@@ -146,6 +147,7 @@ class FriendsViewModel: ObservableObject {
                 myProfileSearches: myProfileSearches,
                 myComments: myComments,
                 myCategories: myCategories,
+                myTopics: myTopics,
                 badges: badges,
                 streak: streak,
                 profilePhoto: profilePhoto,

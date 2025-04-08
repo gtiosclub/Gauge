@@ -11,7 +11,6 @@ import ChatGPTSwift
 
 class UserFirebase: ObservableObject {
     @Published var user: User
-    // = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
     
     init() {
         self.user = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
@@ -40,6 +39,7 @@ class UserFirebase: ObservableObject {
             myPostSearches: data["myPostSearches"] as? [String] ?? [],
             myProfileSearches: data["myProfileSearches"] as? [String] ?? [],
             myCategories: data["myCategories"] as? [String] ?? [],
+            myTopics: data["myTopics"] as? [String] ?? [],
             badges: data["badges"] as? [String] ?? [],
             streak: data["streak"] as? Int ?? 0,
             profilePhoto: data["profilePhoto"] as? String ?? "",

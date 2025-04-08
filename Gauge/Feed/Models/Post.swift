@@ -20,6 +20,7 @@ protocol Post: ObservableObject, Identifiable {
     var postDateAndTime: Date {get set} // String in Firebase
     var favoritedBy: [String] {get set} // UserIds of users that have favorited
     var question: String {get set}
+    func calculateResponses() -> [Int]
 }
 
 //class AnyObservablePost: ObservableObject, Identifiable {

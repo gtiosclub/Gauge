@@ -12,8 +12,8 @@ class SliderPost: Post, Equatable {
     var userId: String
     var username: String = "" // NOT stored in Firebase
     var profilePhoto: String = "" // NOT stored in Firebase
-    var comments: [Comment]
-    var responses: [Response]
+    @Published var comments: [Comment]
+    @Published var responses: [Response]
     var categories: [Category]
     var topics: [String]
     var viewCounter: Int
@@ -73,5 +73,18 @@ class SliderPost: Post, Equatable {
     
     static func == (lhs: SliderPost, rhs: SliderPost) -> Bool {
         return lhs.postId == rhs.postId
+    }
+    
+    func calculateResponses() -> [Int] {
+        var responses = [0, 0]
+        for response in self.responses {
+            if response.responseOption == self.lowerBoundLabel {
+                responses[0] += 1
+            } else {
+                responses[1] += 1
+            }
+        }
+        
+        return responses
     }
 }

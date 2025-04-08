@@ -71,4 +71,17 @@ class BinaryPost: Post, Equatable {
     static func == (lhs: BinaryPost, rhs: BinaryPost) -> Bool {
         return lhs.postId == rhs.postId
     }
+    
+    func calculateResponses() -> [Int] {
+        var responses = [0, 0]
+        for response in self.responses {
+            if response.responseOption == self.responseOption1 {
+                responses[0] += 1
+            } else {
+                responses[1] += 1
+            }
+        }
+        
+        return responses
+    }
 }

@@ -45,14 +45,14 @@ struct FirebaseTesting: View {
                             )
                         }
                         
-                        Button("Add Ranked Post") {
-                            postVM.createRankPost(
-                                userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
-                                categories: [.arts(.music)],
-                                question: "Best Half-Time Performance?",
-                                responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
-                            )
-                        }
+//                        Button("Add Ranked Post") {
+//                            postVM.createRankPost(
+//                                userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+//                                categories: [.arts(.music)],
+//                                question: "Best Half-Time Performance?",
+//                                responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
+//                            )
+//                        }
                         
                         Button("Add user to VIEWS of a post (hardcoded for Firebase testing)") {
                             postVM.addViewToPost(
@@ -120,14 +120,14 @@ struct FirebaseTesting: View {
                             )
                         }
                         
-                        Button("Add Ranked Post") {
-                            postVM.createRankPost(
-                                userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
-                                categories: [.arts(.music)],
-                                question: "Best Half-Time Performance?",
-                                responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
-                            )
-                        }
+//                        Button("Add Ranked Post") {
+//                            postVM.createRankPost(
+//                                userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+//                                categories: [.arts(.music)],
+//                                question: "Best Half-Time Performance?",
+//                                responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
+//                            )
+//                        }
                         
                         Button("Add response") {
                             postVM.addResponse(

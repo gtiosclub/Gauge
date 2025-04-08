@@ -199,10 +199,8 @@ struct FeedView: View {
                                                         var responseChosen = "NA"
                                                         if (optionSelected == 1) {
                                                             responseChosen = post.responseOption1
-                                                            post.responseResult1 += 1
                                                         } else if (optionSelected == 2) {
                                                             responseChosen = post.responseOption2
-                                                            post.responseResult2 += 1
                                                         }
                                                         postVM.addResponse(postId: post.postId, userId: user.userId, responseOption: responseChosen)
                                                     }
