@@ -8,24 +8,25 @@
 import SwiftUI
 
 struct InputPostQuestion: View {
-    @State private var questionText: String = ""
+    @Binding var questionText: String
+    @Binding var stepCompleted: Bool
     private let maxCharacters = 150
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("New Post")
-                .font(.headline)
-            
-            TextField("What’s your hot take?", text: $questionText)
+        VStack(alignment: .leading) {
+            TextField("What’s your hot take?", text: $questionText, axis: .vertical)
                 .font(.title)
-                .foregroundColor(.mediumGray)
+                .foregroundColor(.black)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.leading)
                 .lineLimit(3)
-                .padding(.vertical, 4)
                 .onChange(of: questionText) {
                     if questionText.count > maxCharacters {
                         questionText = String(questionText.prefix(maxCharacters))
+                    }
+                    
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        stepCompleted = !questionText.isEmpty
                     }
                 }
 
@@ -40,11 +41,14 @@ struct InputPostQuestion: View {
 
             }
         }
-        .padding()
+        .onAppear {
+                stepCompleted = !questionText.isEmpty
+        }
+        .padding(.horizontal)
     }
 }
 
 #Preview {
-    InputPostQuestion()
+//    InputPostQuestion()
 }
 

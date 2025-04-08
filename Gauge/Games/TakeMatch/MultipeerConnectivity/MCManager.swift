@@ -8,6 +8,7 @@ extension String {
 struct AdvertisedInfo {
     let roomCode: String?
     let username: String
+    let profileLink: String
 }
 
 class MCManager: NSObject, ObservableObject {
@@ -19,6 +20,7 @@ class MCManager: NSObject, ObservableObject {
     let nearbyServiceBrowser: MCNearbyServiceBrowser
 
     @Published var username: String
+    @Published var profileLink: String
     @Published var connectedPeers: [MCPeerID] = []
     @Published var discoveredPeers: [MCPeerID: AdvertisedInfo] = [:]
     @Published var receivedInvite: Bool = false
@@ -96,6 +98,7 @@ class MCManager: NSObject, ObservableObject {
     init(yourName: String) {
         
         self.username = yourName
+        self.profileLink = "TestProfile"
         myPeerID = MCPeerID(displayName: yourName)
         session = MCSession(peer: myPeerID)
         nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: nil, serviceType: serviceType)
@@ -154,25 +157,32 @@ class MCManager: NSObject, ObservableObject {
 //        stopAdvertising()
 //    }
     
-    func setUsername(username: String) {
-        self.username = username
-        nearbyServiceAdvertiser.stopAdvertisingPeer()
-        nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(
-            peer: myPeerID,
-            discoveryInfo: ["username": username],
-            serviceType: serviceType
-        )
-        nearbyServiceAdvertiser.delegate = self
-        startAdvertising()
-    }
-    
-    func startHosting(with roomCode: String) {
-        stopAdvertising()
-        nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: ["roomCode": roomCode, "username": username], serviceType: serviceType)
-        nearbyServiceAdvertiser.delegate = self
-        startAdvertising()
-    }
-    
+    func setUsernameAndProfile(username: String, profileLink: String? = nil) {
+            self.username = username
+            nearbyServiceAdvertiser.stopAdvertisingPeer()
+            let discoveryInfo: [String: String] = {
+                var info = ["username": username]
+                if let profileLink = profileLink {
+                    info["profileLink"] = profileLink
+                }
+                return info
+            }()
+            nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(
+                peer: myPeerID,
+                discoveryInfo: discoveryInfo,
+                serviceType: serviceType
+            )
+            nearbyServiceAdvertiser.delegate = self
+            startAdvertising()
+        }
+
+        func startHosting(with roomCode: String) {
+            stopAdvertising()
+            nearbyServiceAdvertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: ["roomCode": roomCode, "username": username, "profileLink": profileLink], serviceType: serviceType)
+            nearbyServiceAdvertiser.delegate = self
+            startAdvertising()
+        }
+
     func joinRoom(with code: String) {
         
         if let targetPeer = discoveredPeers.first(where: { $0.value.roomCode == code })?.key {
@@ -264,7 +274,8 @@ extension MCManager: MCNearbyServiceBrowserDelegate {
             
             let roomCode = info?["roomCode"] // might be nil for joiners
             let username = info?["username"] ?? peerID.displayName
-            let advertisedInfo = AdvertisedInfo(roomCode: roomCode, username: username)
+            let profileLink = info?["profileLink"] ?? "TestProfile"
+            let advertisedInfo = AdvertisedInfo(roomCode: roomCode, username: username, profileLink: profileLink)
             self.discoveredPeers[peerID] = advertisedInfo
             print("Open rooms: \(self.openRoomsCount)")
         }

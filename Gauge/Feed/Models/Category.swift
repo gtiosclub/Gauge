@@ -116,6 +116,8 @@ enum Category: Hashable {
         case workLifeBalance = "⚖️ Work-Life Balance"
         case productivity = "📊 Productivity"
         case minimalism = "🧳 Minimalism"
+        case food = "🍔 Food"
+        case drinks = "🍹 Drinks"
     }
 
     enum Arts: String, CaseIterable {

@@ -25,6 +25,7 @@ class User: Equatable, Identifiable, ObservableObject {
     var profilePhoto: String
     var phoneNumber: String = ""
     var myCategories: [String] = []
+    var myTopics: [String] = [] // List of topics that user is interested in / interact with
     var myNextPosts: [String] = []
     
     // MARK: AI Algorithm Variables
@@ -54,7 +55,7 @@ class User: Equatable, Identifiable, ObservableObject {
         self.myAccessedProfiles = []
     }
     
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String = "", myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], myTopics: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -69,6 +70,7 @@ class User: Equatable, Identifiable, ObservableObject {
         self.myProfileSearches = myProfileSearches
         self.myComments = myComments
         self.myCategories = myCategories
+        self.myTopics = myTopics
         self.badges = badges
         self.profilePhoto = profilePhoto
         self.myAccessedProfiles = myAccessedProfiles

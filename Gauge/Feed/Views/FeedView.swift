@@ -16,47 +16,54 @@ struct FeedView: View {
     @State private var isConfirmed: Bool = false
     @State private var hasSkipped: Bool = false
     
+    @State private var showPostCreation: Bool = false
+    @State private var modalSize: CGFloat = 380
+    
     var body: some View {
         GeometryReader { geo in
             VStack {
-                HStack(spacing: (geo.size.width / 3.0)) {
-                    Button {
-                        //TODO: Insert Button action here
-                        print("Filter Button")
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 13, height: 13)
-                            .foregroundStyle(.white)
+                if !isConfirmed {
+                    HStack(spacing: (geo.size.width / 3.0)) {
+                        Button {
+                            //TODO: Insert Button action here
+                            print("Filter Button")
+                        } label: {
+                            Image(systemName: "line.3.horizontal.decrease")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 13, height: 13)
+                                .foregroundStyle(.white)
+                        }
+                        
+                        Button {
+                            showPostCreation = true
+                        } label: {
+                            Image(systemName: "plus.rectangle")
+                                .resizable()
+                                .scaledToFill()
+                                .rotationEffect(.degrees(90))
+                                .frame(width: 18, height: 18)
+                                .foregroundStyle(.white)
+                        }
+                        
+                        Button {
+                            postVM.undoSkipPost(userId: userVM.user.userId)
+                            Task {
+                                try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
+                            }
+                        } label: {
+                            Image(systemName: "arrow.uturn.backward")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 18, height: 18)
+                                .foregroundStyle((postVM.skippedPost == nil) ? .gray : .white)
+                        }
+                        .disabled((postVM.skippedPost == nil))
                     }
-                    
-                    Button {
-                        //TODO: Insert Button action here
-                        print("Create Button")
-                    } label: {
-                        Image(systemName: "plus.square")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 18, height: 18)
-                            .foregroundStyle(.white)
-                    }
-                    
-                    Button {
-                        //TODO: Insert Button action here
-                        print("Undo Button")
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 18, height: 18)
-                            .foregroundStyle((postVM.skippedPost == nil) ? .gray : .white)
-                    }
-                    .disabled((postVM.skippedPost == nil))
+                    .bold()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.bottom, 10)
                 }
-                .bold()
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .padding(.bottom, 10)
                 
                 ZStack {
                     HStack {
@@ -152,6 +159,12 @@ struct FeedView: View {
                                     .frame(width: max(0, geo.size.width))
                                 }
                             }
+                        } else if postVM.feedPosts.count == 0 {
+                            Text("Finding Your Optimal Posts...")
+                                .font(.title)
+                            ProgressView()
+                                .scaleEffect(5.0)
+                                .frame(width: 200, height: 200)
                         }
                         
                         RoundedRectangle(cornerRadius: 10.0)
@@ -169,10 +182,16 @@ struct FeedView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { gesture in
+                                if postVM.feedPosts.count == 0 {
+                                    return
+                                }
+                                
                                 withAnimation {
                                     if gesture.translation.height.magnitude > gesture.translation.width.magnitude {
                                         if !hasSkipped {
-                                            dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
+                                            if (optionSelected != 0 && gesture.translation.height < 0) || gesture.translation.height > 0 {
+                                                dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
+                                            }
                                         } else {
                                             withAnimation(.smooth(duration: 0.5)) {
                                                 dragOffset = CGSize(width: 0.0, height: 800.0)
@@ -181,10 +200,17 @@ struct FeedView: View {
                                         
                                         if dragOffset.height < -150 {
                                             if optionSelected != 0 {
-                                                if !isConfirmed && optionSelected == 1 {
-                                                    postVM.addView(responseOption: optionSelected)
-                                                } else if !isConfirmed {
-                                                    postVM.addView(responseOption: optionSelected)
+                                                if !isConfirmed {
+                                                    let user = userVM.user
+                                                    if let post = postVM.feedPosts.first as? BinaryPost {
+                                                        var responseChosen = "NA"
+                                                        if (optionSelected == 1) {
+                                                            responseChosen = post.responseOption1
+                                                        } else if (optionSelected == 2) {
+                                                            responseChosen = post.responseOption2
+                                                        }
+                                                        postVM.addResponse(postId: post.postId, userId: user.userId, responseOption: responseChosen)
+                                                    }
                                                 }
                                                 withAnimation {
                                                     isConfirmed = true
@@ -197,7 +223,6 @@ struct FeedView: View {
                                         if dragOffset.height > 150 && !hasSkipped {
                                             hasSkipped = true
                                             optionSelected = 0
-                                            isConfirmed = false
                                         }
                                         
                                     } else {
@@ -220,12 +245,19 @@ struct FeedView: View {
                                 if dragOffset.height > 150 && hasSkipped {
                                     if isConfirmed {
                                         // Next post logic
-                                        postVM.feedPosts.remove(at: 0)
+                                        postVM.feedPosts.removeFirst()
+                                        postVM.findNextPost(user: userVM.user)
+                                        postVM.skippedPost = nil
                                     } else {
                                         // Skip logic
-                                        postVM.feedPosts.remove(at: 0)
+                                        postVM.skippedPost = postVM.skipPost(user: userVM.user)
                                     }
-                                    isConfirmed = false
+                                    withAnimation {
+                                        isConfirmed = false
+                                    }
+                                    Task {
+                                        try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
+                                    }
                                 }
                                 
                                 //                            withAnimation(.none) {
@@ -240,11 +272,20 @@ struct FeedView: View {
                 .background(.black)
             }
             .background(.black)
-            
+            .sheet(isPresented: $showPostCreation) {
+                PostCreationView(modalSize: $modalSize, showCreatePost: $showPostCreation)
+                    .presentationDetents([.height(modalSize)])
+                    .presentationBackground(.clear)
+                    .background(
+                        RoundedRectangle(cornerRadius: 36, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .padding(.horizontal, 10)
+            }
         }
-        .onAppear() {
-            postVM.addDummyPosts()
-        }
+//        .onAppear() {
+//            postVM.addDummyPosts()
+//        }
     }
 }
 
