@@ -329,7 +329,111 @@ class UserFirebase: ObservableObject {
             "myProfileSearches": FieldValue.arrayUnion([search])
         ])
     }
-    
+  
+    // reorder user's topic using OpenAI
+    func reorderUserTopics(for user: User, with interactions: [String: Int]) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("USERS").document(user.userId)
+        
+        let currentTopics = user.myTopics
+        
+        // Format the interactions dictionary into a string for the OpenAI prompt
+        let interactionPairs = interactions.map { "\"\($0)\": \($1)" }.joined(separator: ", ")
+        let interactionsString = "{\(interactionPairs)}"
+        
+        let examplePrompt = """
+                Given the user's current topic list and their most recent interaction counts per topic, reorder the list so that the most relevant topics appear higher. Be **conservative**—only rearrange topics significantly if the interaction data clearly shows strong interest or disinterest.
+
+                - Always return exactly **20** topics.
+                - Topics may be added or removed at your discretion if needed for relevance.
+                - Index 0 = highest interest, index 19 = lowest.
+                - Return only a JSON list of 20 topic strings, no explanations.
+
+                Example:
+                Current Topics: ["AI", "Gaming", "Fitness", "Politics", "NFL", "Cooking", "Stocks", "Movies", "Fashion", "Travel", "NBA", "Music", "Photography", "Books", "Science", "Education", "Food", "Space", "Health", "History"]
+                Last Session Interactions: {"NFL": 14, "NBA": 13, "Gaming": 11, "AI": 2, "Books": 0, "Fashion": 1, "Science": 5, "Music": 6, "Politics": 0}
+                Output:
+                ["NFL", "NBA", "Gaming", "Music", "Science", "AI", "Cooking", "Fitness", "Stocks", "Movies", "Travel", "Photography", "Education", "Food", "Space", "Health", "Fashion", "History", "Politics", "Books"]
+
+                Now reorder this list:
+                Current Topics: \(currentTopics)
+                Last Session Interactions: \(interactionsString)
+                Output:
+                """
+        
+        let openAIRequest: [String: Any] = [
+            "model": "gpt-4o-mini",
+            "messages": [
+                ["role": "system", "content": "You are an assistant that helps personalize topic rankings for users based on session activity. Respond ONLY with a JSON list of 20 topic strings."],
+                ["role": "user", "content": examplePrompt]
+            ],
+            "temperature": 0.4
+        ]
+        
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            print("Invalid OpenAI URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(Keys.openAIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: openAIRequest, options: [])
+        } catch {
+            print("Failed to encode OpenAI request")
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("OpenAI API error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let data = data else {
+                print("No data received from OpenAI")
+                return
+            }
+
+            do {
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let choices = jsonResponse["choices"] as? [[String: Any]],
+                   let text = choices.first?["message"] as? [String: Any],
+                   let content = text["content"] as? String {
+                    
+                    guard let reorderedData = content.data(using: .utf8),
+                          let reorderedTopics = try JSONSerialization.jsonObject(with: reorderedData, options: []) as? [String],
+                          reorderedTopics.count == 20 else {
+                        print("Invalid or incomplete topic list returned")
+                        return
+                    }
+
+                    DispatchQueue.main.async {
+                        user.myTopics = reorderedTopics
+                    }
+
+                    // Save to Firestore
+                    userRef.updateData(["myTopics": reorderedTopics]) { error in
+                        if let error = error {
+                            print("Failed to update reordered topics: \(error.localizedDescription)")
+                        } else {
+                            print("User topics successfully reordered and updated")
+                        }
+                    }
+                } else {
+                    print("Unexpected OpenAI response format")
+                }
+            } catch {
+                print("Failed to decode OpenAI response: \(error.localizedDescription)")
+            }
+        }
+        
+        task.resume()
+    }
+
     func reorderUserCategory(latest: [String: Int], currentInterestList: [String]) async throws -> [String] {
         let latestSorted = latest.sorted { $0.value > $1.value }
 
@@ -364,7 +468,6 @@ class UserFirebase: ObservableObject {
                 print("⚠️ Failed to decode JSON: \(error)")
                 return []
             }
-
         } catch {
             print("❌ OpenAI API error: \(error)")
             return []

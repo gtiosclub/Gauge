@@ -962,7 +962,7 @@ class PostFirebase: ObservableObject {
                 }
                 
                 guard let data = data else {
-                    print("No data received")
+                    print("No data received from OpenAI")
                     return
                 }
                 
