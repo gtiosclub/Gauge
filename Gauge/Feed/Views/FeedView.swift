@@ -35,16 +35,16 @@ struct FeedView: View {
                         //TODO: Insert Button action here
                         print("Create Button")
                     } label: {
-                        Image(systemName: "plus.square")
+                        Image(systemName: "plus.rectangle")
                             .resizable()
                             .scaledToFill()
+                            .rotationEffect(.degrees(90))
                             .frame(width: 18, height: 18)
                             .foregroundStyle(.white)
                     }
                     
                     Button {
-                        //TODO: Insert Button action here
-                        print("Undo Button")
+                        postVM.undoSkipPost(userId: userVM.user.userId)
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
                             .resizable()
@@ -152,6 +152,12 @@ struct FeedView: View {
                                     .frame(width: max(0, geo.size.width))
                                 }
                             }
+                        } else if postVM.feedPosts.count == 0 {
+                            Text("Finding Your Optimal Posts...")
+                                .font(.title)
+                            ProgressView()
+                                .scaleEffect(5.0)
+                                .frame(width: 200, height: 200)
                         }
                         
                         RoundedRectangle(cornerRadius: 10.0)
@@ -169,10 +175,16 @@ struct FeedView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { gesture in
+                                if postVM.feedPosts.count == 0 {
+                                    return
+                                }
+                                
                                 withAnimation {
                                     if gesture.translation.height.magnitude > gesture.translation.width.magnitude {
                                         if !hasSkipped {
-                                            dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
+                                            if (optionSelected != 0 && gesture.translation.height < 0) || gesture.translation.height > 0 {
+                                                dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
+                                            }
                                         } else {
                                             withAnimation(.smooth(duration: 0.5)) {
                                                 dragOffset = CGSize(width: 0.0, height: 800.0)
@@ -181,10 +193,19 @@ struct FeedView: View {
                                         
                                         if dragOffset.height < -150 {
                                             if optionSelected != 0 {
-                                                if !isConfirmed && optionSelected == 1 {
-                                                    postVM.addView(responseOption: optionSelected)
-                                                } else if !isConfirmed {
-                                                    postVM.addView(responseOption: optionSelected)
+                                                if !isConfirmed {
+                                                    let user = userVM.user
+                                                    if let post = postVM.feedPosts.first as? BinaryPost {
+                                                        var responseChosen = "NA"
+                                                        if (optionSelected == 1) {
+                                                            responseChosen = post.responseOption1
+                                                            post.responseResult1 += 1
+                                                        } else if (optionSelected == 2) {
+                                                            responseChosen = post.responseOption2
+                                                            post.responseResult2 += 1
+                                                        }
+                                                        postVM.addResponse(postId: post.postId, userId: user.userId, responseOption: responseChosen)
+                                                    }
                                                 }
                                                 withAnimation {
                                                     isConfirmed = true
@@ -197,7 +218,6 @@ struct FeedView: View {
                                         if dragOffset.height > 150 && !hasSkipped {
                                             hasSkipped = true
                                             optionSelected = 0
-                                            isConfirmed = false
                                         }
                                         
                                     } else {
@@ -220,10 +240,12 @@ struct FeedView: View {
                                 if dragOffset.height > 150 && hasSkipped {
                                     if isConfirmed {
                                         // Next post logic
-                                        postVM.feedPosts.remove(at: 0)
+                                        postVM.feedPosts.removeFirst()
+                                        postVM.findNextPost(user: userVM.user)
+                                        postVM.skippedPost = nil
                                     } else {
                                         // Skip logic
-                                        postVM.feedPosts.remove(at: 0)
+                                        postVM.skippedPost = postVM.skipPost(user: userVM.user)
                                     }
                                     isConfirmed = false
                                 }
@@ -240,11 +262,10 @@ struct FeedView: View {
                 .background(.black)
             }
             .background(.black)
-            
         }
-        .onAppear() {
-            postVM.addDummyPosts()
-        }
+//        .onAppear() {
+//            postVM.addDummyPosts()
+//        }
     }
 }
 
