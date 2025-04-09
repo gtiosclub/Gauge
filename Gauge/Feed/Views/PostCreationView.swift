@@ -22,6 +22,8 @@ struct PostCreationView: View {
     @State var postCategories: [Category] = []
     @State var postType: PostType?
     @State var optionsSelectedIndex: Int?
+    @State var leftLabel: String = ""
+    @State var rightLabel: String = ""
     
     init(modalSize: Binding<CGFloat>, showCreatePost: Binding<Bool>) {
         self._modalSize = modalSize
