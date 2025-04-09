@@ -12,30 +12,62 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             VStack {
+                
+                // Profile, Settings
                 HStack {
-                    if let url = URL(string: userVM.user.profilePhoto), !userVM.user.profilePhoto.isEmpty {
-                        AsyncImage(url: url) { phase in
-                            if let image = phase.image {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 80, height: 80)
-                                    .clipShape(Circle())
-                            } else if phase.error != nil {
-                                Circle()
-                                    .fill(Color.gray)
-                                    .frame(width: 80, height: 80)
-                            } else {
-                                ProgressView()
-                                    .frame(width: 80, height: 80)
-                            }
-                        }
-                    } else {
-                        Circle()
-                            .frame(width: 80, height: 80)
-                            .foregroundColor(.gray)
+                    Spacer()
+                    Menu {
+                        Button(action: {
+                            // Navigate to Profile
+                            print("Profile tapped")
+                        }, label: {
+                            Label("Profile", systemImage: "person")
+                        })
+                        
+                        Button(action: {
+                            // Navigate to Settings
+                            print("Settings tapped")
+                        }, label: {
+                            Label("Settings", systemImage: "gearshape")
+                        })
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .resizable()
+                            .frame(width: 20, height: 15)
+                            .foregroundColor(.black)
+                            .padding()
+                        
                     }
-
+                }
+                
+                // Profile Picture, Username, Friends
+                HStack {
+                    HStack {
+                        if let url = URL(string: userVM.user.profilePhoto), !userVM.user.profilePhoto.isEmpty {
+                            AsyncImage(url: url) { phase in
+                                if let image = phase.image {
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 60, height: 60)
+                                        .clipShape(Circle())
+                                } else if phase.error != nil {
+                                    Circle()
+                                        .fill(Color.gray)
+                                        .frame(width: 60, height: 60)
+                                } else {
+                                    ProgressView()
+                                        .frame(width: 60, height: 60)
+                                }
+                            }
+                        } else {
+                            Circle()
+                                .frame(width: 60, height: 60)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding(.leading, 16)
+                    
                     VStack(alignment: .leading) {
                         // Display the username from the environment user.
                         Text(userVM.user.username)
@@ -43,52 +75,71 @@ struct ProfileView: View {
                             .fontWeight(.bold)
                         
                         NavigationLink(destination: FriendsView()) {
-                            Image(systemName: "person.2.fill")
-                                .foregroundColor(.gray)
                             Text("27")
                                 .foregroundColor(.black)
+                            Text("Friends")
+                                .foregroundColor(Color(.systemGray))
                         }
-        
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 20) {
-                                ForEach(userTags, id: \.self) { tag in
-                                    Text(tag)
-                                        .padding(.horizontal, 15)
-                                        .padding(.vertical, 6)
-                                        .font(.system(size: 14))
-                                        .background(Color.gray.opacity(0.2))
-                                        .foregroundColor(.black)
-                                    .cornerRadius(10)}
-                            }
-                        }
-                        
-                        Text("a short bio that describes the user")
-                         
                     }
+                    
                     Spacer()
                 }
-                .padding()
-
-               
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        TabButton(title: "Takes", selectedTab: $selectedTab)
-                        Spacer()
-                        TabButton(title: "Votes", selectedTab: $selectedTab)
-                        Spacer()
-                        TabButton(title: "Comments", selectedTab: $selectedTab)
-                        Spacer()
-                        TabButton(title: "Badges", selectedTab: $selectedTab)
-                        Spacer()
-                        TabButton(title: "Statistics", selectedTab: $selectedTab)
-                        Spacer()
-                        TabButton(title: "Favorites", selectedTab: $selectedTab)
+                
+                // User Tags
+                HStack {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(userTags, id: \.self) { tag in
+                                Text(tag)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 6)
+                                    .font(.system(size: 14))
+                                    .background(Color.gray.opacity(0.2))
+                                    .foregroundColor(.black)
+                                    .cornerRadius(15)
+                            }
+                        }
                     }
-                    .padding(.horizontal)
+                    .padding(.leading, 20)
+                    .padding(.top, 10)
+                }
+                
+                //Bio
+                
+                HStack {
+                    Text("a short bio that describes the user")
+                        .padding(.leading, 20)
+                    Spacer()
                 }
                 .padding(.top, 10)
+                
+                // Tabs
+                VStack (spacing: 0){
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            TabButton(title: "Takes", selectedTab: $selectedTab)
+                            Spacer()
+                            TabButton(title: "Votes", selectedTab: $selectedTab)
+                            Spacer()
+                            TabButton(title: "Comments", selectedTab: $selectedTab)
+                            Spacer()
+                            TabButton(title: "Badges", selectedTab: $selectedTab)
+                            Spacer()
+                            TabButton(title: "Statistics", selectedTab: $selectedTab)
+                            Spacer()
+                            TabButton(title: "Favorites", selectedTab: $selectedTab)
+                        }
+                        .padding(.horizontal)
+                    }
+                    .padding(.top, 5)
+                    
+                    Rectangle()
+                        .frame(height: 1)
+                        .foregroundColor(Color(.systemGray))
+                        .ignoresSafeArea(.container, edges: .horizontal)
 
+                }
+                
                 // Content based on the selected tab.
                 if selectedTab == "Badges" {
                     BadgesView(onBadgeTap: { badge in
@@ -221,30 +272,31 @@ struct ProfileView: View {
                     .cornerRadius(10)
                     .padding()
                 }
-
+                
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if isCurrentUser {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        NavigationLink(destination: SettingsView()) {
-                            Image(systemName: "gearshape")
-                                .foregroundColor(.black)
-                        }
-                    }
-                    
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        NavigationLink(destination: ProfileEditView()) {
-                            Text("edit profile")
-                                .font(.system(size: 15))
-                        }
-                    }
-                }
-            }
-            .sheet(item: $selectedBadge) { badge in
-                BadgeDetailView(badge: badge)
-            }
+            //            .navigationBarTitleDisplayMode(.inline)
+            //            .toolbar {
+            //                if isCurrentUser {
+            //                    ToolbarItem(placement: .navigationBarTrailing) {
+            //                        NavigationLink(destination: SettingsView()) {
+            //                            Image(systemName: "gearshape")
+            //                                .foregroundColor(.black)
+            //                        }
+            //                    }
+            //
+            //                    ToolbarItem(placement: .navigationBarTrailing) {
+            //                        NavigationLink(destination: ProfileEditView()) {
+            //                            Text("edit profile")
+            //                                .font(.system(size: 15))
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //            .sheet(item: $selectedBadge) { badge in
+            //                BadgeDetailView(badge: badge)
+            //            }
         }
+
     }
 }
 
@@ -260,17 +312,23 @@ struct TabButton: View {
         }) {
             VStack(spacing: 0) {
                 Text(title)
-                    .font(.system(size: 25))
+                    .font(.system(size: 20))
                     .foregroundColor(selectedTab == title ? .black : .gray)
                     .fontWeight(selectedTab == title ? .bold : .regular)
-                Rectangle()
-                    .frame(height: 2)
-                    .foregroundColor(selectedTab == title ? .blue : .gray)
-                    .edgesIgnoringSafeArea(.horizontal)
+                    .padding(.bottom, 6)
+                
+                if (selectedTab == title) {
+                    Rectangle()
+                        .frame(height: 4)
+                        .cornerRadius(4)
+                        .foregroundColor(.blue)
+                        .edgesIgnoringSafeArea(.horizontal)
+                }
             }
-            .padding(.vertical, 8)
+            .padding(.top, 8)
         }
-        .frame(minWidth: 100)
+        .padding(.horizontal, 5)
+//        .frame(minWidth: 100)
     }
 }
 
