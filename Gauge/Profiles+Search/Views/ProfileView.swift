@@ -10,36 +10,32 @@ struct ProfileView: View {
     let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 
-                // Profile, Settings
-                HStack {
-                    Spacer()
-                    Menu {
-                        Button(action: {
-                            // Navigate to Profile
-                            print("Profile tapped")
-                        }, label: {
-                            Label("Profile", systemImage: "person")
-                        })
-                        
-                        Button(action: {
-                            // Navigate to Settings
-                            print("Settings tapped")
-                        }, label: {
-                            Label("Settings", systemImage: "gearshape")
-                        })
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                            .resizable()
-                            .frame(width: 20, height: 15)
-                            .foregroundColor(.black)
-                            .padding()
-                        
+                // Edit Profile, Settings
+                if isCurrentUser {
+                    HStack {
+                        Spacer()
+                        Menu {
+                            NavigationLink(destination: ProfileEditView()) {
+                                Label("Profile", systemImage: "person")
+                            }
+                            
+                            NavigationLink(destination: SettingsView()) {
+                                Label("Settings", systemImage: "gearshape")
+                            }
+                        } label: {
+                            Image(systemName: "line.3.horizontal")
+                                .resizable()
+                                .frame(width: 20, height: 15)
+                                .foregroundColor(.black)
+                                .padding()
+                            
+                        }
                     }
                 }
-                
+
                 // Profile Picture, Username, Friends
                 HStack {
                     HStack {
@@ -84,11 +80,12 @@ struct ProfileView: View {
                     
                     Spacer()
                 }
+                .padding(.top, isCurrentUser ? 0 : 10)
                 
                 // User Tags
                 HStack {
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
+                        HStack {
                             ForEach(userTags, id: \.self) { tag in
                                 Text(tag)
                                     .padding(.horizontal, 20)
@@ -114,7 +111,7 @@ struct ProfileView: View {
                 .padding(.top, 10)
                 
                 // Tabs
-                VStack (spacing: 0){
+                VStack (spacing: 0) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             TabButton(title: "Takes", selectedTab: $selectedTab)
@@ -137,166 +134,36 @@ struct ProfileView: View {
                         .frame(height: 1)
                         .foregroundColor(Color(.systemGray))
                         .ignoresSafeArea(.container, edges: .horizontal)
-
                 }
+                .background(.red)
                 
-                // Content based on the selected tab.
-                if selectedTab == "Badges" {
-                    BadgesView(onBadgeTap: { badge in
-                        selectedBadge = badge
-                    })
-                } else if selectedTab == "Votes" {
-                    VoteCardsView()
-                } else if selectedTab == "Takes" {
-                    TakesView()
-                }
-                else if selectedTab == "Statistics" {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Username Statistics")
-                            .font(.system(size:21))
-                            .fontWeight(.bold)
-                            .padding(.vertical, 20)
-                            .padding(.horizontal)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        
-                        VStack(spacing: 0) {
-                            // Total Votes Made
-                            HStack {
-                                Text("Total Votes Made")
-                                    .font(.system(size: 17))
-                                    .fontWeight(.regular)
-                                Spacer()
-                                HStack {
-                                    Text("100 Votes")
-                                        .font(.system(size: 17))
-                                        .foregroundColor(.gray)
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                        .font(.system(size: 14))
-                                }
-                            }
-                            .padding(.vertical, 15)
-                            .padding(.horizontal)
-                            
-                            Divider().padding(.horizontal)
-                            
-                            // Total Takes Made
-                            HStack {
-                                Text("Total Takes Made")
-                                    .font(.system(size: 17))
-                                    .fontWeight(.regular)
-                                Spacer()
-                                HStack {
-                                    Text("25 Takes")
-                                        .font(.system(size: 17))
-                                        .foregroundColor(.gray)
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                        .font(.system(size: 14))
-                                }
-                            }
-                            .padding(.vertical, 15)
-                            .padding(.horizontal)
-                            
-                            Divider().padding(.horizontal)
-                            
-                            // Total Votes Collected
-                            HStack {
-                                Text("Total Votes Collected")
-                                    .font(.system(size: 17))
-                                    .fontWeight(.regular)
-                                Spacer()
-                                HStack {
-                                    Text("275 Votes")
-                                        .font(.system(size: 17))
-                                        .foregroundColor(.gray)
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                        .font(.system(size: 14))
-                                }
-                            }
-                            .padding(.vertical, 15)
-                            .padding(.horizontal)
-                            
-                            Divider().padding(.horizontal)
-                            
-                            HStack {
-                                Text("Total Comments Made")
-                                    .font(.system(size: 17))
-                                    .fontWeight(.regular)
-                                Spacer()
-                                HStack {
-                                    Text("110 Comments")
-                                        .font(.system(size: 17))
-                                        .foregroundColor(.gray)
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                        .font(.system(size: 14))
-                                }
-                            }
-                            .padding(.vertical, 15)
-                            .padding(.horizontal)
-                            
-                            Divider().padding(.horizontal)
-                            
-                            HStack {
-                                Text("Ratio View/Response")
-                                    .font(.system(size: 17))
-                                    .fontWeight(.regular)
-                                Spacer()
-                                HStack {
-                                    Text("0.75")
-                                        .font(.system(size: 17))
-                                        .foregroundColor(.gray)
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray)
-                                        .font(.system(size: 14))
-                                }
-                            }
-                            .padding(.vertical, 15)
-                            .padding(.horizontal)
+                HStack {
+                    // Content based on the selected tab.
+                    if selectedTab == "Badges" {
+                        BadgesView(onBadgeTap: { badge in
+                            selectedBadge = badge
+                        })
+                    } else if selectedTab == "Votes" {
+                        VoteCardsView()
+                    } else if selectedTab == "Takes" {
+                        TakesView()
+                    }
+                    else if selectedTab == "Statistics" {
+                        StatisticsView()
+                    } else {
+                        VStack {
+                            Text("\(selectedTab) Content Here")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(Color(UIColor.systemGray6))
                         }
-                        Spacer()
+                        .cornerRadius(10)
+                        .padding()
                     }
-                    .background(Color.white)
-                    .cornerRadius(10)
-                    .padding([.horizontal, .bottom])
-                } else {
-                    VStack {
-                        Text("\(selectedTab) Content Here")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Color(UIColor.systemGray6))
-                    }
-                    .cornerRadius(10)
-                    .padding()
                 }
-                
             }
-            //            .navigationBarTitleDisplayMode(.inline)
-            //            .toolbar {
-            //                if isCurrentUser {
-            //                    ToolbarItem(placement: .navigationBarTrailing) {
-            //                        NavigationLink(destination: SettingsView()) {
-            //                            Image(systemName: "gearshape")
-            //                                .foregroundColor(.black)
-            //                        }
-            //                    }
-            //
-            //                    ToolbarItem(placement: .navigationBarTrailing) {
-            //                        NavigationLink(destination: ProfileEditView()) {
-            //                            Text("edit profile")
-            //                                .font(.system(size: 15))
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //            .sheet(item: $selectedBadge) { badge in
-            //                BadgeDetailView(badge: badge)
-            //            }
         }
-
     }
 }
 
