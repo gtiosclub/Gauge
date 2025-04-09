@@ -7,15 +7,15 @@
 import FirebaseFirestore
 import Firebase
 import Foundation
+import SwiftUICore
 
+@MainActor
 class SearchViewModel: ObservableObject {
     @Published var recentSearchesUpdated = false // trigger state updates in the search bar (recent searches)
-    @Published var user: User // assuming UserModel is your user type
-    
-    init(user: User) {
-        self.user = user
-    }
     private let vectorSearchCollection = "_firestore-vector-search"
+    // updates the last 5 in functions - to easily display in ProfileView
+    @Published var recentFiveTopics : [String] = []
+    @Published var recentFiveProfiles : [String] = []
     
     func searchSimilarQuestions(query: String) async throws -> [String] {
         let queryDocRef = Firebase.db.collection(vectorSearchCollection)
@@ -128,15 +128,17 @@ class SearchViewModel: ObservableObject {
         return questions
     }
     
-    func addRecentlySearchedPost(search: String) {
-        // local model update
-        if user.myPostSearches.contains(search) {
-            user.myPostSearches.removeAll(where: { $0 == search })
-        }
-        user.myPostSearches.append(search)
-
-        // Firestore update
-        let userRef = Firebase.db.collection("USERS").document(user.userId)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    func addRecentlySearchedPost(userId: String, search: String) {
+        let userRef = Firebase.db.collection("USERS").document(userId)
 
         userRef.getDocument { document, error in
             guard let document = document, document.exists,
@@ -144,34 +146,37 @@ class SearchViewModel: ObservableObject {
                 return
             }
 
-            // Remove search if it exists
+            // Update Firestore
             if existingSearches.contains(search) {
                 userRef.updateData([
                     "myPostSearches": FieldValue.arrayRemove([search])
                 ]) { _ in
-                    // Re-add after removal to move it to the end
                     userRef.updateData([
                         "myPostSearches": FieldValue.arrayUnion([search])
                     ])
                 }
             } else {
-                // add search it doesn't exist
                 userRef.updateData([
                     "myPostSearches": FieldValue.arrayUnion([search])
                 ])
             }
+
+            // Update local state: remove then append to ensure it's most recent
+            DispatchQueue.main.async {
+                self.recentFiveTopics.removeAll(where: { $0 == search })
+                self.recentFiveTopics.append(search)
+
+                // Keep only the last 5
+                if self.recentFiveTopics.count > 5 {
+                    self.recentFiveTopics = Array(self.recentFiveTopics.suffix(5))
+                }
+            }
         }
     }
-    
-    func addRecentlySearchedProfile(search: String) {
-        // local model update
-        if user.myProfileSearches.contains(search) {
-            user.myProfileSearches.removeAll(where: { $0 == search })
-        }
-        user.myProfileSearches.append(search)
 
-        // Firestore update
-        let userRef = Firebase.db.collection("USERS").document(user.userId)
+    
+    func addRecentlySearchedProfile(userId: String, search: String) {
+        let userRef = Firebase.db.collection("USERS").document(userId)
 
         userRef.getDocument { document, error in
             guard let document = document, document.exists,
@@ -179,47 +184,78 @@ class SearchViewModel: ObservableObject {
                 return
             }
 
-            // Remove search if it exists
+            // Update Firestore
             if existingSearches.contains(search) {
                 userRef.updateData([
                     "myProfileSearches": FieldValue.arrayRemove([search])
                 ]) { _ in
-                    // Re-add after removal to move it to the end
                     userRef.updateData([
                         "myProfileSearches": FieldValue.arrayUnion([search])
                     ])
                 }
             } else {
-                // add search it doesn't exist
                 userRef.updateData([
                     "myProfileSearches": FieldValue.arrayUnion([search])
                 ])
             }
+
+            // Update local state for UI
+            DispatchQueue.main.async {
+                self.recentFiveProfiles.removeAll(where: { $0 == search })
+                self.recentFiveProfiles.append(search)
+
+                if self.recentFiveProfiles.count > 5 {
+                    self.recentFiveProfiles = Array(self.recentFiveProfiles.suffix(5))
+                }
+            }
         }
     }
     
-    //delete recent searches
-   func deleteRecentlySearched(_ search: String, isProfileSearch: Bool) {
-       let key = isProfileSearch ? "myProfileSearches" : "myPostSearches"
+    func deleteRecentlySearched(userId: String, searchTerm: String, isProfileSearch: Bool) {
+        let key = isProfileSearch ? "myProfileSearches" : "myPostSearches"
+        let userRef = Firebase.db.collection("USERS").document(userId)
+        
+        // Remove from Firestore
+        userRef.updateData([
+            key: FieldValue.arrayRemove([searchTerm])
+        ])
+        
+        // Update local array
+        DispatchQueue.main.async {
+            if isProfileSearch {
+                self.recentFiveProfiles.removeAll { $0 == searchTerm }
+            } else {
+                self.recentFiveTopics.removeAll { $0 == searchTerm }
+            }
+        }
+    }
+    // get last 5 searches
+    func lastFiveSearches(userID: String, isProfileSearch: Bool) async -> [String] {
+        let key = isProfileSearch ? "myProfileSearches" : "myPostSearches"
+        let userDocument = Firebase.db.collection("USERS").document(userID)
 
-       // Remove locally
-       if isProfileSearch {
-           if let index = user.myProfileSearches.firstIndex(of: search) {
-               user.myProfileSearches.remove(at: index)
-           }
-       } else {
-           if let index = user.myPostSearches.firstIndex(of: search) {
-               user.myPostSearches.remove(at: index)
-           }
-       }
-       //retrigger render in view
-       recentSearchesUpdated.toggle()
+        do {
+            let document = try await userDocument.getDocument()
+            guard let userData = document.data() else { return [] }
 
-       // Remove in Firebase
-       let userRef = Firebase.db.collection("USERS").document(user.userId)
-       userRef.updateData([
-           key: FieldValue.arrayRemove([search])
-       ])
-   }
+            let allSearches = userData[key] as? [String] ?? []
+            let lastFive = allSearches.suffix(5)
+
+            // update local array holding last 5 searches
+            if isProfileSearch {
+                self.recentFiveProfiles = Array(lastFive)
+            } else {
+                self.recentFiveTopics = Array(lastFive)
+            }
+
+            return Array(lastFive)
+        } catch {
+            print("Error fetching document: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+
+
     
 }

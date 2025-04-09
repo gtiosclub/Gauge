@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct SearchView: View {
-    @StateObject private var searchVM = SearchViewModel(user: <#User#>)
+    @EnvironmentObject var userFirebase: UserFirebase
+    @StateObject private var searchVM = SearchViewModel()
     @State private var searchText: String = ""
     @FocusState private var isSearchFieldFocused: Bool
     @State private var selectedTab: String = "Topics"
@@ -18,7 +19,7 @@ struct SearchView: View {
     @State private var showResults: Bool = false
     @State private var isSearchActive: Bool = false
     @State var items = Array(Category.allCategoryStrings.shuffled().prefix(through: 19))
-    
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -32,40 +33,23 @@ struct SearchView: View {
                             .foregroundColor(Color(.black))
                             .focused($isSearchFieldFocused)
                             .submitLabel(.search)
-                            .onChange(of: isSearchFieldFocused) { focused in
-                                if focused {
+                            .onChange(of: isSearchFieldFocused) {
+                                print("focus")
+                                if isSearchFieldFocused {
                                     isSearchActive = true
+                                    Task {
+                                        await searchVM.lastFiveSearches(
+                                            userID: userFirebase.user.id,
+                                            isProfileSearch: selectedTab != "Topics"
+                                        )
+                                    }
                                 }
                             }
                             .onSubmit {
                                 if !searchText.isEmpty {
                                     isLoading = true
                                     showResults = true
-                                    Task {
-                                        do {
-                                            let results = try await searchVM.searchPosts(for: searchText)
-                                            // Add to recent post searches if tab == Topics ++
-                                            if (selectedTab == "Topics") {
-                                                await MainActor.run {
-                                                    searchVM.addRecentlySearchedPost(search: searchText)
-                                                }
-                                            } else {
-                                                await MainActor.run {
-                                                    searchVM.addRecentlySearchedProfile(search: searchText)
-                                                }
-                                            }
-
-                                            await MainActor.run {
-                                                searchResults = results
-                                                isLoading = false
-                                            }
-                                        } catch {
-                                            await MainActor.run {
-                                                errorMessage = "Search failed: \(error.localizedDescription)"
-                                                isLoading = false
-                                            }
-                                        }
-                                    }
+                                    performSearch()
                                 }
                             }
 
@@ -80,7 +64,7 @@ struct SearchView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 4)  // Reduced horizontal padding
+                    .padding(.horizontal, 4)
                     .padding(.vertical, 5)
                     .background(Color(.systemGray5))
                     .cornerRadius(12)
@@ -99,23 +83,19 @@ struct SearchView: View {
                 .padding(.horizontal, 4)
                 .padding(.top, 1)
                 .padding(.bottom, 10)
-                
-                Group {
-                    if isSearchActive {
-                        if showResults {
-                            if isLoading {
-                                AnyView(
+
+                AnyView(
+                    Group {
+                        if isSearchActive {
+                            if showResults {
+                                if isLoading {
                                     ProgressView("Searching...")
                                         .padding()
-                                )
-                            } else if let errorMessage = errorMessage {
-                                AnyView(
+                                } else if let errorMessage = errorMessage {
                                     Text(errorMessage)
                                         .foregroundStyle(.red)
                                         .padding()
-                                )
-                            } else if !searchResults.isEmpty {
-                                AnyView(
+                                } else if !searchResults.isEmpty {
                                     List {
                                         ForEach(searchResults) { result in
                                             PostResultRow(result: result)
@@ -124,35 +104,64 @@ struct SearchView: View {
                                         }
                                     }
                                     .listStyle(.plain)
-                                )
-                            } else {
-                                AnyView(
+                                } else {
                                     Text("No results found.")
                                         .padding()
+                                }
+                            } else {
+                                RecentSearchesView(
+                                    isSearchFieldFocused: $isSearchFieldFocused,
+                                    searchText: $searchText,
+                                    selectedTab: $selectedTab,
+                                    searchVM: searchVM,
                                 )
                             }
                         } else {
-                            AnyView(
-                                RecentSearchesView(isSearchFieldFocused: $isSearchFieldFocused,
-                                                   searchText: $searchText,
-                                                   selectedTab: $selectedTab,
-                                                   searchVM: searchVM) // ++
-                            )
-                        }
-                    } else {
-                        AnyView(
                             CategoriesView(items: $items)
-                        )
+                        }
                     }
-                }
-
+                )
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
             .navigationTitle(isSearchActive ? "" : "Explore")
         }
     }
-}
 
+    // Extracted for clarity
+    func performSearch() {
+        Task {
+            do {
+                let results = try await searchVM.searchPosts(for: searchText)
+
+                if selectedTab == "Topics" {
+                    await MainActor.run {
+                        searchVM.addRecentlySearchedPost(userId: userFirebase.user.id, search: searchText)
+                    }
+                } else {
+                    await MainActor.run {
+                        searchVM.addRecentlySearchedProfile(userId: userFirebase.user.id, search: searchText)
+                    }
+                }
+
+                // ✅ Sync the real last 5 from Firestore
+                await searchVM.lastFiveSearches(
+                    userID: userFirebase.user.id,
+                    isProfileSearch: selectedTab != "Topics"
+                )
+
+                await MainActor.run {
+                    searchResults = results
+                    isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Search failed: \(error.localizedDescription)"
+                    isLoading = false
+                }
+            }
+        }
+    }
+}
 
 struct CategoriesView: View {
     @Binding var items: [String]
@@ -203,31 +212,41 @@ struct CategoriesView: View {
     }
 }
 
+
+
 struct RecentSearchesView: View {
     @FocusState.Binding var isSearchFieldFocused: Bool
     @Binding var searchText: String
     @Binding var selectedTab: String
     @ObservedObject var searchVM: SearchViewModel  // link SearchViewModel
-    
-    var recentTopics: [String] {
-        _ = $searchVM.recentSearchesUpdated // forces dependency
-        return Array(searchVM.user.myPostSearches.suffix(5).reversed())
-    }
-    var recentUsers: [String] {
-        _ = $searchVM.recentSearchesUpdated
-        return Array(searchVM.user.myProfileSearches.suffix(5).reversed())
-    }
+    @EnvironmentObject var userFirebase: UserFirebase
+//    @State private var isSearchActive: Bool
+
+
+
+    // $searchVM.recentFiveTopics
     
     var body: some View {
         VStack(alignment: .leading) {
             Text("Recent")
                 .font(.headline)
                 .padding(.leading)
+//                .onChange(of: isSearchFieldFocused) { isActive in
+//                    print(isActive)
+//                    if isActive {
+//                        Task {
+//                            await searchVM.lastFiveSearches(
+//                                userID: userFirebase.user.id,
+//                                isProfileSearch: selectedTab != "Topics"
+//                            )
+//                        }
+//                    }
+//                }
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     if selectedTab == "Topics" {
-                        ForEach(recentTopics, id: \.self) { topic in
+                        ForEach(searchVM.recentFiveTopics, id: \.self) { topic in
                             HStack {
                                 Image(systemName: "number")
                                     .font(.system(size: 12, weight: .bold))
@@ -235,10 +254,17 @@ struct RecentSearchesView: View {
                                     .padding(8)
                                     .background(Color(.systemGray5))
                                     .clipShape(Circle())
-                                
-                                
+
+                                Text(topic) // ✅ Show the actual search term
+
+                                Spacer()
+
                                 Button(action: {
-                                    searchVM.deleteRecentlySearched(topic, isProfileSearch: false)
+                                    searchVM.deleteRecentlySearched(
+                                        userId: userFirebase.user.id,
+                                        searchTerm: topic,
+                                        isProfileSearch: false
+                                    )
                                 }) {
                                     Image(systemName: "xmark")
                                         .font(.system(size: 12, weight: .regular))
@@ -247,19 +273,24 @@ struct RecentSearchesView: View {
                                 }
                             }
                         }
+
                     } else {
-                        ForEach(recentUsers, id: \.self) { user in
+                        ForEach(searchVM.recentFiveProfiles, id: \.self) { profile in
                             HStack {
                                 Circle()
                                     .fill(Color(.systemGray))
                                     .frame(width: 30, height: 30)
-                                
-                                Text(user)
-                                    .padding(5)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                
+
+                                Text(profile) //  Not userFirebase.user.id
+
+                                Spacer()
+
                                 Button(action: {
-                                    searchVM.deleteRecentlySearched(user, isProfileSearch: true)
+                                    searchVM.deleteRecentlySearched(
+                                        userId: userFirebase.user.id,
+                                        searchTerm: profile,
+                                        isProfileSearch: true
+                                    )
                                 }) {
                                     Image(systemName: "xmark")
                                         .font(.system(size: 12, weight: .regular))
@@ -272,6 +303,23 @@ struct RecentSearchesView: View {
                 }
                 .padding()
             }
+            .onAppear {
+                   Task {
+                       await searchVM.lastFiveSearches(
+                           userID: userFirebase.user.id,
+                           isProfileSearch: selectedTab != "Topics"
+                       )
+                   }
+               }
+               .onChange(of: selectedTab) { newTab in
+                   Task {
+                       await searchVM.lastFiveSearches(
+                           userID: userFirebase.user.id,
+                           isProfileSearch: newTab != "Topics"
+                       )
+                   }
+               }
+            // added ^^^^^
             
             HStack {
                 Picker(selection: $selectedTab, label: Text("")) {
@@ -290,7 +338,8 @@ struct RecentSearchesView: View {
 
 
 
-
 #Preview {
     SearchView()
+        .environmentObject(UserFirebase())     // Fixes build crash
+        .environmentObject(PostFirebase())     // optional for testing**
 }
