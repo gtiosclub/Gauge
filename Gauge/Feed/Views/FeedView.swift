@@ -224,7 +224,6 @@ struct FeedView: View {
                                             hasSkipped = true
                                             optionSelected = 0
                                         }
-                                        
                                     } else {
                                         if gesture.translation.width.magnitude > 150 {
                                             dragOffset = .zero

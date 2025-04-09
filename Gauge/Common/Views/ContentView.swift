@@ -134,8 +134,9 @@ struct ContentView: View {
                             
                             postVM.watchForNewPosts(user: userVM.user)
                             
-                            while postVM.feedPosts.count < 5 {
-                                postVM.findNextPost(user: userVM.user)
+                            var queriedHasPostsLeft = true
+                            while postVM.feedPosts.count < 5 && queriedHasPostsLeft {
+                                queriedHasPostsLeft = postVM.findNextPost(user: userVM.user)
                             }
                             
                             _ = try await (
