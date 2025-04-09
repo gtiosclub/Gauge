@@ -110,8 +110,10 @@ struct CustomRoundedRectangle: Shape {
             categories: [.arts(.painting)],
             topics: ["art", "picasso"], postDateAndTime: Date(),
             question: "Picasso is the goat",
-            responseOption1: "Facts 💯",
-            responseOption2: "Nah 🤮",
+            responseOption1: "Yes",
+            responseOption2: "No",
+            sublabel1: "Facts 💯",
+            sublabel2: "Nah 🤮",
             favoritedBy: ["sameer"]
         ),
         optionSelected: 1

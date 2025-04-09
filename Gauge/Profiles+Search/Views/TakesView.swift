@@ -42,9 +42,6 @@ struct TakesView: View {
             }
             .padding()
         }
-        .onAppear {
-            postVM.addDummyPosts()
-        }
     }
 }
     

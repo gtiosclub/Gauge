@@ -158,6 +158,8 @@ class PostFirebase: ObservableObject {
                                 question: data["question"] as? String ?? "",
                                 responseOption1: data["responseOption1"] as? String ?? "",
                                 responseOption2: data["responseOption2"] as? String ?? "",
+                                sublabel1: data["sublabel1"] as? String ?? "",
+                                sublabel2: data["sublabel2"] as? String ?? "",
                                 favoritedBy: data["favoritedBy"] as? [String] ?? []
                             )
                             return (postId, post)
@@ -240,6 +242,8 @@ class PostFirebase: ObservableObject {
                                                   question: newPostData["question"] as? String ?? "",
                                                   responseOption1: newPostData["responseOption1"] as? String ?? "",
                                                   responseOption2: newPostData["responseOption2"] as? String ?? "",
+                                                  sublabel1: newPostData["sublabel1"] as? String ?? "",
+                                                  sublabel2: newPostData["sublabel2"] as? String ?? "",
                                                   favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
                             
                             self.allQueriedPosts.append(post)
@@ -277,6 +281,8 @@ class PostFirebase: ObservableObject {
                                     question: newPostData["question"] as? String ?? "",
                                     responseOption1: newPostData["responseOption1"] as? String ?? "",
                                     responseOption2: newPostData["responseOption2"] as? String ?? "",
+                                    sublabel1: newPostData["sublabel1"] as? String ?? "",
+                                    sublabel2: newPostData["sublabel2"] as? String ?? "",
                                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
 
                                 self.allQueriedPosts = self.allQueriedPosts
@@ -345,6 +351,8 @@ class PostFirebase: ObservableObject {
                     question: newPostData["question"] as? String ?? "",
                     responseOption1: newPostData["responseOption1"] as? String ?? "",
                     responseOption2: newPostData["responseOption2"] as? String ?? "",
+                    sublabel1: newPostData["sublabel1"] as? String ?? "",
+                    sublabel2: newPostData["sublabel2"] as? String ?? "",
                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? []
                 )
                 DispatchQueue.main.async {
@@ -450,7 +458,7 @@ class PostFirebase: ObservableObject {
         }
     }
   
-    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String) async {
+    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String = "", sublabel2: String = "") async {
         // Create post instance
         let post = BinaryPost(
             postId: UUID().uuidString,
@@ -459,7 +467,9 @@ class PostFirebase: ObservableObject {
             postDateAndTime: Date(),
             question: question,
             responseOption1: responseOption1,
-            responseOption2: responseOption2
+            responseOption2: responseOption2,
+            sublabel1: sublabel1,
+            sublabel2: sublabel2
         )
         
         // Create document in Firebase
@@ -479,6 +489,8 @@ class PostFirebase: ObservableObject {
             "question": post.question,
             "responseOption1": post.responseOption1,
             "responseOption2": post.responseOption2,
+            "sublabel1": post.sublabel1,
+            "sublabel2": post.sublabel2,
             "favoritedBy": post.favoritedBy
         ]) { error in
             if let error = error {
@@ -968,8 +980,12 @@ class PostFirebase: ObservableObject {
         return skippedPost
     }
     
-    func findNextPost(user: User) {
+    func findNextPost(user: User) -> Bool {
         // load the next post in the feed
+        if allQueriedPosts.isEmpty {
+            return false
+        }
+        
         if feedPosts.count < 5 && !allQueriedPosts.isEmpty {
             getNextBestPost(user: user)
             feedPosts.append(allQueriedPosts[0])
@@ -978,6 +994,8 @@ class PostFirebase: ObservableObject {
 
         // listen for changes in the new post
         watchForCurrentFeedPostChanges()
+        
+        return true
     }
     
     func undoSkipPost(userId: String) {
@@ -1351,7 +1369,7 @@ class PostFirebase: ObservableObject {
 //                    }
 //                }
 //            }
-//        }
+//        
         var response: String = ""
         let responses = current_post.responses
         print("Responses within the method: \n\(responses)")
