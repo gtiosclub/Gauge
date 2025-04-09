@@ -8,6 +8,11 @@ struct ProfileView: View {
     @State var isCurrentUser: Bool
     
     let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
+    let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
+    
+    @State var slideGesture: CGSize = CGSize.zero
+    @State var currTabIndex = 0
+    var distance: CGFloat = UIScreen.main.bounds.size.width
 
     var body: some View {
         NavigationStack {
@@ -67,8 +72,8 @@ struct ProfileView: View {
                     VStack(alignment: .leading) {
                         // Display the username from the environment user.
                         Text(userVM.user.username)
-                            .font(.title2)
-                            .fontWeight(.bold)
+                            .font(.system(size: 30))
+                            .fontWeight(.medium)
                         
                         NavigationLink(destination: FriendsView()) {
                             Text("27")
@@ -80,7 +85,7 @@ struct ProfileView: View {
                     
                     Spacer()
                 }
-                .padding(.top, isCurrentUser ? 0 : 10)
+                .padding(.top, isCurrentUser ? 0 : 15)
                 
                 // User Tags
                 HStack {
@@ -114,17 +119,9 @@ struct ProfileView: View {
                 VStack (spacing: 0) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
-                            TabButton(title: "Takes", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Votes", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Comments", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Badges", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Statistics", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Favorites", selectedTab: $selectedTab)
+                            ForEach(tabs, id: \.self) { tab in
+                                TabButton(title: tab, selectedTab: $selectedTab)
+                            }
                         }
                         .padding(.horizontal)
                     }
@@ -135,35 +132,69 @@ struct ProfileView: View {
                         .foregroundColor(Color(.systemGray))
                         .ignoresSafeArea(.container, edges: .horizontal)
                 }
-                .background(.red)
-                
-                HStack {
-                    // Content based on the selected tab.
-                    if selectedTab == "Badges" {
+                GeometryReader { geo in
+                    HStack(spacing: 0) {
+                        TakesView()
+                            .frame(width: geo.size.width)
+                        VoteCardsView()
+                            .frame(width: geo.size.width)
+                        TabPlaceholder(tab: "Comments")
+                            .frame(width: geo.size.width)
                         BadgesView(onBadgeTap: { badge in
                             selectedBadge = badge
                         })
-                    } else if selectedTab == "Votes" {
-                        VoteCardsView()
-                    } else if selectedTab == "Takes" {
-                        TakesView()
-                    }
-                    else if selectedTab == "Statistics" {
+                            .frame(width: geo.size.width)
                         StatisticsView()
-                    } else {
-                        VStack {
-                            Text("\(selectedTab) Content Here")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .background(Color(UIColor.systemGray6))
-                        }
-                        .cornerRadius(10)
-                        .padding()
+                            .frame(width: geo.size.width)
+                        TabPlaceholder(tab: "Comments")
+                            .frame(width: geo.size.width)
+                    }
+                    .offset(x: -CGFloat(self.currTabIndex) * geo.size.width + self.slideGesture.width)
+                    .animation(.spring(), value: currTabIndex)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                self.slideGesture = value.translation
+                            }
+                            .onEnded { value in
+                                let threshold: CGFloat = 50
+                                if value.translation.width < -threshold, self.currTabIndex < self.tabs.count - 1 {
+                                    self.currTabIndex += 1
+                                    self.selectedTab = self.tabs[self.currTabIndex]
+                                } else if value.translation.width > threshold, self.currTabIndex > 0 {
+                                    self.currTabIndex -= 1
+                                    self.selectedTab = self.tabs[self.currTabIndex]
+                                }
+                                self.slideGesture = .zero
+                            }
+                    )
+                }
+            }
+            .onChange(of: selectedTab) {
+                if let index = tabs.firstIndex(of: selectedTab) {
+                    withAnimation {
+                        currTabIndex = index
                     }
                 }
             }
+
         }
+    }
+}
+
+struct TabPlaceholder: View {
+    var tab: String
+    
+    var body: some View {
+        VStack {
+            Text("\(tab) Content Here")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(UIColor.systemGray6))
+        }
+        .cornerRadius(10)
+        .padding()
     }
 }
 
