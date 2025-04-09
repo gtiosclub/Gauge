@@ -184,7 +184,7 @@ class AuthenticationVM: ObservableObject {
             "height": tempUserData.attributes["height"] ?? "",
             "relationshipStatus": tempUserData.attributes["relationshipStatus"] ?? "",
             "workStatus": tempUserData.attributes["workStatus"] ?? "",
-            "bio": tempUserData.bio // Assumes bio is initialized to "" if not set.
+            "bio": tempUserData.bio
         ]
         
         let updates: [String: Any] = [
@@ -194,7 +194,6 @@ class AuthenticationVM: ObservableObject {
         
         try await Firebase.db.collection("USERS").document(userId).updateData(updates)
         
-        // Update local user object if needed.
         currentUser?.attributes = userAttributes
         currentUser?.myCategories = Array(tempUserData.selectedCategories)
     }

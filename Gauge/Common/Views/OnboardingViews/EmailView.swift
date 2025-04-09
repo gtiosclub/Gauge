@@ -13,14 +13,11 @@ struct EmailView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Progress bar shows step 1 out of 3
             ProgressBar(progress: 1, steps: 3)
             
-            // Header with back button and title
             ZStack {
                 HStack {
                     Button(action: {
-                        // Pop the view or dismiss
                         authVM.onboardingState = .welcome
                     }) {
                         Image(systemName: "chevron.left")
@@ -81,7 +78,6 @@ struct EmailView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            // Prepopulate the email if user is returning to this screen
             email = authVM.tempUserData.email
         }
     }
@@ -94,13 +90,11 @@ struct UsernameView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Progress bar shows step 2 out of 3
             ProgressBar(progress: 2, steps: 3)
             
             ZStack {
                 HStack {
                     Button(action: {
-                        // Go back to email view
                         authVM.onboardingState = .email
                     }) {
                         Image(systemName: "chevron.left")
@@ -167,21 +161,19 @@ struct UsernameView: View {
 
 struct PasswordView: View {
     @EnvironmentObject var authVM: AuthenticationVM
-    let email: String   // Passed down for reference if needed
-    let username: String // Passed down for reference if needed
+    let email: String
+    let username: String
     
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
-            // Progress bar shows step 3 out of 3
             ProgressBar(progress: 3, steps: 3)
             
             ZStack {
                 HStack {
                     Button(action: {
-                        // Go back to username view
                         authVM.onboardingState = .username
                     }) {
                         Image(systemName: "chevron.left")
@@ -222,11 +214,9 @@ struct PasswordView: View {
             Spacer()
             
             Button(action: {
-                // Only continue if both passwords match
                 if password == confirmPassword {
                     authVM.tempUserData.password = password
                     Task {
-                        // Call your sign up or account creation function
                         try await authVM.createInitialAccount()
                     }
                 }
@@ -250,7 +240,6 @@ struct PasswordView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            // (Optional) Restore previous password if needed.
             password = authVM.tempUserData.password
         }
     }

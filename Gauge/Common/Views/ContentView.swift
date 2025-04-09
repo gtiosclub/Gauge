@@ -60,6 +60,11 @@ struct ContentView: View {
                         
                         ProfileView(userVM: userVM, isCurrentUser: true)
                             .environmentObject(authVM)
+                            .tabItem {
+                                  Image(systemName: "person.crop.circle")
+                                  Text("Profile")
+                              }
+                            .tag(3)
                     }
                     .background(.white)
                     .onAppear {

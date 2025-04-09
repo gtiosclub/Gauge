@@ -77,7 +77,6 @@ struct ProfileView: View {
                                 Text("27")
                                     .foregroundColor(.black)
                             }
-        
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 20) {
@@ -88,15 +87,11 @@ struct ProfileView: View {
                                             .font(.system(size: 14))
                                             .background(Color.gray.opacity(0.2))
                                             .foregroundColor(.black)
-                                        .cornerRadius(10)}
+                                            .cornerRadius(10)
+                                    }
                                 }
                             }
-                            
-                            Text("a short bio that describes the user")
-                             
                         }
-                        
-                        Text("i have many hot takes to make")
                     }
                     .padding()
 
@@ -252,18 +247,6 @@ struct ProfileView: View {
                         .padding()
                     }
 
-                    // Display other attributes
-                    ForEach(Array(userVM.user.attributes.keys), id: \.self) { key in
-                        if key != "profileEmoji" { // Don't show profileEmoji in attributes list
-                            HStack {
-                                Text(key.capitalized)
-                                    .bold()
-                                Spacer()
-                                Text(userVM.user.attributes[key] ?? "")
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

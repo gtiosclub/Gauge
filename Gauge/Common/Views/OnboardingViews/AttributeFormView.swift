@@ -88,13 +88,12 @@ struct AttributeFormView: View {
                 Task {
                         do {
                             try await authVM.updateUserProfile()
-                            // After updating, set onboardingState to complete.
                             DispatchQueue.main.async {
                                 authVM.onboardingState = .complete
                                 navigateToHome = true
                             }
                         } catch {
-                            // Handle the error if needed.
+                            // Handle error
                         }
                     }
                 }) {

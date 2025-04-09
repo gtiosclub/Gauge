@@ -13,8 +13,7 @@ struct GenderSelectionView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 1, steps: 6)  // Adjust steps count as needed for “About You” flow
-            // Header
+            ProgressBar(progress: 1, steps: 6)
             ZStack {
                 Text("About You")
                     .font(.system(size: 17, weight: .semibold))
