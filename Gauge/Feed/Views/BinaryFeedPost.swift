@@ -203,7 +203,7 @@ struct BinaryFeedPost: View {
             NavigationLink(destination: {
                 HomeView()
             }, label: {
-                Text("\(post.responseResult1 + post.responseResult2) votes")
+                Text("\(post.calculateResponses().reduce(0, +)) votes")
                     .foregroundColor(.gray)
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
@@ -213,7 +213,7 @@ struct BinaryFeedPost: View {
                 Spacer(minLength: 1008.0)
             }
             
-            Spacer(minLength: 20.0)
+            Spacer(minLength: 50.0)
         }
 //        .padding()
         .frame(width: UIScreen.main.bounds.width)
@@ -304,7 +304,7 @@ extension View {
 
 
 #Preview {
-    BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0), skipping: .constant(false)
+    BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good", sublabel1: "bad", sublabel2: "great"), dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0), skipping: .constant(false)
     )
 }
 

@@ -26,15 +26,17 @@ class User: Equatable, Identifiable, ObservableObject {
     var profilePhoto: String
     var phoneNumber: String = ""
     var myCategories: [String] = []
+    var myTopics: [String] = [] // List of topics that user is interested in / interact with
     var myNextPosts: [String] = []
     
     // MARK: AI Algorithm Variables
-    var myPosts: [String] = [] // PostIds of the user's posts
-    var myResponses: [String] = [] // PostIds of those responded to
-    var myViews: [String] = [] // PostIds of those skipped
-    var myFavorites: [String] = [] // PostIds of those favorited
-    var myComments: [String] = [] // PostIds of those commented on
-    var mySearches: [String] = [] // Search queries
+    @Published var myPosts: [String] = [] // PostIds of the user's posts
+    @Published var myResponses: [String] = [] // PostIds of those responded to
+    @Published var myViews: [String] = [] // PostIds of those skipped
+    @Published var myFavorites: [String] = [] // PostIds of those favorited
+    @Published var myComments: [String] = [] // PostIds of those commented on
+    var myPostSearches: [String] = [] // Search queries
+    var myProfileSearches: [String] = [] //search queries
     var myAccessedProfiles: [String] // UserIDs of other users, sorted by profile accesses
     // MARK: AI Algorithm Variables
     
@@ -55,7 +57,11 @@ class User: Equatable, Identifiable, ObservableObject {
         self.attributes = [:]
     }
     
+<<<<<<< HEAD
     init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String], mySearches: [String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String = "", myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, attributes: [String: String]) {
+=======
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], myTopics: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
+>>>>>>> main
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -66,9 +72,11 @@ class User: Equatable, Identifiable, ObservableObject {
         self.myNextPosts = myNextPosts
         self.myResponses = myResponses
         self.myFavorites = myFavorites
-        self.mySearches = mySearches
+        self.myPostSearches = myPostSearches
+        self.myProfileSearches = myProfileSearches
         self.myComments = myComments
         self.myCategories = myCategories
+        self.myTopics = myTopics
         self.badges = badges
         self.profilePhoto = profilePhoto
         self.myAccessedProfiles = myAccessedProfiles

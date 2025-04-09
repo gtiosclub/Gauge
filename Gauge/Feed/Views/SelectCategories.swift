@@ -13,6 +13,7 @@ struct SelectCategories: View {
     @State var isSearching: Bool = false
     @State var suggestedCategories: [Category] = []
     @Binding var selectedCategories: [Category]
+    @Binding var stepCompleted: Bool
     
     let question: String
     let responseOptions: [String]
@@ -29,21 +30,19 @@ struct SelectCategories: View {
             question: self.question,
             responseOptions: self.responseOptions
         ) { suggestedCategories in
-            self.suggestedCategories = suggestedCategories
+            for category in suggestedCategories {
+                if !selectedCategories.contains(category) {
+                    self.suggestedCategories.append(category)
+                }
+            }
         }
+        
+        stepCompleted = selectedCategories.count > 0
     }
     
     var body: some View {
         ZStack {
-            VStack(spacing: 25) {
-                HStack {
-                    Text("Select categories")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    
-                    Spacer()
-                }
-                
+            VStack(spacing: 10) {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.gray)
@@ -67,20 +66,23 @@ struct SelectCategories: View {
                 .background(Color(.systemGray5))
                 .cornerRadius(20)
                 
-                FlowLayout(verticalSpacing: 5, horizontalSpacing: 5) {
-                    ForEach(selectedCategories, id: \.self) { category in
-                        Button(category.rawValue) {
-                            withAnimation {
-                                selectedCategories = selectedCategories.filter { $0 != category}
+                ScrollView {
+                    FlowLayout(verticalSpacing: 5, horizontalSpacing: 5) {
+                        ForEach(selectedCategories, id: \.self) { category in
+                            Button(category.rawValue) {
+                                withAnimation {
+                                    selectedCategories = selectedCategories.filter { $0 != category}
+                                }
+                                stepCompleted = selectedCategories.count > 0
                             }
+                            .padding(10)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .background(Color(.systemGray6))
+                            .foregroundColor(.black)
+                            .cornerRadius(20)
+                            .fixedSize()
                         }
-                        .padding(10)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .background(Color(.systemGray6))
-                        .foregroundColor(.black)
-                        .cornerRadius(20)
-                        .fixedSize()
                     }
                 }
                 
@@ -88,7 +90,7 @@ struct SelectCategories: View {
                     VStack {
                         HStack {
                             Text("Suggested")
-                                .font(.title3)
+                                .font(.title2)
                                 .fontWeight(.bold)
                             
                             Spacer()
@@ -102,6 +104,8 @@ struct SelectCategories: View {
                                             selectedCategories.append(category)
                                         }
                                         suggestedCategories = suggestedCategories.filter { $0 != category }
+                                        
+                                        stepCompleted = selectedCategories.count > 0
                                     }
                                 }
                                 .padding(10)
@@ -127,13 +131,15 @@ struct SelectCategories: View {
                                 if (!selectedCategories.contains(Category.stringToCategory(category)!)) {
                                     selectedCategories.append(Category.stringToCategory(category)!)
                                 }
+                                categoryInput = ""
                                 isSearching = false
+                                stepCompleted = selectedCategories.count > 0
                             }
                         }
                         .padding(.vertical, 5)
                     }
                     .listStyle(PlainListStyle())
-                    .frame(height: min(CGFloat(filteredCategories.count) * 44, 170))
+                    .frame(height: min(CGFloat(filteredCategories.count) * 44, 130))
                     .background(Color.white)
                     .cornerRadius(10)
                     .shadow(radius: 5)
@@ -141,7 +147,7 @@ struct SelectCategories: View {
                     
                     Spacer()
                 }
-                .padding(.top, 50)
+                .padding(.top, 3)
                 .zIndex(2)
             
                 //Background to dismiss searching

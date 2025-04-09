@@ -9,7 +9,11 @@ import SwiftUI
 
 struct CommentsView: View {
     var comments: [Comment]
-    @State private var sortedComments: [Comment] = []
+    var sortedComments: [Comment] {
+        comments.sorted {
+            ($0.likes.count - $0.dislikes.count) > ($1.likes.count - $1.dislikes.count)
+        }
+    }
     
     var body: some View {
         ScrollView {
@@ -26,11 +30,6 @@ struct CommentsView: View {
                 }
             }
         }
-        .onAppear {
-            sortedComments = comments.sorted {
-                ($0.likes.count - $0.dislikes.count) > ($1.likes.count - $1.dislikes.count)
-            }
-        }
     }
 }
 
@@ -39,6 +38,7 @@ struct CommentsView: View {
         comments: [
             Comment(
                 commentType: .text,
+                postId: "555555555",
                 userId: "Lv72Qz7Qc4TC2vDeE94q",
                 date: Date(),
                 commentId: "",
@@ -48,6 +48,7 @@ struct CommentsView: View {
             ),
             Comment(
                 commentType: .text,
+                postId: "555555555",
                 userId: "Lv72Qz7Qc4TC2vDeE94q",
                 date: Date(),
                 commentId: "",

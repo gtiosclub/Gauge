@@ -95,7 +95,13 @@ struct ProfileView: View {
                             Text("a short bio that describes the user")
                              
                         }
+<<<<<<< HEAD
                         Spacer()
+=======
+                        
+                        Text("i have many hot takes to make")
+                         
+>>>>>>> main
                     }
                     .padding()
 

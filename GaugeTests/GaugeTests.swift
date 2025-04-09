@@ -79,6 +79,7 @@ final class GaugeTests: XCTestCase {
         print(options)
     }
     
+<<<<<<< HEAD
     func testFetchUserSearch() async {
         let viewModel = SearchViewModel()
         do {
@@ -89,5 +90,29 @@ final class GaugeTests: XCTestCase {
         } catch {
             print("error")
         }
+=======
+    func testCategoryRanker() {
+        let vm = PostFirebase()
+        let userCategories = [
+            "🎮 Video Games",
+            "🎬 Movies",
+            "🎵 Music",
+            "📺 TV Shows"
+        ]
+        
+        let postCategories = Category.mapStringsToCategories(returnedStrings: [
+            "📺 TV Shows",
+            "🎮 Video Games",
+            "🎬 Movies",
+            "🎵 Music"
+        ])
+
+        let result = vm.categoryRanker(user_categories: userCategories, post_categories: postCategories)
+        
+        print(userCategories)
+        print(postCategories)
+        print(result!)
+        XCTAssertEqual(result, 93)
+>>>>>>> main
     }
 }

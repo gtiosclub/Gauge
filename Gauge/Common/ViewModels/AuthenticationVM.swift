@@ -79,10 +79,18 @@ class AuthenticationVM: ObservableObject {
                             "profilePhoto": tempUser.profilePhoto,
                             "phoneNumber": tempUser.phoneNumber,
                             "myCategories": tempUser.myCategories,
+                            "myCategories": tempUser.myTopics,
                             "myNextPosts": tempUser.myNextPosts,
+<<<<<<< HEAD
                             "mySearches": tempUser.mySearches,
                             "myAccessedProfiles": tempUser.myAccessedProfiles,
                             "attributes": [:],
+=======
+                            "myPostSearches": tempUser.myPostSearches,
+                            "myProfileSearches": tempUser.myProfileSearches,
+                            "myAccessedProfiles": tempUser.myAccessedProfiles
+                        
+>>>>>>> main
             ] as [String : Any]
             
             try await Firebase.db.collection("USERS").document(user.uid).setData(userData)
