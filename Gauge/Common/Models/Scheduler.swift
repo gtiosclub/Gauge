@@ -19,9 +19,9 @@ class Scheduler: ObservableObject {
     }
 
     func startDailyInterruptTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: false) { _ in
-            self.triggerInterrupt()
-        }
+//        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: false) { _ in
+//            self.triggerInterrupt()
+//        }
     }
 
     private func checkForInterrupt() {
