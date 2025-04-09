@@ -1,32 +1,30 @@
 //
-//  CreateAccountView.swift
-//  Gauge
+//  CreateAccountView.swift
+//  Gauge
 //
-//  Created by Anthony Le on 4/3/25.
+//  Created by Anthony Le on 4/3/25.
 //
 
 import SwiftUI
 
-struct CreateAccountView: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var navigateToUsernameCreation: Bool = false
+struct EmailView: View {
+    @EnvironmentObject var authVM: AuthenticationVM
     @State private var email: String = ""
-
+    
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 1)
+            ProgressBar(progress: 1, steps: 3)
             
             ZStack {
                 HStack {
                     Button(action: {
-                        dismiss()
+                        authVM.onboardingState = .welcome
                     }) {
                         Image(systemName: "chevron.left")
                             .foregroundColor(.blue)
                     }
                     Spacer()
                 }
-
                 Text("Create Account")
                     .font(.system(size: 17, weight: .semibold))
             }
@@ -35,13 +33,16 @@ struct CreateAccountView: View {
             
             Spacer().frame(height: 30)
             
+            // Email field
             VStack(alignment: .leading, spacing: 8) {
                 Text("What’s your email?")
                     .font(.title)
                     .bold()
                     .padding(.bottom, 20)
-
+                
                 TextField("Email", text: $email)
+                    .autocapitalization(.none)
+                    .keyboardType(.emailAddress)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 20)
@@ -49,11 +50,12 @@ struct CreateAccountView: View {
                     )
             }
             .padding(.horizontal, 24)
-
+            
             Spacer()
-
+            
             Button(action: {
-                navigateToUsernameCreation = true
+                authVM.tempUserData.email = email
+                authVM.onboardingState = .username
             }) {
                 HStack {
                     Spacer()
@@ -68,39 +70,38 @@ struct CreateAccountView: View {
                 .background(Color.blue)
                 .cornerRadius(25)
             }
+            .disabled(email.isEmpty)
             .padding(.horizontal, 24)
             .padding(.bottom, 8)
-
+            
             Spacer().frame(height: 0)
         }
         .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $navigateToUsernameCreation) {
-            UsernameCreationView(email: email)
+        .onAppear {
+            email = authVM.tempUserData.email
         }
     }
 }
 
-struct UsernameCreationView: View {
-    @Environment(\.dismiss) private var dismiss
-    let email: String
-    @State private var navigateToPasswordCreation: Bool = false
-    @State private var username: String = ""
 
+struct UsernameView: View {
+    @EnvironmentObject var authVM: AuthenticationVM
+    @State private var username: String = ""
+    
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 2)
+            ProgressBar(progress: 2, steps: 3)
             
             ZStack {
                 HStack {
                     Button(action: {
-                        dismiss()
+                        authVM.onboardingState = .email
                     }) {
                         Image(systemName: "chevron.left")
                             .foregroundColor(.blue)
                     }
                     Spacer()
                 }
-
                 Text("Create Account")
                     .font(.system(size: 17, weight: .semibold))
             }
@@ -114,7 +115,7 @@ struct UsernameCreationView: View {
                     .font(.title)
                     .bold()
                     .padding(.bottom, 20)
-
+                
                 TextField("Username", text: $username)
                     .padding()
                     .background(
@@ -123,11 +124,12 @@ struct UsernameCreationView: View {
                     )
             }
             .padding(.horizontal, 24)
-
+            
             Spacer()
-
+            
             Button(action: {
-                navigateToPasswordCreation = true
+                authVM.tempUserData.username = username
+                authVM.onboardingState = .password
             }) {
                 HStack {
                     Spacer()
@@ -142,43 +144,43 @@ struct UsernameCreationView: View {
                 .background(Color.blue)
                 .cornerRadius(25)
             }
+            .disabled(username.isEmpty)
             .padding(.horizontal, 24)
             .padding(.bottom, 8)
-
+            
             Spacer().frame(height: 0)
         }
         .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $navigateToPasswordCreation) {
-            PasswwordCreationView(email: email, username: username)
+        .onAppear {
+            // Restore username if previously entered
+            username = authVM.tempUserData.username
         }
     }
 }
 
-struct PasswwordCreationView: View {
-    @Environment(\.dismiss) private var dismiss
+
+struct PasswordView: View {
+    @EnvironmentObject var authVM: AuthenticationVM
     let email: String
     let username: String
     
-    @StateObject private var authVM = AuthenticationVM()
-    @State private var navigateToGenderSelection: Bool = false
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
-
+    
     var body: some View {
         VStack(spacing: 0) {
-            ProgressBar(progress: 3)
+            ProgressBar(progress: 3, steps: 3)
             
             ZStack {
                 HStack {
                     Button(action: {
-                        dismiss()
+                        authVM.onboardingState = .username
                     }) {
                         Image(systemName: "chevron.left")
                             .foregroundColor(.blue)
                     }
                     Spacer()
                 }
-
                 Text("Create Account")
                     .font(.system(size: 17, weight: .semibold))
             }
@@ -192,7 +194,7 @@ struct PasswwordCreationView: View {
                     .font(.title)
                     .bold()
                     .padding(.bottom, 20)
-
+                
                 SecureField("Password", text: $password)
                     .padding()
                     .background(
@@ -208,15 +210,15 @@ struct PasswwordCreationView: View {
                     )
             }
             .padding(.horizontal, 24)
-
+            
             Spacer()
-
+            
             Button(action: {
-                if (password == confirmPassword) {
+                if password == confirmPassword {
+                    authVM.tempUserData.password = password
                     Task {
-                        await authVM.signUp(email: email, password: password, username: username.lowercased())
+                        try await authVM.createInitialAccount()
                     }
-                    navigateToGenderSelection = true
                 }
             }) {
                 HStack {
@@ -230,21 +232,23 @@ struct PasswwordCreationView: View {
                 .background(Color.blue)
                 .cornerRadius(25)
             }
+            .disabled(password.isEmpty || confirmPassword.isEmpty || password != confirmPassword)
             .padding(.horizontal, 24)
             .padding(.bottom, 8)
-
+            
             Spacer().frame(height: 0)
         }
         .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $navigateToGenderSelection) {
-            GenderSelectionView()
+        .onAppear {
+            password = authVM.tempUserData.password
         }
     }
 }
 
+
 struct ProgressBar: View {
     var progress: Int
-    var steps: Int = 3
+    var steps: Int
     var spacing: CGFloat = 4
     var barFraction: CGFloat = 5 / 8
 
@@ -255,7 +259,7 @@ struct ProgressBar: View {
                 0,
                 (totalWidth - spacing * CGFloat(steps - 1)) / CGFloat(steps)
             )
-
+            
             HStack(spacing: spacing) {
                 ForEach(0..<steps, id: \.self) { index in
                     Capsule()
@@ -271,6 +275,7 @@ struct ProgressBar: View {
     }
 }
 
+
 #Preview {
-    CreateAccountView()
+    EmailView()
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct BinaryFeedResults: View {
-    var post: BinaryPost
+    @ObservedObject var post: BinaryPost
     var optionSelected: Int
     
     var body: some View {
@@ -63,15 +63,21 @@ struct BinaryFeedResults: View {
             BinaryResultView(post: post, optionSelected: optionSelected)
                 .padding(.top, 10)
                 
-            Text("\(post.responseResult1 + post.responseResult2) votes")
+            Text("\(post.calculateResponses().reduce(0, +)) votes")
                 .foregroundColor(.gray)
                 .padding(.top, 10)
                         
             withAnimation(.none, {
                 CommentsView(comments: post.comments)
-            })            
+                    .onChange(of: post.comments) {old, new in
+                            print("recognized  commentschanged")
+                    }
+            })
         }
         .padding()
+        .onAppear() {
+            print(post.responses)
+        }
     }
     
     var profileImage: some View {
@@ -106,5 +112,5 @@ struct BinaryFeedResults: View {
 }
 
 #Preview {
-    BinaryFeedResults(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), optionSelected: 1)
+    BinaryFeedResults(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good", sublabel1: "bad", sublabel2: "great"), optionSelected: 1)
 }

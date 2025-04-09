@@ -11,9 +11,38 @@ class AuthenticationVM: ObservableObject {
     @Published var errorMessage: String?
     @Published var isLoading = false
     @Published var currentUser: User?
+    @Published var onboardingState: OnboardingState = .welcome
+    @Published var tempUserData = TempUserData()
     
     let auth = Auth.auth()
     
+    enum OnboardingState {
+        case welcome
+        case email
+        case username
+        case password
+        case gender
+        case location
+        case profileEmoji
+        case bio
+        case categories
+        case attributes
+        case complete
+    }
+
+    
+    class TempUserData: ObservableObject {
+        @Published var email: String = ""
+        @Published var username: String = ""
+        @Published var password: String = ""
+        @Published var gender: String = ""
+        @Published var location: String = ""
+        @Published var profileEmoji: String = ""
+        @Published var bio: String = ""
+        @Published var selectedCategories: Set<String> = []
+        @Published var attributes: [String: String] = [:]
+    }
+
     init() {
         auth.addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async {
@@ -27,16 +56,14 @@ class AuthenticationVM: ObservableObject {
     }
     
     func signUp(email: String, password: String, username: String) async {
-        isLoading = true
         do {
+            isLoading = true
             let authResult = try await auth.createUser(withEmail: email, password: password)
             let user = authResult.user
             
             let changeRequest = user.createProfileChangeRequest()
             changeRequest.displayName = username
             try await changeRequest.commitChanges()
-            
-//            let userData = ["email": email, "username": username]
             
             let tempUser = User(userId: user.uid, username: username, email: email)
             
@@ -52,8 +79,12 @@ class AuthenticationVM: ObservableObject {
                             "profilePhoto": tempUser.profilePhoto,
                             "phoneNumber": tempUser.phoneNumber,
                             "myCategories": tempUser.myCategories,
+                            "myCategories": tempUser.myTopics,
                             "myNextPosts": tempUser.myNextPosts,
-                            "mySearches": tempUser.mySearches,
+                            "myAccessedProfiles": tempUser.myAccessedProfiles,
+                            "attributes": [:],
+                            "myPostSearches": tempUser.myPostSearches,
+                            "myProfileSearches": tempUser.myProfileSearches,
                             "myAccessedProfiles": tempUser.myAccessedProfiles
                         
             ] as [String : Any]
@@ -89,6 +120,94 @@ class AuthenticationVM: ObservableObject {
                 self.errorMessage = error.localizedDescription
                 self.isLoading = false
             }
+        }
+    }
+    
+    func createInitialAccount() async throws {
+        isLoading = true
+        do {
+            let authResult = try await auth.createUser(withEmail: tempUserData.email, password: tempUserData.password)
+            let user = authResult.user
+            
+            let changeRequest = user.createProfileChangeRequest()
+            changeRequest.displayName = tempUserData.username
+            try await changeRequest.commitChanges()
+            
+            let tempUser = User(userId: user.uid, username: tempUserData.username, email: tempUserData.email)
+            
+            // Initialize with empty attributes map
+            let initialAttributes: [String: String] = [:]
+            
+            let userData = ["email": tempUserData.email,
+                          "username": tempUserData.username,
+                          "lastLogin": DateConverter.convertDateToString(tempUser.lastLogin),
+                          "lastFeedRefresh": DateConverter.convertDateToString(tempUser.lastFeedRefresh),
+                          "streak": tempUser.streak,
+                          "friendIn": tempUser.friendIn,
+                          "friendOut": tempUser.friendOut,
+                          "friends": tempUser.friends,
+                          "badges": tempUser.badges,
+                          "profilePhoto": tempUser.profilePhoto,
+                          "phoneNumber": tempUser.phoneNumber,
+                          "myCategories": tempUser.myCategories,
+                          "myNextPosts": tempUser.myNextPosts,
+                        "myProfileSearches": tempUser.myProfileSearches,
+                        "myPostSearches": tempUser.myPostSearches,
+                          "myAccessedProfiles": tempUser.myAccessedProfiles,
+                          "attributes": initialAttributes  // Initialize empty attributes
+            ] as [String : Any]
+            
+            try await Firebase.db.collection("USERS").document(user.uid).setData(userData)
+            
+            DispatchQueue.main.async {
+                self.currentUser = tempUser
+                self.isLoading = false
+                self.onboardingState = .gender
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = error.localizedDescription
+                self.isLoading = false
+            }
+        }
+    }
+
+    func updateUserProfile() async throws {
+        guard let userId = currentUser?.userId else { return }
+        
+        let userAttributes: [String: String] = [
+            "gender": tempUserData.attributes["gender"] ?? "",
+            "location": tempUserData.attributes["location"] ?? "",
+            "profileEmoji": tempUserData.attributes["profileEmoji"] ?? "",
+            "pronouns": tempUserData.attributes["pronouns"] ?? "",
+            "age": tempUserData.attributes["age"] ?? "",
+            "height": tempUserData.attributes["height"] ?? "",
+            "relationshipStatus": tempUserData.attributes["relationshipStatus"] ?? "",
+            "workStatus": tempUserData.attributes["workStatus"] ?? "",
+            "bio": tempUserData.bio
+        ]
+        
+        let updates: [String: Any] = [
+            "attributes": userAttributes,
+            "myCategories": Array(tempUserData.selectedCategories)
+        ]
+        
+        try await Firebase.db.collection("USERS").document(userId).updateData(updates)
+        
+        currentUser?.attributes = userAttributes
+        currentUser?.myCategories = Array(tempUserData.selectedCategories)
+    }
+
+    
+    func signOut() {
+        do {
+            try auth.signOut()
+            DispatchQueue.main.async {
+                self.currentUser = nil
+                self.onboardingState = .welcome
+            }
+        } catch {
+            self.errorMessage = error.localizedDescription
         }
     }
     

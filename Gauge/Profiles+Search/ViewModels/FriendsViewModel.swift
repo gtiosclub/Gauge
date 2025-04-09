@@ -157,14 +157,18 @@ class FriendsViewModel: ObservableObject {
             let myNextPosts = userData["myNextPosts"] as? [String] ?? []
             let myResponses = userData["myResponses"] as? [String] ?? []
             let myFavorites = userData["myFavorites"] as? [String] ?? []
-            let mySearches = userData["mySearches"] as? [String] ?? []
+            let myPostSearches = userData["myPostSearches"] as? [String] ?? []
+            let myProfileSearches = userData["myProfileSearches"] as? [String] ?? []
             let myComments = userData["myComments"] as? [String] ?? []
             let myCategories = userData["myCategories"] as? [String] ?? []
+            let myTopics = userData["myTopics"] as? [String] ?? []
             let myAccessedProfiles = userData["myAccessedProfiles"] as? [String] ?? []
             let badges = userData["badges"] as? [String] ?? []
             let streak = userData["streak"] as? Int ?? 0
             let lastLogin = DateConverter.convertStringToDate(userData["lastLogin"] as? String ?? "") ?? Date()
             let lastFeedRefresh = DateConverter.convertStringToDate(userData["lastFeedRefresh"] as? String ?? "") ?? Date()
+            let attributes = userData["attributes"] as? [String : String] ?? [:]
+            let profilePhoto = userData["profilePhoto"] as? String ?? ""
 
             let outputUser = User(
                 userId: userId,
@@ -177,14 +181,18 @@ class FriendsViewModel: ObservableObject {
                 myNextPosts: myNextPosts,
                 myResponses: myResponses,
                 myFavorites: myFavorites,
-                mySearches: mySearches,
+                myPostSearches: myPostSearches,
+                myProfileSearches: myProfileSearches,
                 myComments: myComments,
                 myCategories: myCategories,
+                myTopics: myTopics,
                 badges: badges,
                 streak: streak,
+                profilePhoto: profilePhoto,
                 myAccessedProfiles: myAccessedProfiles,
                 lastLogin: lastLogin,
-                lastFeedRefresh: lastFeedRefresh
+                lastFeedRefresh: lastFeedRefresh,
+                attributes: attributes
             )
             return outputUser
                 

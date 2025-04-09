@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct BinaryResultView: View {
-    let post: BinaryPost
+    @ObservedObject var post: BinaryPost
     let optionSelected: Int
     
     var body: some View {
         // Avoid division by zero
-        let total = max(post.responseResult1 + post.responseResult2, 1)
-        let percent1 = Int(round(Double(post.responseResult1) / Double(total) * 100))
-        let percent2 = Int(round(Double(post.responseResult2) / Double(total) * 100))
+        let total = max(post.calculateResponses().reduce(0, +), 1)
+        let percent1 = Int(round(Double(post.calculateResponses()[0]) / Double(total) * 100))
+        let percent2 = Int(round(Double(post.calculateResponses()[1]) / Double(total) * 100))
         
         GeometryReader { geometry in
             VStack {
@@ -108,12 +108,12 @@ struct CustomRoundedRectangle: Shape {
             postId: "sameer's post",
             userId: "Sameer",
             categories: [.arts(.painting)],
-            postDateAndTime: Date(),
+            topics: ["art", "picasso"], postDateAndTime: Date(),
             question: "Picasso is the goat",
-            responseOption1: "Facts 💯",
-            responseOption2: "Nah 🤮",
-            responseResult1: 34, //167 people pressed Facts
-            responseResult2: 1,  //83 people pressed Nah
+            responseOption1: "Yes",
+            responseOption2: "No",
+            sublabel1: "Facts 💯",
+            sublabel2: "Nah 🤮",
             favoritedBy: ["sameer"]
         ),
         optionSelected: 1

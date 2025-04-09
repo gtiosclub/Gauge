@@ -87,7 +87,7 @@ struct GamesHome: View {
                                     .padding()
                                 HStack {
                                     Button(action: {
-                                        mcManager.setUsername(username: username)
+                                        mcManager.setUsernameAndProfile(username: username, profileLink: "Profile Link")
                                         isHost = true
                                         roomCode = generateRoomCode()
                                         navigateToRoom = true
@@ -107,7 +107,7 @@ struct GamesHome: View {
                                     Button(action: {
                                         withAnimation {
                                             showingJoin.toggle()
-                                            mcManager.setUsername(username: username)
+                                            mcManager.setUsernameAndProfile(username: username)
                                             isHost = false
                                             mcManager.startBrowsing()
                                         }
@@ -142,7 +142,7 @@ struct GamesHome: View {
                                         let roomAvailable = !roomCode.isEmpty && mcManager.discoveredPeers.values.contains { $0.roomCode == roomCode }
                                         Button(action: {
                                             if roomAvailable {
-                                                mcManager.setUsername(username: username)
+                                                mcManager.setUsernameAndProfile(username: username)
                                                 isHost = false
                                                 mcManager.joinRoom(with: roomCode)
                                                 navigateToRoom = true

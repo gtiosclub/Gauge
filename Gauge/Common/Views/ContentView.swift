@@ -6,24 +6,28 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     @StateObject private var authVM = AuthenticationVM()
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
-    @State private var isSigningUp = false
     @State private var selectedTab: Int = 0
     @State private var showSplashScreen: Bool = true
+    @Environment(\.modelContext) private var modelContext
+    @Query var userResponses: [UserResponses]
     
     var body: some View {
         if showSplashScreen {
             ZStack {
+                Color.red
+
                 Image(systemName: "gauge.open.with.lines.needle.84percent.exclamation")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                    .frame(width: UIScreen.main.bounds.width - 50)
             }
-            .background(.red)
+            .ignoresSafeArea()
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     showSplashScreen = false
@@ -40,7 +44,6 @@ struct ContentView: View {
                             }
                             .tag(0)
                         
-//                        Text("Search")
                         SearchView()
                             .tabItem {
                                 Image(systemName: "magnifyingglass")
@@ -55,12 +58,12 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-//                        Text("Profile")
                         ProfileView(userVM: userVM, isCurrentUser: true)
+                            .environmentObject(authVM)
                             .tabItem {
-                                Image(systemName: "person.circle")
-                                Text("Profile")
-                            }
+                                  Image(systemName: "person.crop.circle")
+                                  Text("Profile")
+                              }
                             .tag(3)
                     }
                     .background(.white)
@@ -75,55 +78,119 @@ struct ContentView: View {
                         UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
                     }
                 } else {
-                    if isSigningUp {
-                        SignUpView()
-                            .environmentObject(authVM)
-                    } else {
-                        SignInView()
-                            .environmentObject(authVM)
-                    }
-                    
-                    Button(action: { isSigningUp.toggle() }) {
-                        Text(isSigningUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
-                    }
+                    OnboardingView()
+                        .environmentObject(authVM)
                 }
             }
             .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
                 if let signedInUser = newUser {
-                    userVM.user = signedInUser
+                    userVM.replaceCurrentUser(user: signedInUser)
                     
-                    // populate the user data
-                    userVM.getAllUserData(userId: userVM.user.userId, completion: { user in
-                        userVM.user = user
-                    })
+                    print("Signed in as user: " + signedInUser.userId)
                     
-                    // call watchForNewPosts
-    //                postVM.watchForNewPosts(user: userVM.user)
-                    
-                    // move posts in allQueriedPosts to feedPosts that have a matching ID in the user's myNextPosts (in order)
-    //                postVM.feedPosts = postVM.allQueriedPosts.filter { userVM.user.myNextPosts.contains($0.postId) }
-                    
-                    // call the watchForCurrentFeedPostChanges
-    //                postVM.watchForCurrentFeedPostChanges()
-                    
-                    // call functions to fill out a user's AI Algo variables
-                    userVM.getPosts(userId: userVM.user.userId) { posts in
-                        userVM.user.myPosts = posts
-                    }
-                    
-                    userVM.getUserPostInteractions{responsePostIDs, commentPostIDs, viewPostIDs in
-                        userVM.user.myResponses = responsePostIDs
-                        userVM.user.myComments = commentPostIDs
-                        userVM.user.myViews = viewPostIDs
-                    }
-                    
-                    userVM.getUserFavorites(userId: userVM.user.userId) { favorites in
-                        userVM.user.myFavorites = favorites
+                    Task {
+                        async let userData = userVM.getUserData(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userInteractions = userVM.getUserPostInteractions(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userPosts = userVM.getUserPosts(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userFavorites = userVM.getUserFavorites(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userNumViews = userVM.getUserNumViews(userId: signedInUser.userId, setCurrentUserData: true)
+                        async let userNumResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
+                        
+                        do {
+                            _ = try await userData
+                            
+                            if let userResponse = userResponses.first {
+                                let newCategories = userVM.user.myCategories
+                                if Set(newCategories) != Set(userResponse.currentUserCategories) {
+                                    userResponse.currentUserCategories = newCategories
+                                    print("Replaced UserResponses current categories with: " + String(describing: newCategories))
+                                }
+                                
+//                                let newTopics = userVM.user.myTopics
+//                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
+//                                    userResponse.currentUserTopics = newTopics
+//                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
+//                                }
+                            }
+                            
+                            await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
+                            postVM.watchForCurrentFeedPostChanges()
+                            
+                            _ = try await (
+                                userInteractions,
+                                userPosts
+                            )
+                            
+                            await postVM.loadInitialNewPosts(user: userVM.user)
+                            
+                            postVM.watchForNewPosts(user: userVM.user)
+                            
+                            var queriedHasPostsLeft = true
+                            while postVM.feedPosts.count < 5 && queriedHasPostsLeft {
+                                queriedHasPostsLeft = postVM.findNextPost(user: userVM.user)
+                            }
+                            
+                            _ = try await (
+                                userNumViews,
+                                userNumResponses,
+                                userFavorites
+                            )
+                            
+                            async let updateNextPosts: () = userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
+                            
+                            async let updateStreakAndLogin: () = userVM.updateUserStreakAndLastLogin(user: userVM.user)
+                            
+                            _ = try await (
+                                updateStreakAndLogin,
+                                updateNextPosts
+                            )
+                        } catch {
+                            print("❌ Error loading user data: \(error)")
+                        }
                     }
                 }
-                //ADD FUNCTIONS FOR SEARCH AND ACCESSED
-
             }
+            .task {
+                do {
+                    let userResponse: UserResponses
+                    if let existing = userResponses.first {
+                        userResponse = existing
+                    } else {
+                        print("⚠️ No UserResponses found. Creating one.")
+                        let newResponse = UserResponses()
+                        modelContext.insert(newResponse)
+                        userResponse = newResponse
+                    }
+                    
+                    let newCategories = try await userVM.reorderUserCategory(
+                        latest: userResponse.userCategoryResponses,
+                        currentInterestList: userResponse.currentUserCategories
+                    )
+                    
+                    userResponse.currentUserCategories = newCategories.isEmpty
+                    ? userResponse.currentUserCategories
+                    : newCategories
+                    
+                    userResponse.userCategoryResponses = [:]
+                    
+                    /*
+                     let newTopics = try await userVM.reorderUserTopics(
+                     latest: userResponse.userTopicResponses,
+                     currentInterestList: userResponse.currentUserTopics
+                     )
+                     
+                     userResponse.currentUserTopics = newTopics.isEmpty
+                     ? userResponse.currentUserTopics
+                     : newTopics
+                     
+                     userResponse.userTopicResponses = [:]
+                     */
+                    
+                } catch {
+                    print("❌ Error reordering categories: \(error)")
+                }
+            }
+            .environmentObject(authVM)
         }
     }
 }

@@ -152,32 +152,26 @@ class SearchViewModel: ObservableObject {
         return results
     }
 
-    func fetchUsers(for query: String) async throws-> [UserResult] {
-        let profileVM = ProfileViewModel()
-        
-        let userRef = Firebase.db.collection("USERS")
-        let firebaseQuery = userRef
-            .whereField("username", isGreaterThanOrEqualTo: query)
-            .whereField("username", isLessThan: query + "\u{f8ff}")
-            .order(by: "username")
+    func fetchUsers(for query: String) async throws -> [UserResult] {
+        let snapshot = try await Firebase.db.collection("USERS")
+            .whereField("username", isGreaterThanOrEqualTo: query.lowercased())
+            .whereField("username", isLessThan: query.lowercased() + "\u{f8ff}")
             .limit(to: 10)
-        
-        let snapshot = try await firebaseQuery.getDocuments()
-        var users: [UserResult] = []
-        
-        for userDocument in snapshot.documents {
-            let userId = userDocument.documentID
-            guard let username = userDocument["username"] as? String else {continue}
-            let profilePhotoUrl = userDocument["profilePhoto"] as? String ?? ""
-            
-            var lightweightUser = UserResult(userId: userId, username: username, profilePhotoUrl: profilePhotoUrl)
+            .getDocuments()
 
-            users.append(lightweightUser)
+        return try snapshot.documents.compactMap { document -> UserResult? in
+            let data = document.data()
+            
+            var result = UserResult(
+                userId: document.documentID,
+                username: data["username"] as? String ?? "",
+                profilePhotoUrl: data["profilePhoto"] as? String ?? ""
+            )
+            
+            // Add attributes
+            result.attributes = data["attributes"] as? [String: String] ?? [:]
+            
+            return result
         }
-        
-        return users
     }
 }
-
-
-

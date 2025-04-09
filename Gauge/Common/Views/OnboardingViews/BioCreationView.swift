@@ -8,23 +8,22 @@
 import SwiftUI
 
 struct BioCreationView: View {
-    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authVM: AuthenticationVM
     @State private var bio: String = ""
-    @State private var showSuggestions: Bool = true
-    @State private var isProgammaticChange: Bool = false
-    @State private var toSkip: Bool = true
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(spacing: 0) {
-            AboutYouProgressBar(progress: 4)
+            ProgressBar(progress: 4, steps: 6)
             
             ZStack {
                 HStack {
                     Button(action: {
-                        dismiss()
+                        authVM.onboardingState = .profileEmoji
                     }) {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .foregroundColor(.gray)
                     }
                     Spacer()
                 }
@@ -38,37 +37,35 @@ struct BioCreationView: View {
             Spacer().frame(height: 30)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Create a bio to display on your profile.")
-                    .font(.title)
-                    .bold()
-                    .padding(.bottom, 20)
-                
-                TextField("This is optional.", text: $bio, axis: .vertical)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .lineLimit(5)
-            }
-            .padding(.horizontal, 24)
-
-            Spacer()
-
-            Button(action: {
-                
-            }) {
-                skipOrNextActionButton(toSkip: bio.isEmpty)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 8)
-
-            Spacer().frame(height: 0)
-        }
-        .navigationBarBackButtonHidden(true)
-        
-//        add navigation to next step
-//        .navigationDestination(isPresented: $navigateTo) {
-//        }
-    }
+                            Text("Create a bio to display on your profile.")
+                                .font(.title)
+                                .bold()
+                                .padding(.bottom, 20)
+                            
+                            TextField("This is optional.", text: $bio, axis: .vertical)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
+                                .lineLimit(5)
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            authVM.tempUserData.bio = bio
+                            authVM.onboardingState = .categories
+                        }) {
+                            skipOrNextActionButton(toSkip: bio.isEmpty)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 8)
+                    }
+                    .navigationBarBackButtonHidden(true)
+                    .onAppear {
+                        bio = authVM.tempUserData.bio
+                    }
+                }
 }
 #Preview {
     BioCreationView()

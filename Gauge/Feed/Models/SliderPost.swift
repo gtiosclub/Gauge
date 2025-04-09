@@ -12,9 +12,10 @@ class SliderPost: Post, Equatable {
     var userId: String
     var username: String = "" // NOT stored in Firebase
     var profilePhoto: String = "" // NOT stored in Firebase
-    var comments: [Comment]
-    var responses: [Response]
+    @Published var comments: [Comment]
+    @Published var responses: [Response]
     var categories: [Category]
+    var topics: [String]
     var viewCounter: Int
     var postDateAndTime: Date
     var favoritedBy: [String]
@@ -38,6 +39,7 @@ class SliderPost: Post, Equatable {
         self.postDateAndTime = postDateAndTime
         self.favoritedBy = []
         self.question = question
+        self.topics = []
         
         // Slider post specific attributes
         self.lowerBoundLabel = lowerBoundLabel
@@ -47,7 +49,7 @@ class SliderPost: Post, Equatable {
     }
     
     // Initializing from Firebase
-    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], viewCounter: Int = 0, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, favoritedBy: [String]) {
+    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], topics: [String], viewCounter: Int = 0, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, favoritedBy: [String]) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -60,6 +62,7 @@ class SliderPost: Post, Equatable {
         self.postDateAndTime = postDateAndTime
         self.favoritedBy = favoritedBy
         self.question = question
+        self.topics = topics
         
         // Slider post specific attributes
         self.lowerBoundValue = lowerBoundValue
@@ -70,5 +73,18 @@ class SliderPost: Post, Equatable {
     
     static func == (lhs: SliderPost, rhs: SliderPost) -> Bool {
         return lhs.postId == rhs.postId
+    }
+    
+    func calculateResponses() -> [Int] {
+        var responses = [0, 0]
+        for response in self.responses {
+            if response.responseOption == self.lowerBoundLabel {
+                responses[0] += 1
+            } else {
+                responses[1] += 1
+            }
+        }
+        
+        return responses
     }
 }

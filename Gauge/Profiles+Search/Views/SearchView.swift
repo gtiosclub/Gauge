@@ -282,12 +282,17 @@ struct SearchResultsView: View {
                     }
                     .onTapGesture {
                         Task {
-                            searchedUserVM.getAllUserData(userId: user.id, completion: { user in
-                                searchedUserVM.user = user
-                            })
-                            searchedUserIsCurrUser = (user.id == userVM.user.id)
-                            navigateToSearchedUser = true
+                            do {
+                                let fetchedUser = try await searchedUserVM.getUserData(userId: user.id)
+                                // Update the user on the main thread if needed:
+                                await MainActor.run {
+                                    searchedUserVM.user = fetchedUser
+                                }
+                            } catch {
+                                print("Error fetching user data: \(error.localizedDescription)")
+                            }
                         }
+
                     }
                 }
             }
