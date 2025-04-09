@@ -17,13 +17,16 @@ struct PostCreationView: View {
     @State private var currentStepTitle: String = "New Post"
     @State private var canMoveNext: Bool = false
     @State private var stepCompleted: Bool = false
+    @State var skippable: Bool = false
+    @State var isRight: Bool = false // boolean for switching between left and right caption
     
     @State var postQuestion: String = ""
     @State var postCategories: [Category] = []
     @State var postType: PostType?
     @State var optionsSelectedIndex: Int?
-    @State var leftLabel: String = ""
-    @State var rightLabel: String = ""
+    @State var leftCaption: String = ""
+    @State var rightCaption: String = ""
+
     
     init(modalSize: Binding<CGFloat>, showCreatePost: Binding<Bool>) {
         self._modalSize = modalSize
@@ -81,6 +84,14 @@ struct PostCreationView: View {
                 SelectLabelNames(slidingOptions: slidingOptions, selectedIndex: $optionsSelectedIndex, stepCompleted: $stepCompleted)
                     .padding(.horizontal, 20)
             } else if currentStep == 4 {
+                TypeCaptionsView(
+                    leftCaption: $leftCaption,
+                    rightCaption: $rightCaption,
+                    isRight: isRight,
+                    stepCompleted: $stepCompleted,
+                    skippable: $skippable
+                )
+            } else if currentStep == 5 {
                 SelectCategories(
                     selectedCategories: $postCategories,
                     stepCompleted: $stepCompleted,
@@ -88,17 +99,44 @@ struct PostCreationView: View {
                     responseOptions: [slidingOptions[optionsSelectedIndex ?? 0].left, slidingOptions[optionsSelectedIndex ?? 0].right]
                 )
                 .frame(height: 200)
-            } else if currentStep == 5 {
-                BinaryPostPreview(postQuestion: postQuestion, postCategories: postCategories, postType: postType!, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, username: userVM.user.username)
-                    .frame(height: 600)
             }
+            
+//            else if currentStep == 5 {
+//                BinaryPostPreview(postQuestion: postQuestion, postCategories: postCategories, postType: postType!, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, username: userVM.user.username)
+//                    .frame(height: 600)
+//            }
             
             
             HStack {
                 if currentStep > 1 {
                     Button(action: {
-                        currentStep = max(currentStep - 1, 1)
                         withAnimation {
+                            if (currentStep == 5) {
+                                currentStep = 4
+                                currentStepTitle = "Type Captions"
+                                modalSize = 300
+                                if (rightCaption.count > 0) {
+                                    isRight = true
+                                } else {
+                                    isRight = false
+                                    skippable = leftCaption.isEmpty
+                                }
+                                return
+                            }
+                            
+                            if (currentStep != 4) {
+                                currentStep = max(currentStep - 1, 1)
+                            } else {
+                                if (!isRight) {
+                                    currentStep = 3
+                                    skippable = false
+                                } else {
+                                    isRight = false
+                                    skippable = leftCaption.isEmpty
+                                    return
+                                }
+                            }
+                            
                             if currentStep == 1 {
                                 currentStepTitle = "New Post"
                                 modalSize = 380
@@ -108,14 +146,16 @@ struct PostCreationView: View {
                             } else if currentStep == 3 {
                                 currentStepTitle = "Pick Options"
                                 modalSize = 400
-                            } else if currentStep == 4 {
+                            } else if currentStep == 5 {
                                 currentStepTitle = "Select Categories"
                                 modalSize = 380
-                            } else if currentStep == 5 {
-                                currentStepTitle = "Review Post"
-                                modalSize = 800
-                                stepCompleted = true
                             }
+                            
+//                            else if currentStep == 5 {
+//                                currentStepTitle = "Review Post"
+//                                modalSize = 800
+//                                stepCompleted = true
+//                            }
                         }
                     }) {
                         Circle()
@@ -134,19 +174,40 @@ struct PostCreationView: View {
                 }
                 
                 Button(action: {
-                    if (currentStep == 5) {
-                        modalSize = 380
-                        showCreatePost = false
-                        
-                        Task {
-                            await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right)
-                        }
-                    }
-                    
-                    currentStep = min(currentStep + 1, totalSteps)
-                    stepCompleted = false
+//                    if (currentStep == 5) {
+//                        modalSize = 380
+//                        showCreatePost = false
+//                        
+//                        Task {
+//                            await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right)
+//                        }
+//                    }
                         
                     withAnimation {
+                        if (currentStep == 3) {
+                            currentStep = 4
+                            currentStepTitle = "Type Captions"
+                            modalSize = 300
+                            isRight = false
+                            skippable = leftCaption.isEmpty
+                            return
+                        }
+                        
+                        if (currentStep != 4) {
+                            currentStep = max(currentStep + 1, 1)
+                        } else {
+                            if (isRight || skippable) {
+                                currentStep = 5
+                            } else {
+                                isRight = true
+                                skippable = false
+                                stepCompleted = !rightCaption.isEmpty
+                                return
+                            }
+                        }
+                        
+                        stepCompleted = false
+                        
                         if currentStep == 1 {
                             currentStepTitle = "New Post"
                             modalSize = 380
@@ -156,34 +217,37 @@ struct PostCreationView: View {
                         } else if currentStep == 3 {
                             currentStepTitle = "Pick Options"
                             modalSize = 400
-                        } else if currentStep == 4 {
+                        } else if currentStep == 5 {
                             currentStepTitle = "Select Categories"
                             modalSize = 380
-                        } else if currentStep == 5 {
-                            currentStepTitle = "Review Post"
-                            if showCreatePost {
-                                modalSize = 800
-                            }
-                            stepCompleted = true
                         }
+                        
+//                        else if currentStep == 5 {
+//                            currentStepTitle = "Review Post"
+//                            if showCreatePost {
+//                                modalSize = 800
+//                            }
+//                            stepCompleted = true
+//                        }
                     }
                 }) {
                     Capsule()
-                        .fill(stepCompleted ? Color.darkBlue : Color.lightBlue)
+                        .fill(stepCompleted ? Color.darkBlue : skippable || (currentStep == 4 && !isRight) ? Color.blue : Color.lightBlue)
                         .frame(width: currentStep == 1 ? 329 : 83, height: 43)
                         .overlay(
                             HStack {
-                                Text(currentStep != 5 ? "Next" : "Post")
+                                Text(skippable ? "Skip" : currentStep != 6 ? "Next" :  "Post")
                                     .font(.system(size: 18, weight: .semibold))
                                     .foregroundColor(.white)
                                 
-                                Image(systemName: currentStep != 5 ? "chevron.right" : "arrow.up")
+                                Image(systemName: skippable ? "chevron.right.2" : currentStep != 6 ? "chevron.right" : "arrow.up")
                                     .foregroundColor(.white)
                                     .font(.system(size: 16, weight: .semibold))
+                                
                             }
                         )
                 }
-                .disabled(!stepCompleted)
+                .disabled(currentStep == 4 && (!isRight || skippable) ? false : !stepCompleted)
             }
             .padding(.horizontal)
             .padding(.top, 20)

@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct TypeCaptionsView: View {
-    @State var leftCaption: String = ""
-    @State var rightCaption: String = ""
-    @State var isRight: Bool = false
-    @State var stepCompleted: Bool = false
-    @State var skippable: Bool = false
+    @Binding var leftCaption: String
+    @Binding var rightCaption: String
+    var isRight: Bool = false
+    @Binding var stepCompleted: Bool
+    @Binding var skippable: Bool
     
     var body: some View {
         VStack {
@@ -24,6 +24,19 @@ struct TypeCaptionsView: View {
                         .font(!isRight ? .caption : .title)
                         .fontWeight(!isRight ? .regular : .bold)
                         .foregroundColor(!isRight ? .red.opacity(0.5) : .lightGray)
+                        .mask(
+                            HStack {
+                                    LinearGradient(
+                                        gradient: Gradient(stops: [
+                                            .init(color: .black, location: 0.0),
+                                            .init(color: .black, location: 0.2),
+                                            .init(color: !isRight ? .black : .clear, location: 1.0)
+                                        ]),
+                                        startPoint: .trailing,
+                                        endPoint: .leading
+                                    )
+                            }
+                        )
                     if (!isRight) {
                         TextField("Caption", text: $leftCaption)
                             .multilineTextAlignment(.leading)
@@ -31,8 +44,8 @@ struct TypeCaptionsView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(.red)
                             .onChange(of: leftCaption) { newValue in
-                                stepCompleted = leftCaption.count > 0 && rightCaption.count > 0
-                                skippable = leftCaption.count == 0 && rightCaption.count == 0
+                                stepCompleted = newValue.count > 0 && rightCaption.count > 0
+                                skippable = newValue.count == 0 && rightCaption.count == 0
                             }
                     }
                 }
@@ -63,17 +76,15 @@ struct TypeCaptionsView: View {
                         .foregroundColor(isRight ? .green.opacity(0.5) : .lightGray)
                         .mask(
                             HStack {
-                                if (!isRight) {
                                     LinearGradient(
                                         gradient: Gradient(stops: [
                                             .init(color: .black, location: 0.0),
                                             .init(color: .black, location: 0.2),
-                                            .init(color: .clear, location: 1.0)
+                                            .init(color: isRight ? .black : .clear, location: 1.0)
                                         ]),
                                         startPoint: .leading,
                                         endPoint: .trailing
                                     )
-                                }
                             }
                         )
                     if (isRight) {
@@ -83,8 +94,8 @@ struct TypeCaptionsView: View {
                             .fontWeight(.semibold)
                             .foregroundColor(.green)
                             .onChange(of: rightCaption) { newValue in
-                                stepCompleted = leftCaption.count > 0 && rightCaption.count > 0
-                                skippable = leftCaption.count == 0 && rightCaption.count == 0
+                                stepCompleted = leftCaption.count > 0 && newValue.count > 0
+                                skippable = leftCaption.count == 0 && newValue.count == 0
                             }
                     }
                 }
@@ -97,7 +108,6 @@ struct TypeCaptionsView: View {
                 .cornerRadius(24)
                 
             }
-//            .padding()
             FadingDivider()
         }
         .padding()
@@ -109,5 +119,5 @@ struct TypeCaptionsView: View {
 }
 
 #Preview {
-    TypeCaptionsView()
+//    TypeCaptionsView()
 }
