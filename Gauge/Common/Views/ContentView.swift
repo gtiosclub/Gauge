@@ -11,7 +11,6 @@ struct ContentView: View {
     @StateObject private var authVM = AuthenticationVM()
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
-    @State private var isSigningUp = false
     @State private var selectedTab: Int = 0
     @State private var showSplashScreen: Bool = true
     
@@ -40,7 +39,6 @@ struct ContentView: View {
                             }
                             .tag(0)
                         
-//                        Text("Search")
                         SearchView()
                             .tabItem {
                                 Image(systemName: "magnifyingglass")
@@ -55,8 +53,8 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-//                        Text("Profile")
                         ProfileView(userVM: userVM, isCurrentUser: true)
+                            .environmentObject(authVM)
                             .tabItem {
                                 Image(systemName: "person.circle")
                                 Text("Profile")
@@ -75,17 +73,8 @@ struct ContentView: View {
                         UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
                     }
                 } else {
-                    if isSigningUp {
-                        SignUpView()
-                            .environmentObject(authVM)
-                    } else {
-                        SignInView()
-                            .environmentObject(authVM)
-                    }
-                    
-                    Button(action: { isSigningUp.toggle() }) {
-                        Text(isSigningUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
-                    }
+                    OnboardingView()
+                        .environmentObject(authVM)
                 }
             }
             .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
@@ -124,6 +113,7 @@ struct ContentView: View {
                 //ADD FUNCTIONS FOR SEARCH AND ACCESSED
 
             }
+            .environmentObject(authVM)
         }
     }
 }

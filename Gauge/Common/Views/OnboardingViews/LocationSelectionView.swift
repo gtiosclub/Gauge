@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LocationSelectionView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authVM: AuthenticationVM
     @State private var navigateToEmojiSelection: Bool = false
     @State private var locationSelection: String = ""
     @State private var query: String = ""
@@ -43,12 +44,12 @@ struct LocationSelectionView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            AboutYouProgressBar(progress: 2)
+            ProgressBar(progress: 2, steps: 6)
             
             ZStack {
                 HStack {
                     Button(action: {
-                        dismiss()
+                        authVM.onboardingState = .gender
                     }) {
                         Image(systemName: "chevron.left")
                             .foregroundColor(.blue)
@@ -123,18 +124,19 @@ struct LocationSelectionView: View {
             Spacer()
 
             Button(action: {
-                navigateToEmojiSelection = true
+                authVM.tempUserData.attributes["location"] = locationSelection
+                authVM.onboardingState = .profileEmoji
             }) {
-                skipOrNextActionButton(toSkip: toSkip)
+            skipOrNextActionButton(toSkip: locationSelection.isEmpty)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 8)
-
-            Spacer().frame(height: 0)
         }
         .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $navigateToEmojiSelection) {
-            EmojiSelectionView()
+        .onAppear {
+            let savedLocation = authVM.tempUserData.attributes["location"] ?? ""
+            locationSelection = savedLocation
+            query = savedLocation
         }
     }
 }

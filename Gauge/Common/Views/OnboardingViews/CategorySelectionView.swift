@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct CategorySelectionView: View {
-    @Binding var showAttributeForm: Bool
+    @EnvironmentObject var authVM: AuthenticationVM
     @State private var selectedCategories: Set<String> = []
     @State private var searchText: String = ""
-
+    
     let allCategories = ["Music", "Travel", "Fitness", "Art", "Tech", "Gaming", "Books", "Movies"]
-
+    
     var filteredCategories: [String] {
         if searchText.isEmpty {
             return allCategories
@@ -21,11 +21,12 @@ struct CategorySelectionView: View {
             return allCategories.filter { $0.localizedCaseInsensitiveContains(searchText) }
         }
     }
-
+    
     var body: some View {
         VStack(spacing: 16) {
+            ProgressBar(progress: 5, steps: 6)
             Spacer().frame(height: 40)
-
+            
             HStack(spacing: 8) {
                 ForEach(0..<4) { index in
                     Capsule()
@@ -34,38 +35,38 @@ struct CategorySelectionView: View {
                 }
             }
             .padding(.horizontal)
-
+            
             HStack {
                 Button(action: {
+                    authVM.onboardingState = .bio
                 }) {
                     Image(systemName: "chevron.left")
                         .font(.title2)
                         .foregroundColor(.gray)
                 }
-
+                
                 Spacer()
-
+                
                 Text("About You")
                     .font(.headline)
                     .bold()
-
+                
                 Spacer()
-
+                
                 Image(systemName: "chevron.left")
                     .opacity(0)
             }
             .padding(.horizontal)
-
+            
             Text(selectedCategories.count < 3
-                 ? "Choose \(3 - selectedCategories.count) more categories you like."
-                 : "You can choose more if you like.")
-                .font(.headline)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-
+                 ? "Choose \(3 - selectedCategories.count) more categories."
+                 : "You can choose more categories if you like.")
+            .font(.headline)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            
             CategorySearchBar(text: $searchText)
-
-
+            
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140))], spacing: 16) {
                 ForEach(filteredCategories, id: \.self) { category in
                     CategoryCard(
@@ -78,23 +79,30 @@ struct CategorySelectionView: View {
                 }
             }
             .padding(.horizontal)
-
+            
             Spacer()
-
+            
             Button(action: {
-                showAttributeForm = true
+                authVM.tempUserData.selectedCategories = selectedCategories
+                authVM.onboardingState = .attributes
             }) {
-                Text(selectedCategories.count >= 3 ? "Next" : "Skip")
+                Text("Next")
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue)
                     .cornerRadius(10)
             }
+            .disabled(selectedCategories.count < 3)
             .padding(.horizontal)
             .padding(.bottom)
+
         }
-        .padding()
+        .onAppear {
+            selectedCategories = authVM.tempUserData.selectedCategories
+        }
+        .padding(.horizontal)
+        .padding(.bottom)
     }
 
     private func toggleCategorySelection(_ category: String) {
@@ -128,7 +136,6 @@ struct CategoryCard: View {
     }
 }
 
-
 struct CategorySearchBar: View {
     @Binding var text: String
 
@@ -147,5 +154,5 @@ struct CategorySearchBar: View {
 }
 
 #Preview {
-    CategorySelectionView(showAttributeForm: .constant(false))
+    CategorySelectionView()
 }

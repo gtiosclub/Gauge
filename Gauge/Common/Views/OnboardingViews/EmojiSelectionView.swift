@@ -9,18 +9,18 @@ import SwiftUI
 import UIKit
 
 struct EmojiSelectionView: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var navigateToBioCreation: Bool = false
+    @EnvironmentObject var authVM: AuthenticationVM
     @State private var emoji: String = ""
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(spacing: 0) {
-            AboutYouProgressBar(progress: 3)
+             ProgressBar(progress: 3, steps: 6)
             
             ZStack {
                 HStack {
                     Button(action: {
-                        dismiss()
+                        authVM.onboardingState = .location
                     }) {
                         Image(systemName: "chevron.left")
                             .foregroundColor(.blue)
@@ -37,7 +37,7 @@ struct EmojiSelectionView: View {
             Spacer().frame(height: 30)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text("Pick an emoji to display on your profile.")
+                Text("Pick an emoji for your profile.")
                     .font(.title)
                     .bold()
                     .padding(.bottom, 20)
@@ -56,18 +56,17 @@ struct EmojiSelectionView: View {
             Spacer()
 
             Button(action: {
-                navigateToBioCreation = true
-            }) {
-                skipOrNextActionButton(toSkip: emoji.isEmpty)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 8)
-
-            Spacer().frame(height: 0)
-        }
-        .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $navigateToBioCreation) {
-            BioCreationView()
+                            authVM.tempUserData.attributes["profileEmoji"] = emoji
+                            authVM.onboardingState = .bio
+                        }) {
+                            skipOrNextActionButton(toSkip: emoji.isEmpty)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 8)
+                    }
+                    .navigationBarBackButtonHidden(true)
+                    .onAppear {
+                        emoji = authVM.tempUserData.attributes["profileEmoji"] ?? ""
         }
     }
 }

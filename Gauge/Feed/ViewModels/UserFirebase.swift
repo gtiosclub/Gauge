@@ -34,9 +34,9 @@ class UserFirebase: ObservableObject {
                         profilePhoto: data["profilePhoto"] as? String ?? "",
                         myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
                         lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
-                        lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date()
+                        lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date(),
+                        attributes: data["attributes"] as? [String: String] ?? [:]
                     )
-                    
                     completion(userObj)
                 }
             }
@@ -122,24 +122,28 @@ class UserFirebase: ObservableObject {
             }
     }
     
-    //let attributesList = ["lastLogin", "lastFeedRefresh", "streak", "friendIn", "friendOut", "friends", "badges", "profilePhoto", "phoneNumber", "myCategories", "myNextPosts", "mySearches", "myAccessedProfiles"]
-    
-
     func updateUserFields(user: User) {
-        let data = ["lastLogin": DateConverter.convertDateToString(user.lastLogin),
-                    "lastFeedRefresh": DateConverter.convertDateToString(user.lastFeedRefresh),
-                    "streak": user.streak,
-                    "friendIn": user.friendIn,
-                    "friendOut": user.friendOut,
-                    "friends": user.friends,
-                    "badges": user.badges,
-                    "profilePhoto": user.profilePhoto,
-                    "phoneNumber": user.phoneNumber,
-                    "myCategories": user.myCategories,
-                    "myNextPosts": user.myNextPosts,
-                    "mySearches": user.mySearches,
-                    "myAccessedProfiles": user.myAccessedProfiles
-                    
+        let data = [
+            "lastLogin": DateConverter.convertDateToString(user.lastLogin),
+            "lastFeedRefresh": DateConverter.convertDateToString(user.lastFeedRefresh),
+            "streak": user.streak,
+            "friendIn": user.friendIn,
+            "friendOut": user.friendOut,
+            "friends": user.friends,
+            "badges": user.badges,
+            "profilePhoto": user.profilePhoto,
+            "phoneNumber": user.phoneNumber,
+            "myCategories": user.myCategories,
+            "myNextPosts": user.myNextPosts,
+            "mySearches": user.mySearches,
+            "myAccessedProfiles": user.myAccessedProfiles,
+            "attributes": user.attributes,
+            "myPosts": user.myPosts,
+            "myResponses": user.myResponses,
+            "myViews": user.myViews,
+            "myComments": user.myComments,
+            "numUserResponses": user.numUserResponses,
+            "numUserViews": user.numUserViews
         ] as [String : Any]
         
         Firebase.db.collection("USERS").document(user.userId).updateData(data) { error in
@@ -149,7 +153,7 @@ class UserFirebase: ObservableObject {
             }
         }
     }
-    
+
     func getUsernameAndPhoto(userId: String, completion: @escaping ([String: String]) -> Void) {
         var nameAndPhoto = ["username": "", "profilePhoto": ""]
         
@@ -294,7 +298,4 @@ class UserFirebase: ObservableObject {
                 }
         }
     }
-
-
-
 }
