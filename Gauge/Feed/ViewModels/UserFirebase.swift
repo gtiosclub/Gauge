@@ -11,38 +11,6 @@ import ChatGPTSwift
 
 class UserFirebase: ObservableObject {
     @Published var user: User
-    
-<<<<<<< HEAD
-    func getAllUserData(userId: String, completion: @escaping (User) -> Void) {
-        Firebase.db.collection("USERS").document(userId).getDocument { document, error in
-            if let error = error {
-                print("Error getting documents: \(error)")
-            } else {
-                if let data = document?.data() {
-                    let userObj = User(
-                        userId: document!.documentID,
-                        username: data["username"] as? String ?? "",
-                        phoneNumber: data["phoneNumber"] as? String ?? "",
-                        email: data["email"] as? String ?? "",
-                        friendIn: data["friendIn"] as? [String: [String]] ?? [:],
-                        friendOut: data["friendOut"] as? [String: [String]] ?? [:],
-                        friends: data["friends"] as? [String: [String]] ?? [:],
-                        myNextPosts: data["myNextPosts"] as? [String] ?? [],
-                        myFavorites: data["myFavorites"] as? [String] ?? [],
-                        mySearches: data["mySearches"] as? [String] ?? [],
-                        myCategories: data["myCategories"] as? [String] ?? [],
-                        badges: data["badges"] as? [String] ?? [],
-                        streak: data["streak"] as? Int ?? 0,
-                        profilePhoto: data["profilePhoto"] as? String ?? "",
-                        myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
-                        lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
-                        lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date(),
-                        attributes: data["attributes"] as? [String: String] ?? [:]
-                    )
-                    completion(userObj)
-                }
-            }
-=======
     init() {
         self.user = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
     }
@@ -76,7 +44,8 @@ class UserFirebase: ObservableObject {
             profilePhoto: data["profilePhoto"] as? String ?? "",
             myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
             lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
-            lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date()
+            lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date(),
+            attributes: data["attributes"] as? [String: String] ?? [:]
         )
         
         if setCurrentUserData {
@@ -97,7 +66,7 @@ class UserFirebase: ObservableObject {
             user.myAccessedProfiles = userObj.myAccessedProfiles
             user.lastLogin = userObj.lastLogin
             user.lastFeedRefresh = userObj.lastFeedRefresh
->>>>>>> main
+            user.attributes = userObj.attributes
         }
         
         return userObj
@@ -160,7 +129,6 @@ class UserFirebase: ObservableObject {
         return (responsePostIDs, commentPostIDs, viewPostIDs)
     }
     
-<<<<<<< HEAD
     func updateUserFields(user: User) {
         let data = [
             "lastLogin": DateConverter.convertDateToString(user.lastLogin),
@@ -174,7 +142,8 @@ class UserFirebase: ObservableObject {
             "phoneNumber": user.phoneNumber,
             "myCategories": user.myCategories,
             "myNextPosts": user.myNextPosts,
-            "mySearches": user.mySearches,
+            "myProfileSearches": user.myProfileSearches,
+            "myPostSearches": user.myPostSearches,
             "myAccessedProfiles": user.myAccessedProfiles,
             "attributes": user.attributes,
             "myPosts": user.myPosts,
@@ -190,7 +159,9 @@ class UserFirebase: ObservableObject {
                 print("DEBUG: Failed to updateUserFields from UserFirebase class \(error.localizedDescription)")
                 return
             }
-=======
+        }
+    }
+    
     func getUserPosts(userId: String, setCurrentUserData: Bool = false) async throws -> [String] {
         let snapshot = try await Firebase.db.collection("POSTS")
             .whereField("userId", isEqualTo: userId)
@@ -205,7 +176,6 @@ class UserFirebase: ObservableObject {
 
         if setCurrentUserData {
             user.myPosts = postIds
->>>>>>> main
         }
         
         return postIds
@@ -346,32 +316,7 @@ class UserFirebase: ObservableObject {
         }
     }
     
-    func updateUserFields(user: User) {
-        let data = ["lastLogin": DateConverter.convertDateToString(user.lastLogin),
-                    "lastFeedRefresh": DateConverter.convertDateToString(user.lastFeedRefresh),
-                    "streak": user.streak,
-                    "friendIn": user.friendIn,
-                    "friendOut": user.friendOut,
-                    "friends": user.friends,
-                    "badges": user.badges,
-                    "profilePhoto": user.profilePhoto,
-                    "phoneNumber": user.phoneNumber,
-                    "myCategories": user.myCategories,
-                    "myNextPosts": user.myNextPosts,
-                    "myPostSearches": user.myPostSearches,
-                    "myProfileSearches": user.myProfileSearches,
-                    "myAccessedProfiles": user.myAccessedProfiles
-                    
-        ] as [String : Any]
-        
-        Firebase.db.collection("USERS").document(user.userId).updateData(data) { error in
-            if let error = error {
-                print("DEBUG: Failed to updateUserFields from UserFirebase class \(error.localizedDescription)")
-                return
-            }
-        }
-    }
-    
+
     func addUserPostSearch(search: String) {
         // Update user var
         user.myPostSearches.append(search)
@@ -563,8 +508,6 @@ class UserFirebase: ObservableObject {
             
         }
     }
-<<<<<<< HEAD
-=======
     
     func updateUserNextPosts(userId: String, postIds: [String]) async throws {        
         let data: [String: Any] = [
@@ -574,5 +517,4 @@ class UserFirebase: ObservableObject {
         try await Firebase.db.collection("USERS").document(userId).updateData(data)
         print("✅ myNextPosts updated for user \(userId)")
     }
->>>>>>> main
 }

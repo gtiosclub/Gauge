@@ -58,17 +58,8 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-<<<<<<< HEAD
                         ProfileView(userVM: userVM, isCurrentUser: true)
                             .environmentObject(authVM)
-=======
-                        ProfileView()
->>>>>>> main
-                            .tabItem {
-                                Image(systemName: "person.circle")
-                                Text("Profile")
-                            }
-                            .tag(3)
                     }
                     .background(.white)
                     .onAppear {

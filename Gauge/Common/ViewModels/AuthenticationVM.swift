@@ -81,16 +81,12 @@ class AuthenticationVM: ObservableObject {
                             "myCategories": tempUser.myCategories,
                             "myCategories": tempUser.myTopics,
                             "myNextPosts": tempUser.myNextPosts,
-<<<<<<< HEAD
-                            "mySearches": tempUser.mySearches,
                             "myAccessedProfiles": tempUser.myAccessedProfiles,
                             "attributes": [:],
-=======
                             "myPostSearches": tempUser.myPostSearches,
                             "myProfileSearches": tempUser.myProfileSearches,
                             "myAccessedProfiles": tempUser.myAccessedProfiles
                         
->>>>>>> main
             ] as [String : Any]
             
             try await Firebase.db.collection("USERS").document(user.uid).setData(userData)
@@ -155,7 +151,8 @@ class AuthenticationVM: ObservableObject {
                           "phoneNumber": tempUser.phoneNumber,
                           "myCategories": tempUser.myCategories,
                           "myNextPosts": tempUser.myNextPosts,
-                          "mySearches": tempUser.mySearches,
+                        "myProfileSearches": tempUser.myProfileSearches,
+                        "myPostSearches": tempUser.myPostSearches,
                           "myAccessedProfiles": tempUser.myAccessedProfiles,
                           "attributes": initialAttributes  // Initialize empty attributes
             ] as [String : Any]
