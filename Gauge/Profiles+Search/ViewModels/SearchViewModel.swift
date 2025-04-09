@@ -128,15 +128,6 @@ class SearchViewModel: ObservableObject {
         return questions
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
     func addRecentlySearchedPost(userId: String, search: String) {
         let userRef = Firebase.db.collection("USERS").document(userId)
 

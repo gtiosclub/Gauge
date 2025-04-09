@@ -20,6 +20,7 @@ struct SearchView: View {
     @State private var isSearchActive: Bool = false
     @State var items = Array(Category.allCategoryStrings.shuffled().prefix(through: 19))
 
+    // userFirebase.user.id
     var body: some View {
         NavigationStack {
             VStack {
@@ -39,7 +40,7 @@ struct SearchView: View {
                                     isSearchActive = true
                                     Task {
                                         await searchVM.lastFiveSearches(
-                                            userID: userFirebase.user.id,
+                                            userID: "user123",
                                             isProfileSearch: selectedTab != "Topics"
                                         )
                                     }
@@ -135,17 +136,17 @@ struct SearchView: View {
 
                 if selectedTab == "Topics" {
                     await MainActor.run {
-                        searchVM.addRecentlySearchedPost(userId: userFirebase.user.id, search: searchText)
+                        searchVM.addRecentlySearchedPost(userId: "user123", search: searchText)
                     }
                 } else {
                     await MainActor.run {
-                        searchVM.addRecentlySearchedProfile(userId: userFirebase.user.id, search: searchText)
+                        searchVM.addRecentlySearchedProfile(userId: "user123", search: searchText)
                     }
                 }
 
-                // ✅ Sync the real last 5 from Firestore
+                // Sync the real last 5 from Firestore
                 await searchVM.lastFiveSearches(
-                    userID: userFirebase.user.id,
+                    userID: "user123",
                     isProfileSearch: selectedTab != "Topics"
                 )
 
@@ -220,28 +221,13 @@ struct RecentSearchesView: View {
     @Binding var selectedTab: String
     @ObservedObject var searchVM: SearchViewModel  // link SearchViewModel
     @EnvironmentObject var userFirebase: UserFirebase
-//    @State private var isSearchActive: Bool
-
-
-
-    // $searchVM.recentFiveTopics
     
     var body: some View {
         VStack(alignment: .leading) {
             Text("Recent")
                 .font(.headline)
                 .padding(.leading)
-//                .onChange(of: isSearchFieldFocused) { isActive in
-//                    print(isActive)
-//                    if isActive {
-//                        Task {
-//                            await searchVM.lastFiveSearches(
-//                                userID: userFirebase.user.id,
-//                                isProfileSearch: selectedTab != "Topics"
-//                            )
-//                        }
-//                    }
-//                }
+
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
@@ -261,7 +247,7 @@ struct RecentSearchesView: View {
 
                                 Button(action: {
                                     searchVM.deleteRecentlySearched(
-                                        userId: userFirebase.user.id,
+                                        userId: "user123",
                                         searchTerm: topic,
                                         isProfileSearch: false
                                     )
@@ -281,13 +267,13 @@ struct RecentSearchesView: View {
                                     .fill(Color(.systemGray))
                                     .frame(width: 30, height: 30)
 
-                                Text(profile) //  Not userFirebase.user.id
+                                Text(profile)
 
                                 Spacer()
 
                                 Button(action: {
                                     searchVM.deleteRecentlySearched(
-                                        userId: userFirebase.user.id,
+                                        userId: "user123",
                                         searchTerm: profile,
                                         isProfileSearch: true
                                     )
@@ -306,7 +292,7 @@ struct RecentSearchesView: View {
             .onAppear {
                    Task {
                        await searchVM.lastFiveSearches(
-                           userID: userFirebase.user.id,
+                           userID: "user123",
                            isProfileSearch: selectedTab != "Topics"
                        )
                    }
@@ -314,7 +300,7 @@ struct RecentSearchesView: View {
                .onChange(of: selectedTab) { newTab in
                    Task {
                        await searchVM.lastFiveSearches(
-                           userID: userFirebase.user.id,
+                           userID: "user123",
                            isProfileSearch: newTab != "Topics"
                        )
                    }
