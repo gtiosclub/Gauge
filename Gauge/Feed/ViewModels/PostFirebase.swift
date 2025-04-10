@@ -176,8 +176,6 @@ class PostFirebase: ObservableObject {
                                     ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
                                     ?? Date(),
                                 question: data["question"] as? String ?? "",
-                                lowerBoundValue: data["lowerBoundValue"] as? Double ?? 0,
-                                upperBoundValue: data["upperBoundValue"] as? Double ?? 1,
                                 lowerBoundLabel: data["lowerBoundLabel"] as? String ?? "",
                                 upperBoundLabel: data["upperBoundLabel"] as? String ?? "",
                                 favoritedBy: data["favoritedBy"] as? [String] ?? []
@@ -259,8 +257,6 @@ class PostFirebase: ObservableObject {
                                                       ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
                                                       ?? Date(),
                                                   question: newPostData["question"] as? String ?? "",
-                                                  lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
-                                                  upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
                                                   lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
                                                   upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
                                                   favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
@@ -298,8 +294,6 @@ class PostFirebase: ObservableObject {
                                     topics: newPostData["topics"] as? [String] ?? [],
                                     postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
                                     question: newPostData["question"] as? String ?? "",
-                                    lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
-                                    upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
                                     lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
                                     upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
                                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
@@ -370,8 +364,6 @@ class PostFirebase: ObservableObject {
                         ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
                         ?? Date(),
                     question: newPostData["question"] as? String ?? "",
-                    lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
-                    upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
                     lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
                     upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? []
@@ -486,7 +478,6 @@ class PostFirebase: ObservableObject {
             "userId": post.userId,
             "categories": categoryStrings,
             "topics": topics,
-            "viewCounter": post.viewCounter,
             "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
             "responseOption1": post.responseOption1,
@@ -503,12 +494,11 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String) {
+    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async {
         var categoryString: [String] = []
         for cat in categories {
             categoryString.append(cat.rawValue)
         }
-
         
         // Create post instance
         let post = SliderPost(
@@ -518,10 +508,10 @@ class PostFirebase: ObservableObject {
             postDateAndTime: Date(),
             question: question,
             lowerBoundLabel: lowerBoundLabel,
-            upperBoundLabel: upperBoundLabel,
-            lowerBoundValue: lowerBoundValue,
-            upperBoundValue: upperBoundValue
+            upperBoundLabel: upperBoundLabel
         )
+        
+        let topics = await generatePostKeywords(post: post)
         
         // Create document in Firebase
         let documentRef = Firebase.db.collection("POSTS").document(post.postId)
@@ -531,10 +521,9 @@ class PostFirebase: ObservableObject {
             "postId": post.postId,
             "userId": post.userId,
             "categories": categoryString,
+            "topics": topics,
             "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
-            "lowerBoundValue": post.lowerBoundValue,
-            "upperBoundValue": post.upperBoundValue,
             "lowerBoundLabel": post.lowerBoundLabel,
             "upperBoundLabel": post.upperBoundLabel,
             "favoritedBy": post.favoritedBy
@@ -542,7 +531,7 @@ class PostFirebase: ObservableObject {
             if let error = error {
                 print("error writing doc: \(error)")
             } else {
-                print("added new post to POSTS")
+                print("added new slider post to POSTS")
             }
         }
     }

@@ -18,7 +18,7 @@ struct ProfileUsernameDateView: View {
         HStack{
             ProfilePictureView(profilePhoto: userVM.useridsToPhotosAndUsernames[userId]?.0 ?? "")
             
-            Text(userVM.useridsToPhotosAndUsernames[userId]?.1 ?? userId)
+            Text(userVM.useridsToPhotosAndUsernames[userId]?.1 ?? "")
                 .font(.system(size: 16))
                 .foregroundStyle(.black)
             
@@ -51,6 +51,7 @@ struct ProfilePictureView: View {
                     .frame(width:30, height: 30)
                     .opacity(0.6)
                 )
+                .padding(.trailing, 8)
             )
         } else {
             AnyView(AsyncImage(url: URL(string: profilePhoto)) { image in
@@ -69,13 +70,20 @@ struct ProfilePictureView: View {
     }
 }
 
+//#Preview {
+//    let mockUserVM = UserFirebase()
+//
+//    ProfileUsernameDateView(
+//        profilePhoto: "",
+//        dateTime: Date.now,
+//        userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92"
+//    )
+//    .environmentObject(mockUserVM)
+//}
+
 #Preview {
     let mockUserVM = UserFirebase()
-
-    ProfileUsernameDateView(
-        profilePhoto: "",
-        dateTime: Date.now,
-        userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92"
-    )
-    .environmentObject(mockUserVM)
+    
+    ProfileUsernameDateView(dateTime: Date.now, userId: "0RIEcQl2H9hUCL2DSDaMDg9scqg2")
+        .environmentObject(mockUserVM)
 }

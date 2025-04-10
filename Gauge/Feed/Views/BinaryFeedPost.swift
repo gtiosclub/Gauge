@@ -34,12 +34,9 @@ struct BinaryFeedPost: View {
             //Category Boxes
             ScrollView(.horizontal) {
                 HStack {
-                    let categories: [Category] = post.categories
-                    
-                    ForEach(categories, id: \.self) { category in
+                    ForEach(post.categories, id: \.self) { category in
                         Text(category.rawValue)
-                            .padding(.leading, 10)
-                            .padding(.trailing, 10)
+                            .padding(.horizontal, 10)
                             .font(.system(size: 14))
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
@@ -48,25 +45,21 @@ struct BinaryFeedPost: View {
                                     .frame(height: 32)
                             )
                             .padding(.top, 10)
-                            .frame(minWidth: 40)
-                            .fixedSize(horizontal: true, vertical: false)
                     }
-                    
-                    Spacer()
                 }
                 .padding(.bottom, 10)
                 .padding(.leading)
             }
             
+            Text(post.question)
+                .padding(.top, 15)
+                .bold()
+                .font(.system(size: 35))
+                .multilineTextAlignment(.leading)
+                .foregroundStyle(.black)
+                .padding(.horizontal)
+            
             VStack {
-                Text(post.question)
-                    .padding(.top, 15)
-                    .bold()
-                    .font(.system(size: 35))
-                    .frame(alignment: .leading)
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(.black)
-                
                 Spacer()
                 
                 ZStack {
@@ -230,7 +223,8 @@ struct BinaryFeedPost: View {
                 StackedProfiles(
                     userIds: post.responses
                         .map { $0.userId }
-                        .filter { userVM.user.friends.contains($0) }
+                        .filter { userVM.user.friends.contains($0) },
+                    startCompacted: false
                 )
                 
                 Spacer()

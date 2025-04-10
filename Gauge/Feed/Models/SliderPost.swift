@@ -22,13 +22,11 @@ class SliderPost: Post, Equatable {
     var question: String
     
     // Slider post specific attributes
-    var lowerBoundValue: Double
-    var upperBoundValue: Double
     var lowerBoundLabel: String
     var upperBoundLabel: String
     
     // Initializing locally
-    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, lowerBoundLabel: String, upperBoundLabel: String, lowerBoundValue: Double, upperBoundValue: Double) {
+    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, lowerBoundLabel: String, upperBoundLabel: String) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -44,12 +42,10 @@ class SliderPost: Post, Equatable {
         // Slider post specific attributes
         self.lowerBoundLabel = lowerBoundLabel
         self.upperBoundLabel = upperBoundLabel
-        self.lowerBoundValue = lowerBoundValue
-        self.upperBoundValue = upperBoundValue
     }
     
     // Initializing from Firebase
-    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], topics: [String], viewCounter: Int = 0, postDateAndTime: Date, question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String, favoritedBy: [String]) {
+    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], topics: [String], viewCounter: Int = 0, postDateAndTime: Date, question: String, lowerBoundLabel: String, upperBoundLabel: String, favoritedBy: [String]) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -65,8 +61,6 @@ class SliderPost: Post, Equatable {
         self.topics = topics
         
         // Slider post specific attributes
-        self.lowerBoundValue = lowerBoundValue
-        self.upperBoundValue = upperBoundValue
         self.lowerBoundLabel = lowerBoundLabel
         self.upperBoundLabel = upperBoundLabel
     }
@@ -76,12 +70,13 @@ class SliderPost: Post, Equatable {
     }
     
     func calculateResponses() -> [Int] {
-        var responses = [0, 0]
+        var responses = Array(repeating: 0, count: 7)
+        
         for response in self.responses {
-            if response.responseOption == self.lowerBoundLabel {
-                responses[0] += 1
-            } else {
-                responses[1] += 1
+            if let response = Int(response.responseOption) {
+                if response >= 0 && response < 7 {
+                    responses[response] += 1
+                }
             }
         }
         
