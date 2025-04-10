@@ -250,7 +250,9 @@ struct VoteCardsView: View {
             .padding()
         }
     }
+    
 }
+
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {

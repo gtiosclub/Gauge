@@ -1,11 +1,3 @@
-////
-////  ProfileEditView.swift
-////  Gauge
-////
-////  Created by Sam Orouji on 2/25/25.
-////
-////
-
 import SwiftUI
 
 struct ProfileEditView: View {
@@ -116,7 +108,7 @@ struct ProfileEditView: View {
                 HStack {
                     Text("User Tags")
                     Spacer()
-                    NavigationLink(destination: Text("User Tags Screen")) {
+                    NavigationLink(destination: TagsView()) { // Navigate to TagsView
                         HStack {
                             Text("4")
                             Image(systemName: "chevron.right")
@@ -143,22 +135,21 @@ struct ProfileEditView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer()
-            
-            
         }
         .task {
             profileImage = await profileViewModel.getProfilePicture(userID: userVM.user.userId)
         }
-
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(false) // Show the back button when navigating to TagsView
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    HStack {
-                        Image(systemName: "chevron.left")
-                        Text("Cancel")
+                if dismiss == nil { // This means we are at the root view (ProfileEditView)
+                    Button {
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Image(systemName: "chevron.left")
+                            Text("Cancel")
+                        }
                     }
                 }
             }
@@ -185,9 +176,6 @@ struct ProfileEditView: View {
     ProfileEditView()
         .environmentObject(UserFirebase())
 }
-
-
-
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.presentationMode) var presentationMode
