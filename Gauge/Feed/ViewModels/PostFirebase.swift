@@ -1318,49 +1318,23 @@ class PostFirebase: ObservableObject {
         }
         return total_points
     }
+    
+    static func updatePostsAndFeeds(postIds: [String], updateMyNextPosts: Bool, completion: @escaping (Error?) -> Void) {
+        let group = DispatchGroup()
 
-    class PostFirebase {
-        static let db = Firestore.firestore()
-        static func updatePostsAndFeeds(postIds: [String], updateMyNextPosts: Bool, completion: @escaping (Error?) -> Void) {
-            let group = DispatchGroup()
-
-            for postId in postIds {
-                for subcollection in ["RESPONSES", "COMMENTS", "VIEWS"] {
-                    group.enter()
-                    db.collection("POSTS").document(postId).collection(subcollection).getDocuments { snapshot, error in
-                        if let error = error {
-                            group.leave()
-                            completion(error)
-                            return
-                        }
-
-                        let batch = db.batch()
-                        snapshot?.documents.forEach { doc in
-                            batch.deleteDocument(doc.reference)
-                        }
-
-                        batch.commit { error in
-                            group.leave()
-                            if let error = error {
-                                completion(error)
-                            }
-                        }
-                    }
-                }
-            }
-
-            if updateMyNextPosts {
+        for postId in postIds {
+            for subcollection in ["RESPONSES", "COMMENTS", "VIEWS"] {
                 group.enter()
-                db.collection("USERS").getDocuments { snapshot, error in
+                Firestore.firestore().collection("POSTS").document(postId).collection(subcollection).getDocuments { snapshot, error in
                     if let error = error {
                         group.leave()
                         completion(error)
                         return
                     }
 
-                    let batch = db.batch()
+                    let batch = Firestore.firestore().batch()
                     snapshot?.documents.forEach { doc in
-                        batch.updateData(["myNextPosts": postIds], forDocument: doc.reference)
+                        batch.deleteDocument(doc.reference)
                     }
 
                     batch.commit { error in
@@ -1371,10 +1345,33 @@ class PostFirebase: ObservableObject {
                     }
                 }
             }
+        }
 
-            group.notify(queue: .main) {
-                completion(nil)
+        if updateMyNextPosts {
+            group.enter()
+            Firestore.firestore().collection("USERS").getDocuments { snapshot, error in
+                if let error = error {
+                    group.leave()
+                    completion(error)
+                    return
+                }
+
+                let batch = Firestore.firestore().batch()
+                snapshot?.documents.forEach { doc in
+                    batch.updateData(["myNextPosts": postIds], forDocument: doc.reference)
+                }
+
+                batch.commit { error in
+                    group.leave()
+                    if let error = error {
+                        completion(error)
+                    }
+                }
             }
+        }
+
+        group.notify(queue: .main) {
+            completion(nil)
         }
     }
 
