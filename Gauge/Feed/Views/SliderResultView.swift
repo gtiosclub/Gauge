@@ -115,17 +115,19 @@ struct SliderResultView: View {
         Response(responseId: "18", userId: "", responseOption: "6")
     ]
 
-    var post = SliderPost(
+    let post = SliderPost(
         postId: "1",
         userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+        comments: [],
+        responses: responses,
         categories: [.arts(.painting)],
+        topics: [],
         postDateAndTime: Date(),
         question: "Picasso is the goat",
         lowerBoundLabel: "YES",
-        upperBoundLabel: "NO"
+        upperBoundLabel: "NO",
+        favoritedBy: []
     )
-    
-    post.responses = responses
 
     SliderResultView(
         post: post,
