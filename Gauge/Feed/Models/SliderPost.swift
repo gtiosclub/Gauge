@@ -76,13 +76,9 @@ class SliderPost: Post, Equatable {
     }
     
     func calculateResponses() -> [Int] {
-        var responses = [0, 0]
+        var responses = [0, 0, 0, 0, 0]
         for response in self.responses {
-            if response.responseOption == self.lowerBoundLabel {
-                responses[0] += 1
-            } else {
-                responses[1] += 1
-            }
+            responses[Int(response.responseOption)! - 1] += 1
         }
         
         return responses

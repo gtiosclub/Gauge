@@ -1,14 +1,14 @@
 //
-//  BinaryFeedResults.swift
+//  SliderFeedResults.swift
 //  Gauge
 //
-//  Created by Austin Huguenard on 3/3/25.
+//  Created by Sameer Arora on 4/9/25.
 //
 
 import SwiftUI
 
-struct BinaryFeedResults: View {
-    @ObservedObject var post: BinaryPost
+struct SliderFeedResults: View {
+    @ObservedObject var post: SliderPost
     var optionSelected: Int
     
     var body: some View {
@@ -60,7 +60,7 @@ struct BinaryFeedResults: View {
             }
             .padding(.horizontal)
             
-            BinaryResultView(post: post, optionSelected: optionSelected)
+            SliderResultView(post: post, optionSelected: optionSelected)
                 .padding(.top, 10)
                 
             Text("\(post.calculateResponses().reduce(0, +)) votes")
@@ -112,10 +112,5 @@ struct BinaryFeedResults: View {
 }
 
 #Preview {
-    BinaryFeedResults(
-        post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good", sublabel1: "bad", sublabel2: "great"),
-        optionSelected: 2
-    )
-    .environmentObject(UserFirebase())
-    .environmentObject(PostFirebase())
+    SliderFeedResults()
 }
