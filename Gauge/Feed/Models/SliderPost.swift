@@ -70,14 +70,9 @@ class SliderPost: Post, Equatable {
     }
     
     func calculateResponses() -> [Int] {
-        var responses = Array(repeating: 0, count: 7)
-        
+        var responses = [0, 0, 0, 0, 0, 0]
         for response in self.responses {
-            if let response = Int(response.responseOption) {
-                if response >= 0 && response < 7 {
-                    responses[response] += 1
-                }
-            }
+            responses[Int(response.responseOption)! - 1] += 1
         }
         
         return responses
