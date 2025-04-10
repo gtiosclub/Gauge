@@ -10,16 +10,11 @@ import SwiftUI
 struct CommentsView: View {
     @EnvironmentObject private var userVM: UserFirebase
     @EnvironmentObject private var postVM: PostFirebase
-    @State private var comments: [Comment]
     @State private var sortOption: SortOption = .mostVotes
-    @State private var newCommentText: String = ""
+    @State var newCommentText: String = ""
+    @State var showAddComment: Bool = false
     @State private var isBookmarked: Bool = false
     var post: any Post
-    
-    init(comments: [Comment], post: (any Post)) {
-        _comments = State(initialValue: comments)
-        self.post = post
-    }
     
     enum SortOption: String, CaseIterable {
         case mostVotes = "Most votes"
@@ -29,11 +24,11 @@ struct CommentsView: View {
     var sortedComments: [Comment] {
         switch sortOption {
         case .mostVotes:
-            return comments.sorted {
+            return post.comments.sorted {
                 ($0.likes.count - $0.dislikes.count) > ($1.likes.count - $1.dislikes.count)
             }
         case .mostRecent:
-            return comments.sorted {
+            return post.comments.sorted {
                 $0.date > $1.date
             }
         }
@@ -76,19 +71,24 @@ struct CommentsView: View {
                 Spacer()
                 
                 // Comment count
-                HStack {
-                    Image(systemName: "bubble.left")
-                        .font(.system(size: 12))
-                    Text("\(comments.count)")
-                        .font(.system(size: 12, weight: .medium))
+                Button(action: {
+                    showAddComment = true
+                }) {
+                    HStack {
+                        Image(systemName: "bubble.left")
+                            .font(.system(size: 12))
+                        
+                        Text("\(post.comments.count)")
+                            .font(.system(size: 12, weight: .medium))
+                    }
+                    .padding(10)
+                    .foregroundColor(.black)
+                    .background(
+                        Capsule()
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .background(Color.whiteGray)
                 }
-                .padding(10)
-                .foregroundColor(.black)
-                .background(
-                    Capsule()
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                )
-                .background(Color.whiteGray)
                 
                 // Bookmark button
                 Button(action: {
@@ -112,8 +112,8 @@ struct CommentsView: View {
             
             // Comments list
             ScrollView {
-                if comments.isEmpty {
-                    VStack(spacing: 16) {
+                if post.comments.isEmpty {
+                    VStack(spacing: 8) {
                         Spacer()
                         
                         // Cricket icons using emoji
@@ -154,6 +154,18 @@ struct CommentsView: View {
         .background(Color.whiteGray)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
+        .sheet(isPresented: $showAddComment) {
+            ZStack {
+                    Color.black.opacity(0.3).ignoresSafeArea() // semi-transparent background
+                    CommentSheetView(showAddComment: $showAddComment, post: post)
+                        .padding()
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .shadow(radius: 8)
+                }
+                .presentationDetents([.height(250)])
+                .presentationDragIndicator(.visible)
+        }
     }
 }
     
