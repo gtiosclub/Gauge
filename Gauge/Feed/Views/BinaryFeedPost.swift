@@ -30,7 +30,7 @@ struct BinaryFeedPost: View {
             Spacer(minLength: 30.0)
             
             ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
-                .padding(.horizontal)
+                .padding(.leading)
                         
             //Category Boxes
             ScrollView(.horizontal) {

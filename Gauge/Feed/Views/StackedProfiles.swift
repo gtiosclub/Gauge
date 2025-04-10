@@ -18,6 +18,7 @@ struct StackedProfiles: View {
     @State private var spacing: CGFloat = 15
     var sideOnTop: Side = .right
     var startCompacted: Bool = true
+    var changeOffset: Bool = true
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -43,7 +44,7 @@ struct StackedProfiles: View {
             }
         }
         .frame(height: userIds.count == 0 ? 0 : 30)
-        .offset(x: -spacing * CGFloat(userIds.count - 1) / 2.0 * (sideOnTop == .left ? -1 : 1))
+        .offset(x: -spacing * CGFloat(userIds.count - 1) / (changeOffset ? 2.0 : 1.0) * (sideOnTop == .left ? -1 : 1))
         .onTapGesture {
             withAnimation {
                 spacing = (spacing == 15 ? 40 : 15)
