@@ -18,8 +18,8 @@ extension Color {
     
     
     
-    static let lightRed = Color(red: 246.0 / 255, green: 167.0 / 255, blue: 163.0 / 255)
-    static let darkRed = Color(red: 237.0 / 255, green: 56.0 / 255, blue: 46.0 / 255)
+    static let lightRed = Color(red: 237.0 / 255, green: 56.0 / 255, blue: 46.0 / 255, opacity: 0.15)
+    static let darkRed = Color(red: 237.0 / 255, green: 56.0 / 255, blue: 46.0 / 255, opacity: 1.0)
     
     static let lightOrange = Color(red: 242.0 / 255, green: 116.0 / 255, blue: 31.0 / 255, opacity: 0.2)
     static let darkOrange = Color(red: 242.0 / 255, green: 116.0 / 255, blue: 31.0 / 255, opacity: 1.0)

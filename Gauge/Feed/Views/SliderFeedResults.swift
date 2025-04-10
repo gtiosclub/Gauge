@@ -112,5 +112,46 @@ struct SliderFeedResults: View {
 }
 
 #Preview {
-    SliderFeedResults()
+    let responses = [
+        ///Option 1, 2/10 = 20%
+        Response(responseId: "1", userId: "", responseOption: "1"),
+        Response(responseId: "2", userId: "", responseOption: "1"),
+
+        ///Option 2, 0/10 = 0%
+        
+        ///Option 3, 1/10 = 10%
+        Response(responseId: "5", userId: "", responseOption: "3"),
+
+        ///Option 4, 1/10 = 10%
+        Response(responseId: "7", userId: "", responseOption: "4"),
+
+        ///Option 4, 5/10 = 50%
+        Response(responseId: "9", userId: "", responseOption: "5"),
+        Response(responseId: "10", userId: "", responseOption: "5"),
+        Response(responseId: "11", userId: "", responseOption: "5"),
+        Response(responseId: "12", userId: "", responseOption: "5"),
+
+        ///Option 4, 2/10 = 20%
+        Response(responseId: "17", userId: "", responseOption: "6"),
+        Response(responseId: "18", userId: "", responseOption: "6")
+    ]
+
+    var post = SliderPost(
+        postId: "1",
+        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+        categories: [.arts(.painting)],
+        postDateAndTime: Date(),
+        question: "Picasso is the goat",
+        lowerBoundLabel: "YES",
+        upperBoundLabel: "NO",
+        lowerBoundValue: 1.0,
+        upperBoundValue: 6.0
+    )
+    
+    post.responses = responses
+
+    return SliderFeedResults(
+        post: post,
+        optionSelected: 4
+    )
 }
