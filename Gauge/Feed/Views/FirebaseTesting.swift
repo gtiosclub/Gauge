@@ -252,7 +252,7 @@ struct FirebaseTesting: View {
                     Section("OpenAI Queries") {
                         Button("Suggest Post Categories") {
                             postVM.suggestPostCategories(
-                                question: "Which channel is better?", responseOptions: ["National Geographic", "Animal Planet"]
+                                question: "Which channel is better?", captions: ["National Geographic", "Animal Planet"]
                             ) { suggestedCategories in
                                 print(suggestedCategories)
                             }

@@ -8,8 +8,12 @@
 import SwiftUI
 
 struct TypeCaptionsView: View {
+    var leftResponseOption: String
+    var rightResponseOption: String
     @Binding var leftCaption: String
     @Binding var rightCaption: String
+    
+    
     var isRight: Bool = false
     @Binding var stepCompleted: Bool
     @Binding var skippable: Bool
@@ -20,7 +24,7 @@ struct TypeCaptionsView: View {
             HStack(spacing: 8) {
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("No")
+                    Text(leftResponseOption)
                         .font(!isRight ? .caption : .title)
                         .fontWeight(!isRight ? .regular : .bold)
                         .foregroundColor(!isRight ? .red.opacity(0.5) : .lightGray)
@@ -70,7 +74,7 @@ struct TypeCaptionsView: View {
                 }
                     
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text("Yes")
+                    Text(rightResponseOption)
                         .font(isRight ? .caption : .title)
                         .fontWeight(isRight ? .regular : .bold)
                         .foregroundColor(isRight ? .green.opacity(0.5) : .lightGray)

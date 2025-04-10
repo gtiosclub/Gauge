@@ -85,6 +85,8 @@ struct PostCreationView: View {
                     .padding(.horizontal, 20)
             } else if currentStep == 4 {
                 TypeCaptionsView(
+                    leftResponseOption: slidingOptions[optionsSelectedIndex!].left,
+                    rightResponseOption: slidingOptions[optionsSelectedIndex!].right,
                     leftCaption: $leftCaption,
                     rightCaption: $rightCaption,
                     isRight: isRight,
@@ -96,15 +98,20 @@ struct PostCreationView: View {
                     selectedCategories: $postCategories,
                     stepCompleted: $stepCompleted,
                     question: postQuestion,
-                    responseOptions: [slidingOptions[optionsSelectedIndex ?? 0].left, slidingOptions[optionsSelectedIndex ?? 0].right]
+                    captions: [leftCaption,  rightCaption]
                 )
                 .frame(height: 200)
+            } else if currentStep == 6 {
+                BinaryPostPreview(
+                    postQuestion: postQuestion,
+                    postCategories: postCategories,
+                    postType: postType!,
+                    responseOption1: slidingOptions[optionsSelectedIndex!].left,
+                    responseOption2: slidingOptions[optionsSelectedIndex!].right,
+                    leftCaption: leftCaption,
+                    rightCaption: rightCaption
+                )
             }
-            
-//            else if currentStep == 5 {
-//                BinaryPostPreview(postQuestion: postQuestion, postCategories: postCategories, postType: postType!, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, username: userVM.user.username)
-//                    .frame(height: 600)
-//            }
             
             
             HStack {
@@ -150,12 +157,6 @@ struct PostCreationView: View {
                                 currentStepTitle = "Select Categories"
                                 modalSize = 380
                             }
-                            
-//                            else if currentStep == 5 {
-//                                currentStepTitle = "Review Post"
-//                                modalSize = 800
-//                                stepCompleted = true
-//                            }
                         }
                     }) {
                         Circle()
@@ -174,14 +175,14 @@ struct PostCreationView: View {
                 }
                 
                 Button(action: {
-//                    if (currentStep == 5) {
-//                        modalSize = 380
-//                        showCreatePost = false
-//                        
-//                        Task {
-//                            await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right)
-//                        }
-//                    }
+                    if (currentStep == 6) {
+                        modalSize = 380
+                        showCreatePost = false
+                        
+                        Task {
+                            await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right)
+                        }
+                    }
                         
                     withAnimation {
                         if (currentStep == 3) {
@@ -208,40 +209,36 @@ struct PostCreationView: View {
                         
                         stepCompleted = false
                         
-                        if currentStep == 1 {
-                            currentStepTitle = "New Post"
-                            modalSize = 380
-                        } else if currentStep == 2 {
+                        if currentStep == 2 {
                             currentStepTitle = "Choose Type"
                             modalSize = 340
                         } else if currentStep == 3 {
                             currentStepTitle = "Pick Options"
                             modalSize = 400
                         } else if currentStep == 5 {
+                            skippable = false
                             currentStepTitle = "Select Categories"
                             modalSize = 380
+                        } else if currentStep == 6 {
+                            stepCompleted = true
+                            currentStepTitle = "Review Post"
+                            if showCreatePost {
+                                modalSize = 500
+                            }
                         }
-                        
-//                        else if currentStep == 5 {
-//                            currentStepTitle = "Review Post"
-//                            if showCreatePost {
-//                                modalSize = 800
-//                            }
-//                            stepCompleted = true
-//                        }
                     }
                 }) {
                     Capsule()
-                        .fill(stepCompleted ? Color.darkBlue : skippable || (currentStep == 4 && !isRight) ? Color.blue : Color.lightBlue)
-                        .frame(width: currentStep == 1 ? 329 : 83, height: 43)
+                        .fill(skippable ? Color.blue.opacity(0.2) : stepCompleted || (currentStep == 4 && !isRight) ? Color.darkBlue :  Color.lightBlue)
+                        .frame(width: currentStep == 1 || currentStep == 6 ? 329 : 83, height: 43)
                         .overlay(
                             HStack {
                                 Text(skippable ? "Skip" : currentStep != 6 ? "Next" :  "Post")
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(skippable ? .blue : .white)
                                 
                                 Image(systemName: skippable ? "chevron.right.2" : currentStep != 6 ? "chevron.right" : "arrow.up")
-                                    .foregroundColor(.white)
+                                    .foregroundColor(skippable ? .blue : .white)
                                     .font(.system(size: 16, weight: .semibold))
                                 
                             }
@@ -264,12 +261,18 @@ struct ProgressIndicator: View {
     var totalSteps: Int
     
     var body: some View {
-        HStack(spacing: 4) {
-            ForEach(1...totalSteps, id: \.self) { step in
-                Capsule()
-                    .fill(stepCompleted && step == currentStep ? Color.blue : Color.gray.opacity(step == currentStep ? 0.5 : 0.2))
-                    .frame(width: step == currentStep ? 32 : 12, height: 5)
+        if currentStep != 6 {
+            HStack(spacing: 4) {
+                ForEach(1...totalSteps, id: \.self) { step in
+                    Capsule()
+                        .fill(stepCompleted && step == currentStep ? Color.blue : Color.gray.opacity(step == currentStep ? 0.5 : 0.2))
+                        .frame(width: step == currentStep ? 32 : 12, height: 5)
+                }
             }
+        } else {
+            Capsule()
+                .fill(Color.blue)
+                .frame(width: 96, height: 5)
         }
     }
 }
@@ -280,135 +283,120 @@ struct BinaryPostPreview: View {
     var postType: PostType
     var responseOption1: String
     var responseOption2: String
-    var username: String
-    var profilePhoto: String = ""
-    
-    let profilePhotoSize: CGFloat = 30
+    var leftCaption: String
+    var rightCaption: String
     
     
     var body: some View {
         VStack(alignment: .leading) {
-            HStack(spacing: 4) {
-                //Profile Photo
-                if profilePhoto != "", let url = URL(string: profilePhoto) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                .clipShape(Circle())
-                        case .failure, .empty:
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                .foregroundColor(.gray)
-                        @unknown default:
-                            EmptyView()
+            HStack {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(postCategories, id: \.self) { category in
+                            Text(category.rawValue)
+                                .padding(10)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .background(Color(.systemGray6))
+                                .foregroundColor(.black)
+                                .cornerRadius(20)
+                                .fixedSize()
                         }
                     }
-                } else {
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .frame(width: profilePhotoSize, height: profilePhotoSize)
-                        .foregroundColor(.gray)
                 }
-                
-                Text(username)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color(white: 0.4))
-                
-                Text("• 0m ago")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color(white: 0.6))
-                
-
-                
             }
-            .frame(alignment: .leading)
-            .padding(.leading)
+            .padding(.vertical, 15)
+            .padding(.horizontal, 15)
+            .background(Color(.systemGray5))
+            .cornerRadius(16)
+            .padding(.horizontal)
             
-            ScrollView(.horizontal) {
-                HStack {
-                    ForEach(postCategories, id: \.self) { category in
-                        Text(category.rawValue)
-                            .padding(.leading, 10)
-                            .padding(.trailing, 10)
-                            .font(.system(size: 14))
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color.gray)
-                                    .opacity(0.2)
-                                    .frame(height: 32)
-                            )
-                            .padding(.top, 10)
-                            .frame(minWidth: 40)
-                            .fixedSize(horizontal: true, vertical: false)
-                    }
-                    
-
-                }
-                .padding(.bottom, 10)
-                .padding(.leading)
-            }
-            
-            VStack {
+            HStack {
                 Text(postQuestion)
-                    .padding(.top, 15)
-                    .padding(.horizontal)
+                    .lineLimit(3)
                     .bold()
-                    .font(.system(size: 35))
-                    .frame(alignment: .leading)
+                    .font(.system(size: 24.8))
                     .multilineTextAlignment(.leading)
                     .foregroundStyle(.black)
+                    
+                Spacer()
+            }
+            .padding()
+            .background(Color(.systemGray5))
+            .cornerRadius(16)
+            .padding(.horizontal, 16)
+            
+            HStack {
+                Image(systemName: "rectangle.split.2x1")
+                    .resizable()
+                    .frame(width: 25, height: 25)
+                    .foregroundColor(.black)
+                    .fontWeight(.medium)
+                
+                Text("Binary")
+                    .font(.system(size: 24))
+                    .foregroundColor(.black)
+                    .fontWeight(.medium)
                 
                 Spacer()
-                
-                ZStack {
+            }
+            .padding()
+            .background(Color(.systemGray5))
+            .cornerRadius(16)
+            .padding(.horizontal)
+            
+            ZStack {
+                VStack {
                     HStack {
                         Text(responseOption1)
-                            .foregroundColor(.gray)
-                            .font(.system(size: 30))
-                            .font(.title)
-                            .opacity(0.5)
-                            .frame(width: 150.0, alignment: .leading)
-                            .minimumScaleFactor(0.75)
-                            .lineLimit(2)
-                        
-                        
-                        Spacer()
-                        
-                        Image(systemName: "arrow.left.and.right")
-                            .resizable()
-                            .scaledToFit()
-                            .opacity(0.5)
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.gray)
+                            .font(.system(size: 24))
+                            .foregroundColor(.black)
+                            .fontWeight(.medium)
                         
                         Spacer()
                         
                         Text(responseOption2)
-                            .foregroundColor(.gray)
-                            .font(.system(size: 30))
-                            .font(.title)
-                            .opacity(0.5)
-                            .frame(width: 150.0, alignment: .trailing)
-                            .minimumScaleFactor(0.75)
-                            .lineLimit(2)
+                            .font(.system(size: 24))
+                            .foregroundColor(.black)
+                            .fontWeight(.medium)
                     }
                     .padding(.horizontal)
+                    
+                    Divider()
+                        .frame(height: 3)
+                        .overlay(Color.white)
+                    
+                    HStack {
+                        Text(leftCaption)
+                            .font(.system(size: 14))
+                            .foregroundColor(.black)
+                            .fontWeight(.medium)
+                        
+                        Spacer()
+                        
+                        Text(rightCaption)
+                            .font(.system(size: 14))
+                            .foregroundColor(.black)
+                            .fontWeight(.medium)
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 3)
                 }
+                .padding(.vertical)
+                .background(Color(.systemGray5))
+                .cornerRadius(16)
+                .padding(.horizontal)
                 
-                Spacer(minLength: 100)
-                
-                Text("0 votes")
-                    .foregroundColor(.gray)
-                    .scaledToFit()
-                    .opacity(0.7)
-                
-                Spacer()
+                Image(systemName: "arrow.left.and.right")
+                    .resizable()
+                    .frame(width: 20, height: 15)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 13)
+                    .foregroundStyle(Color(.systemGray5))
+                    .background(Color.white)
+                    .cornerRadius(60)
+                    .offset(x: 0, y: 8)
             }
         }
     }
