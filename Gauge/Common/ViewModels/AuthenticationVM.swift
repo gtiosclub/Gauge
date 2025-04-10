@@ -125,8 +125,8 @@ class AuthenticationVM: ObservableObject {
     }
     
     func createInitialAccount() async throws {
-        isLoading = true
         do {
+            isLoading = true
             let authResult = try await auth.createUser(withEmail: tempUserData.email, password: tempUserData.password)
             let user = authResult.user
             
