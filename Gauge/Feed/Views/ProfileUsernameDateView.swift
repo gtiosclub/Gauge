@@ -18,15 +18,14 @@ struct ProfileUsernameDateView: View {
         HStack{
             ProfilePictureView(profilePhoto: userVM.useridsToPhotosAndUsernames[userId]?.0 ?? "")
             
-            Text(userVM.useridsToPhotosAndUsernames[userId]?.1 ?? userId)
-                .font(.system(size: 16))
+            Text(userVM.useridsToPhotosAndUsernames[userId]?.1 ?? "")
+                .font(.system(size: 15))
                 .foregroundStyle(.black)
-            
-            Text("•  \(DateConverter.timeAgo(from: dateTime))")
-                .font(.system(size: 13))
+
+            Text("•  \(DateConverter.timeAgo(from: dateTime)) ago")
+                .font(.system(size: 15))
                 .foregroundStyle(.gray)
         }
-        .padding(.leading)
         .task {
             do {
                 try await userVM.populateUsernameAndProfilePhoto(userId: userId)
@@ -51,7 +50,9 @@ struct ProfilePictureView: View {
                     .frame(width:30, height: 30)
                     .opacity(0.6)
                 )
+                .padding(.trailing, 6)
             )
+            .alignmentGuide(.leading) { d in d[.leading] }
         } else {
             AnyView(AsyncImage(url: URL(string: profilePhoto)) { image in
                 image
@@ -65,17 +66,25 @@ struct ProfilePictureView: View {
                     .clipShape(Circle())
             }
             )
+            .alignmentGuide(.leading) { d in d[.leading] }
         }
     }
 }
 
+//#Preview {
+//    let mockUserVM = UserFirebase()
+//
+//    ProfileUsernameDateView(
+//        profilePhoto: "",
+//        dateTime: Date.now,
+//        userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92"
+//    )
+//    .environmentObject(mockUserVM)
+//}
+
 #Preview {
     let mockUserVM = UserFirebase()
-
-    ProfileUsernameDateView(
-        profilePhoto: "",
-        dateTime: Date.now,
-        userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92"
-    )
-    .environmentObject(mockUserVM)
+    
+    ProfileUsernameDateView(dateTime: Date.now, userId: "0RIEcQl2H9hUCL2DSDaMDg9scqg2")
+        .environmentObject(mockUserVM)
 }

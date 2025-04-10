@@ -30,16 +30,14 @@ struct BinaryFeedPost: View {
             Spacer(minLength: 30.0)
             
             ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
+                .padding(.leading)
                         
             //Category Boxes
             ScrollView(.horizontal) {
                 HStack {
-                    let categories: [Category] = post.categories
-                    
-                    ForEach(categories, id: \.self) { category in
+                    ForEach(post.categories, id: \.self) { category in
                         Text(category.rawValue)
-                            .padding(.leading, 10)
-                            .padding(.trailing, 10)
+                            .padding(.horizontal, 10)
                             .font(.system(size: 14))
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
@@ -48,25 +46,21 @@ struct BinaryFeedPost: View {
                                     .frame(height: 32)
                             )
                             .padding(.top, 10)
-                            .frame(minWidth: 40)
-                            .fixedSize(horizontal: true, vertical: false)
                     }
-                    
-                    Spacer()
                 }
                 .padding(.bottom, 10)
                 .padding(.leading)
             }
             
+            Text(post.question)
+                .padding(.top, 15)
+                .bold()
+                .font(.system(size: 35))
+                .multilineTextAlignment(.leading)
+                .foregroundStyle(.black)
+                .padding(.horizontal)
+            
             VStack {
-                Text(post.question)
-                    .padding(.top, 15)
-                    .bold()
-                    .font(.system(size: 35))
-                    .frame(alignment: .leading)
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(.black)
-                
                 Spacer()
                 
                 ZStack {
@@ -230,7 +224,8 @@ struct BinaryFeedPost: View {
                 StackedProfiles(
                     userIds: post.responses
                         .map { $0.userId }
-                        .filter { userVM.user.friends.contains($0) }
+                        .filter { userVM.user.friends.contains($0) },
+                    startCompacted: false
                 )
                 
                 Spacer()
@@ -303,5 +298,7 @@ extension View {
 #Preview {
     BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good", sublabel1: "bad", sublabel2: "great"), dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0), skipping: .constant(false)
     )
+    .environmentObject(UserFirebase())
+    .environmentObject(PostFirebase())
 }
 
