@@ -168,7 +168,6 @@ class SearchViewModel: ObservableObject {
                 profilePhotoUrl: data["profilePhoto"] as? String ?? ""
             )
             
-            // Add attributes
             result.attributes = data["attributes"] as? [String: String] ?? [:]
             
             return result

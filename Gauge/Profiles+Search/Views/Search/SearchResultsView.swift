@@ -4,7 +4,6 @@
 //
 //  Created by Datta Kansal on 4/10/25.
 //
-
 import SwiftUI
 
 struct SearchResultsView: View {
@@ -18,7 +17,7 @@ struct SearchResultsView: View {
     @Binding var userSearchProfileImages: [String: UIImage]
     @Binding var navigateToSearchedUser: Bool
     @Binding var searchedUserIsCurrUser: Bool
-    
+
     var body: some View {
         if isLoading {
             ProgressView("Searching...")
@@ -63,15 +62,14 @@ struct SearchResultsView: View {
                         Task {
                             do {
                                 let fetchedUser = try await searchedUserVM.getUserData(userId: user.id)
-                                // Update the user on the main thread if needed:
                                 await MainActor.run {
                                     searchedUserVM.user = fetchedUser
+                                    navigateToSearchedUser = true
                                 }
                             } catch {
                                 print("Error fetching user data: \(error.localizedDescription)")
                             }
                         }
-
                     }
                 }
             }
