@@ -42,7 +42,7 @@ struct BinaryFeedResults: View {
                         .font(.system(size: 16))
                         .padding(.leading, 10)
                     
-                    Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
+                    Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime)) ago")
                         .font(.system(size: 13))
                         .padding(.leading, 5)
                         .foregroundStyle(.gray)
@@ -58,26 +58,29 @@ struct BinaryFeedResults: View {
                         ForEach(post.categories, id: \.self) { category in
                             Text(category.rawValue)
                                 .font(.system(size: 12))
-                                .padding(.top, 6)
-                                .padding(.bottom, 6)
+                                .fontWeight(.medium)
+                                .padding(.top, 10)
+                                .padding(.bottom, 10)
                                 .padding(.leading, 8)
                                 .padding(.trailing, 8)
                                 .background(Color.categoryGray)
                                 .cornerRadius(100)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.black)
                                 .padding(.trailing, 10)
+                                .lineLimit(1)
                         }
                     }
 
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                
                 
                 HStack {
                     Text(post.question)
                         .padding(.top, 10)
-                        .font(.system(size: 25))
+                        .font(.system(size: 24))
                         .frame(alignment: .leading)
-                        .fontWeight(.bold)
+                        .fontWeight(.semibold)
                     
                     Spacer()
                 }

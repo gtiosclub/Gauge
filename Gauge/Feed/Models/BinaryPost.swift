@@ -13,7 +13,7 @@ class BinaryPost: Post, Equatable, ObservableObject {
     var userId: String
     var username: String = "" // NOT stored in Firebase
     var profilePhoto: String = "" // NOT stored in Firebase
-    @Published var categories: [Category]
+    var categories: [Category]
     var topics: [String]
     var postDateAndTime: Date
     var favoritedBy: [String]
