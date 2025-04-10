@@ -90,4 +90,43 @@ final class GaugeTests: XCTestCase {
             print("error")
         }
     }
+    func testCategoryRanker() {
+        let vm = PostFirebase()
+        let userCategories = [
+            "🎮 Video Games",
+            "🎬 Movies",
+            "🎵 Music",
+            "📺 TV Shows"
+        ]
+        
+        let postCategories = Category.mapStringsToCategories(returnedStrings: [
+            "📺 TV Shows",
+            "🎮 Video Games",
+            "🎬 Movies",
+            "🎵 Music"
+        ])
+        
+        let result = vm.categoryRanker(user_categories: userCategories, post_categories: postCategories)
+        
+        print(userCategories)
+        print(postCategories)
+        print(result)
+        XCTAssertEqual(result, 93)
+    }
+
+    func testGetUserResponseFromPostResponses() async {
+        let vm = PostFirebase()
+        await vm.loadFeedPosts(for: ["37459197-11A2-40C9-A569-45043EF523DF"])
+        vm.watchForCurrentFeedPostChanges()
+        DispatchTime(uptimeNanoseconds: 1000000000000)
+        let post = vm.feedPosts[0]
+        print("POST INFO - START")
+        print("\(post.postId) \n \n comments - \n \(post.comments) \n \n resposes - \n \(post.responses)")
+        print("POST INFO - END")
+        var response = vm.getUserResponseForCurrentPost(userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92")
+        print(response)
+        
+//        XCTAssertEqual(result, 93)
+
+    }
 }

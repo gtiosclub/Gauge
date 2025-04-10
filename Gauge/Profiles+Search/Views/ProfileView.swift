@@ -2,12 +2,15 @@ import SwiftUI
 
 struct ProfileView: View {
     @ObservedObject var userVM: UserFirebase
-    @EnvironmentObject var postVM: PostFirebase // will need to be changed to observed object and passed in on ContentView (like userVM) when postVM is actually used to display posts on profiles
+    @EnvironmentObject var postVM: PostFirebase
+    @EnvironmentObject var authVM: AuthenticationVM
+    @StateObject var profileViewModel = ProfileViewModel()
     @State private var selectedTab: String = "Takes"
     @State private var selectedBadge: BadgeModel? = nil
     @State var isCurrentUser: Bool
     
     let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
+    @State private var profileImage: UIImage?
     let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
     
     @State var slideGesture: CGSize = CGSize.zero
@@ -32,6 +35,24 @@ struct ProfileView: View {
                             }
                         } label: {
                             Image(systemName: "line.3.horizontal")
+                        if isCurrentUser {
+                            Button(action: {
+                                showingSettings = true
+                            }) {
+                                Image(systemName: "gearshape.fill")
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.trailing)
+                        }
+                    }
+                    
+                    HStack {
+                        // CHANGED: Get emoji from attributes
+                        if let emoji = userVM.user.attributes["profileEmoji"], !emoji.isEmpty {
+                            Text(emoji)
+                                .font(.system(size: 60))
+                        } else if let profileImage = profileImage {
+                            Image(uiImage: profileImage)
                                 .resizable()
                                 .frame(width: 20, height: 15)
                                 .foregroundColor(.black)
@@ -254,5 +275,6 @@ struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileView(userVM: UserFirebase(), isCurrentUser: false)
             .environmentObject(PostFirebase())
+            .environmentObject(AuthenticationVM())
     }
 }

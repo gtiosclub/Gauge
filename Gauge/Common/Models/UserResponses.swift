@@ -7,14 +7,58 @@
 
 import Foundation
 import SwiftData
+
+@Model
 class UserResponses {
-    var userResponses: [String : Int] // String is Category name .rawValue, Int is number of times interacted in session
+    var userCategoryResponses: [String : Int] // String is Category name .rawValue, Int is number of times interacted in session
+    var userTopicResponses: [String : Int] // String is Topic name, Int is number of times interacted in session
     var currentUserCategories: [String] // Current category list (as rawValues) in Firebase
-    init(userResponses: [String : Int], currentUserCategories: [String]) {
-        self.userResponses = userResponses
+    var currentUserTopics: [String] // Current topic list in Firebase
+    
+    init(userCategoryResponses: [String : Int] = [:], userTopicResponses: [String : Int] = [:], currentUserCategories: [String] = [], currentUserTopics: [String] = []) {
+        self.userCategoryResponses = userCategoryResponses
+        self.userTopicResponses = userTopicResponses
         self.currentUserCategories = currentUserCategories
+        self.currentUserTopics = currentUserTopics
     }
     
+    func addToUserTopics(topics: [String]) {
+        for topic in topics {
+            if let currentCount = userTopicResponses[topic] {
+                userTopicResponses[topic] = currentCount + 1
+            } else {
+                userTopicResponses[topic] = 1
+            }
+        }
+    }
+    
+    func addToUserCategories(categories: [String]) {
+        for category in categories {
+            if let currentCount = userCategoryResponses[category] {
+                userCategoryResponses[category] = currentCount + 1
+            } else {
+                userCategoryResponses[category] = 1
+            }
+        }
+    }
+    
+    func removeFromUserTopics(topics: [String]) {
+        for topic in topics {
+            if let currentCount = userTopicResponses[topic] {
+                userTopicResponses[topic] = currentCount - 1
+            } else {
+                userTopicResponses[topic] = -1
+            }
+        }
+    }
+    
+    func removeFromUserCategories(categories: [String]) {
+        for category in categories {
+            if let currentCount = userCategoryResponses[category] {
+                userCategoryResponses[category] = currentCount - 1
+            } else {
+                userCategoryResponses[category] = -1
+            }
+        }
+    }
 }
-    //container is where data is persisted.. create in separate file
-

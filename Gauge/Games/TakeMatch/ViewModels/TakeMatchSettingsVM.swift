@@ -18,5 +18,5 @@ class TakeMatchSettingsVM: ObservableObject {
     @Published var question: String = ""
     @Published var selectedTopic: String = "No topic selected"
 
-    private init() {}
+    init() {}
 }
