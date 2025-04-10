@@ -180,7 +180,7 @@ struct PostCreationView: View {
                         showCreatePost = false
                         
                         Task {
-                            await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right)
+                            await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, sublabel1: leftCaption, sublabel2: rightCaption)
                         }
                     }
                         

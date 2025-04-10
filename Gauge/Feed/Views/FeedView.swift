@@ -73,10 +73,10 @@ struct FeedView: View {
                                 RoundedRectangle(cornerRadius: 20.0)
                                     .fill(Color.mediumGray)
                             }
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.black, lineWidth: 0.5)
-                            )
+//                            .overlay(
+//                                RoundedRectangle(cornerRadius: 20)
+//                                    .stroke(Color.black, lineWidth: 0.5)
+//                            )
                             .frame(width: geo.size.width - 32 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 8) : 8.0) : 0.0))
                     }
                     
@@ -85,12 +85,14 @@ struct FeedView: View {
                             .frame(width: geo.size.width - 18 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 12) : 12.0) : 0.0))
                             .overlay {
                                 RoundedRectangle(cornerRadius: 20.0)
-                                    .fill(Color.mediumGray)
+                                    .fill(Color(red: (min(209.0, 187.0 + dragOffset.height) / 255),
+                                                green: (min(209.0, 187.0 + dragOffset.height) / 255),
+                                                blue: (min(209.0, 187.0 + dragOffset.height) / 255)))
                             }
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.black, lineWidth: 0.5)
-                            )
+//                            .overlay(
+//                                RoundedRectangle(cornerRadius: 20)
+//                                    .stroke(Color.black, lineWidth: 0.5)
+//                            )
                             .offset(y: dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0)
                     }
                     .frame(maxWidth: geo.size.width - 24 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 12.0) : 12.0) : 0.0))
@@ -101,15 +103,15 @@ struct FeedView: View {
                                 BinaryFeedPost(post: post, dragAmount: .constant(CGSize(width: 0.0, height: 0.0)), optionSelected: .constant(0), skipping: $hasSkipped)
                                     .background(
                                         RoundedRectangle(cornerRadius: 20.0)
-                                            .fill(Color(red: (min(255.0, 187.0 + dragOffset.height) / 255),
-                                                        green: (min(255.0, 187.0 + dragOffset.height) / 255),
-                                                        blue: (min(255.0, 187.0 + dragOffset.height) / 255)))
+                                            .fill(Color(red: (min(255.0, 209.0 + dragOffset.height) / 255),
+                                                        green: (min(255.0, 209.0 + dragOffset.height) / 255),
+                                                        blue: (min(255.0, 209.0 + dragOffset.height) / 255)))
                                     )
                                     .frame(width: max(0, geo.size.width - 6 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 20.0, 6.0) : 6.0) : 0.0)))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.black.opacity(hasSkipped ? 0.0 : dragOffset.height > 0 ? (dragOffset.height < 150.0 ? max(100 - dragOffset.height / 150.0, 0.0) : 0.0) : 1.0), lineWidth: 0.5)
-                                    )
+//                                    .overlay(
+//                                        RoundedRectangle(cornerRadius: 20)
+//                                            .stroke(Color.black.opacity(hasSkipped ? 0.0 : dragOffset.height > 0 ? (dragOffset.height < 150.0 ? max(100 - dragOffset.height / 150.0, 0.0) : 0.0) : 1.0), lineWidth: 0.5)
+//                                    )
                                     .offset(y: 10 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0))
                                     .mask(RoundedRectangle(cornerRadius: 20.0).offset(y: 10))
                             }
