@@ -11,10 +11,11 @@ import Firebase
 class FirebaseDemoVM: ObservableObject {
     @Published var users: [User] = []
     
-    func addUserAustin() {
+    func addUserAustin(fcmToken: String? = nil) {
         Firebase.db.collection("USERS").document("austin").setData([
             "username": "Austin",
-            "phoneNumber": "111-111-1111"
+            "phoneNumber": "111-111-1111",
+            "fcmToken": fcmToken
         ]) { error in
             if let error = error {
                 print("error writing doc: \(error)")
@@ -24,10 +25,11 @@ class FirebaseDemoVM: ObservableObject {
         }
     }
     
-    func addNewUser() {
+    func addNewUser(fcmToken: String? = nil) {
         Firebase.db.collection("USERS").addDocument(data: [
             "username": "new user!",
-            "phoneNumber": "\(Int.random(in: 0...9))\(Int.random(in: 0...9))\(Int.random(in: 0...9))-\(Int.random(in: 0...9))\(Int.random(in: 0...9))\(Int.random(in: 0...9))-\(Int.random(in: 0...9))\(Int.random(in: 0...9))\(Int.random(in: 0...9))\(Int.random(in: 0...9))"
+            "phoneNumber": "\(Int.random(in: 0...9))\(Int.random(in: 0...9))\(Int.random(in: 0...9))-\(Int.random(in: 0...9))\(Int.random(in: 0...9))\(Int.random(in: 0...9))-\(Int.random(in: 0...9))\(Int.random(in: 0...9))\(Int.random(in: 0...9))\(Int.random(in: 0...9))",
+            "fcmToken": fcmToken as? String ?? "No fcm token"
         ]) { error in
             if let error = error {
                 print("error writing doc: \(error)")
@@ -44,7 +46,7 @@ class FirebaseDemoVM: ObservableObject {
                     print("User data: \(data)")
                     DispatchQueue.main.async {
                         self.users = []
-                        self.users = [User(userId: "austin", username: data["username"] as? String ?? "No username", email: data["email"] as? String ?? "No email" )]
+                        self.users = [User(userId: "austin", username: data["username"] as? String ?? "No username", email: data["email"] as? String ?? "No email", fcmToken: document.data()!["fcmToken"] as? String ?? "No fcm token")]
                         print("updated user array: \(self.users)")
                     }
                 } else {
@@ -64,7 +66,7 @@ class FirebaseDemoVM: ObservableObject {
                 var retrievedUsers: [User] = []
                 for document in snapshot!.documents {
                     print("\(document.documentID) => \(document.data())")
-                    let retrievedUser = User(userId: document.documentID, username: document.data()["username"] as? String ?? "No username", email: document.data()["email"] as? String ?? "No email")
+                    let retrievedUser = User(userId: document.documentID, username: document.data()["username"] as? String ?? "No username", email: document.data()["email"] as? String ?? "No email", fcmToken: document.data()["fcmToken"] as? String ?? "No fcm token")
                     retrievedUsers.append(retrievedUser)
                 }
                 self.users = retrievedUsers

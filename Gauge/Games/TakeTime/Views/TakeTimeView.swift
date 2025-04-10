@@ -8,31 +8,29 @@
 import SwiftUI
 
 struct TakeTimeView: View {
-    @EnvironmentObject var scheduler: Scheduler
-
     var body: some View {
-        VStack {
-            Text("Take Time!")
-                .font(.largeTitle)
-                .padding()
-            
-            Text("Random Hot Take")
-                .padding()
-            
-            Button(action: {
-                scheduler.restoreUserState()
-            }) {
-                Text("Dismiss & Return")
-                    .font(.title2)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+        ZStack {
+            LinearGradient(
+                gradient: Gradient(colors: [Color.orange, Color.red]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                Image(systemName: "hourglass")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 80, height: 80)
+                    .foregroundColor(.black.opacity(10))
+                    .rotationEffect(.degrees(45))
+                    
+
+                Text("Take Time!")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.black.opacity(10))
             }
-            .padding()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
-        .edgesIgnoringSafeArea(.all)
     }
 }
