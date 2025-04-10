@@ -11,6 +11,8 @@ import ChatGPTSwift
 
 class UserFirebase: ObservableObject {
     @Published var user: User
+    @Published var useridsToPhotosAndUsernames: [String: (photoURL: String, username: String)] = [:]
+    
     init() {
         self.user = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
     }
@@ -196,6 +198,24 @@ class UserFirebase: ObservableObject {
             }
             
             completion(nameAndPhoto)
+        }
+    }
+    
+    func populateUsernameAndProfilePhoto(userId: String) async throws {
+        if useridsToPhotosAndUsernames.keys.contains(userId) { return }
+        
+        let docRef = Firebase.db.collection("USERS").document(userId)
+        
+        let document = try await docRef.getDocument()
+        guard let data = document.data() else {
+            throw NSError(domain: "No user data found for \(userId)", code: 404)
+        }
+        
+        let username = data["username"] as? String ?? ""
+        let profilePhoto = data["profilePhoto"] as? String ?? ""
+        
+        DispatchQueue.main.async {
+            self.useridsToPhotosAndUsernames[userId] = (photoURL: profilePhoto, username: username)
         }
     }
     
