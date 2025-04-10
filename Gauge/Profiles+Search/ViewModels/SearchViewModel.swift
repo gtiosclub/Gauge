@@ -7,6 +7,7 @@
 import FirebaseFirestore
 import Firebase
 import Foundation
+import UIKit
 
 class SearchViewModel: ObservableObject {
     private let vectorSearchCollection = "_firestore-vector-search"
@@ -120,5 +121,57 @@ class SearchViewModel: ObservableObject {
         }
         
         return questions
+    }
+    
+    func searchPostsByCategory(_ category: Category) async throws -> [PostResult] {
+
+        let snapshot = try await Firestore.firestore()
+            .collection("POSTS")
+            .whereField("categories", arrayContains: category.rawValue)
+            .getDocuments()
+
+
+        var results: [PostResult] = []
+
+        for document in snapshot.documents {
+            let data = document.data()
+
+            guard let question = data["question"] as? String else { continue }
+            let options = [
+                data["responseOption1"] as? String ?? "",
+                data["responseOption2"] as? String ?? ""
+            ]
+            let postId = document.documentID
+            let postDateAndTime = data["postDateAndTime"] as? String ?? ""
+            let timeAgo = DateConverter.timeAgo(from: DateConverter.convertStringToDate(postDateAndTime) ?? Date())
+
+            let postResult = PostResult(id: postId, question: question, options: options, timeAgo: timeAgo)
+            results.append(postResult)
+        }
+
+        return results
+    }
+
+    func fetchUsers(for query: String) async throws -> [UserResult] {
+        let snapshot = try await Firebase.db.collection("USERS")
+            .whereField("username", isGreaterThanOrEqualTo: query.lowercased())
+            .whereField("username", isLessThan: query.lowercased() + "\u{f8ff}")
+            .limit(to: 10)
+            .getDocuments()
+
+        return try snapshot.documents.compactMap { document -> UserResult? in
+            let data = document.data()
+            
+            var result = UserResult(
+                userId: document.documentID,
+                username: data["username"] as? String ?? "",
+                profilePhotoUrl: data["profilePhoto"] as? String ?? ""
+            )
+            
+            // Add attributes
+            result.attributes = data["attributes"] as? [String: String] ?? [:]
+            
+            return result
+        }
     }
 }

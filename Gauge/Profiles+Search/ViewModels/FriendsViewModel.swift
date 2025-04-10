@@ -105,6 +105,43 @@ class FriendsViewModel: ObservableObject {
             }
         }
     
+    /// Sends a friend request from one user to another
+    func sendFriendRequest(from senderId: String, to receiverId: String) async throws {
+        let senderRef = Firebase.db.collection("USERS").document(senderId)
+        let receiverRef = Firebase.db.collection("USERS").document(receiverId)
+
+        do {
+            // Fetch the receiver’s data
+            let receiverSnapshot = try await receiverRef.getDocument()
+            guard let receiverData = receiverSnapshot.data() else {
+                throw NSError(domain: "sendFriendRequest", code: 404, userInfo: [NSLocalizedDescriptionKey: "Receiver not found"])
+            }
+
+            var friendIn = receiverData["friendIn"] as? [String: [String]] ?? [:]
+            if friendIn[senderId] == nil {
+                friendIn[senderId] = ["Pending"]
+                try await receiverRef.updateData(["friendIn": friendIn])
+            }
+
+            // Fetch the sender’s data
+            let senderSnapshot = try await senderRef.getDocument()
+            guard let senderData = senderSnapshot.data() else {
+                throw NSError(domain: "sendFriendRequest", code: 404, userInfo: [NSLocalizedDescriptionKey: "Sender not found"])
+            }
+
+            var friendOut = senderData["friendOut"] as? [String: [String]] ?? [:]
+            if friendOut[receiverId] == nil {
+                friendOut[receiverId] = ["Pending"]
+                try await senderRef.updateData(["friendOut": friendOut])
+            }
+
+            print("Friend request sent successfully")
+        } catch {
+            throw error
+        }
+    }
+
+    
     func getUserFromId(userId: String) async -> User? {
         do {
             let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
@@ -130,6 +167,7 @@ class FriendsViewModel: ObservableObject {
             let streak = userData["streak"] as? Int ?? 0
             let lastLogin = DateConverter.convertStringToDate(userData["lastLogin"] as? String ?? "") ?? Date()
             let lastFeedRefresh = DateConverter.convertStringToDate(userData["lastFeedRefresh"] as? String ?? "") ?? Date()
+            let attributes = userData["attributes"] as? [String : String] ?? [:]
             let profilePhoto = userData["profilePhoto"] as? String ?? ""
 
             let outputUser = User(
@@ -153,7 +191,8 @@ class FriendsViewModel: ObservableObject {
                 profilePhoto: profilePhoto,
                 myAccessedProfiles: myAccessedProfiles,
                 lastLogin: lastLogin,
-                lastFeedRefresh: lastFeedRefresh
+                lastFeedRefresh: lastFeedRefresh,
+                attributes: attributes
             )
             return outputUser
                 

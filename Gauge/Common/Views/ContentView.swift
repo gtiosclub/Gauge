@@ -12,7 +12,6 @@ struct ContentView: View {
     @StateObject private var authVM = AuthenticationVM()
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
-    @State private var isSigningUp = false
     @State private var selectedTab: Int = 0
     @State private var showSplashScreen: Bool = true
     @Environment(\.modelContext) private var modelContext
@@ -59,11 +58,12 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-                        ProfileView()
+                        ProfileView(userVM: userVM, isCurrentUser: true)
+                            .environmentObject(authVM)
                             .tabItem {
-                                Image(systemName: "person.circle")
-                                Text("Profile")
-                            }
+                                  Image(systemName: "person.crop.circle")
+                                  Text("Profile")
+                              }
                             .tag(3)
                     }
                     .background(.white)
@@ -76,19 +76,12 @@ struct ContentView: View {
                         let navigationBarAppearance = UINavigationBarAppearance()
                         navigationBarAppearance.configureWithOpaqueBackground()
                         UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
+                        
+                        print("navigated to the main view")
                     }
                 } else {
-                    if isSigningUp {
-                        SignUpView()
-                            .environmentObject(authVM)
-                    } else {
-                        SignInView()
-                            .environmentObject(authVM)
-                    }
-                    
-                    Button(action: { isSigningUp.toggle() }) {
-                        Text(isSigningUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
-                    }
+                    OnboardingView()
+                        .environmentObject(authVM)
                 }
             }
             .onChange(of: authVM.currentUser, initial: true) { oldUser, newUser in
@@ -199,6 +192,7 @@ struct ContentView: View {
                     print("❌ Error reordering categories: \(error)")
                 }
             }
+            .environmentObject(authVM)
         }
     }
 }

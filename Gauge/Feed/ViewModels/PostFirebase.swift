@@ -708,19 +708,19 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func suggestPostCategories(question: String, responseOptions: [String], completion: @escaping (([Category]) -> Void)) {
+    func suggestPostCategories(question: String, captions: [String], completion: @escaping (([Category]) -> Void)) {
         let categories: [String] = Category.allCategoryStrings
         
         let systemPrompt = """
             You are a classifier that assigns categories to a post based on 
-            a post's question and its responses. 
+            a post's question and its captions. 
             Only respond with valid categories from the provided list. 
             Do not create new categories. Return the answer as a JSON array.
             """
         
         let userPrompt = """
             Question: \(question)
-            Response Options: \(responseOptions.joined(separator: ", "))
+            Captions: \(captions.joined(separator: ", "))
             Valid Categories: \(categories.joined(separator: ", "))
 
             Provide the category list as a JSON array without using any

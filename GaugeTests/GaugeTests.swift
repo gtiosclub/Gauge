@@ -80,6 +80,17 @@ final class GaugeTests: XCTestCase {
     }
     
 
+    func testFetchUserSearch() async {
+        let viewModel = SearchViewModel()
+        do {
+            let userSearchResult = try await viewModel.fetchUsers(for: "test")
+            for user in userSearchResult {
+                print(user.username)
+            }
+        } catch {
+            print("error")
+        }
+
     func testCategoryRanker() {
         let vm = PostFirebase()
         let userCategories = [
