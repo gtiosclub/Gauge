@@ -43,7 +43,7 @@ struct StackedProfiles: View {
             }
         }
         .frame(height: userIds.count == 0 ? 0 : 30)
-        .offset(x: userIds.count == 1 ? 0 : sideOnTop == .left ? spacing : -spacing) // offset by current spacing for balance
+        .offset(x: -spacing * CGFloat(userIds.count - 1) / 2.0 * (sideOnTop == .left ? -1 : 1))
         .onTapGesture {
             withAnimation {
                 spacing = (spacing == 15 ? 40 : 15)

@@ -49,7 +49,7 @@ class PostFirebase: ObservableObject {
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
                             postId: self.feedPosts[0].postId,
-                            userId: id,
+                            userId: newCommentDoc["userId"] as? String ?? "",
                             date: date,
                             commentId: id,
                             likes: newCommentDoc["likes"] as? [String] ?? [],
@@ -70,7 +70,7 @@ class PostFirebase: ObservableObject {
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
                             postId: self.feedPosts[0].postId,
-                            userId: id,
+                            userId: newCommentDoc["userId"] as? String ?? "",
                             date: date,
                             commentId: id,
                             likes: newCommentDoc["likes"] as? [String] ?? [],
