@@ -79,6 +79,18 @@ final class GaugeTests: XCTestCase {
         print(options)
     }
     
+<<<<<<< HEAD
+    func testFetchUserSearch() async {
+        let viewModel = SearchViewModel()
+        do {
+            let userSearchResult = try await viewModel.fetchUsers(for: "test")
+            for user in userSearchResult {
+                print(user.username)
+            }
+        } catch {
+            print("error")
+        }
+=======
     func testCategoryRanker() {
         let vm = PostFirebase()
         let userCategories = [
@@ -101,5 +113,6 @@ final class GaugeTests: XCTestCase {
         print(postCategories)
         print(result!)
         XCTAssertEqual(result, 93)
+>>>>>>> main
     }
 }

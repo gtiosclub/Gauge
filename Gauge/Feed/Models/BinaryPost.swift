@@ -27,9 +27,11 @@ class BinaryPost: Post, Equatable, ObservableObject {
     // Binary post specific attributes
     var responseOption1: String
     var responseOption2: String
+    var sublabel1: String
+    var sublabel2: String
     
     // Initializing locally
-    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String) {
+    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -45,10 +47,12 @@ class BinaryPost: Post, Equatable, ObservableObject {
         // Binary post specific attributes
         self.responseOption1 = responseOption1
         self.responseOption2 = responseOption2
+        self.sublabel1 = sublabel1
+        self.sublabel2 = sublabel2
     }
     
     // Initializing from Firebase
-    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], topics: [String], viewCounter: Int = 0, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, favoritedBy: [String]) {
+    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], topics: [String], viewCounter: Int = 0, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String, favoritedBy: [String]) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -66,6 +70,8 @@ class BinaryPost: Post, Equatable, ObservableObject {
         // Binary post specific attributes
         self.responseOption1 = responseOption1
         self.responseOption2 = responseOption2
+        self.sublabel1 = sublabel1
+        self.sublabel2 = sublabel2
     }
     
     static func == (lhs: BinaryPost, rhs: BinaryPost) -> Bool {

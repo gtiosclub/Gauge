@@ -23,8 +23,10 @@ struct FirebaseTesting: View {
                                     userId: "Zmi5Cgm7dtbqCDbLOrhbbDAq8T92",
                                     categories: [.sports(.nba)],
                                     question: "Is Shai the MVP",
-                                    responseOption1: "Nah, free throw merchant🙅‍♂️",
-                                    responseOption2: "Stats dont lie"
+                                    responseOption1: "No",
+                                    responseOption2: "Yes",
+                                    sublabel1: "Nah, free throw merchant🙅‍♂️",
+                                    sublabel2: "Stats dont lie"
                                 )
                             }
                         }
@@ -250,7 +252,7 @@ struct FirebaseTesting: View {
                     Section("OpenAI Queries") {
                         Button("Suggest Post Categories") {
                             postVM.suggestPostCategories(
-                                question: "Which channel is better?", responseOptions: ["National Geographic", "Animal Planet"]
+                                question: "Which channel is better?", captions: ["National Geographic", "Animal Planet"]
                             ) { suggestedCategories in
                                 print(suggestedCategories)
                             }

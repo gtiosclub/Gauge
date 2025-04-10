@@ -1,69 +1,105 @@
+//
+//  FriendsView.swift
+//  Gauge
+//
+//  Created by amber verma on 2/18/25.
+//
+
 import SwiftUI
 
 struct FriendsView: View {
     @State private var searchText = ""
     @Environment(\.dismiss) var dismiss
     
+    // TODO: Replace with actual user ID when integrating authentication
+    let userId = "USER_ID_PLACEHOLDER"
+
     var body: some View {
-            VStack(spacing: 0) {
-                SearchBar(searchText: $searchText)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    .frame(height: 36)
-                
-                Divider()
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        NavigationLink(destination: RequestsView()) {
-                            HStack {
-                                SectionHeader(title: "Requests")
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing)
-                            }
-                            .foregroundColor(.black)
+        VStack(spacing: 0) {
+            SearchBar(searchText: $searchText)
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .frame(height: 36)
+            
+            Divider()
+                .padding(.horizontal)
+                .padding(.top, 8)
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    
+                    // ✅ Navigation to Accept Friend Requests
+                    NavigationLink(destination: AcceptFriendRequestView(viewModel: FriendsViewModel(user: User(userId: userId, username: "DefaultUser", email: "default@example.com")), userId: userId)) {
+                        HStack {
+                            SectionHeader(title: "View Friend Requests")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                                .padding(.trailing)
                         }
-                        .padding(.top, 16)
-                        
-                        FriendRequestView()
-                            .padding(.bottom, 8)
-                        
-                        NavigationLink(destination: RequestsView()) {
-                            HStack {
-                                HStack(spacing: -8) {
-                                    ForEach(0..<4) { _ in
-                                        Circle()
-                                            .frame(width: 30, height: 30)
-                                            .foregroundColor(Color(.systemGray3))
-                                    }
-                                    Text("  and 4 others")
-                                        .font(.subheadline)
-                                        .foregroundColor(.black)
-                                        .padding(.leading, 6)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                            }
-                            .padding(.horizontal)
-                            .padding(.top, -8)
-                        }
-                        
-                        SectionHeader(title: "27 Friends")
-                            .padding(.top, 16)
-                        FriendsListView()
+                        .foregroundColor(.black)
                     }
+                    .padding(.top, 16)
+
+                    // ✅ Navigation to Send Friend Requests
+                    NavigationLink(destination: SendFriendRequestView(viewModel: FriendsViewModel(user: User(userId: userId, username: "DefaultUser", email: "default@example.com")), userId: userId)) {
+                        HStack {
+                            Text("Add Friends")
+                                .font(.headline)
+                                .foregroundColor(.blue)
+                            Spacer()
+                            Image(systemName: "plus.circle")
+                                .foregroundColor(.blue)
+                        }
+                        .padding()
+                    }
+
+                    NavigationLink(destination: RequestsView()) {
+                        HStack {
+                            SectionHeader(title: "Requests")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                                .padding(.trailing)
+                        }
+                        .foregroundColor(.black)
+                    }
+                    .padding(.top, 16)
+                    
+                    FriendRequestView()
+                        .padding(.bottom, 8)
+                    
+                    NavigationLink(destination: RequestsView()) {
+                        HStack {
+                            HStack(spacing: -8) {
+                                ForEach(0..<4) { _ in
+                                    Circle()
+                                        .frame(width: 30, height: 30)
+                                        .foregroundColor(Color(.systemGray3))
+                                }
+                                Text("  and 4 others")
+                                    .font(.subheadline)
+                                    .foregroundColor(.black)
+                                    .padding(.leading, 6)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, -8)
+                    }
+                    
+                    SectionHeader(title: "27 Friends")
+                        .padding(.top, 16)
+                    FriendsListView()
                 }
             }
-            .navigationBarTitle("Friends", displayMode: .inline)
-            .navigationBarBackButtonHidden(false)
-            
         }
+        .navigationBarTitle("Friends", displayMode: .inline)
+        .navigationBarBackButtonHidden(false)
     }
+}
 
 struct CustomSearchBar: View {
     @Binding var text: String
@@ -152,3 +188,4 @@ struct FriendsListView: View {
 #Preview {
     FriendsView()
 }
+
