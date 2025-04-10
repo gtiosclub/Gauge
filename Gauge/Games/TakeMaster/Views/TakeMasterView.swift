@@ -7,12 +7,15 @@
 
 import SwiftUI
 import simd
+import UniformTypeIdentifiers
+import MultipeerConnectivity
 
 #Preview {
-    ZStack {
-        SplashBackgroundView()
-        SlidingWordsView(leftWord: "Ready for", rightWord: "Results?")
-    }
+//    ZStack {
+//        SplashBackgroundView()
+//        SlidingWordsView(leftWord: "Ready for", rightWord: "Results?")
+//    }
+    GuessView(manager: TMManager(yourName: "Akshat", isHost: "Y"))
 }
 
 struct TakeMasterView: View {
@@ -136,9 +139,8 @@ struct QuestionSelectView: View {
                 .lineLimit(2, reservesSpace: true)
                 .padding()
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 10)
                         .fill(Color.black)
-                        .stroke(Color.white)
                 )
             TextField("Answer:", text: $answer, axis: .vertical)
                 .font(.title)
@@ -147,22 +149,22 @@ struct QuestionSelectView: View {
                 .lineLimit(2, reservesSpace: true)
                 .padding()
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 10)
                         .fill(Color.white)
                         .stroke(Color.black)
                 )
             Button(action: {
-                manager.submitQuestion(question, answer: answer, from: manager.username)
+                manager.submitQuestion(question, answer: answer, from: manager.myPeerID.displayName)
             }) {
                 Text("Submit")
-                    .font(.title2)
-                    .foregroundColor(.black)
-                    .padding()
-                    .background(Color(.secondarySystemFill))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 50)
+                    .padding(.vertical, 10)
+                    .background(Color(.black))
                     .cornerRadius(12)
                     .scaleEffect(1.0)
+                    .font(.system(size: 32, weight: .medium))
             }
-            .frame(maxWidth: 400)
             .buttonStyle(PressEffectButtonStyle())
         }
         .padding()
@@ -177,20 +179,21 @@ struct RoundStartView: View {
     var body: some View {
         VStack {
             if let currentQuestion = manager.currentQuestion {
-                Text("The Take Master is \(currentQuestion.playerID)")
-                    .font(.title)
+                if let peer = manager.connectedPeers.first(where: { $0.displayName == currentQuestion.playerID }) {
+                    Text("The Take Master is \(manager.discoveredPeers[peer]?.username ?? "")")
+                        .font(.title)
+                }
                 Text(currentQuestion.question)
                     .font(.title)
                     .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
                     .padding()
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: 10)
                             .fill(Color.black)
-                            .stroke(Color.white)
                     )
-                if (currentQuestion.playerID != manager.username) {
+                if (currentQuestion.playerID != manager.myPeerID.displayName) {
                     TextField("Answer:", text: $answer, axis: .vertical)
                         .font(.title)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -198,7 +201,7 @@ struct RoundStartView: View {
                         .lineLimit(2, reservesSpace: true)
                         .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: 10)
                                 .fill(Color.white)
                                 .stroke(Color.black)
                         )
@@ -210,26 +213,26 @@ struct RoundStartView: View {
                         .lineLimit(2, reservesSpace: true)
                         .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: 10)
                                 .fill(Color.white)
                                 .stroke(Color.black)
                         )
                 }
                 Button(action: {
-                    if (manager.username == currentQuestion.playerID) {
+                    if (manager.myPeerID.displayName == currentQuestion.playerID) {
                         answer = currentQuestion.answer
                     }
-                        manager.submitRoundAnswer(answer, from: manager.username)
+                    manager.submitRoundAnswer(answer, from: manager.myPeerID.displayName)
                 }) {
                     Text("Submit")
-                        .font(.title2)
-                        .foregroundColor(.black)
-                        .padding()
-                        .background(Color(.secondarySystemFill))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 50)
+                        .padding(.vertical, 10)
+                        .background(Color(.black))
                         .cornerRadius(12)
                         .scaleEffect(1.0)
+                        .font(.system(size: 32, weight: .medium))
                 }
-                .frame(maxWidth: 400)
                 .buttonStyle(PressEffectButtonStyle())
             }
         }
@@ -239,37 +242,328 @@ struct RoundStartView: View {
 
 struct GuessView: View {
     @ObservedObject var manager: TMManager
+    @State private var draggedAnswerID: String? = nil
+    @GestureState private var dragOffset = CGSize.zero
+    @EnvironmentObject private var userVm: UserFirebase
+    @State var profilePhoto: String = ""
+    @State var profileRadius = 65.0
 
     var body: some View {
-        VStack {
-            Text("Guess which answer is the original!")
-                .font(.headline)
-            ForEach(manager.roundAnswers, id: \.playerID) { submission in
-                Button(submission.answer) {
-                    manager.submitGuess(submission.answer, from: manager.username)
+        VStack(spacing: 15) {
+            if let currentQuestion = manager.currentQuestion {
+                if let peer = manager.connectedPeers.first(where: { $0.displayName == currentQuestion.playerID }) {
+                    Text(currentQuestion.question)
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.black)
+                        )
+                    Text("Match \(manager.discoveredPeers[peer]?.username ?? "") to their answer.")
+                        .font(.headline)
+                } else if (currentQuestion.playerID == manager.myPeerID.displayName) {
+                    Text(currentQuestion.question)
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.black)
+                        )
+                    Text("Match \(manager.username) to their answer.")
+                        .font(.headline)
                 }
             }
+
+
+            ScrollView {
+                VStack(spacing: 10) {
+                    ForEach(manager.roundAnswers, id: \.playerID) { submission in
+                        HStack(alignment: .center, spacing: 20) {
+                        Spacer()
+                            if draggedAnswerID == submission.playerID {
+                                ZStack {
+                                    if profilePhoto != "", let url = URL(string: profilePhoto) {
+                                        AsyncImage(url: url) { phase in
+                                            switch phase {
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .frame(width: profileRadius, height: profileRadius)
+                                                    .clipShape(Circle())
+                                            case .failure, .empty:
+                                                Image(systemName: "person.circle.fill")
+                                                    .resizable()
+                                                    .frame(width: profileRadius, height: profileRadius)
+                                                    .foregroundColor(.black)
+                                            @unknown default:
+                                                EmptyView()
+                                            }
+                                        }
+                                        .contentShape(.dragPreview, Circle())
+                                        .scaledToFit()
+                                        .frame(width: profileRadius, height: profileRadius)
+                                        .clipped()
+                                        .foregroundColor(.black)
+                                        .draggable(manager.username)
+                                    }
+                                    Circle()
+                                        .strokeBorder(
+                                            style: StrokeStyle(
+                                                lineWidth: 3
+                                            )
+                                        )
+                                        .foregroundColor(Color(red: 248/255, green: 192/255, blue: 21/255))
+                                        .frame(width: profileRadius, height: profileRadius)
+                                }
+                            }
+
+                            Text(submission.answer)
+                                .font(.system(size: 25, weight: .medium))
+                                .padding(20)
+                                .foregroundColor(.black)
+                                .background(Color(red: 235/255, green: 235/255, blue: 235/255))
+                                .cornerRadius(50)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .animation(.easeOut(duration: 0.3), value: draggedAnswerID)
+                        }
+                        .dropDestination(for: String.self) { items, location in
+                            if let _ = items.first {
+                                draggedAnswerID = submission.playerID
+                                return true
+                            }
+                            return false
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, -25)
+
+            Spacer()
+
+            ZStack {
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: profileRadius + 12, height: profileRadius + 12)
+                    .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
+
+                if profilePhoto != "", let url = URL(string: profilePhoto) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .frame(width: profileRadius, height: profileRadius)
+                                .clipShape(Circle())
+                        case .failure, .empty:
+                            Image(systemName: "person.circle.fill")
+                                .resizable()
+                                .frame(width: profileRadius, height: profileRadius)
+                                .foregroundColor(.black)
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                    .contentShape(.dragPreview, Circle())
+                    .scaledToFit()
+                    .frame(width: profileRadius, height: profileRadius)
+                    .clipped()
+                    .foregroundColor(.black)
+                    .draggable(manager.username)
+                }
+
+                Circle()
+                    .strokeBorder(
+                        style: StrokeStyle(
+                            lineWidth: 3,
+                            dash: draggedAnswerID != nil ? [6, 4] : []
+                        )
+                    )
+                    .foregroundColor(Color(red: 248/255, green: 192/255, blue: 21/255))
+                    .frame(width: profileRadius, height: profileRadius)
+            }
+            .opacity(draggedAnswerID != nil ? 0.5 : 1.0)
+
+            Button(action: {
+                if let id = draggedAnswerID,
+                   let answer = manager.roundAnswers.first(where: { $0.playerID == id })?.answer {
+                    manager.submitGuess(answer, from: manager.myPeerID.displayName)
+                }
+            }) {
+                Text("Submit")
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 50)
+                    .padding(.vertical, 10)
+                    .background(Color(.black))
+                    .cornerRadius(12)
+                    .scaleEffect(1.0)
+                    .font(.system(size: 32, weight: .medium))
+            }
+            .buttonStyle(PressEffectButtonStyle())
+            .disabled(draggedAnswerID == nil)
         }
-        .padding()
+        .onAppear {
+            if let peer = manager.connectedPeers.first(where: { $0.displayName == manager.currentQuestion?.playerID }) {
+                if let userId = manager.discoveredPeers[peer]?.profileLink {
+                   fetchUserInfo(userID: userId)
+                }
+            } else if manager.currentQuestion?.playerID == manager.myPeerID.displayName {
+                manager.submitGuess(manager.currentQuestion?.answer ?? "", from: manager.myPeerID.displayName)
+                fetchUserInfo(userID: manager.profileLink)
+            }
+        }
+        .padding(25)
+    }
+
+    func fetchUserInfo(userID: String) {
+        userVm.getUsernameAndPhoto(userId: userID) { info in
+            DispatchQueue.main.async {
+                profilePhoto = info["profilePhoto"] ?? ""
+            }
+        }
     }
 }
 
 struct TMResultsView: View {
     @ObservedObject var manager: TMManager
+    @EnvironmentObject private var userVm: UserFirebase
+    @State private var userInfoMap: [MCPeerID: (username: String, profilePhoto: String)] = [:]
+    @State private var fetchedPeers: Set<MCPeerID> = []
+    @State private var profilePhotoSize = 65.0
+    @State private var myProfilePhoto = ""
 
-    var body: some View {
-        VStack {
-            Text("Results of this round")
-                .font(.headline)
-            ForEach(manager.roundGuesses, id: \.playerID) { submission in
-                Text("\(submission.playerID): \(submission.answer == manager.currentQuestion?.answer ? "Correct" : "Incorrect")")
-            }
-            // You can expand this area to show detailed results
-            Button("Next Round") {
-                manager.resetGame()
+    func fetchUserInfo(for peer: MCPeerID, userID: String) {
+        userVm.getUsernameAndPhoto(userId: userID) { info in
+            DispatchQueue.main.async {
+                userInfoMap[peer] = (
+                    info["username"] ?? "",
+                    info["profilePhoto"] ?? ""
+                )
             }
         }
-        .padding()
+    }
+
+    var body: some View {
+        VStack(spacing: 15) {
+            if let currentQuestion = manager.currentQuestion {
+                if let peer = manager.connectedPeers.first(where: { $0.displayName == currentQuestion.playerID }) {
+                    Text(currentQuestion.question)
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.black)
+                        )
+                } else if (currentQuestion.playerID == manager.myPeerID.displayName) {
+                    Text(currentQuestion.question)
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.black)
+                        )
+                }
+                Text("Results of this round")
+                    .font(.headline)
+            }
+
+            let groupedGuesses = Dictionary(grouping: manager.roundGuesses, by: { $0.answer })
+
+            VStack(spacing: 10) {
+                ForEach(manager.roundAnswers, id: \.playerID) { answerSubmission in
+                    HStack {
+                        if let votes = groupedGuesses[answerSubmission.answer] {
+                            ZStack {
+                                ForEach(Array(votes.enumerated()), id: \.1.playerID) { index, guess in
+                                    if let peer = manager.connectedPeers.first(where: { $0.displayName == guess.playerID }) {
+                                        if let userId = manager.discoveredPeers[peer]?.profileLink {
+                                            Color.clear
+                                                .frame(width: 0, height: 0)
+                                                .onAppear {
+                                                    if !fetchedPeers.contains(peer) {
+                                                        fetchUserInfo(for: peer, userID: userId)
+                                                        fetchedPeers.insert(peer)
+                                                    }
+                                                }
+                                        }
+                                        if let profilePhoto = userInfoMap[peer]?.profilePhoto, let url = URL(string: profilePhoto) {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .success(let image):
+                                                    image
+                                                        .resizable()
+                                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
+                                                        .clipShape(Circle())
+                                                case .failure, .empty:
+                                                    Image(systemName: "person.circle.fill")
+                                                        .resizable()
+                                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
+                                                        .foregroundColor(.gray)
+                                                @unknown default:
+                                                    EmptyView()
+                                                }
+                                            }
+                                            .offset(x: CGFloat(index) * 20)
+                                        }
+                                    } else if guess.playerID == manager.myPeerID.displayName {
+                                        if let profilePhoto = userInfoMap[manager.myPeerID]?.profilePhoto, let url = URL(string: profilePhoto) {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .success(let image):
+                                                    image
+                                                        .resizable()
+                                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
+                                                        .clipShape(Circle())
+                                                case .failure, .empty:
+                                                    Image(systemName: "person.circle.fill")
+                                                        .resizable()
+                                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
+                                                        .foregroundColor(.gray)
+                                                @unknown default:
+                                                    EmptyView()
+                                                }
+                                            }
+                                            .offset(x: CGFloat(index) * 20)
+                                        }
+                                    }
+                                }
+                            }
+                            .onAppear {
+                                if !fetchedPeers.contains(manager.myPeerID) {
+                                    fetchUserInfo(for: manager.myPeerID, userID: manager.profileLink)
+                                    fetchedPeers.insert(manager.myPeerID)
+                                }
+                            }
+                            .padding(.trailing)
+                        }
+
+                        Text(answerSubmission.answer)
+                            .font(.system(size: 25, weight: .medium))
+                            .padding(20)
+                            .foregroundColor(.black)
+                            .background(manager.currentQuestion?.answer == answerSubmission.answer ? Color(red: 174/255, green: 234/255, blue: 189/255) : Color(red: 241/255, green: 186/255, blue: 186/255))
+                            .cornerRadius(50)
+                        Spacer()
+                    }
+                }
+                Spacer()
+                Button("Leave") {
+                    manager.resetGame()
+                }
+            }
+        }
+        .padding(25)
     }
 }
 

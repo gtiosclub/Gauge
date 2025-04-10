@@ -4,7 +4,7 @@ class TMManager: NSObject, ObservableObject {
 
     private let serviceType = String.serviceName
     private var session: MCSession
-    private var myPeerID: MCPeerID
+    var myPeerID: MCPeerID
     private var nearbyServiceAdvertiser: MCNearbyServiceAdvertiser
     private let nearbyServiceBrowser: MCNearbyServiceBrowser
 
@@ -248,7 +248,7 @@ class TMManager: NSObject, ObservableObject {
         roundAnswers = []
         roundGuesses = []
         currentQuestion = nil
-        phase = .questionSelect
+        phase = .notStarted
     }
 }
 

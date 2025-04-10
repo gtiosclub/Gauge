@@ -28,14 +28,12 @@ struct TakeMasterRoomView: View {
     @State var answerText: String = ""
 
     func fetchUserInfo(for peer: MCPeerID, userID: String) {
-        print("Fetching info for userID: \(userID)")
         userVm.getUsernameAndPhoto(userId: userID) { info in
             DispatchQueue.main.async {
                 userInfoMap[peer] = (
                     info["username"] ?? "",
                     info["profilePhoto"] ?? ""
                 )
-                print("Received info for \(userID):", info)
             }
         }
     }
