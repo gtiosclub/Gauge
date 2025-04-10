@@ -175,11 +175,7 @@ class PostFirebase: ObservableObject {
                             let post = SliderPost(
                                 postId: postId,
                                 userId: data["userId"] as? String ?? "",
-<<<<<<< HEAD
                                 categories: categories,
-=======
-                                categories: Category.mapStringsToCategories(returnedStrings: data["categories"] as? [String] ?? []),
->>>>>>> origin/main
                                 topics: data["topics"] as? [String] ?? [],
                                 postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
                                     ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
