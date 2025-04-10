@@ -12,6 +12,7 @@ class User: Equatable, Identifiable, ObservableObject {
     var id: String { userId } // Derived attribute from userId to conform to Equatable, does NOT need to be in init
     @Published var userId: String
     @Published var username: String
+    var fcmToken: String?
     var email: String
     var lastLogin: Date
     var lastFeedRefresh: Date
@@ -43,7 +44,7 @@ class User: Equatable, Identifiable, ObservableObject {
     var numUserViews: Int = 0
     // MARK: STATS
     
-    init(userId: String, username: String, email: String) {
+    init(userId: String, username: String, email: String, fcmToken: String? = nil) {
         self.userId = userId
         self.username = username
         self.email = email
@@ -52,13 +53,15 @@ class User: Equatable, Identifiable, ObservableObject {
         self.lastFeedRefresh = Date()
         self.profilePhoto = ""
         self.myAccessedProfiles = []
+        self.fcmToken = fcmToken
     }
     
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, fcmToken: String? = nil) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
         self.email = email
+        self.fcmToken = fcmToken
         self.friendIn = friendIn
         self.friendOut = friendOut
         self.friends = friends
