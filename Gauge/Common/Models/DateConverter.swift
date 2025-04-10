@@ -31,7 +31,7 @@ class DateConverter {
         
         let diffInDays = Calendar.current.dateComponents([.day], from: postDate, to: Date()).day ?? 31
         let diffInHours = Calendar.current.dateComponents([.hour], from: postDate, to: Date()).hour ?? 31
-        let decayFactor = 0.2
+//        let decayFactor = 0.2
         if(diffInDays > 30) {
             return 0
         }
