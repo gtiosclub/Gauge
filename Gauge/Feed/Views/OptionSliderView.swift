@@ -5,103 +5,137 @@
 //  Created by Kavya Adusumilli on 4/6/25.
 //
 
-
-//WORKING FUNCTIONALITY
 import SwiftUI
 
 struct OptionSliderView: View {
     private let numDots = 7
-    private let dots = [0, 1, 2, 3, 4, 5, 6]
-    @State private var currentIndex: Int = 3
-    @GestureState private var dragOffset: CGFloat = 0.0
+    @Binding var currentIndex: Int
+    @Binding var dragAmount: CGSize
     
-    //constants
+    // Local index that “commits” at drag start
+    @State private var committedIndex: Int? = nil
+    @State private var dragOffsetX: CGFloat = 0
+    
     private let dotSize: CGFloat = 20
+    private let maxExpandedSize: CGFloat = 50
     private let activeDotSize: CGFloat = 40
-    private let maxExpandedSize: CGFloat = 32
-    private let arrowSpacing: CGFloat = 36
     
-    // Computed properties
-    private var activePosition: CGFloat {
-        let totalWidth = UIScreen.main.bounds.width - 40 // Account for padding
-        let stepWidth = totalWidth / CGFloat(numDots - 1)
-        return stepWidth * CGFloat(currentIndex) + dragOffset
-    }
-
     var body: some View {
+        Rectangle()
+            .frame(height: 1)
+            .foregroundStyle(Color.lightGray)
+        
         GeometryReader { geo in
             let totalWidth = geo.size.width
-            let stepWidth = totalWidth / CGFloat(numDots - 1)
-            let dotPosition = stepWidth * CGFloat(currentIndex) + dragOffset
-            
-            ZStack {
-                // Background track with interactive dots
-                HStack(spacing: 0) {
-                    ForEach(dots, id: \.self) { index in
-                        let dotCenter = stepWidth * CGFloat(index)
-                        let distance = abs(dotPosition - dotCenter)
-                        let proximity = 1 - min(distance / (stepWidth * 0.8), 1)
-                        
-                        // Calculate dot properties based on proximity to active dot
-                        let currentSize = dotSize + (maxExpandedSize - dotSize) * proximity
-                        let isSolid = distance < (stepWidth * 0.6) // Threshold for becoming solid
-                        
-                        Circle()
-                            .stroke(isSolid ? Color.black : Color.gray.opacity(0.5),
-                                    style: StrokeStyle(lineWidth: 2, dash: isSolid ? [] : [2]))
-                            .background(Circle().fill(isSolid ? Color.gray.opacity(0.3) : Color.white))
-                            .frame(width: currentSize, height: currentSize)
-                            .animation(.easeOut(duration: 0.2), value: distance)
-                        
-                        if index != dots.last {
-                            Spacer()
-                        }
-                    }
+            let spacing = (totalWidth - CGFloat(numDots)*dotSize) / CGFloat(numDots - 1)
+            let centerY: CGFloat = 30
+
+            ZStack(alignment: .leading) {
+                // 1) Real-time index for display
+                let baseIndex = committedIndex ?? currentIndex
+                let draggedIndexEstimate = CGFloat(baseIndex) + dragOffsetX / (dotSize + spacing)
+                // clamp to [0, numDots-1] to avoid wandering
+                let safeIndex = max(0, min(CGFloat(numDots - 1), draggedIndexEstimate))
+                let dotX = safeIndex * (dotSize + spacing)
+                
+                // 2) Draw background dots
+                ForEach(0..<numDots, id: \.self) { index in
+                    let baseX = CGFloat(index) * (dotSize + spacing)
+                    let distance = abs(dotX - baseX)
+                    let proximity = 1 - min(distance / (dotSize + spacing), 1)
+
+                    let isCenter = (index == numDots / 2)
+                    let fillColor = isCenter ? Color.gray.opacity(0.3) : Color.white
+                    let currentSize = dotSize + (maxExpandedSize + (isCenter ? -10 : 0) - dotSize) * proximity
+
+                    let shouldSolidify = proximity > 0.85
+                    let strokeColor = isCenter ? .clear : Color.black.opacity(0.2 + 0.6 * proximity)
+                    let dashSpacing = max(2, 4 - (proximity * 6))
+                    let dash: [CGFloat] = isCenter ? [] : (shouldSolidify ? [] : [dashSpacing, dashSpacing])
+
+                    Circle()
+                        .stroke(strokeColor, style: StrokeStyle(lineWidth: 2, dash: dash))
+                        .background(Circle().fill(fillColor))
+                        .frame(width: currentSize, height: currentSize)
+                        .position(x: baseX + dotSize/2, y: centerY)
                 }
                 
-                // Active dot (black circle)
+                let dragRange: CGFloat = 150
+                let progress = min(max(-dragAmount.height / 100, 0), 1) // clamps between 0 and 1
+                
+                let interpolatedColor = currentIndex < 3 ? Color(
+                    red: 0.0 + (237.0 / 255.0 - 0.0) * progress,
+                    green: 0.0 + (56.0 / 255.0 - 0.0) * progress,
+                    blue: 0.0 + (46.0 / 255.0 - 0.0) * progress
+                )  : Color(
+                    red: 0.0 + (52.0 / 255.0 - 0.0) * progress,
+                    green: 0.0 + (199.0 / 255.0 - 0.0) * progress,
+                    blue: 0.0 + (89.0 / 255.0 - 0.0) * progress
+                )
+
+                // 3) Draggable dot
                 Circle()
-                    .fill(Color.black)
+                    .fill(interpolatedColor)
                     .frame(width: activeDotSize, height: activeDotSize)
-                    .position(x: dotPosition, y: 30)
+                    .position(x: dotX + dotSize/2, y: centerY)
                     .gesture(
                         DragGesture()
-                            .updating($dragOffset) { value, state, _ in
-                                state = value.translation.width
-                            }
-                            .onEnded { value in
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    let stepChange = Int(round(value.translation.width / stepWidth))
-                                    currentIndex = min(max(currentIndex + stepChange, 0), numDots - 1)
+                            .onChanged { value in
+                                // On first drag event, lock in our starting index
+                                if committedIndex == nil {
+                                    committedIndex = currentIndex
+                                }
+                                dragOffsetX = value.translation.width
+                                
+                                let finalFloat = CGFloat(committedIndex ?? currentIndex) + value.translation.width / (dotSize + spacing)
+                                let finalIndex = Int(round(finalFloat))
+                                let clampedIndex = max(0, min(numDots - 1, finalIndex))
+                                
+                                if clampedIndex != currentIndex {
+                                    withAnimation() {
+                                        currentIndex = clampedIndex  // update parent's binding
+                                    }
                                 }
                             }
+                            .onEnded { value in
+                                let finalFloat = CGFloat(committedIndex ?? currentIndex) + value.translation.width / (dotSize + spacing)
+                                let finalIndex = Int(round(finalFloat))
+                                let clampedIndex = max(0, min(numDots - 1, finalIndex))
+                                
+                                withAnimation(.easeOut(duration: 0.25)) {
+                                    currentIndex = clampedIndex  // update parent's binding
+                                }
+                                // Reset local states
+                                committedIndex = nil
+                                dragOffsetX = 0
+                            }
                     )
-                
-                // Arrows
-                if currentIndex > 0 {
-                    Image(systemName: "arrow.left")
-                        .foregroundColor(.gray)
-                        .position(
-                            x: max(dotPosition - arrowSpacing, activeDotSize/2),
-                            y: 30
-                        )
-                }
-                
-                if currentIndex < numDots - 1 {
-                    Image(systemName: "arrow.right")
-                        .foregroundColor(.gray)
-                        .position(
-                            x: min(dotPosition + arrowSpacing, totalWidth - activeDotSize/2),
-                            y: 30
-                        )
-                }
+
+                // 4) Arrows
+                let leftOpacity = Double(min(1, max(0, safeIndex / 1.5)))
+                let rightOpacity = Double(min(1, max(0, (CGFloat(numDots-1) - safeIndex) / 1.5)))
+
+                Image(systemName: "arrow.left")
+                    .foregroundColor(.gray)
+                    .opacity(leftOpacity)
+                    .position(x: max(dotX + dotSize/2 - 36, dotSize/2), y: centerY)
+
+                Image(systemName: "arrow.right")
+                    .foregroundColor(.gray)
+                    .opacity(rightOpacity)
+                    .position(x: min(dotX + dotSize/2 + 36, totalWidth - dotSize/2), y: centerY)
             }
         }
         .frame(height: 60)
-        .padding(.horizontal, 20)
+        .padding(.horizontal)
+        
+        Rectangle()
+            .frame(height: 1)
+            .foregroundStyle(Color.lightGray)
     }
 }
 
 #Preview {
-    OptionSliderView()
+    @Previewable @State var optionSelected = 3
+    OptionSliderView(currentIndex: $optionSelected, dragAmount: .constant(CGSize(width: 40.0, height: 10.0)))
 }

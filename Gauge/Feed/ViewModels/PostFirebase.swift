@@ -42,14 +42,14 @@ class PostFirebase: ObservableObject {
             DispatchQueue.main.async {
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
-//                        print("New comment: \(diff.document.data())")
+                        print("New comment: \(diff.document.data())")
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
                             postId: self.feedPosts[0].postId,
-                            userId: id,
+                            userId: newCommentDoc["userId"] as? String ?? "",
                             date: date,
                             commentId: id,
                             likes: newCommentDoc["likes"] as? [String] ?? [],
@@ -70,7 +70,7 @@ class PostFirebase: ObservableObject {
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
                             postId: self.feedPosts[0].postId,
-                            userId: id,
+                            userId: newCommentDoc["userId"] as? String ?? "",
                             date: date,
                             commentId: id,
                             likes: newCommentDoc["likes"] as? [String] ?? [],
@@ -147,10 +147,12 @@ class PostFirebase: ObservableObject {
 
                         switch type {
                         case PostType.BinaryPost.rawValue:
+                            let categoryStrings = data["categories"] as? [String] ?? []
+                            let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
                             let post = BinaryPost(
                                 postId: postId,
                                 userId: data["userId"] as? String ?? "",
-                                categories: Category.mapStringsToCategories(returnedStrings: data["categories"] as? [String] ?? []),
+                                categories: categories,
                                 topics: data["topics"] as? [String] ?? [],
                                 postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
                                     ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
@@ -166,18 +168,19 @@ class PostFirebase: ObservableObject {
                             print("post categories: \(post.categories)")
                             return (postId, post)
 
+
                         case PostType.SliderPost.rawValue:
+                            let categoryStrings = data["categories"] as? [String] ?? []
+                            let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
                             let post = SliderPost(
                                 postId: postId,
                                 userId: data["userId"] as? String ?? "",
-                                categories: Category.mapStringsToCategories(returnedStrings: data["categories"] as? [String] ?? []),
+                                categories: categories,
                                 topics: data["topics"] as? [String] ?? [],
                                 postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
                                     ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "")
                                     ?? Date(),
                                 question: data["question"] as? String ?? "",
-                                lowerBoundValue: data["lowerBoundValue"] as? Double ?? 0,
-                                upperBoundValue: data["upperBoundValue"] as? Double ?? 1,
                                 lowerBoundLabel: data["lowerBoundLabel"] as? String ?? "",
                                 upperBoundLabel: data["upperBoundLabel"] as? String ?? "",
                                 favoritedBy: data["favoritedBy"] as? [String] ?? []
@@ -234,6 +237,9 @@ class PostFirebase: ObservableObject {
                         }
                         
                         if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
+//                            let categoryStrings = newPostData["categories"] as? [String] ?? []
+//                            let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
+                            
                             let post = BinaryPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: Category.mapStringsToCategories(returnedStrings: newPostData["categories"] as? [String] ?? []),
@@ -251,6 +257,8 @@ class PostFirebase: ObservableObject {
                             self.allQueriedPosts.append(post)
                             self.allQueriedPosts = self.allQueriedPosts
                         } else if (newPostData["type"] as? String == PostType.SliderPost.rawValue) {
+                            let categoryStrings = newPostData["categories"] as? [String] ?? []
+                            let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
                             let post = SliderPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
                                                   categories: Category.mapStringsToCategories(returnedStrings: newPostData["categories"] as? [String] ?? []),
@@ -259,8 +267,6 @@ class PostFirebase: ObservableObject {
                                                       ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
                                                       ?? Date(),
                                                   question: newPostData["question"] as? String ?? "",
-                                                  lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
-                                                  upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
                                                   lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
                                                   upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
                                                   favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
@@ -273,6 +279,9 @@ class PostFirebase: ObservableObject {
                             //replaces data at index
                             if (newPostData["type"] as? String == PostType.BinaryPost.rawValue) {
                                 print("updating binary post")
+                                
+                                let categoryStrings = newPostData["categories"] as? [String] ?? []
+                                let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
                                 
                                 self.allQueriedPosts[index] = BinaryPost(
                                     postId: newPostData["postId"] as? String ?? "",
@@ -291,6 +300,8 @@ class PostFirebase: ObservableObject {
                                 
                             } else if (newPostData["type"] as? String == PostType.SliderPost.rawValue) {
                                 print("updating slider post")
+//                                let categoryStrings = newPostData["categories"] as? [String] ?? []
+//                                let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
                                 self.allQueriedPosts[index] = SliderPost(
                                     postId: newPostData["postId"] as? String ?? "",
                                     userId: newPostData["userId"] as? String ?? "",
@@ -298,8 +309,6 @@ class PostFirebase: ObservableObject {
                                     topics: newPostData["topics"] as? [String] ?? [],
                                     postDateAndTime: DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "") ?? Date(),
                                     question: newPostData["question"] as? String ?? "",
-                                    lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
-                                    upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
                                     lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
                                     upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
                                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? [])
@@ -342,6 +351,8 @@ class PostFirebase: ObservableObject {
             }
 
             if newPostData["type"] as? String == PostType.BinaryPost.rawValue {
+//                let categoryStrings = newPostData["categories"] as? [String] ?? []
+//                let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
                 let post = BinaryPost(
                     postId: postId,
                     userId: newPostData["userId"] as? String ?? "",
@@ -361,17 +372,17 @@ class PostFirebase: ObservableObject {
                     self.allQueriedPosts.append(post)
                 }
             } else if newPostData["type"] as? String == PostType.SliderPost.rawValue {
+                let categoryStrings = newPostData["categories"] as? [String] ?? []
+                let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
                 let post = SliderPost(
                     postId: postId,
                     userId: newPostData["userId"] as? String ?? "",
-                    categories: Category.mapStringsToCategories(returnedStrings: newPostData["categories"] as? [String] ?? []),
+                    categories: categories,
                     topics: newPostData["topics"] as? [String] ?? [],
                     postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
                         ?? DateConverter.convertStringToDate(newPostData["postDateAndTime"] as? String ?? "")
                         ?? Date(),
                     question: newPostData["question"] as? String ?? "",
-                    lowerBoundValue: newPostData["lowerBoundValue"] as? Double ?? 0,
-                    upperBoundValue: newPostData["upperBoundValue"] as? Double ?? 1,
                     lowerBoundLabel: newPostData["lowerBoundLabel"] as? String ?? "",
                     upperBoundLabel: newPostData["upperBoundLabel"] as? String ?? "",
                     favoritedBy: newPostData["favoritedBy"] as? [String] ?? []
@@ -486,7 +497,6 @@ class PostFirebase: ObservableObject {
             "userId": post.userId,
             "categories": categoryStrings,
             "topics": topics,
-            "viewCounter": post.viewCounter,
             "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
             "responseOption1": post.responseOption1,
@@ -503,12 +513,11 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundValue: Double, upperBoundValue: Double, lowerBoundLabel: String, upperBoundLabel: String) {
+    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async {
         var categoryString: [String] = []
         for cat in categories {
             categoryString.append(cat.rawValue)
         }
-
         
         // Create post instance
         let post = SliderPost(
@@ -518,10 +527,10 @@ class PostFirebase: ObservableObject {
             postDateAndTime: Date(),
             question: question,
             lowerBoundLabel: lowerBoundLabel,
-            upperBoundLabel: upperBoundLabel,
-            lowerBoundValue: lowerBoundValue,
-            upperBoundValue: upperBoundValue
+            upperBoundLabel: upperBoundLabel
         )
+        
+        let topics = await generatePostKeywords(post: post)
         
         // Create document in Firebase
         let documentRef = Firebase.db.collection("POSTS").document(post.postId)
@@ -531,10 +540,9 @@ class PostFirebase: ObservableObject {
             "postId": post.postId,
             "userId": post.userId,
             "categories": categoryString,
+            "topics": topics,
             "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
-            "lowerBoundValue": post.lowerBoundValue,
-            "upperBoundValue": post.upperBoundValue,
             "lowerBoundLabel": post.lowerBoundLabel,
             "upperBoundLabel": post.upperBoundLabel,
             "favoritedBy": post.favoritedBy
@@ -542,7 +550,7 @@ class PostFirebase: ObservableObject {
             if let error = error {
                 print("error writing doc: \(error)")
             } else {
-                print("added new post to POSTS")
+                print("added new slider post to POSTS")
             }
         }
     }
@@ -708,6 +716,30 @@ class PostFirebase: ObservableObject {
                 completion(responses)
             }
         }
+    }
+    
+    func getUserResponseForComment(postId: String, userId: String, completion: @escaping (String?) -> Void) {
+        print("Method Called")
+        print(userId)
+        print(postId)
+        Firebase.db.collection("POSTS").document(postId).collection("RESPONSES")
+            .whereField("userId", isEqualTo: userId)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error getting user response: \(error)")
+                    completion(nil)
+                    return
+                }
+                
+                if let document = snapshot?.documents.first,
+                   let responseOption = document.data()["responseOption"] as? String {
+                    print("BACKEND RESPONSE OPTION", responseOption)
+                    completion(responseOption)
+                } else {
+                    print("Number of documents found: \(snapshot?.documents.count ?? 0)")
+                    completion(nil)
+                }
+            }
     }
     
     func suggestPostCategories(question: String, captions: [String], completion: @escaping (([Category]) -> Void)) {

@@ -44,6 +44,9 @@ struct HomeView: View {
                 NavigationLink("Feed View") {
                     FeedView()
                 }
+//                NavigationLink("Add Comment view"){
+//                    AddCommentView()
+//                }
             }
             .sheet(isPresented: $showPostCreation) {
                 PostCreationView(modalSize: $modalSize, showCreatePost: $showPostCreation)
