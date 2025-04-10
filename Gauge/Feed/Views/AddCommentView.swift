@@ -92,7 +92,7 @@ struct CommentSheetView: View {
                     Text("What do you think?")
                         .foregroundColor(.gray)
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 10)
+                        .padding(.vertical, 8)
                 }
                 
                 GrowingTextView(text: $commentText, dynamicHeight: $textHeight)
@@ -124,9 +124,9 @@ struct CommentSheetView: View {
             .disabled(commentText.isEmpty)
         }
         .padding()
-        // ❌ Don't clip shape or add shadow here – it's done by .sheet
+        .frame(height: 200)
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 isFocused = true
             }
         }
