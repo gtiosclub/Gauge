@@ -84,10 +84,13 @@ struct BinaryFeedResults: View {
             .padding(.horizontal)
 
             // Comments
-            CommentsView(comments: post.comments, post: post)
+            CommentsView(post: post)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 12)
                 .padding(.horizontal, 0)
+                .onChange(of: post.comments) {old, new in
+                    print("recognized comments changed")
+                }
             
             Spacer()
                 .frame(height: 5.0)

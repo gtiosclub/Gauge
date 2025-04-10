@@ -8,11 +8,9 @@
 import SwiftUI
 
 struct AddCommentView: View {
-    @State private var showComment = false
+    @Binding var showComment: Bool
     @State private var keyboardHeight: CGFloat = 0
-    
-
-    
+    var post: any Post
     
     var body: some View {
         ZStack {
@@ -32,7 +30,7 @@ struct AddCommentView: View {
                 VStack {
                     Spacer()
                     
-                    CommentSheetView(isPresented: $showComment)
+                    CommentSheetView(showAddComment: $showComment, post: post)
                         .transition(.move(edge: .bottom))
                         .padding(.bottom, keyboardHeight)
                         .zIndex(1)
@@ -51,154 +49,135 @@ struct AddCommentView: View {
                     keyboardHeight = max(0, screenHeight - keyboardTop)
                 }
             }
-
+            
             NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
                 keyboardHeight = 0
             }
         }
     }
+}
+
+struct CommentSheetView: View {
+    @Binding var showAddComment: Bool
+    @State private var commentText: String = ""
+    @FocusState private var isFocused: Bool
+    @State private var textHeight: CGFloat = 40
+    @EnvironmentObject var postVM: PostFirebase
+    @EnvironmentObject var userVM: UserFirebase
+    var post: any Post
     
-    struct CommentSheetView: View {
-        @Binding var isPresented: Bool
-        @State private var commentText: String = ""
-        @FocusState private var isFocused: Bool
-        @State private var textHeight: CGFloat = 40
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("New comment")
-                        .font(.headline)
-                        .padding(.leading)
-                        .foregroundColor(Color.darkGray)
-                    
-                    Spacer()
-                    
-                    
-                    Button(action: {
-                        withAnimation {
-                            isPresented = false
-                        }
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(width: 30, height: 30)
-                            Image(systemName: "xmark")
-                                .foregroundColor(.gray)
-                                .padding()
-                        }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("New comment")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button {
+                    withAnimation {
+                        showAddComment = false
                     }
-                    
-                    
+                } label: {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.gray)
+                        .padding(8)
+                        .background(Circle().fill(Color.gray.opacity(0.2)))
                 }
-                
-                
-                ZStack(alignment: .topLeading) {
-                    if commentText.isEmpty {
-                        Text("What do you think?")
-                            .foregroundColor(.gray)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 10)
-                            .zIndex(1)
-                    }
-                    
-                    //                TextEditor(text: $commentText)
-                    //                    .frame(height: 20)
-                    //                    .padding(4)
-                    //                    .focused($isFocused)
-                    GrowingTextView(text: $commentText, dynamicHeight: $textHeight)
-                        .frame(height: textHeight)
-                        .padding(4)
-                        .cornerRadius(10)
-                }
-                //.background(Color(UIColor.systemGray6))
-                .cornerRadius(10)
-                
-                
-                Button(action: {
-                    // Handle post action
-                    print("Posted: \(commentText)")
-                    commentText = ""
-                    isPresented = false
-                }) {
-                    Text("Post")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(commentText.isEmpty ? Color.gray.opacity(0.2) : Color.blue)
-                        .foregroundColor(commentText.isEmpty ? .gray : .white)
-                        .cornerRadius(20)
-                        .padding(.horizontal)
-                }
-                .disabled(commentText.isEmpty)
-                .padding(.bottom, 10)
             }
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .shadow(radius: 10)
-            .padding()
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    isFocused = true
+            
+            ZStack(alignment: .topLeading) {
+                if commentText.isEmpty {
+                    Text("What do you think?")
+                        .foregroundColor(.gray)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 10)
                 }
+                
+                GrowingTextView(text: $commentText, dynamicHeight: $textHeight)
+                    .frame(height: textHeight)
+                    .focused($isFocused)
+                    .padding(8)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(10)
+            }
+
+            Button(action: {
+                postVM.addComment(
+                    postId: post.postId,
+                    commentType: .text,
+                    userId: userVM.user.userId,
+                    content: commentText
+                )
+                commentText = ""
+                showAddComment = false
+            }) {
+                Text("Post")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(commentText.isEmpty ? Color.gray.opacity(0.2) : Color.blue)
+                    .foregroundColor(commentText.isEmpty ? .gray : .white)
+                    .cornerRadius(12)
+            }
+            .disabled(commentText.isEmpty)
+        }
+        .padding()
+        // ❌ Don't clip shape or add shadow here – it's done by .sheet
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isFocused = true
+            }
+        }
+    }
+}
+
+struct GrowingTextView: UIViewRepresentable {
+    @Binding var text: String
+    @Binding var dynamicHeight: CGFloat
+    
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.isScrollEnabled = false
+        textView.font = UIFont.systemFont(ofSize: 17)
+        textView.delegate = context.coordinator
+        textView.backgroundColor = .clear
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return textView
+    }
+    
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        if uiView.text != text {
+            uiView.text = text
+        }
+        
+        // Update height only when needed
+        DispatchQueue.main.async {
+            let size = uiView.sizeThatFits(CGSize(width: uiView.frame.width, height: .infinity))
+            if self.dynamicHeight != size.height {
+                self.dynamicHeight = size.height
             }
         }
     }
     
-    
-    
-    struct GrowingTextView: UIViewRepresentable {
-        @Binding var text: String
-        @Binding var dynamicHeight: CGFloat
-        
-        func makeUIView(context: Context) -> UITextView {
-            let textView = UITextView()
-            textView.isScrollEnabled = false
-            textView.font = UIFont.systemFont(ofSize: 17)
-            textView.delegate = context.coordinator
-            textView.backgroundColor = .clear
-            textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-            return textView
-        }
-        
-        func updateUIView(_ uiView: UITextView, context: Context) {
-            if uiView.text != text {
-                uiView.text = text
-            }
-            
-            // Update height only when needed
-            DispatchQueue.main.async {
-                let size = uiView.sizeThatFits(CGSize(width: uiView.frame.width, height: .infinity))
-                if self.dynamicHeight != size.height {
-                    self.dynamicHeight = size.height
-                }
-            }
-        }
-        
-        func makeCoordinator() -> Coordinator {
-            return Coordinator(self)
-        }
-        
-        class Coordinator: NSObject, UITextViewDelegate {
-            var parent: GrowingTextView
-            
-            init(_ parent: GrowingTextView) {
-                self.parent = parent
-            }
-            
-            func textViewDidChange(_ textView: UITextView) {
-                parent.text = textView.text
-            }
-        }
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(self)
     }
     
+    class Coordinator: NSObject, UITextViewDelegate {
+        var parent: GrowingTextView
+        
+        init(_ parent: GrowingTextView) {
+            self.parent = parent
+        }
+        
+        func textViewDidChange(_ textView: UITextView) {
+            parent.text = textView.text
+        }
+    }
 }
 
-
-
-
-
-#Preview {
-    AddCommentView()
-}
+//#Preview {
+//    AddCommentView()
+//}
