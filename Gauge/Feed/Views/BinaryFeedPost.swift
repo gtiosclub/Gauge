@@ -28,29 +28,16 @@ struct BinaryFeedPost: View {
     var body: some View {
         VStack(alignment: .leading) {
             Spacer(minLength: 30.0)
-            HStack{
-                profileImage
-                
-                Text(post.userId)
-                    .font(.system(size: 16))
-                    .foregroundStyle(.black)
-                
-                Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.gray)
-            }
-            .padding(.leading)
             
-            
+            ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
+                .padding(.leading)
+                        
             //Category Boxes
             ScrollView(.horizontal) {
                 HStack {
-                    let categories: [Category] = post.categories
-                    
-                    ForEach(categories, id: \.self) { category in
+                    ForEach(post.categories, id: \.self) { category in
                         Text(category.rawValue)
-                            .padding(.leading, 10)
-                            .padding(.trailing, 10)
+                            .padding(.horizontal, 10)
                             .font(.system(size: 14))
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
@@ -59,61 +46,81 @@ struct BinaryFeedPost: View {
                                     .frame(height: 32)
                             )
                             .padding(.top, 10)
-                            .frame(minWidth: 40)
-                            .fixedSize(horizontal: true, vertical: false)
                     }
-                    
-                    Spacer()
                 }
                 .padding(.bottom, 10)
                 .padding(.leading)
             }
             
+            Text(post.question)
+                .padding(.top, 15)
+                .bold()
+                .font(.system(size: 35))
+                .multilineTextAlignment(.leading)
+                .foregroundStyle(.black)
+                .padding(.horizontal)
+            
             VStack {
-                Text(post.question)
-                    .padding(.top, 15)
-                    .padding(.horizontal)
-                    .bold()
-                    .font(.system(size: 35))
-                    .frame(alignment: .leading)
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(.black)
-                
                 Spacer()
                 
                 ZStack {
                     HStack {
-                        Text(post.responseOption1)
-                            .foregroundColor(optionSelected == 1 ? .darkRed : .gray)
-                            .font(.system(size: optionSelected == 1 ? 50 : 30))
-                            .font(optionSelected == 1 ? .title : .title2)
-                            .opacity(max(0.0, (optionSelected == 1 && dragAmount.width == 0.0 ? 1.0 : 0.5) - (dragAmount.width / 125.0).magnitude))
-                            .frame(width: 150.0, alignment: .leading)
-                            .minimumScaleFactor(0.75)
-                            .lineLimit(2)
-                        
+                        VStack {
+                            Text(post.responseOption1)
+                                .foregroundColor(optionSelected == 1 ? .darkRed : .gray)
+                                .fontWeight(.bold)
+                                .font(.system(size: optionSelected == 1 ? 50 : 40))
+                                .font(optionSelected == 1 ? .title : .title2)
+                                .opacity(max(0.0, (optionSelected == 1 && dragAmount.width == 0.0 ? 1.0 : 0.3) - (dragAmount.width / 125.0).magnitude))
+                                .frame(width: 150.0, alignment: .leading)
+                                .minimumScaleFactor(0.75)
+                                .lineLimit(2)
+                            
+                            Text(post.sublabel1)
+                                .foregroundColor(optionSelected == 1 ? .darkRed : .darkGray)
+                                .fontWeight(.bold)
+                                .font(.system(size: optionSelected == 1 ? 20 : 10))
+                                .font(.subheadline)
+                                .opacity(max(0.0, (optionSelected == 1 && dragAmount.width == 0.0 ? 1.0 : 0.8) - (dragAmount.width / 125.0).magnitude))
+                                .frame(width: 150.0, alignment: .leading)
+                                .minimumScaleFactor(0.50)
+                                .lineLimit(1)
+                        }
                         
                         Spacer()
                         
                         Image(systemName: "arrow.left.and.right")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 50, height: 50)
+                            .frame(width: 40, height: 40)
                             .foregroundColor(.gray)
-                            .opacity(0.5 - (dragAmount.width / 125.0).magnitude)
+                            .opacity(0.3 - (dragAmount.width / 125.0).magnitude)
                         
                         Spacer()
                         
-                        Text(post.responseOption2)
-                            .foregroundColor(optionSelected == 2 ? .darkGreen : .gray)
-                            .font(.system(size: optionSelected == 2 ? 50 : 30))
-                            .font(optionSelected == 2 ? .title : .title2)
-                            .opacity(max(0.0, (optionSelected == 2 && dragAmount.width == 0.0 ? 1.0 : 0.5) - (dragAmount.width / 125.0).magnitude))
-                            .frame(width: 150.0, alignment: .trailing)
-                            .minimumScaleFactor(0.75)
-                            .lineLimit(2)
+                        VStack {
+                            Text(post.responseOption2)
+                                .foregroundColor(optionSelected == 2 ? .darkGreen : .gray)
+                                .fontWeight(.bold)
+                                .font(.system(size: optionSelected == 2 ? 50 : 40))
+                                .font(optionSelected == 2 ? .title : .title2)
+                                .opacity(max(0.0, (optionSelected == 2 && dragAmount.width == 0.0 ? 1.0 : 0.3) - (dragAmount.width / 125.0).magnitude))
+                                .frame(width: 150.0, alignment: .trailing)
+                                .minimumScaleFactor(0.75)
+                                .lineLimit(2)
+                            
+                            Text(post.sublabel2)
+                                .foregroundColor(optionSelected == 2 ? .darkGreen : .darkGray)
+                                .fontWeight(.bold)
+                                .font(.system(size: optionSelected == 2 ? 20 : 10))
+                                .font(.subheadline)
+                                .opacity(max(0.0, (optionSelected == 2 && dragAmount.width == 0.0 ? 1.0 : 0.8) - (dragAmount.width / 125.0).magnitude))
+                                .frame(width: 150.0, alignment: .trailing)
+                                .minimumScaleFactor(0.50)
+                                .lineLimit(1)
+                        }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     HStack {
                         Spacer()
@@ -121,7 +128,8 @@ struct BinaryFeedPost: View {
                         if dragAmount.width < 0.0 {
                             HStack {
                                 Text(post.responseOption1)
-                                    .font(.system(size: 30))
+                                    .font(.system(size: 40))
+                                    .fontWeight(.bold)
                                     .minimumScaleFactor(0.75)
                                     .lineLimit(2)
                                 
@@ -144,7 +152,8 @@ struct BinaryFeedPost: View {
                                     .frame(width: 50, height: 50)
                                 
                                 Text(post.responseOption2)
-                                    .font(.system(size: 30))
+                                    .font(.system(size: 40))
+                                    .fontWeight(.bold)
                                     .minimumScaleFactor(0.75)
                                     .lineLimit(2)
                             }
@@ -209,6 +218,19 @@ struct BinaryFeedPost: View {
                     .frame(maxWidth: .infinity)
             })
             
+            HStack {
+                Spacer()
+                
+                StackedProfiles(
+                    userIds: post.responses
+                        .map { $0.userId }
+                        .filter { userVM.user.friends.contains($0) },
+                    startCompacted: false
+                )
+                
+                Spacer()
+            }
+            
             if (postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 0 == 1 || postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 1 == 0 && skipping) {
                 Spacer(minLength: 1008.0)
             }
@@ -217,42 +239,12 @@ struct BinaryFeedPost: View {
         }
 //        .padding()
         .frame(width: UIScreen.main.bounds.width)
-        .gradientBorder(borderWidth: 15, color: optionSelected == 1 ? .darkRed : .darkGreen, cornerRadius: 10, opacity: computedOpacity)
-    }
-    
-    var profileImage: some View {
-        if post.profilePhoto == "" {
-            AnyView(Image(systemName: "person")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 18, height: 18)
-                .background(Circle()
-                    .fill(Color.gray.opacity(0.7))
-                    .frame(width:28, height: 28)
-                    .opacity(0.6)
-                   )
-                )
-        } else {
-            AnyView(AsyncImage(url: URL(string: post.profilePhoto)) { image in
-                image.resizable()
-                    .scaledToFill()
-                    .frame(width: max(120, 140))
-                    .frame(height: 120)
-                    .cornerRadius(10)
-                    .shadow(color: .black.opacity(0.5), radius: 5, y: 3)
-            } placeholder: {
-                ProgressView() // Placeholder until the image is loaded
-                    .frame(width: max(120, 140))
-                    .frame(height: 120)
-                    .cornerRadius(10)
-            }
-                )
-            }
+        .gradientBorder(borderWidth: 40, color: optionSelected == 1 ? .darkRed : .darkGreen, cornerRadius: 20, opacity: computedOpacity)
     }
 }
 
 extension View {
-    func gradientBorder(borderWidth: CGFloat = 20, color: Color = .darkRed, cornerRadius: CGFloat = 10, opacity: Binding<Double>) -> some View {
+    func gradientBorder(borderWidth: CGFloat = 40, color: Color = .darkRed, cornerRadius: CGFloat = 20, opacity: Binding<Double>) -> some View {
         self
             // Top border overlay
             .overlay(

@@ -16,7 +16,7 @@ struct SelectCategories: View {
     @Binding var stepCompleted: Bool
     
     let question: String
-    let responseOptions: [String]
+    let captions: [String]
     
     var filteredCategories: [String] {
         categoryInput.isEmpty ? [] : Category.allCategoryStrings.filter { $0.localizedCaseInsensitiveContains(categoryInput)
@@ -28,7 +28,7 @@ struct SelectCategories: View {
     func getSuggestedCategories() {
         postVM.suggestPostCategories(
             question: self.question,
-            responseOptions: self.responseOptions
+            captions: self.captions
         ) { suggestedCategories in
             for category in suggestedCategories {
                 if !selectedCategories.contains(category) {

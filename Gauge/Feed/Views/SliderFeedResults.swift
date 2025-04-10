@@ -68,7 +68,7 @@ struct SliderFeedResults: View {
                 .padding(.top, 10)
                         
             withAnimation(.none, {
-                CommentsView(comments: post.comments)
+                CommentsView(comments: post.comments, post: post)
                     .onChange(of: post.comments) {old, new in
                             print("recognized  commentschanged")
                     }
@@ -143,14 +143,12 @@ struct SliderFeedResults: View {
         postDateAndTime: Date(),
         question: "Picasso is the goat",
         lowerBoundLabel: "YES",
-        upperBoundLabel: "NO",
-        lowerBoundValue: 1.0,
-        upperBoundValue: 6.0
+        upperBoundLabel: "NO"
     )
     
     post.responses = responses
 
-    return SliderFeedResults(
+    SliderFeedResults(
         post: post,
         optionSelected: 4
     )

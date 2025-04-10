@@ -73,10 +73,6 @@ struct FeedView: View {
                                 RoundedRectangle(cornerRadius: 20.0)
                                     .fill(Color.mediumGray)
                             }
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.black, lineWidth: 0.5)
-                            )
                             .frame(width: geo.size.width - 32 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 8) : 8.0) : 0.0))
                     }
                     
@@ -85,12 +81,10 @@ struct FeedView: View {
                             .frame(width: geo.size.width - 18 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 12) : 12.0) : 0.0))
                             .overlay {
                                 RoundedRectangle(cornerRadius: 20.0)
-                                    .fill(Color.mediumGray)
+                                    .fill(Color(red: (min(209.0, 187.0 + dragOffset.height) / 255),
+                                                green: (min(209.0, 187.0 + dragOffset.height) / 255),
+                                                blue: (min(209.0, 187.0 + dragOffset.height) / 255)))
                             }
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.black, lineWidth: 0.5)
-                            )
                             .offset(y: dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0)
                     }
                     .frame(maxWidth: geo.size.width - 24 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 12.0) : 12.0) : 0.0))
@@ -101,15 +95,11 @@ struct FeedView: View {
                                 BinaryFeedPost(post: post, dragAmount: .constant(CGSize(width: 0.0, height: 0.0)), optionSelected: .constant(0), skipping: $hasSkipped)
                                     .background(
                                         RoundedRectangle(cornerRadius: 20.0)
-                                            .fill(Color(red: (min(255.0, 187.0 + dragOffset.height) / 255),
-                                                        green: (min(255.0, 187.0 + dragOffset.height) / 255),
-                                                        blue: (min(255.0, 187.0 + dragOffset.height) / 255)))
+                                            .fill(Color(red: (min(255.0, 209.0 + dragOffset.height) / 255),
+                                                        green: (min(255.0, 209.0 + dragOffset.height) / 255),
+                                                        blue: (min(255.0, 209.0 + dragOffset.height) / 255)))
                                     )
                                     .frame(width: max(0, geo.size.width - 6 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 20.0, 6.0) : 6.0) : 0.0)))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.black.opacity(hasSkipped ? 0.0 : dragOffset.height > 0 ? (dragOffset.height < 150.0 ? max(100 - dragOffset.height / 150.0, 0.0) : 0.0) : 1.0), lineWidth: 0.5)
-                                    )
                                     .offset(y: 10 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0))
                                     .mask(RoundedRectangle(cornerRadius: 20.0).offset(y: 10))
                             }
@@ -118,13 +108,21 @@ struct FeedView: View {
                     }
                     
                     VStack {
-                        if let post = postVM.feedPosts.first as? BinaryPost {
+                        if let post = postVM.feedPosts.first {
                             ZStack(alignment: .top) {
                                 if isConfirmed {
-                                    BinaryFeedResults(post: post, optionSelected: optionSelected)
+                                    if let binaryPost = post as? BinaryPost {
+                                        BinaryFeedResults(post: binaryPost, optionSelected: optionSelected)
+                                    } else if let sliderPost = post as? SliderPost {
+                                        SliderFeedResults(post: sliderPost, optionSelected: optionSelected)
+                                    }
                                 } else {
-                                    BinaryFeedPost(post: post, dragAmount: $dragOffset, optionSelected: $optionSelected, skipping: $hasSkipped)
-                                        .frame(width: max(0, geo.size.width))
+                                    FeedPostWrapperView(
+                                        post: post,
+                                        dragAmount: $dragOffset,
+                                        optionSelected: $optionSelected,
+                                        skipping: $hasSkipped
+                                    )
                                 }
                                 
                                 if dragOffset.height > 0 {
@@ -177,7 +175,7 @@ struct FeedView: View {
                         RoundedRectangle(cornerRadius: 20.0)
                             .fill(Color.white)
                     }
-                    .rotatedBy(offset: $dragOffset)
+                    .rotatedBy(offset: $dragOffset, doAnimation: (postVM.feedPosts.count > 0 && !isConfirmed && postVM.feedPosts.first! is BinaryPost))
                     .offset(y: dragOffset.height + 20)
                     .gesture(
                         DragGesture()
@@ -189,7 +187,13 @@ struct FeedView: View {
                                 withAnimation {
                                     if gesture.translation.height.magnitude > gesture.translation.width.magnitude {
                                         if !hasSkipped {
-                                            if (optionSelected != 0 && gesture.translation.height < 0) || gesture.translation.height > 0 {
+                                            let currentPost = postVM.feedPosts.first
+                                            let isBinary = currentPost is BinaryPost
+                                            let isSlider = currentPost is SliderPost
+
+                                            let shouldDragUp = ((isBinary && optionSelected != 0) || (isSlider && optionSelected != 3)) && !isConfirmed
+
+                                            if (shouldDragUp && gesture.translation.height < 0) || gesture.translation.height > 0 {
                                                 dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
                                             }
                                         } else {
@@ -199,21 +203,29 @@ struct FeedView: View {
                                         }
                                         
                                         if dragOffset.height < -150 {
-                                            if optionSelected != 0 {
-                                                if !isConfirmed {
-                                                    let user = userVM.user
-                                                    if let post = postVM.feedPosts.first as? BinaryPost {
-                                                        var responseChosen = "NA"
-                                                        if (optionSelected == 1) {
-                                                            responseChosen = post.responseOption1
-                                                        } else if (optionSelected == 2) {
-                                                            responseChosen = post.responseOption2
-                                                        }
-                                                        postVM.addResponse(postId: post.postId, userId: user.userId, responseOption: responseChosen)
+                                            if let post = postVM.feedPosts.first {
+                                                let user = userVM.user
+                                                let shouldSubmit: Bool
+
+                                                if let binaryPost = post as? BinaryPost {
+                                                    shouldSubmit = optionSelected != 0
+                                                    if shouldSubmit && !isConfirmed {
+                                                        let responseChosen = (optionSelected == 1) ? binaryPost.responseOption1 : binaryPost.responseOption2
+                                                        postVM.addResponse(postId: binaryPost.postId, userId: user.userId, responseOption: responseChosen)
                                                     }
+                                                } else if let sliderPost = post as? SliderPost {
+                                                    shouldSubmit = optionSelected != 3
+                                                    if shouldSubmit && !isConfirmed {
+                                                        postVM.addResponse(postId: sliderPost.postId, userId: user.userId, responseOption: String(optionSelected))
+                                                    }
+                                                } else {
+                                                    shouldSubmit = false
                                                 }
-                                                withAnimation {
-                                                    isConfirmed = true
+
+                                                if shouldSubmit {
+                                                    withAnimation {
+                                                        isConfirmed = true
+                                                    }
                                                 }
                                             }
                                             
@@ -225,6 +237,10 @@ struct FeedView: View {
                                             optionSelected = 0
                                         }
                                     } else {
+                                        if let post = postVM.feedPosts.first, post is SliderPost {
+                                            return
+                                        }
+                                        
                                         if gesture.translation.width.magnitude > 150 {
                                             dragOffset = .zero
                                             
@@ -260,7 +276,10 @@ struct FeedView: View {
                                 }
                                 
                                 //                            withAnimation(.none) {
-                                dragOffset = .zero
+//                                if postVM.feedPosts.count > 0 && postVM.feedPosts.first! is SliderPost {
+//                                } else {
+                                    dragOffset = .zero
+//                                }
                                 hasSkipped = false
                                 //                            }
                             }
@@ -282,15 +301,12 @@ struct FeedView: View {
                     .padding(.horizontal, 10)
             }
         }
-//        .onAppear() {
-//            postVM.addDummyPosts()
-//        }
     }
 }
 
 extension View {
-    func rotatedBy(offset: Binding<CGSize>) -> some View {
-        return self.rotationEffect(.degrees(offset.wrappedValue.width / 10.0))
+    func rotatedBy(offset: Binding<CGSize>, doAnimation: Bool) -> some View {
+        return self.rotationEffect(doAnimation ? .degrees(offset.wrappedValue.width / 10.0) : .degrees(0))
     }
 }
 

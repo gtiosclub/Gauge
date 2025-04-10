@@ -38,15 +38,16 @@ struct FirebaseTesting: View {
                         }
                         
                         Button("Add Slider Post") {
-                            postVM.createSliderPost(
-                                userId: "austin",
-                                categories: [.educational(.cs)],
-                                question: "rate Swift 1-10",
-                                lowerBoundValue: 1,
-                                upperBoundValue: 10,
-                                lowerBoundLabel: "Terrible 🤮",
-                                upperBoundLabel: "Goated 🐐"
-                            )
+                            Task {
+                                await
+                                postVM.createSliderPost(
+                                    userId: "austin",
+                                    categories: [.educational(.cs)],
+                                    question: "rate Swift 1-10",
+                                    lowerBoundLabel: "Terrible 🤮",
+                                    upperBoundLabel: "Goated 🐐"
+                                )
+                            }
                         }
                         
 //                        Button("Add Ranked Post") {
@@ -111,18 +112,6 @@ struct FirebaseTesting: View {
 //                                self.postIds = postIds
 //                            }
 //                        }
-                        
-                        Button("Add Slider Post") {
-                            postVM.createSliderPost(
-                                userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
-                                categories: [.educational(.cs)],
-                                question: "rate Swift 1-10",
-                                lowerBoundValue: 1,
-                                upperBoundValue: 10,
-                                lowerBoundLabel: "Terrible 🤮",
-                                upperBoundLabel: "Goated 🐐"
-                            )
-                        }
                         
 //                        Button("Add Ranked Post") {
 //                            postVM.createRankPost(
@@ -252,7 +241,7 @@ struct FirebaseTesting: View {
                     Section("OpenAI Queries") {
                         Button("Suggest Post Categories") {
                             postVM.suggestPostCategories(
-                                question: "Which channel is better?", responseOptions: ["National Geographic", "Animal Planet"]
+                                question: "Which channel is better?", captions: ["National Geographic", "Animal Planet"]
                             ) { suggestedCategories in
                                 print(suggestedCategories)
                             }

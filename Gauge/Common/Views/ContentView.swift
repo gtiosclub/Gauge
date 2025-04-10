@@ -76,6 +76,8 @@ struct ContentView: View {
                         let navigationBarAppearance = UINavigationBarAppearance()
                         navigationBarAppearance.configureWithOpaqueBackground()
                         UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
+                        
+                        print("navigated to the main view")
                     }
                 } else {
                     OnboardingView()
@@ -112,7 +114,7 @@ struct ContentView: View {
 //                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
 //                                }
                             }
-                            
+                                                        
                             await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
                             postVM.watchForCurrentFeedPostChanges()
                             

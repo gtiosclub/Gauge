@@ -9,104 +9,88 @@ import SwiftUI
 
 struct BinaryFeedResults: View {
     @ObservedObject var post: BinaryPost
+    @EnvironmentObject var userVM: UserFirebase
+
     var optionSelected: Int
-    
+
     var body: some View {
-        VStack {
-            HStack {
-                Spacer()
-                VStack {
-                    Text("NEXT")
-                        .foregroundStyle(.gray)
-                        .opacity(0.5)
-                    
-                    Image(systemName: "arrow.down")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30, alignment: .center)
-                        .foregroundStyle(.gray)
-                        .opacity(0.5)
+        VStack(alignment: .leading, spacing: 15) {
+            VStack {
+                Spacer(minLength: 30.0)
+                    .frame(height: 30.0)
+                
+                ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 5)
+                
+                // Categories
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(post.categories, id: \.self) { category in
+                            Text(category.rawValue)
+                                .padding(.vertical, 4)
+                                .padding(.horizontal, 10)
+                                .font(.system(size: 14))
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(Color.gray.opacity(0.2))
+                                        .frame(height: 32)
+                                )
+                        }
+                    }
+                    .padding(.vertical, 6)
                 }
                 
-                Spacer()
-            }
-            
-            Spacer(minLength: 30.0)
-            
-            HStack {
-                profileImage
-                
-                Text(post.userId)
-                    .font(.system(size: 16))
-                    .padding(.leading, 10)
-                
-                Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
-                    .font(.system(size: 13))
-                    .padding(.leading, 5)
-                    .foregroundStyle(.gray)
-                
-                Spacer()
-            }
-            .padding(.horizontal)
-            
-            HStack {
+                // Question
                 Text(post.question)
-                    .padding(.top, 10)
-                    .font(.system(size: 25))
-                    .frame(alignment: .leading)
-                    .fontWeight(.bold)
+                    .bold()
+                    .font(.system(size: 35))
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(.black)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Results
+                BinaryResultView(post: post, optionSelected: optionSelected)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 8)
+                
+                // Profile Stacks + Vote Count
+                HStack {
+                    StackedProfiles(
+                        userIds: post.responses
+                            .filter { userVM.user.friends.contains($0.userId) && $0.responseOption == post.responseOption1 }
+                            .map { $0.userId },
+                        sideOnTop: .left,
+                        changeOffset: false
+                    )
                     
-                Spacer()
+                    Spacer()
+                    
+                    Text("\(post.calculateResponses().reduce(0, +)) votes")
+                        .foregroundColor(Color.blackGray)
+                        .font(.system(size: 12))
+                    
+                    Spacer()
+                    
+                    StackedProfiles(
+                        userIds: post.responses
+                            .filter { userVM.user.friends.contains($0.userId) && $0.responseOption == post.responseOption2 }
+                            .map { $0.userId },
+                        sideOnTop: .right
+                    )
+                }
+                .padding(.top, 5)
             }
             .padding(.horizontal)
+
+            // Comments
+            CommentsView(comments: post.comments, post: post)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
+                .padding(.horizontal, 0)
             
-            BinaryResultView(post: post, optionSelected: optionSelected)
-                .padding(.top, 10)
-                
-            Text("\(post.calculateResponses().reduce(0, +)) votes")
-                .foregroundColor(.gray)
-                .padding(.top, 10)
-                        
-            withAnimation(.none, {
-                CommentsView(comments: post.comments)
-                    .onChange(of: post.comments) {old, new in
-                            print("recognized  commentschanged")
-                    }
-            })
-        }
-        .padding()
-        .onAppear() {
-            print(post.responses)
-        }
-    }
-    
-    var profileImage: some View {
-        if post.profilePhoto == "" {
-            AnyView(Image(systemName: "person")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 18, height: 18)
-                .background(Circle()
-                    .fill(Color.gray.opacity(0.7))
-                    .frame(width:28, height: 28)
-                    .opacity(0.6)
-                )
-            )
-        } else {
-            AnyView(AsyncImage(url: URL(string: post.profilePhoto)) { image in
-                image.resizable()
-                    .scaledToFill()
-                    .frame(width: max(120, 140))
-                    .frame(height: 120)
-                    .cornerRadius(10)
-                    .shadow(color: .black.opacity(0.5), radius: 5, y: 3)
-            } placeholder: {
-                ProgressView() // Placeholder until the image is loaded
-                    .frame(width: max(120, 140))
-                    .frame(height: 120)
-                    .cornerRadius(10)
-            }
-            )
+            Spacer()
+                .frame(height: 5.0)
         }
     }
 }

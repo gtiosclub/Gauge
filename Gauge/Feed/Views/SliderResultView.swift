@@ -122,14 +122,12 @@ struct SliderResultView: View {
         postDateAndTime: Date(),
         question: "Picasso is the goat",
         lowerBoundLabel: "YES",
-        upperBoundLabel: "NO",
-        lowerBoundValue: 1.0,
-        upperBoundValue: 6.0
+        upperBoundLabel: "NO"
     )
     
     post.responses = responses
 
-    return SliderResultView(
+    SliderResultView(
         post: post,
         optionSelected: 4
     )

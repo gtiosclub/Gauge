@@ -8,145 +8,138 @@
 import SwiftUI
 
 struct CommentView: View {
-    @EnvironmentObject private var userVm: UserFirebase
-    @EnvironmentObject private var postVm: PostFirebase
+    @EnvironmentObject private var userVM: UserFirebase
+    @EnvironmentObject private var postVM: PostFirebase
     let comment: Comment
-    let profilePhotoSize: CGFloat = 30
-    @State private var username: String = ""
-    @State private var profilePhoto: String = ""
-    @State var userStatus = "none"
+    let post: any Post
 
-    func fetchUserInfo() {
-        userVm.getUsernameAndPhoto(userId: comment.userId) { info in
-            username = info["username"] ?? ""
-            profilePhoto = info["profilePhoto"] ?? ""
+    @State private var userStatus = "none"
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack() {
+                ProfileUsernameDateView(dateTime: comment.date, userId: comment.userId)
+                    .fixedSize(horizontal: false, vertical: true)
+                
+                Spacer(minLength: 4)
+
+                let (isFirstLabel, responseOption) = findUserResponse(post: post, userId: comment.userId)
+                LabelledDivider(label: responseOption, color: isFirstLabel ? .red : .green)
+                    .fixedSize()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            ExpandableText(comment.content)
+                .foregroundColor(Color(white: 0.2))
+                .multilineTextAlignment(.leading)
+
+            HStack(spacing: 10) {
+                Spacer()
+                
+                Button {
+                    toggleLike()
+                } label: {
+                    Image(systemName: "arrowtriangle.up.fill")
+                        .resizable()
+                        .frame(width: 13, height: 13)
+                        .foregroundColor(userStatus == "liked" ? .green : Color(white: 0.5))
+                }
+
+                Text("\(comment.likes.count - comment.dislikes.count)")
+                    .foregroundColor(userStatus == "liked" ? .green : (userStatus == "disliked") ? .red : Color(white: 0.5))
+
+                Button {
+                    toggleDislike()
+                } label: {
+                    Image(systemName: "arrowtriangle.down.fill")
+                        .resizable()
+                        .frame(width: 13, height: 13)
+                        .foregroundColor(userStatus == "disliked" ? .red : Color(white: 0.5))
+                }
+            }
+            .frame(alignment: .trailing)
         }
-        
-        if comment.likes.contains(userVm.user.id) {
+        .padding(.horizontal)
+        .padding(.vertical, 5)
+        .task {
+            if comment.likes.contains(userVM.user.id) {
+                userStatus = "liked"
+            } else if comment.dislikes.contains(userVM.user.id) {
+                userStatus = "disliked"
+            }
+        }
+    }
+
+    private func toggleLike() {
+        if userStatus != "liked" {
+            postVM.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             userStatus = "liked"
-        } else if comment.dislikes.contains(userVm.user.id) {
+        } else {
+            postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            userStatus = "none"
+        }
+    }
+
+    private func toggleDislike() {
+        if userStatus != "disliked" {
+            postVM.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             userStatus = "disliked"
         } else {
-        }
-    }
-    
-    var body: some View {
-        VStack {
-            Spacer()
-            HStack {
-                VStack {
-                    HStack(spacing: 4) {
-                        //Profile Photo
-                        if profilePhoto != "", let url = URL(string: profilePhoto) {
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                        .clipShape(Circle())
-                                case .failure, .empty:
-                                    Image(systemName: "person.circle.fill")
-                                        .resizable()
-                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                        .foregroundColor(.gray)
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
-                        } else {
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                .foregroundColor(.gray)
-                        }
-                        
-                        Text(username)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color(white: 0.4))
-                        
-                        Text("• \(DateConverter.timeAgo(from: comment.date))")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color(white: 0.6))
-                        
-                        Spacer()
-                        
-                    }
-                    .frame(alignment: .leading)
-                    
-                    HStack {
-                        ExpandableText(comment.content)
-                            .lineLimit(nil)
-                            .frame(alignment: .topLeading)
-                            .foregroundColor(Color(white: 0.2))
-                        
-                        Spacer()
-                    }
-                    
-                }
-                
-                
-                VStack(spacing: 7) {
-                    Button(action: {
-                        if userStatus != "liked" {
-                            postVm.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
-                            userStatus = "liked"
-                        } else {
-                            postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
-                            userStatus = "none"
-                        }
-                        
-                    }) {
-                        Image(systemName: "arrow.up")
-                            .resizable()
-                            .frame(width: 11, height: 13)
-                            .fontWeight(.semibold)
-                            .foregroundColor(userStatus == "liked" ? .blue : .black)
-                    }
-                    
-                    Text("\(comment.likes.count - comment.dislikes.count)")
-                        .font(.callout)
-                    
-                    Button(action: {
-                        if userStatus != "disliked" {
-                            postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
-                            userStatus = "disliked"
-                        } else  {
-                            postVm.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
-                            userStatus = "none"
-                        }
-                    }) {
-                        Image(systemName: "arrow.down")
-                            .resizable()
-                            .frame(width: 11, height: 13)
-                            .fontWeight(.semibold)
-                            .foregroundColor(userStatus == "disliked" ? .blue : .black)
-                    }
-                }
-                .foregroundColor(.black)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 25)
-        .onAppear {
-            fetchUserInfo()
+            postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            userStatus = "none"
         }
     }
 }
 
-#Preview {
-    CommentView(comment: Comment(
-        commentType: .text,
-        postId: "81915E51-E823-4D73-B7C3-201EF39DD675",
-        userId: "uCLGAxWCWFMRm4Qlt06z",
-        date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
-        commentId: "WiIaeW7EIlTr7Mq97PkI",
-        likes: [],
-        dislikes: [],
-        content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
-    ))
-    .environmentObject(UserFirebase())
-    .environmentObject(PostFirebase())
+func findUserResponse(post: any Post, userId: String) -> (Bool, String) {
+    for response in post.responses {
+        if response.userId == userId {
+            if let binaryPost = post as? BinaryPost {
+                return (binaryPost.responseOption1 == response.responseOption, response.responseOption)
+            } else if let sliderPost = post as? SliderPost {
+                return (Int(response.responseOption) ?? 0 < 3, response.responseOption)
+            }
+        }
+    }
+    return (false, "")
 }
+
+struct LabelledDivider: View {
+    let label: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Rectangle()
+                .fill(Color.whiteGray)
+                .frame(height: 1)
+                .frame(maxWidth: .infinity)
+                .alignmentGuide(.firstTextBaseline) { _ in 0 }
+
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundColor(color == .red ? Color.darkRed : Color.darkGreen)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(color.opacity(0.2))
+                )
+        }
+    }
+}
+
+//#Preview {
+//    CommentView(comment: Comment(
+//        commentType: .text,
+//        postId: "81915E51-E823-4D73-B7C3-201EF39DD675",
+//        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+//        date: Calendar.current.date(byAdding: .hour, value: -6, to: Date())!,
+//        commentId: "WiIaeW7EIlTr7Mq97PkI",
+//        likes: ["2lCFmL9FRjhY1v1NMogD5H6YuMV2", "2lCFmL9FRjhY1v1NMogD5H6YuMV2"],
+//        dislikes: ["2lCFmL9FRjhY1v1NMogD5H6YuMV2"],
+//        content: "I might swerve, bend that corner, woah. I might swerve, bend that corner, woah. I might swerve, bend that corner, woah. I might swerve, bend that corner, woah."
+//    ))
+//    .environmentObject(UserFirebase())
+//    .environmentObject(PostFirebase())
+//}
