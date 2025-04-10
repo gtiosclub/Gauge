@@ -180,21 +180,30 @@ struct PostCreationView: View {
                         showCreatePost = false
                         
                         Task {
-                            await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, sublabel1: leftCaption, sublabel2: rightCaption)
+                            if postType == .BinaryPost {
+                                await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, sublabel1: leftCaption, sublabel2: rightCaption)
+                            } else if postType == .SliderPost {
+                                await postVM.createSliderPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, lowerBoundLabel: slidingOptions[optionsSelectedIndex!].left, upperBoundLabel: slidingOptions[optionsSelectedIndex!].right)
+                            }
+                            
                         }
                     }
                         
                     withAnimation {
                         if (currentStep == 3) {
-                            currentStep = 4
-                            currentStepTitle = "Type Captions"
-                            modalSize = 300
-                            isRight = false
-                            skippable = leftCaption.isEmpty
-                            return
+                            if postType == .SliderPost {
+                                currentStep = 4
+                            } else {
+                                currentStep = 4
+                                currentStepTitle = "Type Captions"
+                                modalSize = 300
+                                isRight = false
+                                skippable = leftCaption.isEmpty
+                                return
+                            }
                         }
                         
-                        if (currentStep != 4) {
+                        if (currentStep != 4 || postType == .SliderPost) {
                             currentStep = max(currentStep + 1, 1)
                         } else {
                             if (isRight || skippable) {
@@ -327,13 +336,13 @@ struct BinaryPostPreview: View {
             .padding(.horizontal, 16)
             
             HStack {
-                Image(systemName: "rectangle.split.2x1")
+                Image(systemName: postType == .BinaryPost ? "rectangle.split.2x1" : "arrow.left.and.right.square")
                     .resizable()
                     .frame(width: 25, height: 25)
                     .foregroundColor(.black)
                     .fontWeight(.medium)
                 
-                Text("Binary")
+                Text(postType == .BinaryPost ? "Binary" : "Slider")
                     .font(.system(size: 24))
                     .foregroundColor(.black)
                     .fontWeight(.medium)
@@ -362,25 +371,27 @@ struct BinaryPostPreview: View {
                     }
                     .padding(.horizontal)
                     
-                    Divider()
-                        .frame(height: 3)
-                        .overlay(Color.white)
+                    if !leftCaption.isEmpty {
+                        Divider()
+                            .frame(height: 3)
+                            .overlay(Color.white)
                     
-                    HStack {
-                        Text(leftCaption)
-                            .font(.system(size: 14))
-                            .foregroundColor(.black)
-                            .fontWeight(.medium)
-                        
-                        Spacer()
-                        
-                        Text(rightCaption)
-                            .font(.system(size: 14))
-                            .foregroundColor(.black)
-                            .fontWeight(.medium)
+                        HStack {
+                            Text(leftCaption)
+                                .font(.system(size: 14))
+                                .foregroundColor(.black)
+                                .fontWeight(.medium)
+                            
+                            Spacer()
+                            
+                            Text(rightCaption)
+                                .font(.system(size: 14))
+                                .foregroundColor(.black)
+                                .fontWeight(.medium)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 3)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 3)
                 }
                 .padding(.vertical)
                 .background(Color(.systemGray5))
@@ -396,7 +407,7 @@ struct BinaryPostPreview: View {
                     .foregroundStyle(Color(.systemGray5))
                     .background(Color.white)
                     .cornerRadius(60)
-                    .offset(x: 0, y: 8)
+                    .offset(x: 0, y: leftCaption.isEmpty ? 0 : 8)
             }
         }
     }

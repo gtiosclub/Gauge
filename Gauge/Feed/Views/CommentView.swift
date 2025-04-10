@@ -8,27 +8,11 @@
 import SwiftUI
 
 struct CommentView: View {
-    @EnvironmentObject private var userVm: UserFirebase
-    @EnvironmentObject private var postVm: PostFirebase
+    @EnvironmentObject private var userVM: UserFirebase
+    @EnvironmentObject private var postVM: PostFirebase
     let comment: Comment
     let profilePhotoSize: CGFloat = 25
-    @State private var username: String = ""
-    @State private var profilePhoto: String = ""
     @State var userStatus = "none"
-
-    func fetchUserInfo() {
-        userVm.getUsernameAndPhoto(userId: comment.userId) { info in
-            username = info["username"] ?? ""
-            profilePhoto = info["profilePhoto"] ?? ""
-        }
-        
-        if comment.likes.contains(userVm.user.id) {
-            userStatus = "liked"
-        } else if comment.dislikes.contains(userVm.user.id) {
-            userStatus = "disliked"
-        } else {
-        }
-    }
     
     struct LabelledDivider: View {
 
@@ -73,49 +57,11 @@ struct CommentView: View {
             Spacer()
             HStack {
                 VStack {
-                    HStack(spacing: 4) {
-                        if profilePhoto != "", let url = URL(string: profilePhoto) {
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                        .clipShape(Circle())
-                                case .failure, .empty:
-                                    Image(systemName: "person.circle.fill")
-                                        .resizable()
-                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                        .foregroundColor(.gray)
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
-                        } else {
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                .foregroundColor(.gray)
-                        }
-                        
-                        Text(username)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.black)
-                            .padding(.leading, 6)
-                        
-                        Text("•")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color(white: 0.5))
-                        
-                        Text("\(DateConverter.timeAgo(from: comment.date)) ago")
-                            .font(.subheadline)
-                            .foregroundColor(Color(white: 0.5))
+                    HStack() {
+                        ProfileUsernameDateView(dateTime: comment.date, userId: comment.userId)
                         
                         //TODO: Make label modular and use it to change color
                         LabelledDivider(label: "Yes", color: userStatus == "liked" ? .green : (userStatus == "disliked") ? .red : Color(white: 0.5))
-                        
                     }
                     .frame(alignment: .leading)
                     
@@ -134,10 +80,10 @@ struct CommentView: View {
                         Button {
                             print("Like Button")
                             if userStatus != "liked" {
-                                postVm.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                                postVM.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
                                 userStatus = "liked"
                             } else {
-                                postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                                postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
                                 userStatus = "none"
                             }
 
@@ -163,10 +109,10 @@ struct CommentView: View {
                         Button {
                             print("Dislike Button")
                             if userStatus != "disliked" {
-                                postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                                postVM.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
                                 userStatus = "disliked"
                             } else  {
-                                postVm.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+                                postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
                                 userStatus = "none"
                             }
 
@@ -195,10 +141,10 @@ struct CommentView: View {
 //                VStack(spacing: 7) {
 //                    Button(action: {
 //                        if userStatus != "liked" {
-//                            postVm.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+//                            postVM.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
 //                            userStatus = "liked"
 //                        } else {
-//                            postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+//                            postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
 //                            userStatus = "none"
 //                        }
 //                        
@@ -215,10 +161,10 @@ struct CommentView: View {
 //                    
 //                    Button(action: {
 //                        if userStatus != "disliked" {
-//                            postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+//                            postVM.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
 //                            userStatus = "disliked"
 //                        } else  {
-//                            postVm.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
+//                            postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
 //                            userStatus = "none"
 //                        }
 //                    }) {
@@ -234,9 +180,13 @@ struct CommentView: View {
             }
             Spacer()
         }
-        .padding(.horizontal, 25)
-        .onAppear {
-            fetchUserInfo()
+        .padding(.horizontal, 15)
+        .task {
+            if comment.likes.contains(userVM.user.id) {
+                userStatus = "liked"
+            } else if comment.dislikes.contains(userVM.user.id) {
+                userStatus = "disliked"
+            }
         }
     }
 }

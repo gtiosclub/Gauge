@@ -7,9 +7,17 @@
 
 import SwiftUI
 
+enum Side {
+    case left
+    case right
+}
+
 struct StackedProfiles: View {
     @EnvironmentObject var userVM: UserFirebase
     var userIds: [String]
+    @State private var spacing: CGFloat = 15
+    var sideOnTop: Side = .right
+    var startCompacted: Bool = true
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -18,7 +26,11 @@ struct StackedProfiles: View {
                 let profilePhoto = userVM.useridsToPhotosAndUsernames[userId]?.photoURL ?? ""
 
                 ProfilePictureView(profilePhoto: profilePhoto)
-                    .offset(x: CGFloat(index) * 15)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white, lineWidth: 1)
+                    )
+                    .offset(x: sideOnTop == .left ? -CGFloat(index) * spacing : CGFloat(index) * spacing)
                     .task {
                         if userVM.useridsToPhotosAndUsernames[userId] == nil {
                             do {
@@ -30,7 +42,18 @@ struct StackedProfiles: View {
                     }
             }
         }
-        .frame(height: 30)
+        .frame(height: userIds.count == 0 ? 0 : 30)
+        .offset(x: -spacing * CGFloat(userIds.count - 1) / 2.0 * (sideOnTop == .left ? -1 : 1))
+        .onTapGesture {
+            withAnimation {
+                spacing = (spacing == 15 ? 40 : 15)
+            }
+        }
+        .onAppear {
+            if !startCompacted {
+                spacing = 40
+            }
+        }
     }
 }
 
