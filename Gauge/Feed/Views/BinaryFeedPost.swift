@@ -224,11 +224,17 @@ struct BinaryFeedPost: View {
                     .frame(maxWidth: .infinity)
             })
             
-            StackedProfiles(
-                userIds: post.responses
-                    .map { $0.userId }
-                    .filter { userVM.user.friends.keys.contains($0) }
-            )
+            HStack {
+                Spacer()
+                
+                StackedProfiles(
+                    userIds: post.responses
+                        .map { $0.userId }
+                        .filter { userVM.user.friends.keys.contains($0) }
+                )
+                
+                Spacer()
+            }
             
             if (postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 0 == 1 || postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 1 == 0 && skipping) {
                 Spacer(minLength: 1008.0)
