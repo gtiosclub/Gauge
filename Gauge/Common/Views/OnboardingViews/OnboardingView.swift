@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @StateObject private var authVM = AuthenticationVM()
+    @EnvironmentObject var authVM: AuthenticationVM
     
     var body: some View {
         NavigationView {
