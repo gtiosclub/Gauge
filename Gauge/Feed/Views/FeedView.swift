@@ -191,7 +191,7 @@ struct FeedView: View {
                                             let isBinary = currentPost is BinaryPost
                                             let isSlider = currentPost is SliderPost
 
-                                            let shouldDragUp = (isBinary && optionSelected != 0) || (isSlider && optionSelected != 3)
+                                            let shouldDragUp = ((isBinary && optionSelected != 0) || (isSlider && optionSelected != 3)) && !isConfirmed
 
                                             if (shouldDragUp && gesture.translation.height < 0) || gesture.translation.height > 0 {
                                                 dragOffset = CGSize(width: 0.0, height: gesture.translation.height)

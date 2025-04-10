@@ -8,19 +8,17 @@
 import SwiftUI
 
 struct CommentsView: View {
-    @EnvironmentObject private var userVm: UserFirebase
-    @EnvironmentObject private var postVm: PostFirebase
+    @EnvironmentObject private var userVM: UserFirebase
+    @EnvironmentObject private var postVM: PostFirebase
     @State private var comments: [Comment]
     @State private var sortOption: SortOption = .mostVotes
     @State private var newCommentText: String = ""
     @State private var isBookmarked: Bool = false
-    let postId: String
-    let responseOption1: String?
+    var post: any Post
     
-    init(comments: [Comment], postId: String, responseOption1: String) {
+    init(comments: [Comment], post: (any Post)) {
         _comments = State(initialValue: comments)
-        self.postId = postId
-        self.responseOption1 = responseOption1
+        self.post = post
     }
     
     enum SortOption: String, CaseIterable {
@@ -44,7 +42,7 @@ struct CommentsView: View {
     var body: some View {
         VStack(spacing: 0) {
             Divider()
-                    .background(Color.gray.opacity(0.4))
+                .background(Color.gray.opacity(0.4))
             HStack {
                 Image(systemName: "arrow.up.arrow.down")
                     .font(.system(size: 12))
@@ -95,7 +93,7 @@ struct CommentsView: View {
                 // Bookmark button
                 Button(action: {
                     isBookmarked.toggle()
-                    postVm.addUserToFavoritedBy(postId: postId, userId: userVm.user.id)
+                    postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
                 }) {
                     Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                         .font(.system(size: 18))
@@ -109,9 +107,7 @@ struct CommentsView: View {
                         .background(Color.whiteGray)
                 }
             }
-            .padding(.horizontal)
-            .padding(.top)
-            .padding(.bottom, 10)
+            .padding()
             .background(Color.whiteGray)
             
             // Comments list
@@ -137,18 +133,17 @@ struct CommentsView: View {
                         
                         Spacer()
                     }
-                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 60)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 60)
                 } else {
                     LazyVStack(spacing: 0) {
                         ForEach(sortedComments, id: \.self) { comment in
-                            CommentView(comment: comment, responseOption1: responseOption1 ?? "")
+                            CommentView(comment: comment, post: post)
                                 .padding(.vertical, 12)
                             
                             Rectangle()
                                 .fill(Color.whiteGray)
                                 .frame(height: 6)
-                            
                         }
                     }
                     .background(Color.white)
@@ -159,36 +154,34 @@ struct CommentsView: View {
         .background(Color.whiteGray)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
-        
-    }
-
-    
-    #Preview {
-        CommentsView(
-            comments: [
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "Lv72Qz7Qc4TC2vDeE94q",
-                    date: Date(),
-                    commentId: "",
-                    likes: [],
-                    dislikes: [],
-                    content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communityee. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
-                ),
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "Lv72Qz7Qc4TC2vDeE94q",
-                    date: Date(),
-                    commentId: "",
-                    likes: [],
-                    dislikes: [],
-                    content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communitwwy. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
-                )
-            ], postId: "2C263425-873B-4CD8-89DF-84B1F5A02FF0", responseOption1: "Yes"
-        )
-        .environmentObject(UserFirebase())
     }
 }
+    
+//    #Preview {
+//        CommentsView(
+//            comments: [
+//                Comment(
+//                    commentType: .text,
+//                    postId: "555555555",
+//                    userId: "Lv72Qz7Qc4TC2vDeE94q",
+//                    date: Date(),
+//                    commentId: "",
+//                    likes: [],
+//                    dislikes: [],
+//                    content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communityee. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
+//                ),
+//                Comment(
+//                    commentType: .text,
+//                    postId: "555555555",
+//                    userId: "Lv72Qz7Qc4TC2vDeE94q",
+//                    date: Date(),
+//                    commentId: "",
+//                    likes: [],
+//                    dislikes: [],
+//                    content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communitwwy. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
+//                )
+//            ], postId: "2C263425-873B-4CD8-89DF-84B1F5A02FF0")
+//        .environmentObject(UserFirebase())
+//    }
+//}
  
