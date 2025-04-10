@@ -76,6 +76,8 @@ struct ContentView: View {
                         let navigationBarAppearance = UINavigationBarAppearance()
                         navigationBarAppearance.configureWithOpaqueBackground()
                         UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
+                        
+                        print("navigated to the main view")
                     }
                 } else {
                     OnboardingView()
