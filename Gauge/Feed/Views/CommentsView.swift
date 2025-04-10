@@ -156,15 +156,13 @@ struct CommentsView: View {
         .ignoresSafeArea()
         .sheet(isPresented: $showAddComment) {
             ZStack {
-                    Color.black.opacity(0.3).ignoresSafeArea() // semi-transparent background
                     CommentSheetView(showAddComment: $showAddComment, post: post)
                         .padding()
                         .background(Color.white)
                         .clipShape(RoundedRectangle(cornerRadius: 20))
                         .shadow(radius: 8)
                 }
-                .presentationDetents([.height(250)])
-                .presentationDragIndicator(.visible)
+                .presentationDetents([.height(200)])
         }
     }
 }

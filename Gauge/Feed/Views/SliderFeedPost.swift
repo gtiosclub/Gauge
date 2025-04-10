@@ -28,6 +28,7 @@ struct SliderFeedPost: View {
                 .frame(height: 30)
 
             ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
+                .padding(.leading)
 
             ScrollView(.horizontal) {
                 HStack {
