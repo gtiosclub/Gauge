@@ -7,7 +7,9 @@ struct ProfileView: View {
     @StateObject var profileViewModel = ProfileViewModel()
     @State private var selectedTab: String = "Takes"
     @State private var selectedBadge: BadgeModel? = nil
+    @State private var showingSettings = false
     @State var isCurrentUser: Bool
+
     
     let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
     @State private var profileImage: UIImage?
@@ -29,35 +31,18 @@ struct ProfileView: View {
                             NavigationLink(destination: ProfileEditView()) {
                                 Label("Profile", systemImage: "person")
                             }
-                            
-                            NavigationLink(destination: SettingsView()) {
+
+                            Button(action: {
+                                showingSettings = true
+                            }) {
                                 Label("Settings", systemImage: "gearshape")
                             }
                         } label: {
                             Image(systemName: "line.3.horizontal")
-                        if isCurrentUser {
-                            Button(action: {
-                                showingSettings = true
-                            }) {
-                                Image(systemName: "gearshape.fill")
-                                    .foregroundColor(.gray)
-                            }
-                            .padding(.trailing)
-                        }
-                    }
-                    
-                    HStack {
-                        // CHANGED: Get emoji from attributes
-                        if let emoji = userVM.user.attributes["profileEmoji"], !emoji.isEmpty {
-                            Text(emoji)
-                                .font(.system(size: 60))
-                        } else if let profileImage = profileImage {
-                            Image(uiImage: profileImage)
                                 .resizable()
                                 .frame(width: 20, height: 15)
                                 .foregroundColor(.black)
                                 .padding()
-                            
                         }
                     }
                 }
@@ -198,6 +183,10 @@ struct ProfileView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+                    .environmentObject(authVM)
+            }
 
         }
     }
@@ -248,14 +237,6 @@ struct TabButton: View {
         }
         .padding(.horizontal, 5)
 //        .frame(minWidth: 100)
-    }
-}
-
-struct SettingsView: View {
-    var body: some View {
-        Text("Settings Screen")
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
     }
 }
 
