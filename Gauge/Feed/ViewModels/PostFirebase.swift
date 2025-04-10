@@ -817,7 +817,7 @@ class PostFirebase: ObservableObject {
             let post  = allQueriedPosts[i]
             var score = 0;
             //Friends
-            if (user.friends.keys).contains(post.userId) {
+            if (user.friends).contains(post.userId) {
                 score += 20;
             }
             //Accessed Profiles
