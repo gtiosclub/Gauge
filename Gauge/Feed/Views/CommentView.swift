@@ -12,8 +12,8 @@ struct CommentView: View {
     @EnvironmentObject private var postVM: PostFirebase
     let comment: Comment
     let profilePhotoSize: CGFloat = 25
-    @State var userStatus = "none"
-    
+    @State var userStatus = "none"    
+
     struct LabelledDivider: View {
 
         let label: String
@@ -32,7 +32,7 @@ struct CommentView: View {
                 ZStack {
                     Text(label)
                         .font(.system(size: 14))
-                        .foregroundColor(color)
+                        .foregroundColor(Color.whiteGray)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 4)
                         .background(
@@ -46,12 +46,13 @@ struct CommentView: View {
         var line: some View {
             VStack {
                 Divider()
-                    .background(color)
+                    .background(Color.whiteGray)
             }
             .padding(horizontalPadding)
         }
     }
     
+
     var body: some View {
         VStack {
             Spacer()
@@ -82,9 +83,11 @@ struct CommentView: View {
                             if userStatus != "liked" {
                                 postVM.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
                                 userStatus = "liked"
+                                likeCount = likeCount + 1
                             } else {
                                 postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
                                 userStatus = "none"
+                                likeCount = likeCount - 1
                             }
 
                         } label: {
@@ -103,7 +106,7 @@ struct CommentView: View {
                             }
                         }
                         
-                        Text("\(comment.likes.count - comment.dislikes.count)")
+                        Text("\(likeCount - dislikeCount)")
                             .foregroundColor(userStatus == "liked" ? .green : (userStatus == "disliked") ? .red : Color(white: 0.5))
                         
                         Button {
@@ -111,9 +114,13 @@ struct CommentView: View {
                             if userStatus != "disliked" {
                                 postVM.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
                                 userStatus = "disliked"
+                                dislikeCount = dislikeCount + 1
+
                             } else  {
                                 postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
                                 userStatus = "none"
+                                dislikeCount = dislikeCount - 1
+
                             }
 
                         } label: {
@@ -147,7 +154,7 @@ struct CommentView: View {
 //                            postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
 //                            userStatus = "none"
 //                        }
-//                        
+//
 //                    }) {
 //                        Image(systemName: "arrow.up")
 //                            .resizable()
@@ -155,10 +162,10 @@ struct CommentView: View {
 //                            .fontWeight(.semibold)
 //                            .foregroundColor(userStatus == "liked" ? .blue : .black)
 //                    }
-//                    
+//
 //                    Text("\(comment.likes.count - comment.dislikes.count)")
 //                        .font(.callout)
-//                    
+//
 //                    Button(action: {
 //                        if userStatus != "disliked" {
 //                            postVM.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
@@ -201,7 +208,7 @@ struct CommentView: View {
         likes: ["2lCFmL9FRjhY1v1NMogD5H6YuMV2", "2lCFmL9FRjhY1v1NMogD5H6YuMV2"],
         dislikes: ["2lCFmL9FRjhY1v1NMogD5H6YuMV2"],
         content: "I might swerve, bend that corner, woah. I might swerve, bend that corner, woah. I might swerve, bend that corner, woah. I might swerve, bend that corner, woah."
-    ))
+    ), responseOption1: "Yes", userResponseOption: "Yes")
     .environmentObject(UserFirebase())
     .environmentObject(PostFirebase())
 }

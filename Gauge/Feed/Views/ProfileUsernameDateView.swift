@@ -21,8 +21,8 @@ struct ProfileUsernameDateView: View {
             Text(userVM.useridsToPhotosAndUsernames[userId]?.1 ?? "")
                 .font(.system(size: 15))
                 .foregroundStyle(.black)
-            
-            Text("•  \(DateConverter.timeAgo(from: dateTime))")
+
+            Text("•  \(DateConverter.timeAgo(from: dateTime)) ago")
                 .font(.system(size: 15))
                 .foregroundStyle(.gray)
         }
