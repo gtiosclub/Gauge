@@ -12,51 +12,75 @@ struct BinaryFeedResults: View {
     var optionSelected: Int
     
     var body: some View {
+        let _ = print("CATEGORIES:", post.categories)
         VStack {
             HStack {
                 Spacer()
-                VStack {
-                    Text("NEXT")
-                        .foregroundStyle(.gray)
-                        .opacity(0.5)
-                    
-                    Image(systemName: "arrow.down")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30, alignment: .center)
-                        .foregroundStyle(.gray)
-                        .opacity(0.5)
-                }
+//                VStack {
+//                    Text("NEXT")
+//                        .foregroundStyle(.gray)
+//                        .opacity(0.5)
+//                    
+//                    Image(systemName: "arrow.down")
+//                        .resizable()
+//                        .scaledToFit()
+//                        .frame(width: 30, height: 30, alignment: .center)
+//                        .foregroundStyle(.gray)
+//                        .opacity(0.5)
+//                }
                 
                 Spacer()
             }
             
             Spacer(minLength: 30.0)
             
-            HStack {
-                profileImage
-                
-                Text(post.userId)
-                    .font(.system(size: 16))
-                    .padding(.leading, 10)
-                
-                Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
-                    .font(.system(size: 13))
-                    .padding(.leading, 5)
-                    .foregroundStyle(.gray)
-                
-                Spacer()
-            }
-            .padding(.horizontal)
-            
-            HStack {
-                Text(post.question)
-                    .padding(.top, 10)
-                    .font(.system(size: 25))
-                    .frame(alignment: .leading)
-                    .fontWeight(.bold)
+            VStack {
+                HStack {
+                    profileImage
                     
-                Spacer()
+                    Text(post.userId)
+                        .font(.system(size: 16))
+                        .padding(.leading, 10)
+                    
+                    Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
+                        .font(.system(size: 13))
+                        .padding(.leading, 5)
+                        .foregroundStyle(.gray)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal)
+                
+                HStack {
+                    if(post.categories.isEmpty) {
+                        Text(verbatim: "No Categories Found")
+                    } else {
+                        ForEach(post.categories, id: \.self) { category in
+                            Text(category.rawValue)
+                                .font(.system(size: 12))
+                                .padding(.top, 6)
+                                .padding(.bottom, 6)
+                                .padding(.leading, 8)
+                                .padding(.trailing, 8)
+                                .background(Color.categoryGray)
+                                .cornerRadius(100)
+                                .foregroundColor(.gray)
+                                .padding(.trailing, 10)
+                        }
+                    }
+
+                }
+               
+                
+                HStack {
+                    Text(post.question)
+                        .padding(.top, 10)
+                        .font(.system(size: 25))
+                        .frame(alignment: .leading)
+                        .fontWeight(.bold)
+                    
+                    Spacer()
+                }
             }
             .padding(.horizontal)
             

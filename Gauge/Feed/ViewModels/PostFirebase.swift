@@ -162,6 +162,7 @@ class PostFirebase: ObservableObject {
                             )
                             return (postId, post)
 
+
                         case PostType.SliderPost.rawValue:
                             let post = SliderPost(
                                 postId: postId,
