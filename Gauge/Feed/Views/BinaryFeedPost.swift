@@ -230,7 +230,7 @@ struct BinaryFeedPost: View {
                 StackedProfiles(
                     userIds: post.responses
                         .map { $0.userId }
-                        .filter { userVM.user.friends.keys.contains($0) }
+                        .filter { userVM.user.friends.contains($0) }
                 )
                 
                 Spacer()
