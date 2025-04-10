@@ -97,7 +97,7 @@ func findUserResponse(post: any Post, userId: String) -> (Bool, String) {
             if let binaryPost = post as? BinaryPost {
                 return (binaryPost.responseOption1 == response.responseOption, response.responseOption)
             } else if let sliderPost = post as? SliderPost {
-                return (Int(response.responseOption) ?? 0 < 3, response.responseOption)
+                return ((Int(response.responseOption) ?? 1) - 1 > 3, String((Int(response.responseOption) ?? 1) - 1))
             }
         }
     }

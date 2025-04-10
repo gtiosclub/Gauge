@@ -216,7 +216,7 @@ struct FeedView: View {
                                                 } else if let sliderPost = post as? SliderPost {
                                                     shouldSubmit = optionSelected != 3
                                                     if shouldSubmit && !isConfirmed {
-                                                        postVM.addResponse(postId: sliderPost.postId, userId: user.userId, responseOption: String(optionSelected))
+                                                        postVM.addResponse(postId: sliderPost.postId, userId: user.userId, responseOption: (optionSelected < 3 ? String(optionSelected + 1) : String(optionSelected)))
                                                     }
                                                 } else {
                                                     shouldSubmit = false
