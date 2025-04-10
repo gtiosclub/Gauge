@@ -18,10 +18,7 @@ class SearchViewModel: ObservableObject {
             .collection("queries")
             .document()
         
-        let request: [String: Any] = [
-            "query": query
-        ]
-        
+        let request: [String: Any] = [ "query": query ]
         try await queryDocRef.setData(request)
         
         var postIds: [String] = []
@@ -30,12 +27,14 @@ class SearchViewModel: ObservableObject {
         
         while attempts < maxAttempts {
             attempts += 1
-            
             try await Task.sleep(nanoseconds: 500_000_000) // 500ms
-            
             let docSnapshot = try await queryDocRef.getDocument()
-            guard let data = docSnapshot.data() else { continue }
+            guard let data = docSnapshot.data() else {
+                print("No data on attempt \(attempts)")
+                continue
+            }
             
+            print("Attempt \(attempts) - status data: \(data["status"] ?? "nil")")
             if let status = data["status"] as? [String: Any],
                let textQuery = status["textQuery"] as? [String: Any],
                let state = textQuery["state"] as? String,
@@ -44,24 +43,18 @@ class SearchViewModel: ObservableObject {
                 if let result = data["result"] as? [String: Any],
                    let ids = result["ids"] as? [String] {
                     postIds = ids
+                    print("Vector search COMPLETED with \(ids.count) ids.")
+                } else {
+                    print("No IDs found in result.")
                 }
                 break
             }
         }
         try await queryDocRef.delete()
-        
+        print("Returning \(postIds.count) post IDs for query: \(query)")
         return postIds
     }
     
-    func getPostQuestion(postId: String) async -> String? {
-        do {
-            let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
-            guard let postData = document.data() else { return nil }
-            return postData["question"] as? String
-        } catch {
-            return nil
-        }
-    }
     
     func getPostDateTime(postId: String) async -> String? {
         do {
@@ -74,81 +67,82 @@ class SearchViewModel: ObservableObject {
         }
     }
     
-    func getPostOptions(postId: String) async -> [String]? {
+    
+    func getPostDetails(for postId: String) async -> PostResult? {
         do {
-            let document = try await Firebase.db.collection("POSTS").document(postId).getDocument()
-            guard let postData = document.data() else { return nil }
-            guard let option1 = postData["responseOption1"] as? String else { return nil }
-            guard let option2 = postData["responseOption2"] as? String else { return nil }
-            return [option1, option2]
+            let doc = try await Firebase.db.collection("POSTS").document(postId).getDocument()
+            guard let data = doc.data() else {
+                print("No data for postId: \(postId)")
+                return nil
+            }
+            
+            guard let question = data["question"] as? String,
+                  let dateString = data["postDateAndTime"] as? String,
+                  let date = DateConverter.convertStringToDate(dateString)
+            else {
+                print("Missing required fields (question or postDateAndTime) for postId: \(postId)")
+                return nil
+            }
+            
+            let profilePhoto = data["profilePhoto"] as? String ?? ""
+            let username = data["username"] as? String ?? "Unknown"
+            let categories = data["categories"] as? [String] ?? []
+            
+            let responsesSnapshot = try await Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").getDocuments()
+            let voteCount = responsesSnapshot.documents.count
+            let timeAgo = DateConverter.timeAgo(from: date)
+            
+            return PostResult(id: postId,
+                              question: question,
+                              timeAgo: timeAgo,
+                              username: username,
+                              profilePhoto: profilePhoto,
+                              categories: categories,
+                              voteCount: voteCount)
         } catch {
+            print("Error fetching full post details for \(postId): \(error.localizedDescription)")
             return nil
         }
     }
     
-    /// Combines the three awaits into one function that returns a PostResult.
-    func getPostDetails(for postId: String) async -> PostResult? {
-        async let question = getPostQuestion(postId: postId)
-        async let options = getPostOptions(postId: postId)
-        async let timeAgo = getPostDateTime(postId: postId)
-        
-        let (q, opts, ta) = await (question, options, timeAgo)
-        guard let q = q else { return nil }
-        return PostResult(id: postId, question: q, options: opts ?? [], timeAgo: ta ?? "Just now")
-    }
-    
     func searchPosts(for query: String) async throws -> [PostResult] {
         let postIds = try await searchSimilarQuestions(query: query)
+        print("Vector search returned \(postIds.count) post IDs for query: \(query)")
         var results: [PostResult] = []
         
         for postId in postIds {
             if let details = await getPostDetails(for: postId) {
                 results.append(details)
+            } else {
+                print("No details for postId: \(postId)")
             }
         }
         
+        print("Topic search returning \(results.count) posts for query: \(query)")
         return results
     }
     
-    func searchQuestions(for query: String) async throws -> [String] {
-        let postIds = try await searchSimilarQuestions(query: query)
-        var questions: [String] = []
-        
-        for postId in postIds {
-            if let question = await getPostQuestion(postId: postId) {
-                questions.append(question)
-            }
-        }
-        
-        return questions
-    }
     
     func searchPostsByCategory(_ category: Category) async throws -> [PostResult] {
-
+        print("Filtering posts for category: \(category.rawValue)")
         let snapshot = try await Firestore.firestore()
             .collection("POSTS")
             .whereField("categories", arrayContains: category.rawValue)
             .getDocuments()
-
-
+        
+        print("Category query for \(category.rawValue) returned \(snapshot.documents.count) documents.")
+        
         var results: [PostResult] = []
-
         for document in snapshot.documents {
-            let data = document.data()
-
-            guard let question = data["question"] as? String else { continue }
-            let options = [
-                data["responseOption1"] as? String ?? "",
-                data["responseOption2"] as? String ?? ""
-            ]
             let postId = document.documentID
-            let postDateAndTime = data["postDateAndTime"] as? String ?? ""
-            let timeAgo = DateConverter.timeAgo(from: DateConverter.convertStringToDate(postDateAndTime) ?? Date())
-
-            let postResult = PostResult(id: postId, question: question, options: options, timeAgo: timeAgo)
-            results.append(postResult)
+            if let details = await getPostDetails(for: postId) {
+                results.append(details)
+            } else {
+                print("Failed to get details for postId: \(postId) in category search.")
+            }
         }
-
+        
+        print("Category search returning \(results.count) posts for category: \(category.rawValue)")
         return results
     }
 
@@ -168,7 +162,6 @@ class SearchViewModel: ObservableObject {
                 profilePhotoUrl: data["profilePhoto"] as? String ?? ""
             )
             
-            // Add attributes
             result.attributes = data["attributes"] as? [String: String] ?? [:]
             
             return result

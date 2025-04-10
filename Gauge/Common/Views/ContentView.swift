@@ -114,7 +114,7 @@ struct ContentView: View {
 //                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
 //                                }
                             }
-                            
+                                                        
                             await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
                             postVM.watchForCurrentFeedPostChanges()
                             
