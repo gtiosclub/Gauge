@@ -19,9 +19,9 @@ class User: Equatable, Identifiable, ObservableObject {
     var attributes: [String: String] = [:]
     // MARK: MANDATORY
     
-    var friendIn: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
-    var friendOut: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
-    var friends: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
+    var friendIn: [String] = [] // userIds
+    var friendOut: [String] = [] // userIds
+    var friends: [String] = [] // userIds
     var badges: [String] = []
     var profilePhoto: String
     var phoneNumber: String = ""
@@ -58,7 +58,7 @@ class User: Equatable, Identifiable, ObservableObject {
     }
     
 
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], myTopics: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, attributes: [String: String]) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String], friendOut: [String], friends: [String], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], myTopics: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, attributes: [String: String]) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
