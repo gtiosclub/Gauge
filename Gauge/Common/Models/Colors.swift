@@ -19,5 +19,8 @@ extension Color {
     static let lightBlue = Color(red: 204.0 / 255, green: 228.0 / 255, blue: 255.0 / 255)
     static let darkBlue = Color(red: 0.0 / 255, green: 122.0 / 255, blue: 255.0 / 255)
     static let categoryGray = Color(red: 235.0 / 255, green: 235.0 / 255, blue: 235.0 / 255)
+    static let blackGray = Color(red: 61.0 / 255, green: 61.0 / 255, blue: 61.0 / 255)
+    static let whiteGray = Color(red: 251.0 / 255, green: 251.0 / 255, blue: 251.0 / 255)
+
 
 }

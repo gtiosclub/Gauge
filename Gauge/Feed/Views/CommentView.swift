@@ -12,24 +12,36 @@ struct CommentView: View {
     @EnvironmentObject private var postVm: PostFirebase
     let comment: Comment
     let profilePhotoSize: CGFloat = 25
+    let responseOption1: String
     @State private var username: String = ""
     @State private var profilePhoto: String = ""
     @State var userStatus = "none"
+    @State var likeCount: Int = 0
+    @State var dislikeCount : Int = 0
+    @State var userResponseOption: String = ""
+
 
     func fetchUserInfo() {
+        print("fetchUserInfo CALLED")
         userVm.getUsernameAndPhoto(userId: comment.userId) { info in
             username = info["username"] ?? ""
             profilePhoto = info["profilePhoto"] ?? ""
         }
-        
+        postVm.getUserResponseForComment(postId: comment.postId, userId: comment.userId) { responseOption in
+            userResponseOption = responseOption ?? ""
+            print("COMMENT VIEW", comment.userId)
+        }
         if comment.likes.contains(userVm.user.id) {
             userStatus = "liked"
         } else if comment.dislikes.contains(userVm.user.id) {
             userStatus = "disliked"
         } else {
         }
+        likeCount =  comment.likes.count
+        dislikeCount = comment.dislikes.count
     }
     
+
     struct LabelledDivider: View {
 
         let label: String
@@ -48,7 +60,7 @@ struct CommentView: View {
                 ZStack {
                     Text(label)
                         .font(.system(size: 14))
-                        .foregroundColor(color)
+                        .foregroundColor(Color.whiteGray)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 4)
                         .background(
@@ -62,59 +74,24 @@ struct CommentView: View {
         var line: some View {
             VStack {
                 Divider()
-                    .background(color)
+                    .background(Color.whiteGray)
             }
             .padding(horizontalPadding)
         }
     }
     
+
     var body: some View {
         VStack {
             Spacer()
             HStack {
                 VStack {
                     HStack(spacing: 4) {
-                        if profilePhoto != "", let url = URL(string: profilePhoto) {
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                        .clipShape(Circle())
-                                case .failure, .empty:
-                                    Image(systemName: "person.circle.fill")
-                                        .resizable()
-                                        .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                        .foregroundColor(.gray)
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
-                        } else {
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: profilePhotoSize, height: profilePhotoSize)
-                                .foregroundColor(.gray)
-                        }
-                        
-                        Text(username)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.black)
-                            .padding(.leading, 6)
-                        
-                        Text("•")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(Color(white: 0.5))
-                        
-                        Text("\(DateConverter.timeAgo(from: comment.date)) ago")
-                            .font(.subheadline)
-                            .foregroundColor(Color(white: 0.5))
-                        
+                        ProfileUsernameDateView(dateTime:comment.date, userId: comment.userId)
                         //TODO: Make label modular and use it to change color
-                        LabelledDivider(label: "Yes", color: userStatus == "liked" ? .green : (userStatus == "disliked") ? .red : Color(white: 0.5))
+                        LabelledDivider(label: userResponseOption ?? "", color: userResponseOption == responseOption1 ? .green : .red )
+                        let _ = print("USER RESPONSE OPTION", userResponseOption)
+                        let _ = print("RESPONSE OPTION 1 ", responseOption1)
                         
                     }
                     .frame(alignment: .leading)
@@ -136,9 +113,11 @@ struct CommentView: View {
                             if userStatus != "liked" {
                                 postVm.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
                                 userStatus = "liked"
+                                likeCount = likeCount + 1
                             } else {
                                 postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
                                 userStatus = "none"
+                                likeCount = likeCount - 1
                             }
 
                         } label: {
@@ -157,7 +136,7 @@ struct CommentView: View {
                             }
                         }
                         
-                        Text("\(comment.likes.count - comment.dislikes.count)")
+                        Text("\(likeCount - dislikeCount)")
                             .foregroundColor(userStatus == "liked" ? .green : (userStatus == "disliked") ? .red : Color(white: 0.5))
                         
                         Button {
@@ -165,9 +144,13 @@ struct CommentView: View {
                             if userStatus != "disliked" {
                                 postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
                                 userStatus = "disliked"
+                                dislikeCount = dislikeCount + 1
+
                             } else  {
                                 postVm.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
                                 userStatus = "none"
+                                dislikeCount = dislikeCount - 1
+
                             }
 
                         } label: {
@@ -201,7 +184,7 @@ struct CommentView: View {
 //                            postVm.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
 //                            userStatus = "none"
 //                        }
-//                        
+//
 //                    }) {
 //                        Image(systemName: "arrow.up")
 //                            .resizable()
@@ -209,10 +192,10 @@ struct CommentView: View {
 //                            .fontWeight(.semibold)
 //                            .foregroundColor(userStatus == "liked" ? .blue : .black)
 //                    }
-//                    
+//
 //                    Text("\(comment.likes.count - comment.dislikes.count)")
 //                        .font(.callout)
-//                    
+//
 //                    Button(action: {
 //                        if userStatus != "disliked" {
 //                            postVm.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVm.user.id)
@@ -251,7 +234,7 @@ struct CommentView: View {
         likes: ["2lCFmL9FRjhY1v1NMogD5H6YuMV2", "2lCFmL9FRjhY1v1NMogD5H6YuMV2"],
         dislikes: ["2lCFmL9FRjhY1v1NMogD5H6YuMV2"],
         content: "I might swerve, bend that corner, woah. I might swerve, bend that corner, woah. I might swerve, bend that corner, woah. I might swerve, bend that corner, woah."
-    ))
+    ), responseOption1: "Yes", userResponseOption: "Yes")
     .environmentObject(UserFirebase())
     .environmentObject(PostFirebase())
 }

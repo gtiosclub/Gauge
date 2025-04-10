@@ -49,7 +49,7 @@ class PostFirebase: ObservableObject {
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
                             postId: self.feedPosts[0].postId,
-                            userId: id,
+                            userId: newCommentDoc["userId"] as? String ?? "",
                             date: date,
                             commentId: id,
                             likes: newCommentDoc["likes"] as? [String] ?? [],
@@ -70,7 +70,7 @@ class PostFirebase: ObservableObject {
                         let newComment = Comment(
                             commentType: CommentType.text,  // THIS NEEDS TO BE MODIFIED LATER!!~
                             postId: self.feedPosts[0].postId,
-                            userId: id,
+                            userId: newCommentDoc["userId"] as? String ?? "",
                             date: date,
                             commentId: id,
                             likes: newCommentDoc["likes"] as? [String] ?? [],
@@ -263,9 +263,6 @@ class PostFirebase: ObservableObject {
                             let categories = Category.mapStringsToCategories(returnedStrings: categoryStrings);
                             let post = SliderPost(postId: newPostData["postId"] as? String ?? "",
                                                   userId: newPostData["userId"] as? String ?? "",
-//<<<<<<< HEAD
-//                                                  categories: categories,
-//=======
                                                   categories: Category.mapStringsToCategories(returnedStrings: newPostData["categories"] as? [String] ?? []),
                                                   topics: newPostData["topics"] as? [String] ?? [],
                                                   postDateAndTime: (newPostData["postDateAndTime"] as? Timestamp)?.dateValue()
@@ -730,6 +727,30 @@ class PostFirebase: ObservableObject {
                 completion(responses)
             }
         }
+    }
+    
+    func getUserResponseForComment(postId: String, userId: String, completion: @escaping (String?) -> Void) {
+        print("Method Called")
+        print(userId)
+        print(postId)
+        Firebase.db.collection("POSTS").document(postId).collection("RESPONSES")
+            .whereField("userId", isEqualTo: userId)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error getting user response: \(error)")
+                    completion(nil)
+                    return
+                }
+                
+                if let document = snapshot?.documents.first,
+                   let responseOption = document.data()["responseOption"] as? String {
+                    print("BACKEND RESPONSE OPTION", responseOption)
+                    completion(responseOption)
+                } else {
+                    print("Number of documents found: \(snapshot?.documents.count ?? 0)")
+                    completion(nil)
+                }
+            }
     }
     
     func suggestPostCategories(question: String, captions: [String], completion: @escaping (([Category]) -> Void)) {

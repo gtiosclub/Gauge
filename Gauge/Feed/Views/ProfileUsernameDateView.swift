@@ -22,9 +22,9 @@ struct ProfileUsernameDateView: View {
                 .font(.system(size: 16))
                 .foregroundStyle(.black)
             
-            Text("•  \(DateConverter.timeAgo(from: dateTime))")
+            Text("•  \(DateConverter.timeAgo(from: dateTime)) ago")
                 .font(.system(size: 13))
-                .foregroundStyle(.gray)
+                .foregroundStyle(.black)
         }
         .padding(.leading)
         .task {

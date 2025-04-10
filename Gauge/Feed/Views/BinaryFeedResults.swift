@@ -9,10 +9,21 @@ import SwiftUI
 
 struct BinaryFeedResults: View {
     @ObservedObject var post: BinaryPost
+    @EnvironmentObject var userVM: UserFirebase
+
     var optionSelected: Int
     
     var body: some View {
-        let _ = print("CATEGORIES:", post.categories)
+//        let _ = print("CATEGORIES:", post.categories)
+//        let _ = print("USERIDS",  post.responses
+//            .filter { response in
+//                userVM.user.friends.keys.contains(response.userId) &&
+//                response.responseOption == post.responseOption1
+//            }
+//            .map { $0.userId })
+//        let _ = print("USERIDS", post.responses
+//            .map { $0.userId }
+//            .filter { userVM.user.friends.keys.contains($0) })
         VStack {
             HStack {
                 Spacer()
@@ -34,22 +45,10 @@ struct BinaryFeedResults: View {
             
             Spacer(minLength: 30.0)
             
-            VStack {
-                HStack {
-                    profileImage
-                    
-                    Text(post.userId)
-                        .font(.system(size: 16))
-                        .padding(.leading, 10)
-                    
-                    Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime)) ago")
-                        .font(.system(size: 13))
-                        .padding(.leading, 5)
-                        .foregroundStyle(.gray)
-                    
-                    Spacer()
-                }
-                .padding(.horizontal)
+            VStack(alignment: .leading) {
+                ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(4)
                 
                 HStack {
                     if(post.categories.isEmpty) {
@@ -79,7 +78,6 @@ struct BinaryFeedResults: View {
                     Text(post.question)
                         .padding(.top, 10)
                         .font(.system(size: 24))
-                        .frame(alignment: .leading)
                         .fontWeight(.semibold)
                     
                     Spacer()
@@ -90,15 +88,39 @@ struct BinaryFeedResults: View {
             BinaryResultView(post: post, optionSelected: optionSelected)
                 .padding(.top, 10)
                 
-            Text("\(post.calculateResponses().reduce(0, +)) votes")
-                .foregroundColor(.gray)
-                .padding(.top, 10)
+            HStack {
+                StackedProfiles(
+                    userIds: post.responses
+                        .filter { response in
+                            userVM.user.friends.keys.contains(response.userId) &&
+                            response.responseOption == post.responseOption1
+                        }
+                        .map { $0.userId }
+                )
+                Text("\(post.calculateResponses().reduce(0, +)) votes")
+                    .foregroundColor(Color.blackGray)
+                    .font(.system(size: 12))
+                StackedProfiles(
+                    userIds: post.responses
+                        .filter { response in
+                            userVM.user.friends.keys.contains(response.userId) &&
+                            response.responseOption == post.responseOption1
+                        }
+                        .map { $0.userId }
+                )
+                
+            }
+            .padding(.top, 10)
+
+  
                         
             withAnimation(.none, {
-                CommentsView(comments: post.comments)
+                CommentsView(comments: post.comments, postId: post.postId, responseOption1: post.responseOption1)
                     .onChange(of: post.comments) {old, new in
                             print("recognized  commentschanged")
                     }
+                    .frame(maxWidth: .infinity)
+                    .ignoresSafeArea()
             })
         }
         .padding()
