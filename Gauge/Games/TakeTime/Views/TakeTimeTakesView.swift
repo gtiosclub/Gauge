@@ -6,15 +6,82 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
+
+struct Take: Identifiable, Codable {
+    @DocumentID var id: String?
+    var take: String
+    var category: String
+    var topic: String
+    var createdAt: Date?
+}
+
+class TakesVM: ObservableObject {
+    @Published var takes: [Take] = []
+    @Published var binaryposts: [BinaryPost] = []
+    
+    private var db = Firestore.firestore()
+    
+    init() {
+        fetchTakes()
+        
+        for elm in takes {
+            
+            binaryposts.append(
+                BinaryPost(
+                    postId: "",
+                    userId: "",
+                    username: "",
+                    comments: [],
+                    responses: [],
+                    categories: [],
+                    viewCounter: 1_020,
+                    postDateAndTime: Date(),
+                    question: elm.take,
+                    responseOption1: "No",
+                    responseOption2: "Yes",
+                    responseResult1: 0,
+                    responseResult2: 0,
+                    favoritedBy: []
+            ))
+        }
+    }
+    
+    func addView(responseOption: Int) {
+        if let post = binaryposts.first as? BinaryPost {
+            if responseOption == 1 {
+                post.responseResult1 += 1
+            } else if responseOption == 2 {
+                post.responseResult2 += 1
+            }
+        }
+    }
+    
+    func fetchTakes() {
+        db.collection("TakeTime")
+            .addSnapshotListener { snapshot, error in
+                if let error = error {
+                    print("Error fetching takes: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else { return }
+                self.takes = documents.compactMap { document in
+                    try? document.data(as: Take.self)
+                }
+            }
+    }
+}
 
 struct TakeTimeTakesView: View {
-    @EnvironmentObject var userVM: UserFirebase
-    @EnvironmentObject var postVM: PostFirebase
+//    @EnvironmentObject var userVM: UserFirebase
+//    @EnvironmentObject var postVM: PostFirebase
     @State private var dragOffset: CGSize = .zero
     @State private var opacityAmount = 1.0
     @State private var optionSelected: Int = 0
     @State private var isConfirmed: Bool = false
     @State private var hasSkipped: Bool = false
+    @StateObject var takeVM = TakesVM()
     
     var body: some View {
         GeometryReader { geo in
@@ -50,7 +117,7 @@ struct TakeTimeTakesView: View {
                 
                 withAnimation(.none) {
                     HStack {
-                        if postVM.feedPosts.indices.contains(1), let post = postVM.feedPosts[1] as? BinaryPost {
+                        if takeVM.binaryposts.indices.contains(1), let post = takeVM.binaryposts[1] as? BinaryPost {
                             TakeTimeBinaryPost(post: post, dragAmount: .constant(CGSize(width: 0.0, height: 0.0)), optionSelected: .constant(0), skipping: $hasSkipped)
                                 .background(
                                     RoundedRectangle(cornerRadius: 20.0)
@@ -71,7 +138,7 @@ struct TakeTimeTakesView: View {
                 }
                 
                 VStack {
-                    if let post = postVM.feedPosts.first as? BinaryPost {
+                    if let post = takeVM.binaryposts.first as? BinaryPost {
                         ZStack(alignment: .top) {
                             TakeTimeBinaryPost(post: post, dragAmount: $dragOffset, optionSelected: $optionSelected, skipping: $hasSkipped)
                                 .frame(width: max(0, geo.size.width))
@@ -138,9 +205,9 @@ struct TakeTimeTakesView: View {
                                     if dragOffset.height < -150 {
                                         if optionSelected != 0 {
                                             if !isConfirmed && optionSelected == 1 {
-                                                postVM.addView(responseOption: optionSelected)
+                                                takeVM.addView(responseOption: optionSelected)
                                             } else if !isConfirmed {
-                                                postVM.addView(responseOption: optionSelected)
+                                                takeVM.addView(responseOption: optionSelected)
                                             }
                                             withAnimation {
                                                 isConfirmed = true
@@ -162,14 +229,14 @@ struct TakeTimeTakesView: View {
                                         
                                         if gesture.translation.width > 0 {
                                             optionSelected = 2
-                                            postVM.addView(responseOption: optionSelected)
+                                            takeVM.addView(responseOption: optionSelected)
                                             withAnimation {
                                                 isConfirmed = true
                                             }
                                             dragOffset = .zero
                                         } else {
                                             optionSelected = 1
-                                            postVM.addView(responseOption: optionSelected)
+                                            takeVM.addView(responseOption: optionSelected)
                                             withAnimation {
                                                 isConfirmed = true
                                             }
@@ -186,10 +253,10 @@ struct TakeTimeTakesView: View {
                         .onEnded { gesture in
                             if isConfirmed {
                                 // Next post logic
-                                postVM.feedPosts.remove(at: 0)
+                                takeVM.binaryposts.remove(at: 0)
                             } else {
                                 // Skip logic
-                                postVM.feedPosts.remove(at: 0)
+                                takeVM.binaryposts.remove(at: 0)
                             }
                             isConfirmed = false
                             optionSelected = 0
@@ -205,14 +272,14 @@ struct TakeTimeTakesView: View {
             .frame(width: min(geo.size.width, UIScreen.main.bounds.width))
             .background(.black)
         }
-        .onAppear() {
-            postVM.addDummyPosts()
-        }
+//        .onAppear() {
+//            postVM.addDummyPosts()
+//        }
     }
 }
 
 #Preview {
     TakeTimeTakesView()
-        .environmentObject(UserFirebase())
-        .environmentObject(PostFirebase())
+//        .environmentObject(UserFirebase())
+//        .environmentObject(PostFirebase())
 }
