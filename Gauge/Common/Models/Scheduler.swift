@@ -15,13 +15,13 @@ class Scheduler: ObservableObject {
     private var timer: Timer?
 
     init() {
-        startDailyInterruptTimer()
+//        startDailyInterruptTimer()
     }
 
     func startDailyInterruptTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: false) { _ in
-            self.triggerInterrupt()
-        }
+//        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: false) { _ in
+//            self.triggerInterrupt()
+//        }
     }
 
     private func checkForInterrupt() {

@@ -5,9 +5,12 @@
 //  Created by Datta Kansal on 3/6/25.
 //
 
-struct PostResult: Identifiable {
+struct PostResult: Identifiable, Codable {
     let id: String
     let question: String
-    let options: [String]
     let timeAgo: String
+    let username: String
+    let profilePhoto: String
+    let categories: [String]
+    let voteCount: Int
 }

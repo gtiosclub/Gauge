@@ -18,13 +18,17 @@ struct FirebaseTesting: View {
                 VStack(spacing: 20) {
                     Section(header: Text("Write Data")) {
                         Button("Add Binary Post") {
-                            postVM.createBinaryPost(
-                                userId: "Zmi5Cgm7dtbqCDbLOrhbbDAq8T92",
-                                categories: [.sports(.nba)],
-                                question: "Is Shai the MVP",
-                                responseOption1: "Nah, free throw merchant🙅‍♂️",
-                                responseOption2: "Stats dont lie"
-                            )
+                            Task {
+                                await postVM.createBinaryPost(
+                                    userId: "Zmi5Cgm7dtbqCDbLOrhbbDAq8T92",
+                                    categories: [.sports(.nba)],
+                                    question: "Is Shai the MVP",
+                                    responseOption1: "No",
+                                    responseOption2: "Yes",
+                                    sublabel1: "Nah, free throw merchant🙅‍♂️",
+                                    sublabel2: "Stats dont lie"
+                                )
+                            }
                         }
                         
                         
@@ -34,25 +38,26 @@ struct FirebaseTesting: View {
                         }
                         
                         Button("Add Slider Post") {
-                            postVM.createSliderPost(
-                                userId: "austin",
-                                categories: [.educational(.cs)],
-                                question: "rate Swift 1-10",
-                                lowerBoundValue: 1,
-                                upperBoundValue: 10,
-                                lowerBoundLabel: "Terrible 🤮",
-                                upperBoundLabel: "Goated 🐐"
-                            )
+                            Task {
+                                await
+                                postVM.createSliderPost(
+                                    userId: "austin",
+                                    categories: [.educational(.cs)],
+                                    question: "rate Swift 1-10",
+                                    lowerBoundLabel: "Terrible 🤮",
+                                    upperBoundLabel: "Goated 🐐"
+                                )
+                            }
                         }
                         
-                        Button("Add Ranked Post") {
-                            postVM.createRankPost(
-                                userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
-                                categories: [.arts(.music)],
-                                question: "Best Half-Time Performance?",
-                                responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
-                            )
-                        }
+//                        Button("Add Ranked Post") {
+//                            postVM.createRankPost(
+//                                userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+//                                categories: [.arts(.music)],
+//                                question: "Best Half-Time Performance?",
+//                                responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
+//                            )
+//                        }
                         
                         Button("Add user to VIEWS of a post (hardcoded for Firebase testing)") {
                             postVM.addViewToPost(
@@ -108,26 +113,14 @@ struct FirebaseTesting: View {
 //                            }
 //                        }
                         
-                        Button("Add Slider Post") {
-                            postVM.createSliderPost(
-                                userId: "xEZWt93AaJZPwfHAjlqMjmVP0Lz1",
-                                categories: [.educational(.cs)],
-                                question: "rate Swift 1-10",
-                                lowerBoundValue: 1,
-                                upperBoundValue: 10,
-                                lowerBoundLabel: "Terrible 🤮",
-                                upperBoundLabel: "Goated 🐐"
-                            )
-                        }
-                        
-                        Button("Add Ranked Post") {
-                            postVM.createRankPost(
-                                userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
-                                categories: [.arts(.music)],
-                                question: "Best Half-Time Performance?",
-                                responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
-                            )
-                        }
+//                        Button("Add Ranked Post") {
+//                            postVM.createRankPost(
+//                                userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
+//                                categories: [.arts(.music)],
+//                                question: "Best Half-Time Performance?",
+//                                responseOptions: ["Kendrick Lamar", "Rihanna", "The Weeknd", "Shakira + J Lo"]
+//                            )
+//                        }
                         
                         Button("Add response") {
                             postVM.addResponse(
@@ -224,9 +217,9 @@ struct FirebaseTesting: View {
                             )
                         }
                         
-                        Button("Generate 20 Keywords") {
-                            postVM.generatePostKeywords(postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2")
-                        }
+//                        Button("Generate 20 Keywords") {
+//                            postVM.generatePostKeywords(postId: "B2A9F081-A10C-4957-A6B8-0295F0C700A2")
+//                        }
                         
                         Button("Remove View") {
                             postVM.removeView(
@@ -248,7 +241,7 @@ struct FirebaseTesting: View {
                     Section("OpenAI Queries") {
                         Button("Suggest Post Categories") {
                             postVM.suggestPostCategories(
-                                question: "Which channel is better?", responseOptions: ["National Geographic", "Animal Planet"]
+                                question: "Which channel is better?", captions: ["National Geographic", "Animal Planet"]
                             ) { suggestedCategories in
                                 print(suggestedCategories)
                             }
