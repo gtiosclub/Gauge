@@ -11,7 +11,10 @@ struct HomeView: View {
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
     @State var showComments: Bool = false
+    @State var showPostCreation: Bool = false
     @State var selectedCategories: [Category] = []
+    
+    @State var modalSize: CGFloat = 380
     
     var body: some View {
         NavigationStack {
@@ -27,43 +30,33 @@ struct HomeView: View {
                 }
                 
                 NavigationLink("Select Categories Screen") {
-                    SelectCategories(
-                        selectedCategories: $selectedCategories,
-                        question: "Which channel is better?",
-                        responseOptions: ["National Geographic", "Animal Planet"]
-                    )
+//                    SelectCategories(
+//                        selectedCategories: $selectedCategories,
+//                        question: "Which channel is better?",
+//                        responseOptions: ["National Geographic", "Animal Planet"]
+//                    )
+                }
+                
+                Button("Post creation view") {
+                    showPostCreation = true
                 }
                 
                 NavigationLink("Feed View") {
                     FeedView()
                 }
+//                NavigationLink("Add Comment view"){
+//                    AddCommentView()
+//                }
             }
-            .sheet(isPresented: $showComments) {
-                CommentsView(
-                    comments: [
-                        Comment(
-                            commentType: .text,
-                            postId: "555555555",
-                            userId: "Lv72Qz7Qc4TC2vDeE94q",
-                            date: Calendar.current.date(byAdding: .hour, value: -5, to: Date())!,
-                            commentId: "",
-                            likes: [],
-                            dislikes: [],
-                            content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
-                        ),
-                        Comment(
-                            commentType: .text,
-                            postId: "555555555",
-                            userId: "Lv72Qz7Qc4TC2vDeE94q",
-                            date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
-                            commentId: "",
-                            likes: [],
-                            dislikes: [],
-                            content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
-                        )
-                    ]
-                )
-                .presentationDetents([.medium])
+            .sheet(isPresented: $showPostCreation) {
+                PostCreationView(modalSize: $modalSize, showCreatePost: $showPostCreation)
+                    .presentationDetents([.height(modalSize)])
+                    .presentationBackground(.clear)
+                    .background(
+                        RoundedRectangle(cornerRadius: 36, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .padding(.horizontal, 10)
             }
         }
     }

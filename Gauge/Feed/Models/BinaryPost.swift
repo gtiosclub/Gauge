@@ -7,13 +7,14 @@
 
 import Foundation
 
-class BinaryPost: Post, Equatable {
+class BinaryPost: Post, Equatable, ObservableObject {
     // Post protocol attributes
     @Published var postId: String
     var userId: String
     var username: String = "" // NOT stored in Firebase
     var profilePhoto: String = "" // NOT stored in Firebase
     var categories: [Category]
+    var topics: [String]
     var postDateAndTime: Date
     var favoritedBy: [String]
     var question: String
@@ -26,11 +27,11 @@ class BinaryPost: Post, Equatable {
     // Binary post specific attributes
     var responseOption1: String
     var responseOption2: String
-    @Published var responseResult1: Int
-    @Published var responseResult2: Int
+    var sublabel1: String
+    var sublabel2: String
     
     // Initializing locally
-    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String) {
+    init (postId: String, userId: String, categories: [Category], postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -41,16 +42,17 @@ class BinaryPost: Post, Equatable {
         self.postDateAndTime = postDateAndTime
         self.favoritedBy = []
         self.question = question
+        self.topics = []
         
         // Binary post specific attributes
         self.responseOption1 = responseOption1
         self.responseOption2 = responseOption2
-        self.responseResult1 = 0
-        self.responseResult2 = 0
+        self.sublabel1 = sublabel1
+        self.sublabel2 = sublabel2
     }
     
     // Initializing from Firebase
-    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], viewCounter: Int = 0, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, responseResult1: Int = 0, responseResult2: Int = 0, favoritedBy: [String]) {
+    init(postId: String, userId: String, username: String = "", profilePhoto: String = "", comments: [Comment] = [], responses: [Response] = [], categories: [Category], topics: [String], viewCounter: Int = 0, postDateAndTime: Date, question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String, favoritedBy: [String]) {
         // Post protocol attributes
         self.postId = postId
         self.userId = userId
@@ -63,15 +65,29 @@ class BinaryPost: Post, Equatable {
         self.postDateAndTime = postDateAndTime
         self.favoritedBy = favoritedBy
         self.question = question
+        self.topics = topics
         
         // Binary post specific attributes
         self.responseOption1 = responseOption1
         self.responseOption2 = responseOption2
-        self.responseResult1 = responseResult1
-        self.responseResult2 = responseResult2
+        self.sublabel1 = sublabel1
+        self.sublabel2 = sublabel2
     }
     
     static func == (lhs: BinaryPost, rhs: BinaryPost) -> Bool {
         return lhs.postId == rhs.postId
+    }
+    
+    func calculateResponses() -> [Int] {
+        var responses = [0, 0]
+        for response in self.responses {
+            if response.responseOption == self.responseOption1 {
+                responses[0] += 1
+            } else {
+                responses[1] += 1
+            }
+        }
+        
+        return responses
     }
 }

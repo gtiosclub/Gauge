@@ -14,8 +14,13 @@ struct GamesHome: View {
     @State private var showingJoin = false
     @State var roomCode = ""
     @State var username: String = ""
-    @State var isHost = false
-    @ObservedObject var mcManager = MCManager(yourName: UIDevice.current.identifierForVendor?.uuidString ?? UIDevice.current.name)
+    @State var profileLink: String = ""
+    @ObservedObject var mcManager = MCManager(
+        yourName: UIDevice.current.identifierForVendor?.uuidString
+        ?? UIDevice.current.name)
+    @ObservedObject var tmManager = TMManager(
+        yourName: UIDevice.current.identifierForVendor?.uuidString
+        ?? UIDevice.current.name, isHost: "N")
     @State var showJoinRoom: Bool = false
     @State var navigateToRoom = false
 
@@ -25,17 +30,30 @@ struct GamesHome: View {
                 ScrollView {
                     VStack(spacing: 10) {
                         Button(action: {
+                            selectedGame = "Take Master"
+                            withAnimation {
+                                username = userVM.user.username
+                                profileLink = userVM.user.userId
+                                self.showingPopover.toggle()
+                            }
+                        }) {
+                            GameCardView(
+                                gameTitle: "Take Master", playerRange: "4",
+                                duration: "15m",
+                                description: "Create questions to test if your friends can guess your takes!")
+                        }
+                        Button(action: {
                             selectedGame = "Take Match"
                             withAnimation {
                                 username = userVM.user.username
+                                profileLink = userVM.user.userId
                                 self.showingPopover.toggle()
                             }
                         }) {
                             GameCardView(
                                 gameTitle: "Take Match", playerRange: "3-8",
                                 duration: "15m",
-                                description:
-                                    "Match your friends to their takes!")
+                                description: "Match your friends to their takes!")
                         }
                         Button(action: {
                             selectedGame = "Take Time"
@@ -47,13 +65,11 @@ struct GamesHome: View {
                             GameCardView(
                                 gameTitle: "Take Time", playerRange: "1",
                                 duration: "5m",
-                                description:
-                                    "Make as many takes as you can!")
+                                description: "Make as many takes as you can!")
                         }
                     }
                     .padding()
                 }
-
 
                 if showingPopover {
                     ZStack {
@@ -68,90 +84,120 @@ struct GamesHome: View {
 
                         VStack {
                             VStack(spacing: 20) {
-                                HStack {
-                                    Button(action: {
-                                        withAnimation {
-
-                                            self.showingPopover = false
-                                            self.showingJoin = false
-                                        }
-                                    }) {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .font(.title2)
-                                            .foregroundColor(.gray)
-                                    }
-                                    Spacer()
-                                }
                                 Text(selectedGame ?? "")
-                                    .font(.title)
+                                    .font(.largeTitle)
                                     .padding()
                                 HStack {
                                     Button(action: {
-                                        mcManager.setUsername(username: username)
-                                        isHost = true
                                         roomCode = generateRoomCode()
+                                        switch selectedGame {
+                                        case "Take Master":
+                                            tmManager.setUsernameAndProfile(
+                                                username: username,
+                                                profileLink: profileLink, isHost: "Y")
+                                            tmManager.startHosting(
+                                                with: roomCode)
+                                            tmManager.startBrowsing()
+                                        case "Take Match":
+                                            mcManager.setUsernameAndProfile(
+                                                username: username,
+                                                profileLink: "Profile Link", isHost: "Y")
+                                            mcManager.startHosting(
+                                                with: roomCode)
+                                            mcManager.startBrowsing()
+                                        default:
+                                            break
+                                        }
+
                                         navigateToRoom = true
-                                        mcManager.startHosting(with: roomCode)
-                                        mcManager.startBrowsing()
                                     }) {
                                         Text("Create")
                                             .font(.headline)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.black)
                                             .padding()
                                             .frame(maxWidth: .infinity)
-                                            .background(Color.blue)
+                                            .background(Color.white)
                                             .cornerRadius(10)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(Color.black, lineWidth: 2)
+                                            )
                                     }
                                     .disabled(username.isEmpty)
 
                                     Button(action: {
                                         withAnimation {
-                                            showingJoin.toggle()
-                                            mcManager.setUsername(username: username)
-                                            isHost = false
-                                            mcManager.startBrowsing()
+                                            switch selectedGame {
+                                            case "Take Master":
+                                                showingJoin.toggle()
+                                                tmManager.setUsernameAndProfile(username: username, profileLink: profileLink, isHost: "N")
+                                                tmManager.startBrowsing()
+                                            case "Take Match":
+                                                showingJoin.toggle()
+                                                mcManager.setUsernameAndProfile(username: username, isHost: "N")
+
+                                                mcManager.startBrowsing()
+                                            default:
+                                                break
+                                            }
+
                                         }
                                     }) {
                                         Text("Join")
                                             .font(.headline)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.black)
                                             .padding()
                                             .frame(maxWidth: .infinity)
-                                            .background(Color.green)
+                                            .background(Color.white)
                                             .cornerRadius(10)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(Color.black, lineWidth: 2)
+                                            )
                                     }
                                     .disabled(username.isEmpty)
                                 }
-                                TextField(
-                                    "Username", text: $username
-                                )
-                                .font(.title2)
-                                .textFieldStyle(
-                                    RoundedBorderTextFieldStyle()
-                                )
                                 if showingJoin {
                                     HStack {
                                         TextField("Room Code", text: $roomCode)
-                                            .onChange(of: roomCode) { newValue in
+                                            .onChange(of: roomCode) {
+                                                newValue in
                                                 roomCode = newValue.uppercased()
                                             }
-                                        .font(.title2)
-                                        .textFieldStyle(
-                                            RoundedBorderTextFieldStyle()
-                                        )
-                                        let roomAvailable = !roomCode.isEmpty && mcManager.discoveredPeers.values.contains { $0.roomCode == roomCode }
+                                            .font(.title2)
+                                            .textFieldStyle(
+                                                RoundedBorderTextFieldStyle()
+                                            )
+                                        let roomAvailable =
+                                            !roomCode.isEmpty
+                                            && mcManager.discoveredPeers.values
+                                                .contains {
+                                                    $0.roomCode == roomCode
+                                                }
+                                        let tmRoomAvailable =
+                                            !roomCode.isEmpty
+                                            && tmManager.discoveredPeers.values
+                                                .contains {
+                                                    $0.roomCode == roomCode
+                                                }
                                         Button(action: {
                                             if roomAvailable {
-                                                mcManager.setUsername(username: username)
-                                                isHost = false
-                                                mcManager.joinRoom(with: roomCode)
+                                                mcManager.joinRoom(
+                                                    with: roomCode)
+                                                navigateToRoom = true
+                                            }
+                                            if tmRoomAvailable {
+                                                tmManager.joinRoom(
+                                                    with: roomCode)
                                                 navigateToRoom = true
                                             }
                                         }) {
                                             Image(systemName: "arrow.right")
                                         }
-                                        .disabled(username.isEmpty || roomCode.isEmpty || !roomAvailable)
-                                        
+                                        .disabled(
+                                            username.isEmpty || roomCode.isEmpty || (!roomAvailable && !tmRoomAvailable)
+                                        )
+
                                     }
 
                                 }
@@ -167,7 +213,18 @@ struct GamesHome: View {
             }
             .navigationTitle(Text("Games"))
             .navigationDestination(isPresented: $navigateToRoom) {
-                TakeMatchRoomView(mcManager: mcManager, isHost: isHost, roomCode: roomCode, onExit: resetHomeState)
+                switch selectedGame {
+                case "Take Master":
+                    TakeMasterRoomView(
+                        tmManager: tmManager,
+                        roomCode: roomCode, onExit: resetHomeState)
+                case "Take Match":
+                    TakeMatchRoomView(
+                        mcManager: mcManager, isHost: true,
+                        roomCode: roomCode, onExit: resetHomeState)
+                default:
+                    EmptyView()
+                }
             }
             .navigationBarBackButtonHidden()
         }
@@ -179,10 +236,11 @@ struct GamesHome: View {
     }
 
     func resetHomeState() {
+        tmManager.roomCode = ""
         roomCode = ""
+        showingPopover = false
         showJoinRoom = false
         navigateToRoom = false
-        isHost = false
     }
 }
 
@@ -202,6 +260,7 @@ struct GameCardView: View {
                 Text(gameTitle)
                     .font(.title)
                     .fontWeight(.bold)
+                    .foregroundColor(.black)
                 Label(playerRange, systemImage: "person.2.fill")
                     .font(.subheadline)
                     .foregroundColor(.gray)
@@ -214,6 +273,7 @@ struct GameCardView: View {
                 .font(.body)
                 .foregroundColor(.black)
                 .lineLimit(2)
+                .multilineTextAlignment(.leading)
         }
         .padding()
         .background(Color.white)
@@ -225,4 +285,5 @@ struct GameCardView: View {
 
 #Preview {
     GamesHome()
+        .environmentObject(UserFirebase())
 }
