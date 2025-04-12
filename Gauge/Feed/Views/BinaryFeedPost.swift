@@ -30,7 +30,7 @@ struct BinaryFeedPost: View {
             Spacer(minLength: 30.0)
             
             ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
-                .padding(.horizontal)
+                .padding(.leading)
                         
             //Category Boxes
             ScrollView(.horizontal) {
@@ -298,5 +298,7 @@ extension View {
 #Preview {
     BinaryFeedPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good", sublabel1: "bad", sublabel2: "great"), dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0), skipping: .constant(false)
     )
+    .environmentObject(UserFirebase())
+    .environmentObject(PostFirebase())
 }
 

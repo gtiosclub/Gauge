@@ -26,7 +26,6 @@ struct ProfileUsernameDateView: View {
                 .font(.system(size: 15))
                 .foregroundStyle(.gray)
         }
-        .padding(.leading)
         .task {
             do {
                 try await userVM.populateUsernameAndProfilePhoto(userId: userId)
@@ -51,8 +50,9 @@ struct ProfilePictureView: View {
                     .frame(width:30, height: 30)
                     .opacity(0.6)
                 )
-                .padding(.trailing, 8)
+                .padding(.trailing, 6)
             )
+            .alignmentGuide(.leading) { d in d[.leading] }
         } else {
             AnyView(AsyncImage(url: URL(string: profilePhoto)) { image in
                 image
@@ -66,6 +66,7 @@ struct ProfilePictureView: View {
                     .clipShape(Circle())
             }
             )
+            .alignmentGuide(.leading) { d in d[.leading] }
         }
     }
 }

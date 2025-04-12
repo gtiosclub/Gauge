@@ -18,15 +18,16 @@ struct BinaryResultView: View {
         let percent2 = Int(round(Double(post.calculateResponses()[1]) / Double(total) * 100))
         
         GeometryReader { geometry in
+            let idealWidth = geometry.size.width
             VStack(spacing: 12) {
                 HStack(spacing: 0) {
                     // Left option bar (No)
                     ZStack(alignment: .leading) {
                         Rectangle()
                             .fill(Color.red.opacity(0.15))
-                            .frame(width: max(345 * Double(percent1) / 100.0, 0), height: 60)
+                            .frame(width: max(idealWidth * Double(percent1) / 100.0, 0), height: 60)
                         Path { path in
-                            let width = max(345 * Double(percent1) / 100.0, 0)
+                            let width = max(idealWidth * Double(percent1) / 100.0, 0)
                             let height: CGFloat = 60
                             let cornerRadius: CGFloat = 12
                             
@@ -59,27 +60,27 @@ struct BinaryResultView: View {
                             path.addLine(to: CGPoint(x: width, y: 0))
                         }
                         .stroke(Color.red, lineWidth: 1)
-                        .frame(width: max(345 * Double(percent1) / 100.0, 0), height: 60)
+                        .frame(width: max(idealWidth * Double(percent1) / 100.0, 0), height: 60)
                         
                         VStack (alignment: .leading){
-                            
                             Text(post.responseOption1)
                                 .font(.system(size: 12))
                                 .foregroundColor(.red)
+                            
                             Text("\(percent1)%")
                                 .fontWeight(.bold)
                                 .foregroundColor(.red)
                                 .font(.system(size: 12))
                         }
                         .padding(.leading, 12)
-                        .frame(width: 345 * Double(percent1) / 100.0, alignment: .leading)
+                        .frame(width: idealWidth * Double(percent1) / 100.0, alignment: .leading)
                     }
                     
                     // Right option bar (Yes)
                     ZStack(alignment: .trailing) {
                         Rectangle()
                             .fill(Color.darkGreen)
-                            .frame(width: max(345 * Double(percent2) / 100.0, 0), height: 60)
+                            .frame(width: max(idealWidth * Double(percent2) / 100.0, 0), height: 60)
                         
                         VStack(alignment: .trailing) {
                             Text(post.responseOption2)
@@ -94,14 +95,13 @@ struct BinaryResultView: View {
 
                         }
                         .padding(.trailing, 12)
-                        .frame(width: 345 * Double(percent2) / 100.0, alignment: .trailing)
+                        .frame(width: idealWidth * Double(percent2) / 100.0, alignment: .trailing)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .frame(height: 40)
                 .padding(.bottom, 16)
             }
-            .frame(width: UIScreen.main.bounds.width - 40, height: 50)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 60)

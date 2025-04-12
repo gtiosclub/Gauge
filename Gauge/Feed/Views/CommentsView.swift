@@ -8,20 +8,13 @@
 import SwiftUI
 
 struct CommentsView: View {
-    @EnvironmentObject private var userVm: UserFirebase
-    @EnvironmentObject private var postVm: PostFirebase
-    @State private var comments: [Comment]
+    @EnvironmentObject private var userVM: UserFirebase
+    @EnvironmentObject private var postVM: PostFirebase
     @State private var sortOption: SortOption = .mostVotes
-    @State private var newCommentText: String = ""
+    @State var newCommentText: String = ""
+    @State var showAddComment: Bool = false
     @State private var isBookmarked: Bool = false
-    let postId: String
-    let responseOption1: String?
-    
-    init(comments: [Comment], postId: String, responseOption1: String) {
-        _comments = State(initialValue: comments)
-        self.postId = postId
-        self.responseOption1 = responseOption1
-    }
+    var post: any Post
     
     enum SortOption: String, CaseIterable {
         case mostVotes = "Most votes"
@@ -31,11 +24,11 @@ struct CommentsView: View {
     var sortedComments: [Comment] {
         switch sortOption {
         case .mostVotes:
-            return comments.sorted {
+            return post.comments.sorted {
                 ($0.likes.count - $0.dislikes.count) > ($1.likes.count - $1.dislikes.count)
             }
         case .mostRecent:
-            return comments.sorted {
+            return post.comments.sorted {
                 $0.date > $1.date
             }
         }
@@ -44,7 +37,7 @@ struct CommentsView: View {
     var body: some View {
         VStack(spacing: 0) {
             Divider()
-                    .background(Color.gray.opacity(0.4))
+                .background(Color.gray.opacity(0.4))
             HStack {
                 Image(systemName: "arrow.up.arrow.down")
                     .font(.system(size: 12))
@@ -78,24 +71,29 @@ struct CommentsView: View {
                 Spacer()
                 
                 // Comment count
-                HStack {
-                    Image(systemName: "bubble.left")
-                        .font(.system(size: 12))
-                    Text("\(comments.count)")
-                        .font(.system(size: 12, weight: .medium))
+                Button(action: {
+                    showAddComment = true
+                }) {
+                    HStack {
+                        Image(systemName: "bubble.left")
+                            .font(.system(size: 12))
+                        
+                        Text("\(post.comments.count)")
+                            .font(.system(size: 12, weight: .medium))
+                    }
+                    .padding(10)
+                    .foregroundColor(.black)
+                    .background(
+                        Capsule()
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                    .background(Color.whiteGray)
                 }
-                .padding(10)
-                .foregroundColor(.black)
-                .background(
-                    Capsule()
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                )
-                .background(Color.whiteGray)
                 
                 // Bookmark button
                 Button(action: {
                     isBookmarked.toggle()
-                    postVm.addUserToFavoritedBy(postId: postId, userId: userVm.user.id)
+                    postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
                 }) {
                     Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                         .font(.system(size: 18))
@@ -109,15 +107,13 @@ struct CommentsView: View {
                         .background(Color.whiteGray)
                 }
             }
-            .padding(.horizontal)
-            .padding(.top)
-            .padding(.bottom, 10)
+            .padding()
             .background(Color.whiteGray)
             
             // Comments list
             ScrollView {
-                if comments.isEmpty {
-                    VStack(spacing: 16) {
+                if post.comments.isEmpty {
+                    VStack(spacing: 8) {
                         Spacer()
                         
                         // Cricket icons using emoji
@@ -137,18 +133,17 @@ struct CommentsView: View {
                         
                         Spacer()
                     }
-                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 60)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 60)
                 } else {
                     LazyVStack(spacing: 0) {
                         ForEach(sortedComments, id: \.self) { comment in
-                            CommentView(comment: comment, responseOption1: responseOption1 ?? "")
+                            CommentView(comment: comment, post: post)
                                 .padding(.vertical, 12)
                             
                             Rectangle()
                                 .fill(Color.whiteGray)
                                 .frame(height: 6)
-                            
                         }
                     }
                     .background(Color.white)
@@ -159,36 +154,44 @@ struct CommentsView: View {
         .background(Color.whiteGray)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
-        
-    }
-
-    
-    #Preview {
-        CommentsView(
-            comments: [
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "Lv72Qz7Qc4TC2vDeE94q",
-                    date: Date(),
-                    commentId: "",
-                    likes: [],
-                    dislikes: [],
-                    content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communityee. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
-                ),
-                Comment(
-                    commentType: .text,
-                    postId: "555555555",
-                    userId: "Lv72Qz7Qc4TC2vDeE94q",
-                    date: Date(),
-                    commentId: "",
-                    likes: [],
-                    dislikes: [],
-                    content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communitwwy. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
-                )
-            ], postId: "2C263425-873B-4CD8-89DF-84B1F5A02FF0", responseOption1: "Yes"
-        )
-        .environmentObject(UserFirebase())
+        .sheet(isPresented: $showAddComment) {
+            ZStack {
+                    CommentSheetView(showAddComment: $showAddComment, post: post)
+                        .padding()
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .shadow(radius: 8)
+                }
+                .presentationDetents([.height(200)])
+        }
     }
 }
+    
+//    #Preview {
+//        CommentsView(
+//            comments: [
+//                Comment(
+//                    commentType: .text,
+//                    postId: "555555555",
+//                    userId: "Lv72Qz7Qc4TC2vDeE94q",
+//                    date: Date(),
+//                    commentId: "",
+//                    likes: [],
+//                    dislikes: [],
+//                    content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communityee. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
+//                ),
+//                Comment(
+//                    commentType: .text,
+//                    postId: "555555555",
+//                    userId: "Lv72Qz7Qc4TC2vDeE94q",
+//                    date: Date(),
+//                    commentId: "",
+//                    likes: [],
+//                    dislikes: [],
+//                    content: "Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Communitwwy. Love seeing all the amazing things happening here! Keep up the great work, everyone. 💯✨ #Inspiration #Community."
+//                )
+//            ], postId: "2C263425-873B-4CD8-89DF-84B1F5A02FF0")
+//        .environmentObject(UserFirebase())
+//    }
+//}
  

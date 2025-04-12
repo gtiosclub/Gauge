@@ -42,7 +42,7 @@ class PostFirebase: ObservableObject {
             DispatchQueue.main.async {
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
-//                        print("New comment: \(diff.document.data())")
+                        print("New comment: \(diff.document.data())")
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
