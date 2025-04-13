@@ -73,6 +73,11 @@ struct CommentView: View {
     private func toggleLike() {
         if userStatus != "liked" {
             postVM.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            
+            if userStatus == "disliked" {
+                postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            }
+            
             userStatus = "liked"
         } else {
             postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
@@ -83,6 +88,11 @@ struct CommentView: View {
     private func toggleDislike() {
         if userStatus != "disliked" {
             postVM.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            
+            if userStatus == "liked" {
+                postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            }
+            
             userStatus = "disliked"
         } else {
             postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)

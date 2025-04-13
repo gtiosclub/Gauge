@@ -126,15 +126,19 @@ class AuthenticationVM: ObservableObject {
     
     func createInitialAccount() async throws {
         do {
-            isLoading = true
-            let authResult = try await auth.createUser(withEmail: tempUserData.email, password: tempUserData.password)
+            DispatchQueue.main.async {
+                self.isLoading = true
+            }
+            let authResult = try await auth.createUser(withEmail: self.tempUserData.email, password: self.tempUserData.password)
             let user = authResult.user
             
             let changeRequest = user.createProfileChangeRequest()
             changeRequest.displayName = tempUserData.username
             try await changeRequest.commitChanges()
             
-            tempUser = User(userId: user.uid, username: tempUserData.username, email: tempUserData.email)
+            DispatchQueue.main.async {
+                self.tempUser = User(userId: user.uid, username: self.tempUserData.username, email: self.tempUserData.email)
+            }
             
             // Initialize with empty attributes map
             let initialAttributes: [String: String] = [:]

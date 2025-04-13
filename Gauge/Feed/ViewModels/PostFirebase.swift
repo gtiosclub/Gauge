@@ -57,6 +57,7 @@ class PostFirebase: ObservableObject {
                             content: newCommentDoc["content"] as? String ?? ""
                             )
                         
+                        self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         self.feedPosts[0].comments.append(newComment)
                     } else if diff.type == .removed {
                         print("Comment removed: \(diff.document.documentID)")
@@ -106,6 +107,7 @@ class PostFirebase: ObservableObject {
                             responseOption: newResponseDoc["responseOption"] as? String ?? ""
                         )
                         
+                        self.feedPosts[0].responses.removeAll { $0.userId == newResponse.userId }
                         self.feedPosts[0].responses.append(newResponse)
                         self.feedPosts = self.feedPosts
                     }
@@ -124,7 +126,6 @@ class PostFirebase: ObservableObject {
                 self.objectWillChange.send()
                 let viewCount = snapshot.documents.count
                 self.feedPosts[0].viewCounter = viewCount
-                
                 self.feedPosts = self.feedPosts
             }
         }
