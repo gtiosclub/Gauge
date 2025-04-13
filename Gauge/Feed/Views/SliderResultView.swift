@@ -10,6 +10,7 @@ import SwiftUI
 
 struct SliderResultView: View {
     @ObservedObject var post: SliderPost
+    @EnvironmentObject var userVM: UserFirebase
     let optionSelected: Int
     
     var body: some View {
@@ -38,7 +39,7 @@ struct SliderResultView: View {
 
                         ZStack(alignment: .top) {
                             Rectangle()
-                                .fill(colorForIndex(index, optionSelected))
+                                .fill(SliderResultView.colorForIndex(index, optionSelected))
                                 .frame(height: barHeight)
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
 
@@ -59,17 +60,34 @@ struct SliderResultView: View {
                                 .foregroundColor(textForIndex(index, optionSelected: optionSelected))
                                 .offset(y: -barHeight - 2)
                         }
+                        
+                        RoundedRectangle(cornerRadius: 0)
+                            .frame(height: 1)
+                            .foregroundStyle(Color.gray.opacity(0.2))
                     }
                     .frame(height: maxHeight, alignment: .bottom)
 
                     // Dot
                     ZStack {
                         Circle()
-                            .fill(index == optionSelected ? colorForIndex(index, optionSelected) : Color.white)
+                            .fill(index == optionSelected ? SliderResultView.colorForIndex(index, optionSelected) : Color.white)
                             .overlay(Circle().stroke(Color.gray.opacity(0.4), lineWidth: 1))
                             .frame(width: 18, height: 18)
+                        
+                        Circle()
+                            .fill(index == optionSelected ? SliderResultView.colorForIndex(index, optionSelected) : Color.white)
+                            .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                            .frame(width: 10, height: 10)
                     }
                     .frame(height: 20)
+                    
+                    StackedProfiles(
+                        userIds: Array(post.responses
+                            .filter { userVM.user.friends.contains($0.userId) && Int($0.responseOption) ?? 7 == (Int(index) - 1)}
+                            .map { $0.userId }.shuffled().prefix(3)),
+                        sideOnTop: .right
+                    )
+                    .frame(height: 30.0)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -78,7 +96,7 @@ struct SliderResultView: View {
             GeometryReader { geo in
                 let totalDots = percentages.count
                 let spacing = geo.size.width / CGFloat(totalDots)
-                let dotY = geo.size.height - 10.0  // Y-position of dots (adjust if needed)
+                let dotY = geo.size.height - 45.0  // Y-position of dots (adjust if needed)
                 let lineLength: CGFloat = spacing * 0.4  // length of the short connector line
 
                 ForEach(0..<totalDots - 1, id: \.self) { index in
@@ -101,7 +119,7 @@ struct SliderResultView: View {
 //            .foregroundStyle(.black)
     }
 
-    func colorForIndex(_ index: Int,_ optionSelected: Int) -> Color {
+    static func colorForIndex(_ index: Int,_ optionSelected: Int) -> Color {
         let dark_condition = index == optionSelected
         switch index {
         case 0: return dark_condition ? Color.darkRed : Color.lightRed
@@ -183,9 +201,13 @@ struct SliderResultView: View {
         upperBoundLabel: "NO",
         favoritedBy: []
     )
-
-    SliderResultView(
+    
+    var user = UserFirebase()
+    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:], myTakeTime: [:])
+    
+    return SliderFeedResults(
         post: post,
         optionSelected: 4
     )
+    .environmentObject(user)
 }

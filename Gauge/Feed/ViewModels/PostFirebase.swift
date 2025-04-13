@@ -57,6 +57,7 @@ class PostFirebase: ObservableObject {
                             content: newCommentDoc["content"] as? String ?? ""
                             )
                         
+                        self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         self.feedPosts[0].comments.append(newComment)
                     } else if diff.type == .removed {
                         print("Comment removed: \(diff.document.documentID)")
@@ -106,6 +107,7 @@ class PostFirebase: ObservableObject {
                             responseOption: newResponseDoc["responseOption"] as? String ?? ""
                         )
                         
+                        self.feedPosts[0].responses.removeAll { $0.userId == newResponse.userId }
                         self.feedPosts[0].responses.append(newResponse)
                         self.feedPosts = self.feedPosts
                     }
@@ -124,7 +126,6 @@ class PostFirebase: ObservableObject {
                 self.objectWillChange.send()
                 let viewCount = snapshot.documents.count
                 self.feedPosts[0].viewCounter = viewCount
-                
                 self.feedPosts = self.feedPosts
             }
         }
@@ -471,7 +472,7 @@ class PostFirebase: ObservableObject {
         }
     }
   
-    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) async {
+    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) async -> [String]  {
         // Create post instance
         let post = BinaryPost(
             postId: UUID().uuidString,
@@ -519,8 +520,14 @@ class PostFirebase: ObservableObject {
                 print("added new post to POSTS with topics \(topics)")
             }
         }
+        return topics 
     }
     
+    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> [String] {
+        var categoryString: [String] = []
+        for cat in categories {
+            categoryString.append(cat.rawValue)
+        }
     func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async {
         
         // Create post instance
@@ -564,6 +571,7 @@ class PostFirebase: ObservableObject {
                 print("added new slider post to POSTS")
             }
         }
+        return topics 
     }
     
     func deletePost(postId: String){
@@ -641,6 +649,20 @@ class PostFirebase: ObservableObject {
                 print("Error adding user to favoritedBy array: \(error)")
             } else {
                 print("Added \(userId) to favoritedBy array of post \(postId).")
+            }
+        }
+    }
+    
+    func removeUserFromFavoritedBy(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("POSTS").document(postId)
+        
+        documentRef.updateData([
+            "favoritedBy": FieldValue.arrayRemove([userId])
+        ]) { error in
+            if let error = error {
+                print("Error removing user from favoritedBy array: \(error)")
+            } else {
+                print("Removed \(userId) from favoritedBy array of post \(postId).")
             }
         }
     }

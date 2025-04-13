@@ -38,19 +38,47 @@ struct ProfileUsernameDateView: View {
 
 struct ProfilePictureView: View {
     var profilePhoto: String
+    @EnvironmentObject var userVM: UserFirebase
     
     var body: some View {
-        if profilePhoto == "" {
-            AnyView(Image(systemName: "person")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 18, height: 18)
-                .background(Circle()
-                    .fill(Color.gray.opacity(0.7))
-                    .frame(width:30, height: 30)
-                    .opacity(0.6)
-                )
+        if profilePhoto.count == 1 {
+            AnyView(
+                ZStack {
+                    Circle()
+                        .stroke(Color.white, lineWidth: 1)
+                        .background(
+                            Circle().fill(Color.lightGray)
+                        )
+
+                    Text(profilePhoto)
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                }
+                .frame(width: 30, height: 30)
                 .padding(.trailing, 6)
+                    
+            )
+            .alignmentGuide(.leading) { d in d[.leading] }
+        } else if profilePhoto.isEmpty {
+            AnyView(
+                ZStack {
+                    Circle()
+                        .stroke(Color.white, lineWidth: 1)
+                        .background(
+                            Circle().fill(Color.lightGray)
+                        )
+
+                    Image(systemName: "person")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
+                        .foregroundColor(.white)
+                }
+                .frame(width: 30, height: 30)
+                .padding(.trailing, 6)
+                   
             )
             .alignmentGuide(.leading) { d in d[.leading] }
         } else {

@@ -29,6 +29,7 @@ struct TakeMasterView: View {
                 if showTransition {
                     ZStack {
                         SplashBackgroundView()
+                            .ignoresSafeArea()
                         SlidingWordsView(leftWord: transitionWords().0, rightWord: transitionWords().1)
                     }
                 } else {
@@ -592,19 +593,19 @@ struct SlidingWordsView: View {
                     Text(leftWord)
                         .font(.system(size: 64, weight: .bold))
                         .opacity(0.5)
+                        .offset(x: animate ? 0 : -geometry.size.width)
                         .animation(.easeOut(duration: 1.0), value: animate)
                     Spacer()
                 }
-                .offset(x: animate ? 200 : -geometry.size.width)
 
                 HStack {
                     Spacer()
                     Text(rightWord)
                         .font(.system(size: 64, weight: .bold))
                         .opacity(0.5)
+                        .offset(x: animate ? 0 : geometry.size.width)
                         .animation(.easeOut(duration: 1.0), value: animate)
                 }
-                .offset(x: animate ? -200 : geometry.size.width)
             }
             .padding(.horizontal)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -615,26 +616,42 @@ struct SlidingWordsView: View {
     }
 }
 
-@available(iOS 17.0, *)
 struct SplashBackgroundView: View {
+    var colors: [Color]? = nil
     @State private var angles: [Double] = [0, 72, 144, 216, 288]
 
     var body: some View {
-        TimelineView(.animation) { timeline in
-            let t = timeline.date.timeIntervalSinceReferenceDate
-            let updatedAngles = angles.enumerated().map { index, base in
-                base + t * 100 + Double(index) * 15 // Different speeds
-            }
+        GeometryReader { geometry in
+            TimelineView(.animation) { timeline in
+                let t = timeline.date.timeIntervalSinceReferenceDate
+                let updatedAngles = angles.enumerated().map { index, base in
+                    base + t * 100 + Double(index) * 15
+                }
 
-            ZStack {
-                RotatingBlob(color: .yellow, angle: updatedAngles[0], radius: 250)
-                RotatingBlob(color: .cyan, angle: updatedAngles[1], radius: 250)
-                RotatingBlob(color: .purple, angle: updatedAngles[2], radius: 250)
-                RotatingBlob(color: .blue, angle: updatedAngles[3], radius: 200)
-                RotatingBlob(color: .mint, angle: updatedAngles[4], radius: 250)
+                ZStack {
+                    ForEach(0..<angles.count, id: \.self) { i in
+                        RotatingBlob(
+                            color: blobColor(index: i),
+                            angle: updatedAngles[i],
+                            radius: min(geometry.size.width, geometry.size.height) / 2.2
+                        )
+                    }
+                }
+                .blur(radius: 40)
+                .frame(width: geometry.size.width, height: geometry.size.height)
             }
-            .blur(radius: 60)
-            .ignoresSafeArea()
+        }
+        .ignoresSafeArea()
+        .clipped()
+    }
+
+    private func blobColor(index: Int) -> Color {
+        let defaultColors: [Color] = [.yellow, .cyan, .purple, .blue, .mint]
+        let colorList = colors ?? defaultColors
+        if index < colorList.count {
+            return colorList[index]
+        } else {
+            return .gray
         }
     }
 }
