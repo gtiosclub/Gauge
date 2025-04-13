@@ -16,15 +16,17 @@ class User: Equatable, Identifiable, ObservableObject {
     var lastLogin: Date
     var lastFeedRefresh: Date
     var streak: Int
+    var attributes: [String: String] = [:]
     // MARK: MANDATORY
     
-    var friendIn: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
-    var friendOut: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
-    var friends: [String : [String]] = [:] // Key is userId, String array holds [username, profilePhotoString]
+    var friendIn: [String] = [] // userIds
+    var friendOut: [String] = [] // userIds
+    var friends: [String] = [] // userIds
     var badges: [String] = []
     var profilePhoto: String
     var phoneNumber: String = ""
     var myCategories: [String] = []
+    var myTopics: [String] = [] // List of topics that user is interested in / interact with
     var myNextPosts: [String] = []
     var myTakeTime: [String : Int]
 
@@ -49,14 +51,16 @@ class User: Equatable, Identifiable, ObservableObject {
         self.username = username
         self.email = email
         self.lastLogin = Date()
-        self.streak = 0
         self.lastFeedRefresh = Date()
-        self.profilePhoto = ""
+        self.streak = 0
         self.myAccessedProfiles = []
         self.myTakeTime = [:]
+        self.profilePhoto = ""
+        self.attributes = [:]
     }
-    
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, myTakeTime: [String:Int]) {
+
+
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String], friendOut: [String], friends: [String], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], myTopics: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, attributes: [String: String], myTakeTime: [String:Int]) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -71,21 +75,19 @@ class User: Equatable, Identifiable, ObservableObject {
         self.myProfileSearches = myProfileSearches
         self.myComments = myComments
         self.myCategories = myCategories
+        self.myTopics = myTopics
         self.badges = badges
         self.profilePhoto = profilePhoto
         self.myAccessedProfiles = myAccessedProfiles
         self.myTakeTime = myTakeTime
         self.lastLogin = lastLogin
         self.lastFeedRefresh = lastFeedRefresh
-
-
-        
+        self.attributes = [:]
         // Add logic to add one to streak if it is maintained, update in Firebase
         self.streak = streak
     }
     
     static func == (lhs: User, rhs: User) -> Bool {
-        lhs.id == rhs.id && lhs.username == rhs.username && lhs.phoneNumber == rhs.phoneNumber
+        lhs.id == rhs.id && lhs.userId == rhs.userId && lhs.username == rhs.username && lhs.phoneNumber == rhs.phoneNumber
     }
 }
-

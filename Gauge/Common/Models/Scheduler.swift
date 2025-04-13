@@ -14,7 +14,6 @@ class Scheduler: ObservableObject {
     @Published var savedUserState: String?
 
     private let launchTime = Date()
-    private var hasTriggered = false
 
     private var listener: ListenerRegistration?
 
@@ -33,11 +32,10 @@ class Scheduler: ObservableObject {
                 }
 
                 for change in snapshot.documentChanges where change.type == .added {
-                    if self.hasTriggered { break }
+                    if self.shouldInterrupt { break }
 
                     if let createdAt = change.document.data()["createdAt"] as? Timestamp,
                        createdAt.dateValue() > self.launchTime {
-                        self.hasTriggered = true
                         print("triggered")
                         self.triggerInterrupt()
                         break
@@ -53,14 +51,11 @@ class Scheduler: ObservableObject {
 
     private func triggerInterrupt() {
         DispatchQueue.main.async {
-            self.saveUserState()
             self.shouldInterrupt = true
             print("Interruption triggered after 1 minute!")
         }
     }
 
-    func saveUserState() {
-    }
 
     func restoreUserState() {
         shouldInterrupt = false

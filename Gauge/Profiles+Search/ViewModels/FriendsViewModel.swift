@@ -9,9 +9,9 @@ import Foundation
 import FirebaseFirestore
 
 class FriendsViewModel: ObservableObject {
-    @Published var friends: [String: [String]] = [:]
-    @Published var incomingRequests: [String: [String]] = [:]
-    @Published var outgoingRequests: [String: [String]] = [:]
+    @Published var friends: [String] = []
+    @Published var incomingRequests: [String] = []
+    @Published var outgoingRequests: [String] = []
     
     init(user: User) {
         self.friends = user.friends
@@ -59,10 +59,10 @@ class FriendsViewModel: ObservableObject {
             let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
             
             guard let data = document.data() else { return nil }
-            guard let friendsOut = data["friendOut"] as? [String: [String]] else { return nil }
+            guard let friendsOut = data["friendOut"] as? [String] else { return nil }
             
             var outgoingRequests = [User]()
-            for friendId in friendsOut.keys {
+            for friendId in friendsOut {
                 if let user = await getUserFromId(userId: friendId) {
                     outgoingRequests.append(user)
                 }
@@ -105,6 +105,43 @@ class FriendsViewModel: ObservableObject {
             }
         }
     
+    /// Sends a friend request from one user to another
+    func sendFriendRequest(from senderId: String, to receiverId: String) async throws {
+        let senderRef = Firebase.db.collection("USERS").document(senderId)
+        let receiverRef = Firebase.db.collection("USERS").document(receiverId)
+
+        do {
+            // Fetch the receiver’s data
+            let receiverSnapshot = try await receiverRef.getDocument()
+            guard let receiverData = receiverSnapshot.data() else {
+                throw NSError(domain: "sendFriendRequest", code: 404, userInfo: [NSLocalizedDescriptionKey: "Receiver not found"])
+            }
+
+            var friendIn = receiverData["friendIn"] as? [String: [String]] ?? [:]
+            if friendIn[senderId] == nil {
+                friendIn[senderId] = ["Pending"]
+                try await receiverRef.updateData(["friendIn": friendIn])
+            }
+
+            // Fetch the sender’s data
+            let senderSnapshot = try await senderRef.getDocument()
+            guard let senderData = senderSnapshot.data() else {
+                throw NSError(domain: "sendFriendRequest", code: 404, userInfo: [NSLocalizedDescriptionKey: "Sender not found"])
+            }
+
+            var friendOut = senderData["friendOut"] as? [String: [String]] ?? [:]
+            if friendOut[receiverId] == nil {
+                friendOut[receiverId] = ["Pending"]
+                try await senderRef.updateData(["friendOut": friendOut])
+            }
+
+            print("Friend request sent successfully")
+        } catch {
+            throw error
+        }
+    }
+
+    
     func getUserFromId(userId: String) async -> User? {
         do {
             let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
@@ -114,9 +151,9 @@ class FriendsViewModel: ObservableObject {
             guard let email = userData["email"] as? String else { return nil }
 
             let phoneNumber = userData["phoneNumber"] as? String ?? ""
-            let friendIn = userData["friendIn"] as? [String : [String]] ?? [:]
-            let friendOut = userData["friendOut"] as? [String: [String]] ?? [:]
-            let friends = userData["friends"] as? [String: [String]] ?? [:]
+            let friendIn = userData["friendIn"] as? [String] ?? []
+            let friendOut = userData["friendOut"] as? [String] ?? []
+            let friends = userData["friends"] as? [String] ?? []
             let myNextPosts = userData["myNextPosts"] as? [String] ?? []
             let myResponses = userData["myResponses"] as? [String] ?? []
             let myFavorites = userData["myFavorites"] as? [String] ?? []
@@ -124,11 +161,13 @@ class FriendsViewModel: ObservableObject {
             let myProfileSearches = userData["myProfileSearches"] as? [String] ?? []
             let myComments = userData["myComments"] as? [String] ?? []
             let myCategories = userData["myCategories"] as? [String] ?? []
+            let myTopics = userData["myTopics"] as? [String] ?? []
             let myAccessedProfiles = userData["myAccessedProfiles"] as? [String] ?? []
             let badges = userData["badges"] as? [String] ?? []
             let streak = userData["streak"] as? Int ?? 0
             let lastLogin = DateConverter.convertStringToDate(userData["lastLogin"] as? String ?? "") ?? Date()
             let lastFeedRefresh = DateConverter.convertStringToDate(userData["lastFeedRefresh"] as? String ?? "") ?? Date()
+            let attributes = userData["attributes"] as? [String : String] ?? [:]
             let profilePhoto = userData["profilePhoto"] as? String ?? ""
             let myTakeTime = userData["myTakeTime"] as? [String:Int] ?? [:]
 
@@ -147,12 +186,14 @@ class FriendsViewModel: ObservableObject {
                 myProfileSearches: myProfileSearches,
                 myComments: myComments,
                 myCategories: myCategories,
+                myTopics: myTopics,
                 badges: badges,
                 streak: streak,
                 profilePhoto: profilePhoto,
                 myAccessedProfiles: myAccessedProfiles,
                 lastLogin: lastLogin,
                 lastFeedRefresh: lastFeedRefresh,
+                attributes: attributes,
                 myTakeTime: myTakeTime
             )
             return outputUser

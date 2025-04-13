@@ -77,9 +77,12 @@ class ProfileViewModel: ObservableObject {
         
         let userDocument = Firebase.db.collection("USERS").document(userID)
         do {
-            try await userDocument.updateData(["profilePhoto": profilePhotoURL])
+            try await userDocument.updateData([
+                "profilePhoto": profilePhotoURL,
+                "attributes.profileEmoji": FieldValue.delete() // Remove emoji when setting photo
+            ])
             print("Document successfully updated")
-            return profilePhotoURL 
+            return profilePhotoURL
         } catch {
             print("Error updating document: \(error.localizedDescription)")
             return nil
@@ -91,10 +94,13 @@ class ProfileViewModel: ObservableObject {
         let userDocument = Firebase.db.collection("USERS").document(userID)
         
         do {
-            try await userDocument.updateData(["profilePhoto": FieldValue.delete()])
-            print("Profile picture field removed from Firestore")
+            try await userDocument.updateData([
+                "profilePhoto": FieldValue.delete(),
+                "attributes.profileEmoji": FieldValue.delete() // Remove emoji as well
+            ])
+            print("Profile fields removed from Firestore")
         } catch {
-            print("Error updating profile picture field: \(error.localizedDescription)")
+            print("Error updating fields: \(error.localizedDescription)")
             return false
         }
         

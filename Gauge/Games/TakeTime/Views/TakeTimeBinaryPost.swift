@@ -9,12 +9,12 @@ import SwiftUI
 struct TakeTimeBinaryPost: View {
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
-    
+
     let post: BinaryPost
     @Binding var dragAmount: CGSize
     @Binding var optionSelected: Int
     @Binding var skipping: Bool
-    
+
     var computedOpacity: Binding<Double> {
         Binding<Double>(
             get: {
@@ -23,29 +23,29 @@ struct TakeTimeBinaryPost: View {
             set: { _ in }
         )
     }
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             Spacer(minLength: 30.0)
             HStack{
                 profileImage
-                
+
                 Text(post.userId)
                     .font(.system(size: 16))
                     .foregroundStyle(.black)
-                
+
                 Text("•   \(DateConverter.timeAgo(from: post.postDateAndTime))")
                     .font(.system(size: 13))
                     .foregroundStyle(.gray)
             }
             .padding(.leading)
-            
-            
+
+
             //Category Boxes
             ScrollView(.horizontal) {
                 HStack {
                     let categories: [Category] = post.categories
-                    
+
                     ForEach(categories, id: \.self) { category in
                         Text(category.rawValue)
                             .padding(.leading, 10)
@@ -61,13 +61,13 @@ struct TakeTimeBinaryPost: View {
                             .frame(minWidth: 40)
                             .fixedSize(horizontal: true, vertical: false)
                     }
-                    
+
                     Spacer()
                 }
                 .padding(.bottom, 10)
                 .padding(.leading)
             }
-            
+
             VStack {
                 Text(post.question)
                     .padding(.top, 15)
@@ -77,9 +77,9 @@ struct TakeTimeBinaryPost: View {
                     .frame(alignment: .leading)
                     .multilineTextAlignment(.leading)
                     .foregroundStyle(.black)
-                
+
                 Spacer()
-                
+
                 ZStack {
                     HStack {
                         Text(post.responseOption1)
@@ -90,19 +90,19 @@ struct TakeTimeBinaryPost: View {
                             .frame(width: 150.0, alignment: .leading)
                             .minimumScaleFactor(0.75)
                             .lineLimit(2)
-                        
-                        
+
+
                         Spacer()
-                        
+
                         Image(systemName: "arrow.left.and.right")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 50, height: 50)
                             .foregroundColor(.gray)
                             .opacity(0.5 - (dragAmount.width / 125.0).magnitude)
-                        
+
                         Spacer()
-                        
+
                         Text(post.responseOption2)
                             .foregroundColor(optionSelected == 2 ? .darkGreen : .gray)
                             .font(.system(size: optionSelected == 2 ? 50 : 30))
@@ -113,17 +113,17 @@ struct TakeTimeBinaryPost: View {
                             .lineLimit(2)
                     }
                     .padding(.horizontal)
-                    
+
                     HStack {
                         Spacer()
-                        
+
                         if dragAmount.width < 0.0 {
                             HStack {
                                 Text(post.responseOption1)
                                     .font(.system(size: 30))
                                     .minimumScaleFactor(0.75)
                                     .lineLimit(2)
-                                
+
                                 Image(systemName: "arrow.left")
                                     .resizable()
                                     .scaledToFit()
@@ -132,16 +132,16 @@ struct TakeTimeBinaryPost: View {
                             .opacity((dragAmount.width / 100.0).magnitude)
                             .foregroundStyle(Color.darkRed)
                         }
-                        
+
                         Spacer(minLength: 20.0)
-                        
+
                         if dragAmount.width > 0.0 {
                             HStack {
                                 Image(systemName: "arrow.right")
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 50, height: 50)
-                                
+
                                 Text(post.responseOption2)
                                     .font(.system(size: 30))
                                     .minimumScaleFactor(0.75)
@@ -150,7 +150,7 @@ struct TakeTimeBinaryPost: View {
                             .opacity(dragAmount.width / 100.0)
                             .foregroundStyle(Color.darkGreen)
                         }
-                        
+
                         Spacer()
                     }
                 }
@@ -183,30 +183,30 @@ struct TakeTimeBinaryPost: View {
                                     .offset(x: 200, y: 200)
                             ))
             )
-            
+
             Spacer(minLength: 150.0)
-            
-            
+
+
             NavigationLink(destination: {
                 HomeView()
             }, label: {
-                Text("\(post.responseResult1 + post.responseResult2) votes")
+                Text("\(post.calculateResponses().reduce(0, +)) votes")
                     .foregroundColor(.gray)
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
             })
-            
+
             if (postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 0 == 1 || postVM.feedPosts.firstIndex(where: {$0.postId == post.postId}) ?? 1 == 0 && skipping) {
                 Spacer(minLength: 1008.0)
             }
-            
+
             Spacer(minLength: 20.0)
         }
 //        .padding()
         .frame(width: UIScreen.main.bounds.width)
         .gradientBorder(borderWidth: 15, color: optionSelected == 1 ? .darkRed : .darkGreen, cornerRadius: 10, opacity: computedOpacity)
     }
-    
+
     var profileImage: some View {
         if post.profilePhoto == "" {
             AnyView(Image(systemName: "person")
@@ -239,9 +239,9 @@ struct TakeTimeBinaryPost: View {
 }
 
 
-#Preview {
-    TakeTimeBinaryPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0), skipping: .constant(false)
-    )
-    .environmentObject(UserFirebase())
-    .environmentObject(PostFirebase())
-}
+//#Preview {
+//    TakeTimeBinaryPost(post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl),.sports(.soccer),.entertainment(.tvShows),.entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good"), dragAmount: .constant(CGSize(width: 40.0, height: 10.0)), optionSelected: .constant(0), skipping: .constant(false)
+//    )
+//    .environmentObject(UserFirebase())
+//    .environmentObject(PostFirebase())
+//}

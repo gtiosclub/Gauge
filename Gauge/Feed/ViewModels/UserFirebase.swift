@@ -11,7 +11,7 @@ import ChatGPTSwift
 
 class UserFirebase: ObservableObject {
     @Published var user: User
-    // = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
+    @Published var useridsToPhotosAndUsernames: [String: (photoURL: String, username: String)] = [:]
     
     init() {
         self.user = User(userId: "exampleUser", username: "exampleUser", email: "exuser@gmail.com")
@@ -33,20 +33,23 @@ class UserFirebase: ObservableObject {
             username: data["username"] as? String ?? "",
             phoneNumber: data["phoneNumber"] as? String ?? "",
             email: data["email"] as? String ?? "",
-            friendIn: data["friendIn"] as? [String: [String]] ?? [:],
-            friendOut: data["friendOut"] as? [String: [String]] ?? [:],
-            friends: data["friends"] as? [String: [String]] ?? [:],
+            friendIn: data["friendIn"] as? [String] ?? [],
+            friendOut: data["friendOut"] as? [String] ?? [],
+            friends: data["friends"] as? [String] ?? [],
             myNextPosts: data["myNextPosts"] as? [String] ?? [],
             myPostSearches: data["myPostSearches"] as? [String] ?? [],
             myProfileSearches: data["myProfileSearches"] as? [String] ?? [],
             myCategories: data["myCategories"] as? [String] ?? [],
+            myTopics: data["myTopics"] as? [String] ?? [],
             badges: data["badges"] as? [String] ?? [],
             streak: data["streak"] as? Int ?? 0,
             profilePhoto: data["profilePhoto"] as? String ?? "",
             myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
             lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
             lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date(),
+            attributes: data["attributes"] as? [String: String] ?? [:],
             myTakeTime: data["myTakeTime"] as? [String:Int] ?? [:]
+
         )
         
         if setCurrentUserData {
@@ -68,6 +71,7 @@ class UserFirebase: ObservableObject {
             user.lastLogin = userObj.lastLogin
             user.lastFeedRefresh = userObj.lastFeedRefresh
             user.myTakeTime = userObj.myTakeTime
+            user.attributes = userObj.attributes
         }
         
         return userObj
@@ -130,6 +134,40 @@ class UserFirebase: ObservableObject {
         return (responsePostIDs, commentPostIDs, viewPostIDs)
     }
     
+    func updateUserFields(user: User) {
+        let data = [
+            "lastLogin": DateConverter.convertDateToString(user.lastLogin),
+            "lastFeedRefresh": DateConverter.convertDateToString(user.lastFeedRefresh),
+            "streak": user.streak,
+            "friendIn": user.friendIn,
+            "friendOut": user.friendOut,
+            "friends": user.friends,
+            "badges": user.badges,
+            "profilePhoto": user.profilePhoto,
+            "phoneNumber": user.phoneNumber,
+            "myCategories": user.myCategories,
+            "myNextPosts": user.myNextPosts,
+            "myProfileSearches": user.myProfileSearches,
+            "myPostSearches": user.myPostSearches,
+            "myAccessedProfiles": user.myAccessedProfiles,
+            "attributes": user.attributes,
+            "myPosts": user.myPosts,
+            "myResponses": user.myResponses,
+            "myViews": user.myViews,
+            "myComments": user.myComments,
+            "numUserResponses": user.numUserResponses,
+            "numUserViews": user.numUserViews,
+            "myTakeTime": user.myTakeTime
+        ] as [String : Any]
+        
+        Firebase.db.collection("USERS").document(user.userId).updateData(data) { error in
+            if let error = error {
+                print("DEBUG: Failed to updateUserFields from UserFirebase class \(error.localizedDescription)")
+                return
+            }
+        }
+    }
+    
     func getUserPosts(userId: String, setCurrentUserData: Bool = false) async throws -> [String] {
         let snapshot = try await Firebase.db.collection("POSTS")
             .whereField("userId", isEqualTo: userId)
@@ -148,7 +186,7 @@ class UserFirebase: ObservableObject {
         
         return postIds
     }
-    
+
     func getUsernameAndPhoto(userId: String, completion: @escaping ([String: String]) -> Void) {
         var nameAndPhoto = ["username": "", "profilePhoto": ""]
         
@@ -164,6 +202,24 @@ class UserFirebase: ObservableObject {
             }
             
             completion(nameAndPhoto)
+        }
+    }
+    
+    func populateUsernameAndProfilePhoto(userId: String) async throws {
+        if useridsToPhotosAndUsernames.keys.contains(userId) { return }
+        
+        let docRef = Firebase.db.collection("USERS").document(userId)
+        
+        let document = try await docRef.getDocument()
+        guard let data = document.data() else {
+            throw NSError(domain: "No user data found for \(userId)", code: 404)
+        }
+        
+        let username = data["username"] as? String ?? ""
+        let profilePhoto = data["profilePhoto"] as? String ?? ""
+        
+        DispatchQueue.main.async {
+            self.useridsToPhotosAndUsernames[userId] = (photoURL: profilePhoto, username: username)
         }
     }
     
@@ -283,34 +339,7 @@ class UserFirebase: ObservableObject {
             }
         }
     }
-    
-    func updateUserFields(user: User) {
-        let data = ["lastLogin": DateConverter.convertDateToString(user.lastLogin),
-                    "lastFeedRefresh": DateConverter.convertDateToString(user.lastFeedRefresh),
-                    "streak": user.streak,
-                    "friendIn": user.friendIn,
-                    "friendOut": user.friendOut,
-                    "friends": user.friends,
-                    "badges": user.badges,
-                    "profilePhoto": user.profilePhoto,
-                    "phoneNumber": user.phoneNumber,
-                    "myCategories": user.myCategories,
-                    "myNextPosts": user.myNextPosts,
-                    "myPostSearches": user.myPostSearches,
-                    "myProfileSearches": user.myProfileSearches,
-                    "myAccessedProfiles": user.myAccessedProfiles,
-                    "myTakeTime": user.myTakeTime
 
-        ] as [String : Any]
-        
-        Firebase.db.collection("USERS").document(user.userId).updateData(data) { error in
-            if let error = error {
-                print("DEBUG: Failed to updateUserFields from UserFirebase class \(error.localizedDescription)")
-                return
-            }
-        }
-    }
-    
     func addUserPostSearch(search: String) {
         // Update user var
         user.myPostSearches.append(search)
@@ -332,7 +361,111 @@ class UserFirebase: ObservableObject {
             "myProfileSearches": FieldValue.arrayUnion([search])
         ])
     }
-    
+  
+    // reorder user's topic using OpenAI
+    func reorderUserTopics(for user: User, with interactions: [String: Int]) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("USERS").document(user.userId)
+        
+        let currentTopics = user.myTopics
+        
+        // Format the interactions dictionary into a string for the OpenAI prompt
+        let interactionPairs = interactions.map { "\"\($0)\": \($1)" }.joined(separator: ", ")
+        let interactionsString = "{\(interactionPairs)}"
+        
+        let examplePrompt = """
+                Given the user's current topic list and their most recent interaction counts per topic, reorder the list so that the most relevant topics appear higher. Be **conservative**—only rearrange topics significantly if the interaction data clearly shows strong interest or disinterest.
+
+                - Always return exactly **20** topics.
+                - Topics may be added or removed at your discretion if needed for relevance.
+                - Index 0 = highest interest, index 19 = lowest.
+                - Return only a JSON list of 20 topic strings, no explanations.
+
+                Example:
+                Current Topics: ["AI", "Gaming", "Fitness", "Politics", "NFL", "Cooking", "Stocks", "Movies", "Fashion", "Travel", "NBA", "Music", "Photography", "Books", "Science", "Education", "Food", "Space", "Health", "History"]
+                Last Session Interactions: {"NFL": 14, "NBA": 13, "Gaming": 11, "AI": 2, "Books": 0, "Fashion": 1, "Science": 5, "Music": 6, "Politics": 0}
+                Output:
+                ["NFL", "NBA", "Gaming", "Music", "Science", "AI", "Cooking", "Fitness", "Stocks", "Movies", "Travel", "Photography", "Education", "Food", "Space", "Health", "Fashion", "History", "Politics", "Books"]
+
+                Now reorder this list:
+                Current Topics: \(currentTopics)
+                Last Session Interactions: \(interactionsString)
+                Output:
+                """
+        
+        let openAIRequest: [String: Any] = [
+            "model": "gpt-4o-mini",
+            "messages": [
+                ["role": "system", "content": "You are an assistant that helps personalize topic rankings for users based on session activity. Respond ONLY with a JSON list of 20 topic strings."],
+                ["role": "user", "content": examplePrompt]
+            ],
+            "temperature": 0.4
+        ]
+        
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            print("Invalid OpenAI URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(Keys.openAIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: openAIRequest, options: [])
+        } catch {
+            print("Failed to encode OpenAI request")
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("OpenAI API error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let data = data else {
+                print("No data received from OpenAI")
+                return
+            }
+
+            do {
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let choices = jsonResponse["choices"] as? [[String: Any]],
+                   let text = choices.first?["message"] as? [String: Any],
+                   let content = text["content"] as? String {
+                    
+                    guard let reorderedData = content.data(using: .utf8),
+                          let reorderedTopics = try JSONSerialization.jsonObject(with: reorderedData, options: []) as? [String],
+                          reorderedTopics.count == 20 else {
+                        print("Invalid or incomplete topic list returned")
+                        return
+                    }
+
+                    DispatchQueue.main.async {
+                        user.myTopics = reorderedTopics
+                    }
+
+                    // Save to Firestore
+                    userRef.updateData(["myTopics": reorderedTopics]) { error in
+                        if let error = error {
+                            print("Failed to update reordered topics: \(error.localizedDescription)")
+                        } else {
+                            print("User topics successfully reordered and updated")
+                        }
+                    }
+                } else {
+                    print("Unexpected OpenAI response format")
+                }
+            } catch {
+                print("Failed to decode OpenAI response: \(error.localizedDescription)")
+            }
+        }
+        
+        task.resume()
+    }
+
     func reorderUserCategory(latest: [String: Int], currentInterestList: [String]) async throws -> [String] {
         let latestSorted = latest.sorted { $0.value > $1.value }
 
@@ -367,10 +500,44 @@ class UserFirebase: ObservableObject {
                 print("⚠️ Failed to decode JSON: \(error)")
                 return []
             }
-
         } catch {
             print("❌ OpenAI API error: \(error)")
             return []
         }
+    }
+    
+    func updateUserStreakAndLastLogin(user: User) async throws {
+        let hoursSinceLastLogin = Date().timeIntervalSince(user.lastLogin) / 3600
+        
+        if hoursSinceLastLogin > 48 {
+            // Reset streak
+            let now = Date()
+            let updatedData: [String: Any] = [
+                "lastLogin": DateConverter.convertDateToString(now),
+                "streak": 1
+            ]
+            try await Firebase.db.collection("USERS").document(user.userId).updateData(updatedData)
+            print("🔁 Streak reset to 1 and lastLogin updated.")
+            
+        } else if hoursSinceLastLogin > 24 {
+            // Increment streak
+            let now = Date()
+            let updatedData: [String: Any] = [
+                "lastLogin": DateConverter.convertDateToString(now),
+                "streak": user.streak + 1
+            ]
+            try await Firebase.db.collection("USERS").document(user.userId).updateData(updatedData)
+            print("🔥 Streak incremented and lastLogin updated.")
+            
+        }
+    }
+    
+    func updateUserNextPosts(userId: String, postIds: [String]) async throws {        
+        let data: [String: Any] = [
+            "myNextPosts": postIds
+        ]
+
+        try await Firebase.db.collection("USERS").document(userId).updateData(data)
+        print("✅ myNextPosts updated for user \(userId)")
     }
 }
