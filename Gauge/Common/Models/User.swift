@@ -28,7 +28,7 @@ class User: Equatable, Identifiable, ObservableObject {
     var myCategories: [String] = []
     var myTopics: [String] = [] // List of topics that user is interested in / interact with
     var myNextPosts: [String] = []
-    var myTakeTime: [String : Int]
+    var myTakeTime: [String:Int] = [:]
 
     // MARK: AI Algorithm Variables
     @Published var myPosts: [String] = [] // PostIds of the user's posts
@@ -54,7 +54,6 @@ class User: Equatable, Identifiable, ObservableObject {
         self.lastFeedRefresh = Date()
         self.streak = 0
         self.myAccessedProfiles = []
-        self.myTakeTime = [:]
         self.profilePhoto = ""
         self.attributes = [:]
     }
