@@ -10,6 +10,8 @@ import SwiftUI
 struct CommentsView: View {
     @EnvironmentObject private var userVM: UserFirebase
     @EnvironmentObject private var postVM: PostFirebase
+    @Environment(\.modelContext) private var modelContext
+
     @State private var sortOption: SortOption = .mostVotes
     @State var newCommentText: String = ""
     @State var showAddComment: Bool = false
@@ -19,6 +21,7 @@ struct CommentsView: View {
     enum SortOption: String, CaseIterable {
         case mostVotes = "Most votes"
         case mostRecent = "Most recent"
+        case mostControversial = "Most controversial"
     }
     
     var sortedComments: [Comment] {
@@ -30,6 +33,12 @@ struct CommentsView: View {
         case .mostRecent:
             return post.comments.sorted {
                 $0.date > $1.date
+            }
+        case .mostControversial:
+            return post.comments.sorted {
+                let a = min($0.likes.count, $0.dislikes.count)
+                let b = min($1.likes.count, $1.dislikes.count)
+                return a > b
             }
         }
     }
@@ -93,7 +102,16 @@ struct CommentsView: View {
                 // Bookmark button
                 Button(action: {
                     isBookmarked.toggle()
+                    
+                    if isBookmarked {
+                        postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
+                    } else {
+                        postVM.removeUserFromFavoritedBy(postId: post.postId, userId: userVM.user.id)
+                    }
                     postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
+                    UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                    UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+
                 }) {
                     Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                         .font(.system(size: 18))
@@ -155,14 +173,16 @@ struct CommentsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
         .sheet(isPresented: $showAddComment) {
-            ZStack {
-                    CommentSheetView(showAddComment: $showAddComment, post: post)
-                        .padding()
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .shadow(radius: 8)
-                }
-                .presentationDetents([.height(200)])
+            CommentSheetView(showAddComment: $showAddComment, post: post)
+                .presentationDetents([.height(220)]) // Optional: or use `.medium` / `.large`
+                .presentationBackground(.clear)
+                .background(
+                    RoundedRectangle(cornerRadius: 36, style: .continuous)
+                        .fill(Color.white)
+                )
+        }
+        .onAppear() {
+            isBookmarked = post.favoritedBy.contains(userVM.user.id)
         }
     }
 }

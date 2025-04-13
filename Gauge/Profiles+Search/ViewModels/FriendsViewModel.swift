@@ -169,6 +169,7 @@ class FriendsViewModel: ObservableObject {
             let lastFeedRefresh = DateConverter.convertStringToDate(userData["lastFeedRefresh"] as? String ?? "") ?? Date()
             let attributes = userData["attributes"] as? [String : String] ?? [:]
             let profilePhoto = userData["profilePhoto"] as? String ?? ""
+            let myTakeTime = userData["myTakeTime"] as? [String:Int] ?? [:]
 
             let outputUser = User(
                 userId: userId,
@@ -192,7 +193,8 @@ class FriendsViewModel: ObservableObject {
                 myAccessedProfiles: myAccessedProfiles,
                 lastLogin: lastLogin,
                 lastFeedRefresh: lastFeedRefresh,
-                attributes: attributes
+                attributes: attributes,
+                myTakeTime: myTakeTime
             )
             return outputUser
                 
