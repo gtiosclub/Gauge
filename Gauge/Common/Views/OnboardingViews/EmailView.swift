@@ -117,6 +117,8 @@ struct UsernameView: View {
                     .padding(.bottom, 20)
                 
                 TextField("Username", text: $username)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled(true)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 20)
