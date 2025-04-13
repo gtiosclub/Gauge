@@ -15,10 +15,6 @@ struct ProfileView: View {
     let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
     @State private var profileImage: UIImage?
     let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
-    
-    @State var slideGesture: CGSize = CGSize.zero
-    @State var currTabIndex = 0
-    var distance: CGFloat = UIScreen.main.bounds.size.width
 
     var body: some View {
         NavigationView {
