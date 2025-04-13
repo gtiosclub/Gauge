@@ -28,7 +28,8 @@ class User: Equatable, Identifiable, ObservableObject {
     var myCategories: [String] = []
     var myTopics: [String] = [] // List of topics that user is interested in / interact with
     var myNextPosts: [String] = []
-    
+    var myTakeTime: [String : Int]
+
     // MARK: AI Algorithm Variables
     @Published var myPosts: [String] = [] // PostIds of the user's posts
     @Published var myResponses: [String] = [] // PostIds of those responded to
@@ -53,12 +54,13 @@ class User: Equatable, Identifiable, ObservableObject {
         self.lastFeedRefresh = Date()
         self.streak = 0
         self.myAccessedProfiles = []
+        self.myTakeTime = [:]
         self.profilePhoto = ""
         self.attributes = [:]
     }
-    
 
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String], friendOut: [String], friends: [String], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], myTopics: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, attributes: [String: String]) {
+
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String], friendOut: [String], friends: [String], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], myTopics: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, attributes: [String: String], myTakeTime: [String:Int]) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -77,12 +79,12 @@ class User: Equatable, Identifiable, ObservableObject {
         self.badges = badges
         self.profilePhoto = profilePhoto
         self.myAccessedProfiles = myAccessedProfiles
+        self.myTakeTime = myTakeTime
         self.lastLogin = lastLogin
         self.lastFeedRefresh = lastFeedRefresh
         self.attributes = [:]
         // Add logic to add one to streak if it is maintained, update in Firebase
         self.streak = streak
-        self.attributes = attributes
     }
     
     static func == (lhs: User, rhs: User) -> Bool {

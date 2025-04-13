@@ -47,7 +47,9 @@ class UserFirebase: ObservableObject {
             myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
             lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
             lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date(),
-            attributes: data["attributes"] as? [String: String] ?? [:]
+            attributes: data["attributes"] as? [String: String] ?? [:],
+            myTakeTime: data["myTakeTime"] as? [String:Int] ?? [:]
+
         )
         
         if setCurrentUserData {
@@ -68,6 +70,7 @@ class UserFirebase: ObservableObject {
             user.myAccessedProfiles = userObj.myAccessedProfiles
             user.lastLogin = userObj.lastLogin
             user.lastFeedRefresh = userObj.lastFeedRefresh
+            user.myTakeTime = userObj.myTakeTime
             user.attributes = userObj.attributes
         }
         
@@ -153,7 +156,8 @@ class UserFirebase: ObservableObject {
             "myViews": user.myViews,
             "myComments": user.myComments,
             "numUserResponses": user.numUserResponses,
-            "numUserViews": user.numUserViews
+            "numUserViews": user.numUserViews,
+            "myTakeTime": user.myTakeTime
         ] as [String : Any]
         
         Firebase.db.collection("USERS").document(user.userId).updateData(data) { error in
@@ -336,7 +340,6 @@ class UserFirebase: ObservableObject {
             }
         }
     }
-    
 
     func addUserPostSearch(search: String) {
         // Update user var
