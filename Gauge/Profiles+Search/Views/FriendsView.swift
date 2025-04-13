@@ -2,7 +2,7 @@
 //  FriendsView.swift
 //  Gauge
 //
-//  Created by amber verma on 2/18/25.
+//  Created by amber verma on 2/6/25.
 //
 
 import SwiftUI
@@ -10,182 +10,286 @@ import SwiftUI
 struct FriendsView: View {
     @State private var searchText = ""
     @Environment(\.dismiss) var dismiss
-    
-    // TODO: Replace with actual user ID when integrating authentication
-    let userId = "USER_ID_PLACEHOLDER"
+    @ObservedObject var viewModel: FriendsViewModel
+    var currentUser: User
 
-    var body: some View {
-        VStack(spacing: 0) {
-            SearchBar(searchText: $searchText)
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .frame(height: 36)
-            
-            Divider()
-                .padding(.horizontal)
-                .padding(.top, 8)
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    
-                    // ✅ Navigation to Accept Friend Requests
-                    NavigationLink(destination: AcceptFriendRequestView(viewModel: FriendsViewModel(user: User(userId: userId, username: "DefaultUser", email: "default@example.com")), userId: userId)) {
-                        HStack {
-                            SectionHeader(title: "View Friend Requests")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
-                                .padding(.trailing)
-                        }
-                        .foregroundColor(.black)
-                    }
-                    .padding(.top, 16)
+    @State private var showRemoveAlert = false
+    @State private var userToRemove: User?
 
-                    // ✅ Navigation to Send Friend Requests
-                    NavigationLink(destination: SendFriendRequestView(viewModel: FriendsViewModel(user: User(userId: userId, username: "DefaultUser", email: "default@example.com")), userId: userId)) {
-                        HStack {
-                            Text("Add Friends")
-                                .font(.headline)
-                                .foregroundColor(.blue)
-                            Spacer()
-                            Image(systemName: "plus.circle")
-                                .foregroundColor(.blue)
-                        }
-                        .padding()
-                    }
-
-                    NavigationLink(destination: RequestsView()) {
-                        HStack {
-                            SectionHeader(title: "Requests")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
-                                .padding(.trailing)
-                        }
-                        .foregroundColor(.black)
-                    }
-                    .padding(.top, 16)
-                    
-                    FriendRequestView()
-                        .padding(.bottom, 8)
-                    
-                    NavigationLink(destination: RequestsView()) {
-                        HStack {
-                            HStack(spacing: -8) {
-                                ForEach(0..<4) { _ in
-                                    Circle()
-                                        .frame(width: 30, height: 30)
-                                        .foregroundColor(Color(.systemGray3))
-                                }
-                                Text("  and 4 others")
-                                    .font(.subheadline)
-                                    .foregroundColor(.black)
-                                    .padding(.leading, 6)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, -8)
-                    }
-                    
-                    SectionHeader(title: "27 Friends")
-                        .padding(.top, 16)
-                    FriendsListView()
-                }
+    var filteredFriends: [User] {
+        if searchText.isEmpty {
+            return viewModel.loadedFriends
+        } else {
+            return viewModel.loadedFriends.filter {
+                $0.username.lowercased().contains(searchText.lowercased())
             }
         }
-        .navigationBarTitle("Friends", displayMode: .inline)
-        .navigationBarBackButtonHidden(false)
+    }
+    
+    @Sendable
+    func loadInitialData() async {
+        if let refreshedUser = await viewModel.getUserFromId(userId: currentUser.userId) {
+            await MainActor.run {
+                viewModel.friends = refreshedUser.friends
+                viewModel.incomingRequests = refreshedUser.friendIn
+                viewModel.outgoingRequests = refreshedUser.friendOut
+            }
+
+            await viewModel.fetchFriendsDetails()
+            await viewModel.fetchIncomingRequestDetails(userId: currentUser.userId)
+        }
+    }
+
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                CustomSearchBar(text: $searchText)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .frame(height: 36)
+
+                Divider()
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        if !viewModel.loadedRequests.isEmpty {
+                            SectionHeader(title: "Requests")
+                                .padding(.top, 16)
+
+                            ForEach(viewModel.loadedRequests.prefix(2)) { user in
+                                RequestRow(user: user, viewModel: viewModel, currentUser: currentUser)
+                            }
+
+                           
+                            NavigationLink(destination: RequestsView(viewModel: viewModel, currentUser: currentUser)) {
+                                MoreRequestsView(requests: viewModel.loadedRequests)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    
+                        SectionHeader(title: "\(filteredFriends.count) Friends")
+                            .padding(.top, 16)
+
+                        if filteredFriends.isEmpty {
+                            EmptyFriendsView(searchText: searchText)
+                        } else {
+                            ForEach(filteredFriends) { friend in
+                                HStack(spacing: 10) {
+                                    AsyncImage(url: URL(string: friend.profilePhoto)) { image in
+                                        image.resizable()
+                                    } placeholder: {
+                                        Circle().fill(Color(.systemGray3))
+                                    }
+                                    .frame(width: 30, height: 30)
+                                    .clipShape(Circle())
+
+                                    Text(friend.username)
+                                    Spacer()
+
+                                    Button(action: {
+                                        userToRemove = friend
+                                        showRemoveAlert = true
+                                    }) {
+                                        Image(systemName: "xmark")
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+            .navigationBarTitle("Friends", displayMode: .inline)
+            .confirmationDialog("Remove this friend?", isPresented: $showRemoveAlert, titleVisibility: .visible) {
+                Button("Remove", role: .destructive) {
+                    if let user = userToRemove {
+                        removeFriend(user)
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+        }
+        .task {
+            await loadInitialData()
+        }
+        .refreshable {
+            await loadInitialData()
+        }
+    }
+
+    func refreshData() {
+        Task {
+            await loadInitialData()
+        }
+    }
+
+    func removeFriend(_ friend: User) {
+        Task {
+            do {
+                try await viewModel.removeFriend(friendId: friend.userId, hostId: currentUser.userId)
+                await viewModel.fetchFriendsDetails()
+            } catch {
+                print("Error removing friend: \(error)")
+            }
+        }
     }
 }
 
-struct CustomSearchBar: View {
-    @Binding var text: String
-    
+struct RequestRow: View {
+    let user: User
+    @ObservedObject var viewModel: FriendsViewModel
+    let currentUser: User
+
+    var body: some View {
+        HStack(spacing: 10) {
+            AsyncImage(url: URL(string: user.profilePhoto)) { image in
+                image.resizable()
+            } placeholder: {
+                Circle().fill(Color(.systemGray3))
+            }
+            .frame(width: 30, height: 30)
+            .clipShape(Circle())
+
+            Text(user.username)
+            Spacer()
+
+            Button("Accept") {
+                handleAccept()
+            }
+            .buttonStyle(AcceptButtonStyle())
+
+            Button(action: handleReject) {
+                Image(systemName: "xmark")
+                    .buttonStyle(RejectButtonStyle())
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    private func handleAccept() {
+        Task {
+            try? await viewModel.acceptFriendRequest(
+                friendId: user.userId,
+                hostId: currentUser.userId
+            )
+            await viewModel.fetchIncomingRequestDetails(userId: currentUser.userId)
+            await viewModel.fetchFriendsDetails()
+        }
+    }
+
+    private func handleReject() {
+        Task {
+            try? await viewModel.rejectFriendRequest(
+                friendId: user.userId,
+                hostId: currentUser.userId
+            )
+            await viewModel.fetchIncomingRequestDetails(userId: currentUser.userId)
+        }
+    }
+}
+
+struct MoreRequestsView: View {
+    let requests: [User]
+
     var body: some View {
         HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.gray)
-            TextField("Search", text: $text)
-                .frame(height: 36)
-                .padding(8)
-                .background(Color(.systemGray6))
-                .cornerRadius(8)
-                .frame(height: 28)
-            
-            Image(systemName: "mic.fill")
+            HStack(spacing: -10) {
+                ForEach(Array(requests.prefix(4)), id: \.id) { user in
+                    ProfileImagePill(profilePhoto: user.profilePhoto)
+                }
+            }
+
+            let othersCount = requests.count - 2
+            if othersCount > 0 {
+                Text("and \(othersCount) others...")
+                    .font(.subheadline)
+                    .foregroundColor(.black)
+                    .padding(.leading, 6)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
                 .foregroundColor(.gray)
         }
-        .padding(.horizontal, 8)
-        .background(Color(.systemGray6))
-        .cornerRadius(8)
+        .padding(.horizontal)
+        .padding(.top, -4)
+    }
+}
+
+struct ProfileImagePill: View {
+    let profilePhoto: String
+
+    var body: some View {
+        Group {
+            if let url = URL(string: profilePhoto), !profilePhoto.isEmpty {
+                AsyncImage(url: url) { image in
+                    image.resizable()
+                } placeholder: {
+                    Circle().fill(Color(.systemGray3))
+                }
+            } else {
+                Circle().fill(Color(.systemGray3))
+            }
+        }
+        .frame(width: 28, height: 28)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(Color.white, lineWidth: 1))
+        .shadow(radius: 1)
     }
 }
 
 struct SectionHeader: View {
-    let title: String
-    
+    var title: String
+
     var body: some View {
         Text(title)
             .font(.headline)
-            .fontWeight(.bold)
+            .fontWeight(.semibold)
             .padding(.horizontal)
     }
 }
 
-struct FriendRequestView: View {
+struct EmptyFriendsView: View {
+    let searchText: String
+
     var body: some View {
-        HStack(spacing: 10) {
-            Circle()
-                .frame(width: 30, height: 30)
-                .foregroundColor(Color(.systemGray3))
-            Text("username")
+        VStack {
             Spacer()
-            Button("Accept") {
-                
-            }
+            Text(searchText.isEmpty ? "No friends added yet" : "No matching friends")
+                .foregroundColor(.gray)
+            Spacer()
+        }
+        .frame(height: 200)
+    }
+}
+
+struct AcceptButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
             .font(.system(size: 16, weight: .bold))
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(Color.blue)
             .foregroundColor(.white)
             .cornerRadius(6)
-            
-            Button(action: {}) {
-                Image(systemName: "xmark")
-                    .frame(width: 20, height: 15)
-                    .padding(6)
-                    .foregroundColor(.gray)
-                    .background(Color.gray.opacity(0.3))
-                    .cornerRadius(4)
-            }
-        }
-        .padding(.horizontal)
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
     }
 }
 
-struct FriendsListView: View {
-    var body: some View {
-        ForEach(0..<10) { _ in
-            HStack(spacing: 10) {
-                Circle()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(Color(.systemGray3))
-                Text("username")
-                Spacer()
-                Button(action: {}) {
-                    Image(systemName: "xmark")
-                        .foregroundColor(.gray)
-                }
-            }
-            .padding(.horizontal)
-        }
+struct RejectButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(width: 20, height: 15)
+            .padding(6)
+            .foregroundColor(.gray)
+            .background(Color.gray.opacity(0.3))
+            .cornerRadius(4)
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
     }
 }
-
-#Preview {
-    FriendsView()
-}
-

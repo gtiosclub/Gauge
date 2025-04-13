@@ -71,59 +71,84 @@ struct TakeCard: View {
     var views: Int
 
     var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
+        VStack(alignment: .leading, spacing: 12) {
+            // Top row: Profile, name, badge, time
+            HStack(spacing: 6) {
                 Circle()
                     .fill(Color.gray.opacity(0.3))
-                    .frame(width: 30, height: 30)
-                Text(username)
-                    .font(.headline)
-                Image(systemName: "diamond")
-                    .foregroundColor(.gray.opacity(0.7))
-                Text("• \(timeAgo)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
-            .padding(.bottom, 4)
+                    .frame(width: 36, height: 36)
+                    .overlay(
+                        Image(systemName: "dog.fill") // Placeholder profile icon
+                            .resizable()
+                            .scaledToFit()
+                            .padding(8)
+                            .foregroundColor(.gray)
+                    )
 
-            HStack {
+                Text(username)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+
+                Image(systemName: "hexagon.fill")
+                    .resizable()
+                    .frame(width: 14, height: 14)
+                    .foregroundColor(.yellow)
+
+                Text("• \(timeAgo)")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+
+                Spacer()
+            }
+
+            // Tags row
+            HStack(spacing: 6) {
                 ForEach(tags, id: \.self) { tag in
-                    Text("\(tag)")
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
+                    Text(tag)
                         .font(.caption)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
                         .background(Color.gray.opacity(0.2))
                         .foregroundColor(.black)
-                        .cornerRadius(8)
+                        .cornerRadius(20)
                 }
                 Spacer()
             }
-            .padding(.bottom, 8)
 
             Text(content)
                 .font(.body)
-                .padding(.bottom, 8)
+                .fixedSize(horizontal: false, vertical: true)
 
-            HStack {
+            HStack(spacing: 16) {
                 Text("\(votes) votes")
-                Spacer(minLength: 110)
-                Image(systemName: "message")
-                Text("\(comments)")
-                Image(systemName: "eye")
-                Text("\(views)")
+                
                 Spacer()
-                Image(systemName: "bookmark")
-                Image(systemName: "square.and.arrow.up")
+                HStack(spacing: 16) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "bubble.left")
+                        Text("\(comments)")
+                    }
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "eye")
+                        Text("\(views)")
+                    }
+                    
+                    Image(systemName: "bookmark")
+                    Image(systemName: "square.and.arrow.up")
+                }
             }
+            .font(.footnote)
             .foregroundColor(.gray)
-            .font(.subheadline)
         }
         .padding()
         .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 1)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
     }
 }
+
+
 
 #Preview {
     TakesView()

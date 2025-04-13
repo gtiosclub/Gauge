@@ -81,12 +81,18 @@ struct ProfileView: View {
                             .font(.system(size: 30))
                             .fontWeight(.medium)
                         
-                        NavigationLink(destination: FriendsView()) {
-                            Text("27")
-                                .foregroundColor(.black)
-                            Text("Friends")
-                                .foregroundColor(Color(.systemGray))
+                        NavigationLink(destination: FriendsView(
+                            viewModel: FriendsViewModel(user: userVM.user),
+                            currentUser: userVM.user
+                        )) {
+                            VStack {
+                                Text("\(userVM.user.friends.count)")
+                                    .foregroundColor(.black)
+                                Text("Friends")
+                                    .foregroundColor(Color(.systemGray))
+                            }
                         }
+
                     }
                     
                     Spacer()
@@ -142,7 +148,7 @@ struct ProfileView: View {
                     HStack(spacing: 0) {
                         TakesView()
                             .frame(width: geo.size.width)
-                        VoteCardsView()
+                        TabPlaceholder(tab: "Votes")
                             .frame(width: geo.size.width)
                         TabPlaceholder(tab: "Comments")
                             .frame(width: geo.size.width)
@@ -187,7 +193,6 @@ struct ProfileView: View {
                 SettingsView()
                     .environmentObject(authVM)
             }
-
         }
     }
 }
@@ -240,17 +245,6 @@ struct TabButton: View {
     }
 }
 
-struct VoteCardsView: View {
-    var body: some View {
-        ScrollView {
-            VStack {
-                VoteCard(username: "User1", timeAgo: "1 hour ago", tags: ["swiftui", "ios"], vote: "Yes", content: "This is a sample vote card content.", comments: 10, views: 100, votes: 25)
-                VoteCard(username: "User2", timeAgo: "2 hours ago", tags: ["programming", "swift"], vote: "No", content: "Another vote card example.", comments: 5, views: 50, votes: 10)
-            }
-            .padding()
-        }
-    }
-}
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
