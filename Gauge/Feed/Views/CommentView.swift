@@ -10,6 +10,8 @@ import SwiftUI
 struct CommentView: View {
     @EnvironmentObject private var userVM: UserFirebase
     @EnvironmentObject private var postVM: PostFirebase
+    @Environment(\.modelContext) private var modelContext
+
     let comment: Comment
     let post: any Post
 
@@ -19,13 +21,29 @@ struct CommentView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack() {
                 ProfileUsernameDateView(dateTime: comment.date, userId: comment.userId)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.trailing, 10)
+                    .fixedSize(horizontal: true, vertical: true)
                 
                 Spacer(minLength: 4)
-
+                    .frame(height: 0.5)
+                        .background(Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 0)
+                                .stroke(Color.lightGray, lineWidth: 0.5)
+                        )
+                
                 let (isFirstLabel, responseOption) = findUserResponse(post: post, userId: comment.userId)
-                LabelledDivider(label: responseOption, color: isFirstLabel ? .red : .green)
-                    .fixedSize()
+                let color = SliderResultView.colorForIndex((Int(responseOption) ?? 1) - 1, (Int(responseOption) ?? 1) - 1)
+                Text(responseOption)
+                    .font(.system(size: 14))
+                    .foregroundColor(color)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(color.opacity(0.2))
+                    )
+                    .padding(.leading, 10)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -73,9 +91,18 @@ struct CommentView: View {
     private func toggleLike() {
         if userStatus != "liked" {
             postVM.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+            UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+            
+            if userStatus == "disliked" {
+                postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            }
             userStatus = "liked"
         } else {
             postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+            UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: post.topics)
+
             userStatus = "none"
         }
     }
@@ -83,10 +110,23 @@ struct CommentView: View {
     private func toggleDislike() {
         if userStatus != "disliked" {
             postVM.dislikeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            
+            if userStatus == "liked" {
+                postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            }
+            
             userStatus = "disliked"
+            UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+            UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+
+            
+
         } else {
             postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             userStatus = "none"
+            UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+            UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: post.topics)
+
         }
     }
 }
@@ -97,36 +137,11 @@ func findUserResponse(post: any Post, userId: String) -> (Bool, String) {
             if let binaryPost = post as? BinaryPost {
                 return (binaryPost.responseOption1 == response.responseOption, response.responseOption)
             } else if let sliderPost = post as? SliderPost {
-                return ((Int(response.responseOption) ?? 1) - 1 < 3, String((Int(response.responseOption) ?? 1) - 1))
+                return ((Int(response.responseOption) ?? 1) < 3, String((Int(response.responseOption) ?? 1)))
             }
         }
     }
     return (false, "")
-}
-
-struct LabelledDivider: View {
-    let label: String
-    let color: Color
-
-    var body: some View {
-        HStack(spacing: 10) {
-            Rectangle()
-                .fill(Color.whiteGray)
-                .frame(height: 1)
-                .frame(maxWidth: .infinity)
-                .alignmentGuide(.firstTextBaseline) { _ in 0 }
-
-            Text(label)
-                .font(.system(size: 14))
-                .foregroundColor(color == .red ? Color.darkRed : Color.darkGreen)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
-                .background(
-                    Capsule()
-                        .fill(color.opacity(0.2))
-                )
-        }
-    }
 }
 
 //#Preview {

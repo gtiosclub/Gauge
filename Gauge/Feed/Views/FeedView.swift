@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct FeedView: View {
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
+    @Environment(\.modelContext) private var modelContext
     @State private var dragOffset: CGSize = .zero
     @State private var opacityAmount = 1.0
     @State private var optionSelected: Int = 0
@@ -47,7 +49,12 @@ struct FeedView: View {
                         }
                         
                         Button {
+                            if postVM.skippedPost != nil {
+                                UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
+                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postVM.skippedPost!.topics)
+                            }
                             postVM.undoSkipPost(userId: userVM.user.userId)
+                            
                             Task {
                                 try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
                             }
@@ -102,8 +109,18 @@ struct FeedView: View {
                                     .frame(width: max(0, geo.size.width - 6 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 20.0, 6.0) : 6.0) : 0.0)))
                                     .offset(y: 10 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0))
                                     .mask(RoundedRectangle(cornerRadius: 20.0).offset(y: 10))
+                            } else if postVM.feedPosts.indices.contains(1), let post = postVM.feedPosts[1] as? SliderPost {
+                                SliderFeedPost(post: post, optionSelected: $optionSelected, dragAmount: $dragOffset)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 20.0)
+                                            .fill(Color(red: (min(255.0, 209.0 + dragOffset.height) / 255),
+                                                        green: (min(255.0, 209.0 + dragOffset.height) / 255),
+                                                        blue: (min(255.0, 209.0 + dragOffset.height) / 255)))
+                                    )
+                                    .frame(width: max(0, geo.size.width - 6 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 20.0, 6.0) : 6.0) : 0.0)))
+                                    .offset(y: 10 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0))
+                                    .mask(RoundedRectangle(cornerRadius: 20.0).offset(y: 10))
                             }
-                            
                         }
                     }
                     
@@ -198,7 +215,7 @@ struct FeedView: View {
                                             }
                                         } else {
                                             withAnimation(.smooth(duration: 0.5)) {
-                                                dragOffset = CGSize(width: 0.0, height: 800.0)
+                                                dragOffset = CGSize(width: 0.0, height: geo.size.height)
                                             }
                                         }
                                         
@@ -212,20 +229,24 @@ struct FeedView: View {
                                                     if shouldSubmit && !isConfirmed {
                                                         let responseChosen = (optionSelected == 1) ? binaryPost.responseOption1 : binaryPost.responseOption2
                                                         postVM.addResponse(postId: binaryPost.postId, userId: user.userId, responseOption: responseChosen)
+                                                        UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                                                        UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+
+                                                        
                                                     }
                                                 } else if let sliderPost = post as? SliderPost {
                                                     shouldSubmit = optionSelected != 3
                                                     if shouldSubmit && !isConfirmed {
                                                         postVM.addResponse(postId: sliderPost.postId, userId: user.userId, responseOption: (optionSelected < 3 ? String(optionSelected + 1) : String(optionSelected)))
+                                                        UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                                                        UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
                                                     }
                                                 } else {
                                                     shouldSubmit = false
                                                 }
 
                                                 if shouldSubmit {
-                                                    withAnimation {
-                                                        isConfirmed = true
-                                                    }
+                                                    isConfirmed = true
                                                 }
                                             }
                                             
@@ -257,6 +278,7 @@ struct FeedView: View {
                                 }
                             }
                             .onEnded { gesture in
+                                
                                 if dragOffset.height > 150 && hasSkipped {
                                     if isConfirmed {
                                         // Next post logic
@@ -266,6 +288,11 @@ struct FeedView: View {
                                     } else {
                                         // Skip logic
                                         postVM.skippedPost = postVM.skipPost(user: userVM.user)
+                                        if postVM.skippedPost != nil {
+                                            UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
+                                            UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: postVM.skippedPost!.topics)
+                                            
+                                        }
                                     }
                                     withAnimation {
                                         isConfirmed = false
@@ -274,14 +301,10 @@ struct FeedView: View {
                                         try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
                                     }
                                 }
-                                
-                                //                            withAnimation(.none) {
-//                                if postVM.feedPosts.count > 0 && postVM.feedPosts.first! is SliderPost {
-//                                } else {
+                                withAnimation() {
                                     dragOffset = .zero
-//                                }
+                                }
                                 hasSkipped = false
-                                //                            }
                             }
                     )
                     .opacity(hasSkipped ? 0.0 : 1.0)
