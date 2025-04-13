@@ -27,10 +27,10 @@ struct StackedProfiles: View {
                 let profilePhoto = userVM.useridsToPhotosAndUsernames[userId]?.photoURL ?? ""
 
                 ProfilePictureView(profilePhoto: profilePhoto)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.white, lineWidth: 1)
-                    )
+//                    .overlay(
+//                        Circle()
+//                            .strokeBorder(Color.white, lineWidth: 1)
+//                    )
                     .offset(x: sideOnTop == .left ? -CGFloat(index) * spacing : CGFloat(index) * spacing)
                     .task {
                         if userVM.useridsToPhotosAndUsernames[userId] == nil {

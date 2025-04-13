@@ -5,7 +5,7 @@
 //  Created by Datta Kansal on 2/6/25.
 //
 
-import FirebaseAuth
+@preconcurrency import FirebaseAuth
 
 class AuthenticationVM: ObservableObject {
     @Published var errorMessage: String?
@@ -56,55 +56,6 @@ class AuthenticationVM: ObservableObject {
         }
     }
     
-//    func signUp(email: String, password: String, username: String) async {
-//        do {
-//            isLoading = true
-//            let authResult = try await auth.createUser(withEmail: email, password: password)
-//            let user = authResult.user
-//            
-//            let changeRequest = user.createProfileChangeRequest()
-//            changeRequest.displayName = username
-//            try await changeRequest.commitChanges()
-//            
-//            let tempUser = User(userId: user.uid, username: username, email: email)
-//            
-//            let userData = ["email": email,
-//                            "username": username,
-//                            "lastLogin": DateConverter.convertDateToString(tempUser.lastLogin),
-//                            "lastFeedRefresh": DateConverter.convertDateToString(tempUser.lastFeedRefresh),
-//                            "streak": tempUser.streak,
-//                            "friendIn": tempUser.friendIn,
-//                            "friendOut": tempUser.friendOut,
-//                            "friends": tempUser.friends,
-//                            "badges": tempUser.badges,
-//                            "profilePhoto": tempUser.profilePhoto,
-//                            "phoneNumber": tempUser.phoneNumber,
-//                            "myCategories": tempUser.myCategories,
-//                            "myCategories": tempUser.myTopics,
-//                            "myNextPosts": tempUser.myNextPosts,
-//                            "myAccessedProfiles": tempUser.myAccessedProfiles,
-//                            "attributes": [:],
-//                            "myPostSearches": tempUser.myPostSearches,
-//                            "myProfileSearches": tempUser.myProfileSearches,
-//                            "myAccessedProfiles": tempUser.myAccessedProfiles
-//                        
-//            ] as [String : Any]
-//            
-//            try await Firebase.db.collection("USERS").document(user.uid).setData(userData)
-//            
-//            DispatchQueue.main.async {
-//                self.currentUser = tempUser
-//                self.isLoading = false
-//                print("Signed up as \(username)")
-//            }
-//        } catch {
-//            DispatchQueue.main.async {
-//                self.errorMessage = error.localizedDescription
-//                self.isLoading = false
-//            }
-//        }
-//    }
-    
     func signIn(email: String, password: String) async {
         isLoading = true
         do {
@@ -143,28 +94,27 @@ class AuthenticationVM: ObservableObject {
             // Initialize with empty attributes map
             let initialAttributes: [String: String] = [:]
             
-            if let tempUser = tempUser {
-                let userData = ["email": tempUserData.email,
-                                "username": tempUserData.username,
-                                "lastLogin": DateConverter.convertDateToString(tempUser.lastLogin),
-                                "lastFeedRefresh": DateConverter.convertDateToString(tempUser.lastFeedRefresh),
-                                "streak": tempUser.streak,
-                                "friendIn": tempUser.friendIn,
-                                "friendOut": tempUser.friendOut,
-                                "friends": tempUser.friends,
-                                "badges": tempUser.badges,
-                                "profilePhoto": tempUser.profilePhoto,
-                                "phoneNumber": tempUser.phoneNumber,
-                                "myCategories": tempUser.myCategories,
-                                "myNextPosts": tempUser.myNextPosts,
-                                "myProfileSearches": tempUser.myProfileSearches,
-                                "myPostSearches": tempUser.myPostSearches,
-                                "myAccessedProfiles": tempUser.myAccessedProfiles,
-                                "attributes": initialAttributes  // Initialize empty attributes
-                ] as [String : Any]
-                
+            let nowString = DateConverter.convertDateToString(Date())
+            
+            let userData = ["email": tempUserData.email,
+                            "username": tempUserData.username,
+                            "lastLogin": nowString,
+                            "lastFeedRefresh": nowString,
+                            "streak": 1,
+                            "friendIn": [],
+                            "friendOut": [],
+                            "friends": [],
+                            "badges": [],
+                            "profilePhoto": "",
+                            "phoneNumber": "",
+                            "myCategories": [],
+                            "myNextPosts": [],
+                            "myProfileSearches": [],
+                            "myPostSearches": [],
+                            "myAccessedProfiles": [],
+                            "attributes": initialAttributes] as [String : Any]
+                                
                 try await Firebase.db.collection("USERS").document(user.uid).setData(userData)
-            }
             
             DispatchQueue.main.async {
                 self.isLoading = false
@@ -229,8 +179,8 @@ class AuthenticationVM: ObservableObject {
                     if document.exists {
                         self.currentUser = User(userId: userId, username: username, email: email)
                     } else {
-                        self.errorMessage = "User not found. Creating record."
-                        Task { try await Firebase.db.collection("USERS").document(userId).setData(["email": email, "username": username]) }
+                        self.errorMessage = "User not found."
+//                        Task { try await Firebase.db.collection("USERS").document(userId).setData(["email": email, "username": username]) }
                     }
                 }
             } catch {

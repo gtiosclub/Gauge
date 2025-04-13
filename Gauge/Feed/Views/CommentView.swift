@@ -21,13 +21,29 @@ struct CommentView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack() {
                 ProfileUsernameDateView(dateTime: comment.date, userId: comment.userId)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.trailing, 10)
+                    .fixedSize(horizontal: true, vertical: true)
                 
                 Spacer(minLength: 4)
-
+                    .frame(height: 0.5)
+                        .background(Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 0)
+                                .stroke(Color.lightGray, lineWidth: 0.5)
+                        )
+                
                 let (isFirstLabel, responseOption) = findUserResponse(post: post, userId: comment.userId)
-                LabelledDivider(label: responseOption, color: isFirstLabel ? .red : .green)
-                    .fixedSize()
+                let color = SliderResultView.colorForIndex((Int(responseOption) ?? 1) - 1, (Int(responseOption) ?? 1) - 1)
+                Text(responseOption)
+                    .font(.system(size: 14))
+                    .foregroundColor(color)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(color.opacity(0.2))
+                    )
+                    .padding(.leading, 10)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -121,36 +137,11 @@ func findUserResponse(post: any Post, userId: String) -> (Bool, String) {
             if let binaryPost = post as? BinaryPost {
                 return (binaryPost.responseOption1 == response.responseOption, response.responseOption)
             } else if let sliderPost = post as? SliderPost {
-                return ((Int(response.responseOption) ?? 1) - 1 < 3, String((Int(response.responseOption) ?? 1) - 1))
+                return ((Int(response.responseOption) ?? 1) < 3, String((Int(response.responseOption) ?? 1)))
             }
         }
     }
     return (false, "")
-}
-
-struct LabelledDivider: View {
-    let label: String
-    let color: Color
-
-    var body: some View {
-        HStack(spacing: 10) {
-            Rectangle()
-                .fill(Color.whiteGray)
-                .frame(height: 1)
-                .frame(maxWidth: .infinity)
-                .alignmentGuide(.firstTextBaseline) { _ in 0 }
-
-            Text(label)
-                .font(.system(size: 14))
-                .foregroundColor(color == .red ? Color.darkRed : Color.darkGreen)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
-                .background(
-                    Capsule()
-                        .fill(color.opacity(0.2))
-                )
-        }
-    }
 }
 
 //#Preview {

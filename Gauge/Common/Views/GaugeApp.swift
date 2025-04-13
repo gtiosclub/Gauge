@@ -32,18 +32,17 @@ struct GaugeApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
     @StateObject var userVM: UserFirebase = UserFirebase()
     @StateObject var postVM: PostFirebase = PostFirebase()
     @State private var navigationPath: NavigationPath = NavigationPath()
-
 
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $navigationPath) {
                 ContentView()
                     .fullScreenCover(isPresented: $scheduler.shouldInterrupt) {
-                        TakeTimeView()
-                            .environmentObject(scheduler)
+                        TakeTimeTakesView(scheduler: scheduler)
                     }
             }
         }

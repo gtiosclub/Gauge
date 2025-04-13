@@ -42,7 +42,7 @@ class PostFirebase: ObservableObject {
             DispatchQueue.main.async {
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
-                        print("New comment: \(diff.document.data())")
+//                        print("New comment: \(diff.document.data())")
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
@@ -60,10 +60,10 @@ class PostFirebase: ObservableObject {
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         self.feedPosts[0].comments.append(newComment)
                     } else if diff.type == .removed {
-                        print("Comment removed: \(diff.document.documentID)")
+//                        print("Comment removed: \(diff.document.documentID)")
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                     } else if diff.type == .modified {
-                        print("Comment modified: \(diff.document.documentID)")
+//                        print("Comment modified: \(diff.document.documentID)")
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
@@ -98,7 +98,7 @@ class PostFirebase: ObservableObject {
                 self.objectWillChange.send()
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
-                        print("New Response: \(diff.document.data())")
+//                        print("New Response: \(diff.document.data())")
                         let newResponseDoc = diff.document.data()
                         let id = diff.document.documentID
                         let newResponse = Response(
@@ -166,7 +166,7 @@ class PostFirebase: ObservableObject {
                                 favoritedBy: data["favoritedBy"] as? [String] ?? []
                             )
                             
-                            print("post categories: \(post.categories)")
+//                            print("post categories: \(post.categories)")
                             return (postId, post)
 
 
@@ -215,7 +215,7 @@ class PostFirebase: ObservableObject {
     }
     
     func watchForNewPosts(user: User) {
-        let allFilteredPosts: [String] = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
+        
         Firebase.db.collection("POSTS").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else {
                 print("Error fetching post updates: \(error!)")
@@ -225,6 +225,7 @@ class PostFirebase: ObservableObject {
             DispatchQueue.main.async {
                 self.objectWillChange.send()
                 for change in snapshot.documentChanges {
+                    let allFilteredPosts: [String] = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
                     let newPostData = change.document.data()
                     guard let postId = newPostData["postId"] as? String else { return }
 
@@ -491,6 +492,13 @@ class PostFirebase: ObservableObject {
         let categoryStrings = post.categories.map{$0.rawValue}
         
         let topics = await generatePostKeywords(post: post)
+        
+        let context = """
+        Question: \(question)
+        Response Options: \(sublabel1) or \(sublabel2)
+        Categories: \(categoryStrings.joined(separator: ", "))
+        Topics: \(topics.joined(separator: ", "))
+        """
 
         documentRef.setData([
             "type": PostType.BinaryPost.rawValue,
@@ -504,7 +512,8 @@ class PostFirebase: ObservableObject {
             "responseOption2": post.responseOption2,
             "sublabel1": post.sublabel1,
             "sublabel2": post.sublabel2,
-            "favoritedBy": post.favoritedBy
+            "favoritedBy": post.favoritedBy,
+            "context": context
         ]) { error in
             if let error = error {
                 print("error writing doc: \(error)")
@@ -516,10 +525,6 @@ class PostFirebase: ObservableObject {
     }
     
     func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> [String] {
-        var categoryString: [String] = []
-        for cat in categories {
-            categoryString.append(cat.rawValue)
-        }
         
         // Create post instance
         let post = SliderPost(
@@ -532,8 +537,14 @@ class PostFirebase: ObservableObject {
             upperBoundLabel: upperBoundLabel
         )
         
+        let categoryStrings = post.categories.map{$0.rawValue}
         let topics = await generatePostKeywords(post: post)
         
+        let context = """
+        Question: \(question)
+        Categories: \(categoryStrings.joined(separator: ", "))
+        Topics: \(topics.joined(separator: ", "))
+        """
         // Create document in Firebase
         let documentRef = Firebase.db.collection("POSTS").document(post.postId)
 
@@ -541,13 +552,14 @@ class PostFirebase: ObservableObject {
             "type": PostType.SliderPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "categories": categoryString,
+            "categories": categoryStrings,
             "topics": topics,
             "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
             "lowerBoundLabel": post.lowerBoundLabel,
             "upperBoundLabel": post.upperBoundLabel,
-            "favoritedBy": post.favoritedBy
+            "favoritedBy": post.favoritedBy,
+            "context": context
         ]) { error in
             if let error = error {
                 print("error writing doc: \(error)")
@@ -633,6 +645,20 @@ class PostFirebase: ObservableObject {
                 print("Error adding user to favoritedBy array: \(error)")
             } else {
                 print("Added \(userId) to favoritedBy array of post \(postId).")
+            }
+        }
+    }
+    
+    func removeUserFromFavoritedBy(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("POSTS").document(postId)
+        
+        documentRef.updateData([
+            "favoritedBy": FieldValue.arrayRemove([userId])
+        ]) { error in
+            if let error = error {
+                print("Error removing user from favoritedBy array: \(error)")
+            } else {
+                print("Removed \(userId) from favoritedBy array of post \(postId).")
             }
         }
     }

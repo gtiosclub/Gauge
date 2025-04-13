@@ -117,6 +117,8 @@ struct UsernameView: View {
                     .padding(.bottom, 20)
                 
                 TextField("Username", text: $username)
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled(true)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 20)
@@ -128,7 +130,7 @@ struct UsernameView: View {
             Spacer()
             
             Button(action: {
-                authVM.tempUserData.username = username
+                authVM.tempUserData.username = username.lowercased()
                 authVM.onboardingState = .password
             }) {
                 HStack {

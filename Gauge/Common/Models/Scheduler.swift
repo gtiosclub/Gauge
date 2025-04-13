@@ -7,46 +7,57 @@
 
 import SwiftUI
 import Combine
+import FirebaseFirestore
 
 class Scheduler: ObservableObject {
     @Published var shouldInterrupt: Bool = false
     @Published var savedUserState: String?
 
-    private var timer: Timer?
+    private let launchTime = Date()
+
+    private var listener: ListenerRegistration?
 
     init() {
-//        startDailyInterruptTimer()
+        startFirestoreListener()
     }
 
-    func startDailyInterruptTimer() {
-//        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: false) { _ in
-//            self.triggerInterrupt()
-//        }
+    func startFirestoreListener() {
+        let db = Firestore.firestore()
+        listener = db.collection("TakeTime")
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+                guard let snapshot = snapshot else {
+                    print("Error listening for updates: \(error?.localizedDescription ?? "Unknown error")")
+                    return
+                }
+
+                for change in snapshot.documentChanges where change.type == .added {
+                    if self.shouldInterrupt { break }
+
+                    if let createdAt = change.document.data()["createdAt"] as? Timestamp,
+                       createdAt.dateValue() > self.launchTime {
+                        print("triggered")
+                        self.triggerInterrupt()
+                        break
+                    }
+                }
+            }
     }
 
-    private func checkForInterrupt() {
-        let calendar = Calendar.current
-        let currentTime = Date()
-        let targetTime = calendar.date(bySettingHour: 17, minute: 48, second: 0, of: currentTime)! //Change this to when you want to trigger take time
-
-        if calendar.isDate(currentTime, equalTo: targetTime, toGranularity: .minute) {
-            triggerInterrupt()
-        }
+    func stopFirestoreListener() {
+        listener?.remove()
+        listener = nil
     }
-    
+
     private func triggerInterrupt() {
         DispatchQueue.main.async {
-            self.saveUserState()
             self.shouldInterrupt = true
             print("Interruption triggered after 1 minute!")
         }
     }
 
-    func saveUserState() {
-    }
 
     func restoreUserState() {
         shouldInterrupt = false
     }
 }
-

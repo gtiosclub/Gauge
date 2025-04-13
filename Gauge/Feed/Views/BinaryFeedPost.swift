@@ -222,9 +222,9 @@ struct BinaryFeedPost: View {
                 Spacer()
                 
                 StackedProfiles(
-                    userIds: post.responses
+                    userIds: Array(post.responses
                         .map { $0.userId }
-                        .filter { userVM.user.friends.contains($0) },
+                        .filter { userVM.user.friends.contains($0) }.prefix(5)),
                     startCompacted: false
                 )
                 

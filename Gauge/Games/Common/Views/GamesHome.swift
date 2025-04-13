@@ -252,10 +252,12 @@ struct GameCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.gray.opacity(0.3))
-                .frame(height: 100)  // Placeholder for image
-
+            GeometryReader { geo in
+                SplashBackgroundView()
+                    .frame(width: geo.size.width, height: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .frame(height: 100)
             HStack(spacing: 10) {
                 Text(gameTitle)
                     .font(.title)
