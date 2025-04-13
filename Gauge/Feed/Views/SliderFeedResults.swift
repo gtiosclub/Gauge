@@ -52,7 +52,7 @@ struct SliderFeedResults: View {
                 // Results
                 SliderResultView(post: post, optionSelected: optionSelected > 3 ? optionSelected - 1 : optionSelected)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .frame(height: 170)
+                    .frame(height: 200)
                     .padding(.top, 8)
                 
                 // Profile photos here
@@ -88,7 +88,7 @@ struct SliderFeedResults: View {
         ///Option 2, 0/10 = 0%
         
         ///Option 3, 1/10 = 10%
-        Response(responseId: "5", userId: "", responseOption: "3"),
+        Response(responseId: "hi", userId: "hi", responseOption: "3"),
 
         ///Option 4, 1/10 = 10%
         Response(responseId: "7", userId: "", responseOption: "4"),
@@ -100,14 +100,14 @@ struct SliderFeedResults: View {
         Response(responseId: "12", userId: "", responseOption: "5"),
 
         ///Option 4, 2/10 = 20%
-        Response(responseId: "17", userId: "", responseOption: "6"),
-        Response(responseId: "18", userId: "", responseOption: "6")
+        Response(responseId: "17", userId: "idk", responseOption: "2"),
+        Response(responseId: "18", userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92", responseOption: "6")
     ]
 
     let post = SliderPost(
         postId: "1",
-        userId: "2lCFmL9FRjhY1v1NMogD5H6YuMV2",
-        comments: [],
+        userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92",
+        comments: [Comment(commentType: .text, postId: "idk", userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hi!"), Comment(commentType: .text, postId: "idk", userId: "idk", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hi!"), Comment(commentType: .text, postId: "idk", userId: "hi", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hey!")],
         responses: responses,
         categories: [.arts(.painting)],
         topics: [],
@@ -118,10 +118,12 @@ struct SliderFeedResults: View {
         favoritedBy: []
     )
 
-
-
-    SliderFeedResults(
+    var user = UserFirebase()
+    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:])
+    
+    return SliderFeedResults(
         post: post,
         optionSelected: 4
     )
+    .environmentObject(user)
 }
