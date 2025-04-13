@@ -27,7 +27,7 @@ class UserFirebase: ObservableObject {
         guard let data = document.data() else {
             throw NSError(domain: "getUserData", code: 404, userInfo: [NSLocalizedDescriptionKey: "User document not found"])
         }
-
+        
         let userObj = User(
             userId: document.documentID,
             username: data["username"] as? String ?? "",
@@ -81,22 +81,22 @@ class UserFirebase: ObservableObject {
         var responsePostIDs: [String] = []
         var commentPostIDs: [String] = []
         var viewPostIDs: [String] = []
-
+        
         print("Searching for interactions for user: \(user.userId)")
-
+        
         let postsSnapshot = try await Firebase.db.collection("POSTS").getDocuments()
         let subcollections = ["RESPONSES", "COMMENTS", "VIEWS"]
-
+        
         for document in postsSnapshot.documents {
             let documentRef = Firebase.db.collection("POSTS").document(document.documentID)
-
+            
             try await withThrowingTaskGroup(of: (String, String?).self) { group in
                 for subcollection in subcollections {
                     group.addTask {
                         let subSnapshot = try await documentRef.collection(subcollection)
                             .whereField("userId", isEqualTo: userId)
                             .getDocuments()
-
+                        
                         if !subSnapshot.documents.isEmpty {
                             return (document.documentID, subcollection)
                         } else {
@@ -104,7 +104,7 @@ class UserFirebase: ObservableObject {
                         }
                     }
                 }
-
+                
                 for try await (docID, sub) in group {
                     guard let sub = sub else { continue }
                     switch sub {
@@ -120,7 +120,7 @@ class UserFirebase: ObservableObject {
                 }
             }
         }
-
+        
         print("Responses: \(responsePostIDs)")
         print("Comments: \(commentPostIDs)")
         print("Views: \(viewPostIDs)")
@@ -172,21 +172,21 @@ class UserFirebase: ObservableObject {
         let snapshot = try await Firebase.db.collection("POSTS")
             .whereField("userId", isEqualTo: userId)
             .getDocuments()
-
+        
         var postIds: [String] = []
-
+        
         for document in snapshot.documents {
             print("processing doc")
             postIds.append(document.documentID)
         }
-
+        
         if setCurrentUserData {
             user.myPosts = postIds
         }
         
         return postIds
     }
-
+    
     func getUsernameAndPhoto(userId: String, completion: @escaping ([String: String]) -> Void) {
         var nameAndPhoto = ["username": "", "profilePhoto": ""]
         
@@ -206,7 +206,7 @@ class UserFirebase: ObservableObject {
     }
     
     func populateUsernameAndProfilePhoto(userId: String) async throws {
-        if useridsToPhotosAndUsernames.keys.contains(userId) { return }
+        if useridsToPhotosAndUsernames.keys.contains(userId) || userId.isEmpty { return }
         
         let docRef = Firebase.db.collection("USERS").document(userId)
         
@@ -217,9 +217,10 @@ class UserFirebase: ObservableObject {
         
         let username = data["username"] as? String ?? ""
         let profilePhoto = data["profilePhoto"] as? String ?? ""
+        let profilePhoto2 = (data["attributes"] as? [String: Any] ?? [:])["profileEmoji"] as? String ?? ""
         
         DispatchQueue.main.async {
-            self.useridsToPhotosAndUsernames[userId] = (photoURL: profilePhoto, username: username)
+            self.useridsToPhotosAndUsernames[userId] = (photoURL: profilePhoto.isEmpty ? profilePhoto2 : profilePhoto, username: username)
         }
     }
     
@@ -361,19 +362,11 @@ class UserFirebase: ObservableObject {
             "myProfileSearches": FieldValue.arrayUnion([search])
         ])
     }
-  
-    // reorder user's topic using OpenAI
-    func reorderUserTopics(for user: User, with interactions: [String: Int]) {
-        let db = Firestore.firestore()
-        let userRef = db.collection("USERS").document(user.userId)
-        
-        let currentTopics = user.myTopics
-        
-        // Format the interactions dictionary into a string for the OpenAI prompt
-        let interactionPairs = interactions.map { "\"\($0)\": \($1)" }.joined(separator: ", ")
-        let interactionsString = "{\(interactionPairs)}"
-        
-        let examplePrompt = """
+    
+    func reorderUserTopics(latest: [String: Int], currentInterestList: [String]) async throws -> [String] {
+        let latestSorted = latest.sorted { $0.value > $1.value }
+
+        let prompt = """
                 Given the user's current topic list and their most recent interaction counts per topic, reorder the list so that the most relevant topics appear higher. Be **conservative**—only rearrange topics significantly if the interaction data clearly shows strong interest or disinterest.
 
                 - Always return exactly **20** topics.
@@ -388,86 +381,46 @@ class UserFirebase: ObservableObject {
                 ["NFL", "NBA", "Gaming", "Music", "Science", "AI", "Cooking", "Fitness", "Stocks", "Movies", "Travel", "Photography", "Education", "Food", "Space", "Health", "Fashion", "History", "Politics", "Books"]
 
                 Now reorder this list:
-                Current Topics: \(currentTopics)
-                Last Session Interactions: \(interactionsString)
+                Current Topics: \(currentInterestList)
+                Last Session Interactions: \(latest)
                 Output:
                 """
-        
-        let openAIRequest: [String: Any] = [
-            "model": "gpt-4o-mini",
-            "messages": [
-                ["role": "system", "content": "You are an assistant that helps personalize topic rankings for users based on session activity. Respond ONLY with a JSON list of 20 topic strings."],
-                ["role": "user", "content": examplePrompt]
-            ],
-            "temperature": 0.4
-        ]
-        
-        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
-            print("Invalid OpenAI URL")
-            return
-        }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(Keys.openAIKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+        let token = ChatGPTAPI(apiKey: Keys.openAIKey)
+
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: openAIRequest, options: [])
-        } catch {
-            print("Failed to encode OpenAI request")
-            return
-        }
+            let response = try await token.sendMessage(
+                text: prompt,
+                model: ChatGPTModel.gpt_hyphen_4o_hyphen_mini,
+                systemText: "You are a reordering expert",
+                temperature: 0.5
+            )
 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("OpenAI API error: \(error.localizedDescription)")
-                return
-            }
-
-            guard let data = data else {
-                print("No data received from OpenAI")
-                return
+            guard let data = response.data(using: .utf8) else {
+                print("⚠️ Could not convert response to UTF-8 data")
+                return []
             }
 
             do {
-                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let choices = jsonResponse["choices"] as? [[String: Any]],
-                   let text = choices.first?["message"] as? [String: Any],
-                   let content = text["content"] as? String {
-                    
-                    guard let reorderedData = content.data(using: .utf8),
-                          let reorderedTopics = try JSONSerialization.jsonObject(with: reorderedData, options: []) as? [String],
-                          reorderedTopics.count == 20 else {
-                        print("Invalid or incomplete topic list returned")
-                        return
-                    }
-
-                    DispatchQueue.main.async {
-                        user.myTopics = reorderedTopics
-                    }
-
-                    // Save to Firestore
-                    userRef.updateData(["myTopics": reorderedTopics]) { error in
-                        if let error = error {
-                            print("Failed to update reordered topics: \(error.localizedDescription)")
-                        } else {
-                            print("User topics successfully reordered and updated")
-                        }
-                    }
-                } else {
-                    print("Unexpected OpenAI response format")
-                }
+                let decoded = try JSONDecoder().decode([String].self, from: data)
+                print("decoded topics :")
+                print(decoded)
+                return decoded
             } catch {
-                print("Failed to decode OpenAI response: \(error.localizedDescription)")
+                print("⚠️ Failed to decode JSON: \(error)")
+                return []
             }
+        } catch {
+            print("❌ OpenAI API error: \(error)")
+            return []
         }
-        
-        task.resume()
     }
 
     func reorderUserCategory(latest: [String: Int], currentInterestList: [String]) async throws -> [String] {
+        print("redordering categories now!!")
         let latestSorted = latest.sorted { $0.value > $1.value }
+        print(latestSorted)
+        print(currentInterestList)
 
         let prompt = """
         I will give you 2 lists: a dictionary of the user's latest category interactions, and a list of current categories. Based on significant interaction scores, reorder the current categories only if the data clearly shows preference or disinterest. Combine the sorted interactions with the current list's original order and weight.
@@ -495,6 +448,8 @@ class UserFirebase: ObservableObject {
 
             do {
                 let decoded = try JSONDecoder().decode([String].self, from: data)
+                print("Decoded Strings:")
+                print(decoded)
                 return decoded
             } catch {
                 print("⚠️ Failed to decode JSON: \(error)")

@@ -5,7 +5,7 @@
 //  Created by Datta Kansal on 2/6/25.
 //
 
-import FirebaseAuth
+@preconcurrency import FirebaseAuth
 
 class AuthenticationVM: ObservableObject {
     @Published var errorMessage: String?
@@ -55,55 +55,6 @@ class AuthenticationVM: ObservableObject {
             }
         }
     }
-
-//    func signUp(email: String, password: String, username: String) async {
-//        do {
-//            isLoading = true
-//            let authResult = try await auth.createUser(withEmail: email, password: password)
-//            let user = authResult.user
-//            
-//            let changeRequest = user.createProfileChangeRequest()
-//            changeRequest.displayName = username
-//            try await changeRequest.commitChanges()
-//            
-//            let tempUser = User(userId: user.uid, username: username, email: email)
-//            
-//            let userData = ["email": email,
-//                            "username": username,
-//                            "lastLogin": DateConverter.convertDateToString(tempUser.lastLogin),
-//                            "lastFeedRefresh": DateConverter.convertDateToString(tempUser.lastFeedRefresh),
-//                            "streak": tempUser.streak,
-//                            "friendIn": tempUser.friendIn,
-//                            "friendOut": tempUser.friendOut,
-//                            "friends": tempUser.friends,
-//                            "badges": tempUser.badges,
-//                            "profilePhoto": tempUser.profilePhoto,
-//                            "phoneNumber": tempUser.phoneNumber,
-//                            "myCategories": tempUser.myCategories,
-//                            "myCategories": tempUser.myTopics,
-//                            "myNextPosts": tempUser.myNextPosts,
-//                            "myAccessedProfiles": tempUser.myAccessedProfiles,
-//                            "attributes": [:],
-//                            "myPostSearches": tempUser.myPostSearches,
-//                            "myProfileSearches": tempUser.myProfileSearches,
-//                            "myAccessedProfiles": tempUser.myAccessedProfiles
-//                        
-//            ] as [String : Any]
-//            
-//            try await Firebase.db.collection("USERS").document(user.uid).setData(userData)
-//            
-//            DispatchQueue.main.async {
-//                self.currentUser = tempUser
-//                self.isLoading = false
-//                print("Signed up as \(username)")
-//            }
-//        } catch {
-//            DispatchQueue.main.async {
-//                self.errorMessage = error.localizedDescription
-//                self.isLoading = false
-//            }
-//        }
-//    }
     
     func signIn(email: String, password: String) async {
         isLoading = true
@@ -126,41 +77,44 @@ class AuthenticationVM: ObservableObject {
     
     func createInitialAccount() async throws {
         do {
-            isLoading = true
-            let authResult = try await auth.createUser(withEmail: tempUserData.email, password: tempUserData.password)
+            DispatchQueue.main.async {
+                self.isLoading = true
+            }
+            let authResult = try await auth.createUser(withEmail: self.tempUserData.email, password: self.tempUserData.password)
             let user = authResult.user
             
             let changeRequest = user.createProfileChangeRequest()
             changeRequest.displayName = tempUserData.username
             try await changeRequest.commitChanges()
             
-            tempUser = User(userId: user.uid, username: tempUserData.username, email: tempUserData.email)
+            DispatchQueue.main.async {
+                self.tempUser = User(userId: user.uid, username: self.tempUserData.username, email: self.tempUserData.email)
+            }
             
             // Initialize with empty attributes map
             let initialAttributes: [String: String] = [:]
             
-            if let tempUser = tempUser {
-                let userData = ["email": tempUserData.email,
-                                "username": tempUserData.username,
-                                "lastLogin": DateConverter.convertDateToString(tempUser.lastLogin),
-                                "lastFeedRefresh": DateConverter.convertDateToString(tempUser.lastFeedRefresh),
-                                "streak": tempUser.streak,
-                                "friendIn": tempUser.friendIn,
-                                "friendOut": tempUser.friendOut,
-                                "friends": tempUser.friends,
-                                "badges": tempUser.badges,
-                                "profilePhoto": tempUser.profilePhoto,
-                                "phoneNumber": tempUser.phoneNumber,
-                                "myCategories": tempUser.myCategories,
-                                "myNextPosts": tempUser.myNextPosts,
-                                "myProfileSearches": tempUser.myProfileSearches,
-                                "myPostSearches": tempUser.myPostSearches,
-                                "myAccessedProfiles": tempUser.myAccessedProfiles,
-                                "attributes": initialAttributes  // Initialize empty attributes
-                ] as [String : Any]
-                
+            let nowString = DateConverter.convertDateToString(Date())
+            
+            let userData = ["email": tempUserData.email,
+                            "username": tempUserData.username,
+                            "lastLogin": nowString,
+                            "lastFeedRefresh": nowString,
+                            "streak": 1,
+                            "friendIn": [],
+                            "friendOut": [],
+                            "friends": [],
+                            "badges": [],
+                            "profilePhoto": "",
+                            "phoneNumber": "",
+                            "myCategories": [],
+                            "myNextPosts": [],
+                            "myProfileSearches": [],
+                            "myPostSearches": [],
+                            "myAccessedProfiles": [],
+                            "attributes": initialAttributes] as [String : Any]
+                                
                 try await Firebase.db.collection("USERS").document(user.uid).setData(userData)
-            }
             
             DispatchQueue.main.async {
                 self.isLoading = false
