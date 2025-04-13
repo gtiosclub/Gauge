@@ -97,7 +97,6 @@ struct ContentView: View {
                         async let userFavorites = userVM.getUserFavorites(userId: signedInUser.userId, setCurrentUserData: true)
                         async let userNumViews = userVM.getUserNumViews(userId: signedInUser.userId, setCurrentUserData: true)
                         async let userNumResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
-                        
                         do {
                             _ = try await userData
                             
@@ -106,6 +105,7 @@ struct ContentView: View {
                                 if Set(newCategories) != Set(userResponse.currentUserCategories) {
                                     userResponse.currentUserCategories = newCategories
                                     print("Replaced UserResponses current categories with: " + String(describing: newCategories))
+                                    try modelContext.save()
                                 }
                                 
 //                                let newTopics = userVM.user.myTopics
@@ -154,10 +154,30 @@ struct ContentView: View {
             }
             .task {
                 do {
+                    // Get or create UserResponses
                     let userResponse: UserResponses
                     if !userResponses.isEmpty {
                         print("📱 Found existing UserResponses: \(userResponses.count)")
                         userResponse = userResponses.first!
+                        
+                        if !userResponse.userCategoryResponses.isEmpty {
+                            // Process and reorder based on existing data
+                            let newCategories = try await userVM.reorderUserCategory(
+                                latest: userResponse.userCategoryResponses,
+                                currentInterestList: userResponse.currentUserCategories
+                            )
+                            
+                            userResponse.currentUserCategories = newCategories.isEmpty
+                                ? userResponse.currentUserCategories
+                                : newCategories
+                            
+                            userResponse.userCategoryResponses = [:]
+                            
+                            try modelContext.save()
+                            print("✅ Processed and cleared category responses")
+                        } else {
+                            print("⚠️ No category interactions to process")
+                        }
                     } else {
                         print("⚠️ No UserResponses found. Creating one.")
                         let newResponse = UserResponses()
@@ -165,26 +185,8 @@ struct ContentView: View {
                         try modelContext.save()
                         userResponse = newResponse
                     }
-                    
-                    // Reorder categories based on session data
-                    let newCategories = try await userVM.reorderUserCategory(
-                        latest: userResponse.userCategoryResponses,
-                        currentInterestList: userResponse.currentUserCategories
-                    )
-                    print(newCategories)
-                    userResponse.currentUserCategories = newCategories.isEmpty
-                        ? userResponse.currentUserCategories
-                        : newCategories
-                    userResponse.userCategoryResponses = [:]
-                    
-                    //Reorder topics
-                    
-                    
-                    // After modification, save again
-                    try modelContext.save()
-                    
                 } catch {
-                    print("❌ Error handling UserResponses: \(error)")
+                    print("❌ Error reordering categories: \(error)")
                 }
             }
             .environmentObject(authVM)

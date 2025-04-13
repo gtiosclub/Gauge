@@ -10,6 +10,7 @@ import SwiftUI
 struct AddCommentView: View {
     @Binding var showComment: Bool
     @State private var keyboardHeight: CGFloat = 0
+
     var post: any Post
     
     var body: some View {
@@ -64,6 +65,8 @@ struct CommentSheetView: View {
     @State private var textHeight: CGFloat = 40
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
+    @Environment(\.modelContext) private var modelContext
+
     var post: any Post
     
     var body: some View {
@@ -110,8 +113,10 @@ struct CommentSheetView: View {
                     userId: userVM.user.userId,
                     content: commentText
                 )
+                UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                 commentText = ""
                 showAddComment = false
+                
             }) {
                 Text("Post")
                     .fontWeight(.semibold)
