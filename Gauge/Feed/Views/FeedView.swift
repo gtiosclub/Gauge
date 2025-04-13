@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct FeedView: View {
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
+    @Environment(\.modelContext) private var modelContext
     @State private var dragOffset: CGSize = .zero
     @State private var opacityAmount = 1.0
     @State private var optionSelected: Int = 0
@@ -47,7 +49,11 @@ struct FeedView: View {
                         }
                         
                         Button {
+                            if postVM.skippedPost != nil {
+                                UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
+                            }
                             postVM.undoSkipPost(userId: userVM.user.userId)
+                            
                             Task {
                                 try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
                             }
@@ -222,11 +228,13 @@ struct FeedView: View {
                                                     if shouldSubmit && !isConfirmed {
                                                         let responseChosen = (optionSelected == 1) ? binaryPost.responseOption1 : binaryPost.responseOption2
                                                         postVM.addResponse(postId: binaryPost.postId, userId: user.userId, responseOption: responseChosen)
+                                                        UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                                                     }
                                                 } else if let sliderPost = post as? SliderPost {
                                                     shouldSubmit = optionSelected != 3
                                                     if shouldSubmit && !isConfirmed {
                                                         postVM.addResponse(postId: sliderPost.postId, userId: user.userId, responseOption: (optionSelected < 3 ? String(optionSelected + 1) : String(optionSelected)))
+                                                        UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                                                     }
                                                 } else {
                                                     shouldSubmit = false
@@ -267,24 +275,26 @@ struct FeedView: View {
                             .onEnded { gesture in
                                 
                                 if dragOffset.height > 150 && hasSkipped {
-//                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                        if isConfirmed {
-                                            // Next post logic
-                                            postVM.feedPosts.removeFirst()
-                                            postVM.findNextPost(user: userVM.user)
-                                            postVM.skippedPost = nil
-                                        } else {
-                                            // Skip logic
-                                            postVM.skippedPost = postVM.skipPost(user: userVM.user)
+                                    if isConfirmed {
+                                        // Next post logic
+                                        postVM.feedPosts.removeFirst()
+                                        postVM.findNextPost(user: userVM.user)
+                                        postVM.skippedPost = nil
+                                    } else {
+                                        // Skip logic
+                                        postVM.skippedPost = postVM.skipPost(user: userVM.user)
+                                        if postVM.skippedPost != nil {
+                                            UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
+
                                         }
-                                        withAnimation {
-                                            isConfirmed = false
-                                        }
-                                        Task {
-                                            try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
-                                        }
-//                                    }
-                                }
+                                    }
+                                    withAnimation {
+                                        isConfirmed = false
+                                    }
+                                    Task {
+                                        try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
+                                    }
+               }
                                 withAnimation() {
                                     dragOffset = .zero
                                 }

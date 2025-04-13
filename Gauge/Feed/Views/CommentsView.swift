@@ -10,6 +10,8 @@ import SwiftUI
 struct CommentsView: View {
     @EnvironmentObject private var userVM: UserFirebase
     @EnvironmentObject private var postVM: PostFirebase
+    @Environment(\.modelContext) private var modelContext
+
     @State private var sortOption: SortOption = .mostVotes
     @State var newCommentText: String = ""
     @State var showAddComment: Bool = false
@@ -94,6 +96,7 @@ struct CommentsView: View {
                 Button(action: {
                     isBookmarked.toggle()
                     postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
+                    UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                 }) {
                     Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                         .font(.system(size: 18))

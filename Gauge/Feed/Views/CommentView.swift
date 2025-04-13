@@ -10,6 +10,8 @@ import SwiftUI
 struct CommentView: View {
     @EnvironmentObject private var userVM: UserFirebase
     @EnvironmentObject private var postVM: PostFirebase
+    @Environment(\.modelContext) private var modelContext
+
     let comment: Comment
     let post: any Post
 
@@ -73,14 +75,15 @@ struct CommentView: View {
     private func toggleLike() {
         if userStatus != "liked" {
             postVM.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
             
             if userStatus == "disliked" {
                 postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             }
-            
             userStatus = "liked"
         } else {
             postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
+            UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
             userStatus = "none"
         }
     }
@@ -94,9 +97,12 @@ struct CommentView: View {
             }
             
             userStatus = "disliked"
+            UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+
         } else {
             postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             userStatus = "none"
+            UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
         }
     }
 }

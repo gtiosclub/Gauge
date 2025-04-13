@@ -411,7 +411,10 @@ class UserFirebase: ObservableObject {
     }
 
     func reorderUserCategory(latest: [String: Int], currentInterestList: [String]) async throws -> [String] {
+        print("redordering categories now!!")
         let latestSorted = latest.sorted { $0.value > $1.value }
+        print(latestSorted)
+        print(currentInterestList)
 
         let prompt = """
         I will give you 2 lists: a dictionary of the user's latest category interactions, and a list of current categories. Based on significant interaction scores, reorder the current categories only if the data clearly shows preference or disinterest. Combine the sorted interactions with the current list's original order and weight.
@@ -439,6 +442,8 @@ class UserFirebase: ObservableObject {
 
             do {
                 let decoded = try JSONDecoder().decode([String].self, from: data)
+                print("Decoded Strings:")
+                print(decoded)
                 return decoded
             } catch {
                 print("⚠️ Failed to decode JSON: \(error)")
