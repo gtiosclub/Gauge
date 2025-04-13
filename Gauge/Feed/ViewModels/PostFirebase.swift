@@ -635,6 +635,20 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    func removeUserFromFavoritedBy(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("POSTS").document(postId)
+        
+        documentRef.updateData([
+            "favoritedBy": FieldValue.arrayRemove([userId])
+        ]) { error in
+            if let error = error {
+                print("Error removing user from favoritedBy array: \(error)")
+            } else {
+                print("Removed \(userId) from favoritedBy array of post \(postId).")
+            }
+        }
+    }
+    
     func addComment(postId: String, commentType: CommentType, userId: String, content: String){
         let commentId = UUID().uuidString
         let newCommentRef = Firebase.db.collection("POSTS")

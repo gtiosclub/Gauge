@@ -387,7 +387,8 @@ struct BinaryPostPreview: View {
                                 .font(.system(size: 14))
                                 .foregroundColor(.black)
                                 .fontWeight(.medium)
-                                .frame(maxWidth: 175.0)
+                                .frame(maxWidth: 150.0)
+                                .lineLimit(1)
                             
                             Spacer()
                             
@@ -395,7 +396,8 @@ struct BinaryPostPreview: View {
                                 .font(.system(size: 14))
                                 .foregroundColor(.black)
                                 .fontWeight(.medium)
-                                .frame(maxWidth: 175.0)
+                                .frame(maxWidth: 150.0)
+                                .lineLimit(1)
                         }
                         .padding(.horizontal)
                         .padding(.top, 3)

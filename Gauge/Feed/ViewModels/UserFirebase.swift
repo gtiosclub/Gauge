@@ -27,7 +27,7 @@ class UserFirebase: ObservableObject {
         guard let data = document.data() else {
             throw NSError(domain: "getUserData", code: 404, userInfo: [NSLocalizedDescriptionKey: "User document not found"])
         }
-
+        
         let userObj = User(
             userId: document.documentID,
             username: data["username"] as? String ?? "",
@@ -78,22 +78,22 @@ class UserFirebase: ObservableObject {
         var responsePostIDs: [String] = []
         var commentPostIDs: [String] = []
         var viewPostIDs: [String] = []
-
+        
         print("Searching for interactions for user: \(user.userId)")
-
+        
         let postsSnapshot = try await Firebase.db.collection("POSTS").getDocuments()
         let subcollections = ["RESPONSES", "COMMENTS", "VIEWS"]
-
+        
         for document in postsSnapshot.documents {
             let documentRef = Firebase.db.collection("POSTS").document(document.documentID)
-
+            
             try await withThrowingTaskGroup(of: (String, String?).self) { group in
                 for subcollection in subcollections {
                     group.addTask {
                         let subSnapshot = try await documentRef.collection(subcollection)
                             .whereField("userId", isEqualTo: userId)
                             .getDocuments()
-
+                        
                         if !subSnapshot.documents.isEmpty {
                             return (document.documentID, subcollection)
                         } else {
@@ -101,7 +101,7 @@ class UserFirebase: ObservableObject {
                         }
                     }
                 }
-
+                
                 for try await (docID, sub) in group {
                     guard let sub = sub else { continue }
                     switch sub {
@@ -117,7 +117,7 @@ class UserFirebase: ObservableObject {
                 }
             }
         }
-
+        
         print("Responses: \(responsePostIDs)")
         print("Comments: \(commentPostIDs)")
         print("Views: \(viewPostIDs)")
@@ -168,21 +168,21 @@ class UserFirebase: ObservableObject {
         let snapshot = try await Firebase.db.collection("POSTS")
             .whereField("userId", isEqualTo: userId)
             .getDocuments()
-
+        
         var postIds: [String] = []
-
+        
         for document in snapshot.documents {
             print("processing doc")
             postIds.append(document.documentID)
         }
-
+        
         if setCurrentUserData {
             user.myPosts = postIds
         }
         
         return postIds
     }
-
+    
     func getUsernameAndPhoto(userId: String, completion: @escaping ([String: String]) -> Void) {
         var nameAndPhoto = ["username": "", "profilePhoto": ""]
         
@@ -202,7 +202,7 @@ class UserFirebase: ObservableObject {
     }
     
     func populateUsernameAndProfilePhoto(userId: String) async throws {
-        if useridsToPhotosAndUsernames.keys.contains(userId) { return }
+        if useridsToPhotosAndUsernames.keys.contains(userId) || userId.isEmpty { return }
         
         let docRef = Firebase.db.collection("USERS").document(userId)
         
@@ -213,9 +213,10 @@ class UserFirebase: ObservableObject {
         
         let username = data["username"] as? String ?? ""
         let profilePhoto = data["profilePhoto"] as? String ?? ""
+        let profilePhoto2 = (data["attributes"] as? [String: Any] ?? [:])["profileEmoji"] as? String ?? ""
         
         DispatchQueue.main.async {
-            self.useridsToPhotosAndUsernames[userId] = (photoURL: profilePhoto, username: username)
+            self.useridsToPhotosAndUsernames[userId] = (photoURL: profilePhoto.isEmpty ? profilePhoto2 : profilePhoto, username: username)
         }
     }
     

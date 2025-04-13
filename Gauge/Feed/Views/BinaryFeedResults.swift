@@ -55,29 +55,36 @@ struct BinaryFeedResults: View {
                     .padding(.top, 8)
                 
                 // Profile Stacks + Vote Count
-                HStack {
-                    StackedProfiles(
-                        userIds: post.responses
-                            .filter { userVM.user.friends.contains($0.userId) && $0.responseOption == post.responseOption1 }
-                            .map { $0.userId },
-                        sideOnTop: .left,
-                        changeOffset: false
-                    )
+                
+                ZStack {
+                    HStack {
+                        StackedProfiles(
+                            userIds: Array(post.responses
+                                .filter { userVM.user.friends.contains($0.userId) && $0.responseOption == post.responseOption1 }
+                                .map { $0.userId }.prefix(3)),
+                            sideOnTop: .left,
+                            changeOffset: false
+                        )
+                        
+                        Spacer()
+                        
+                        StackedProfiles(
+                            userIds: Array(post.responses
+                                .filter { userVM.user.friends.contains($0.userId) && $0.responseOption == post.responseOption2 }
+                                .map { $0.userId }.prefix(3)),
+                            sideOnTop: .right
+                        )
+                    }
                     
-                    Spacer()
-                    
-                    Text("\(post.calculateResponses().reduce(0, +)) votes")
-                        .foregroundColor(Color.blackGray)
-                        .font(.system(size: 12))
-                    
-                    Spacer()
-                    
-                    StackedProfiles(
-                        userIds: post.responses
-                            .filter { userVM.user.friends.contains($0.userId) && $0.responseOption == post.responseOption2 }
-                            .map { $0.userId },
-                        sideOnTop: .right
-                    )
+                    HStack {
+                        Spacer()
+                        
+                        Text("\(post.calculateResponses().reduce(0, +)) votes")
+                            .foregroundColor(Color.blackGray)
+                            .font(.system(size: 12))
+                        
+                        Spacer()
+                    }
                 }
                 .padding(.top, 5)
             }
