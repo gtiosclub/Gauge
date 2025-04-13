@@ -44,8 +44,7 @@ struct GaugeApp: App {
             NavigationStack(path: $navigationPath) {
                 ContentView()
                     .fullScreenCover(isPresented: $scheduler.shouldInterrupt) {
-                        TakeTimeView()
-                            .environmentObject(scheduler)
+                        TakeTimeTakesView()
                     }
             }
         }

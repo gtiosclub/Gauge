@@ -26,7 +26,8 @@ class User: Equatable, Identifiable, ObservableObject {
     var phoneNumber: String = ""
     var myCategories: [String] = []
     var myNextPosts: [String] = []
-    
+    var myTakeTime: [String : Int]
+
     // MARK: AI Algorithm Variables
     @Published var myPosts: [String] = [] // PostIds of the user's posts
     @Published var myResponses: [String] = [] // PostIds of those responded to
@@ -52,9 +53,10 @@ class User: Equatable, Identifiable, ObservableObject {
         self.lastFeedRefresh = Date()
         self.profilePhoto = ""
         self.myAccessedProfiles = []
+        self.myTakeTime = [:]
     }
     
-    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date) {
+    init(userId: String, username: String, phoneNumber: String, email: String, friendIn: [String : [String]], friendOut: [String : [String]], friends: [String : [String]], myNextPosts: [String], myResponses: [String] = [], myFavorites: [String] = [], myPostSearches: [String], myProfileSearches:[String], myComments: [String] = [], myCategories: [String], badges: [String], streak: Int, profilePhoto: String, myAccessedProfiles: [String], lastLogin: Date, lastFeedRefresh: Date, myTakeTime: [String:Int]) {
         self.userId = userId
         self.username = username
         self.phoneNumber = phoneNumber
@@ -72,9 +74,11 @@ class User: Equatable, Identifiable, ObservableObject {
         self.badges = badges
         self.profilePhoto = profilePhoto
         self.myAccessedProfiles = myAccessedProfiles
+        self.myTakeTime = myTakeTime
         self.lastLogin = lastLogin
         self.lastFeedRefresh = lastFeedRefresh
-        
+
+
         
         // Add logic to add one to streak if it is maintained, update in Firebase
         self.streak = streak

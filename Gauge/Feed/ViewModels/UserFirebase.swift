@@ -45,7 +45,8 @@ class UserFirebase: ObservableObject {
             profilePhoto: data["profilePhoto"] as? String ?? "",
             myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
             lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
-            lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date()
+            lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date(),
+            myTakeTime: data["myTakeTime"] as? [String:Int] ?? [:]
         )
         
         if setCurrentUserData {
@@ -66,6 +67,7 @@ class UserFirebase: ObservableObject {
             user.myAccessedProfiles = userObj.myAccessedProfiles
             user.lastLogin = userObj.lastLogin
             user.lastFeedRefresh = userObj.lastFeedRefresh
+            user.myTakeTime = userObj.myTakeTime
         }
         
         return userObj
@@ -296,8 +298,9 @@ class UserFirebase: ObservableObject {
                     "myNextPosts": user.myNextPosts,
                     "myPostSearches": user.myPostSearches,
                     "myProfileSearches": user.myProfileSearches,
-                    "myAccessedProfiles": user.myAccessedProfiles
-                    
+                    "myAccessedProfiles": user.myAccessedProfiles,
+                    "myTakeTime": user.myTakeTime
+
         ] as [String : Any]
         
         Firebase.db.collection("USERS").document(user.userId).updateData(data) { error in
