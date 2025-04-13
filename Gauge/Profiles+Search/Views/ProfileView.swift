@@ -19,17 +19,28 @@ struct ProfileView: View {
         NavigationView {
             ScrollView {
                 VStack {
-                    // Profile Header with Settings Button
-                    HStack {
-                        Spacer()
-                        if isCurrentUser {
-                            Button(action: {
-                                showingSettings = true
-                            }) {
-                                Image(systemName: "gearshape.fill")
-                                    .foregroundColor(.gray)
+                    
+                    // Edit Profile, Settings
+                    if isCurrentUser {
+                        HStack {
+                            Spacer()
+                            Menu {
+                                NavigationLink(destination: ProfileEditView()) {
+                                    Label("Profile", systemImage: "person")
+                                }
+
+                                Button(action: {
+                                    showingSettings = true
+                                }) {
+                                    Label("Settings", systemImage: "gearshape")
+                                }
+                            } label: {
+                                Image(systemName: "line.3.horizontal")
+                                    .resizable()
+                                    .frame(width: 20, height: 15)
+                                    .foregroundColor(.black)
+                                    .padding()
                             }
-                            .padding(.trailing)
                         }
                     }
 
@@ -273,23 +284,9 @@ struct ProfileView: View {
 
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if isCurrentUser {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        NavigationLink(destination: ProfileEditView()) {
-                            Text("edit profile")
-                                .font(.system(size: 15))
-                        }
-                    }
-                }
-            }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
                     .environmentObject(authVM)
-            }
-            .sheet(isPresented: $showingTakeTimeResults) {
-                TakeTimeResultsView(myResponses: userVM.user.myTakeTime)
             }
         }
     }
