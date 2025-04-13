@@ -72,13 +72,20 @@ struct ProfileView: View {
                                 showingTakeTimeResults = true
                             }) {
                                 Circle()
-                                    .foregroundColor(Color.black.opacity(0.25))
+                                    .foregroundColor(Color.black.opacity(0))
                                     .frame(width: 80, height: 80)
                                     .overlay(
-                                        Image(systemName: "chart.bar")
-                                            .foregroundColor(.white)
+                                        Circle()
+                                            .stroke(
+                                                LinearGradient(
+                                                    gradient: Gradient(colors: [.blue, .purple]),
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 4
+                                            )
                                     )
-                            }
+                            }.disabled(userVM.user.myTakeTime.isEmpty)
                         }
 
                         VStack(alignment: .leading) {
