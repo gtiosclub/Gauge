@@ -291,7 +291,7 @@ struct FeedView: View {
                                         if postVM.skippedPost != nil {
                                             UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
                                             UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: postVM.skippedPost!.topics)
-
+                                            
                                         }
                                     }
                                     withAnimation {
@@ -300,7 +300,7 @@ struct FeedView: View {
                                     Task {
                                         try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
                                     }
-               }
+                                }
                                 withAnimation() {
                                     dragOffset = .zero
                                 }

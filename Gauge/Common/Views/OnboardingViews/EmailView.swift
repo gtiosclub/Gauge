@@ -128,7 +128,7 @@ struct UsernameView: View {
             Spacer()
             
             Button(action: {
-                authVM.tempUserData.username = username
+                authVM.tempUserData.username = username.lowercased()
                 authVM.onboardingState = .password
             }) {
                 HStack {

@@ -215,7 +215,7 @@ class PostFirebase: ObservableObject {
     }
     
     func watchForNewPosts(user: User) {
-        let allFilteredPosts: [String] = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
+        
         Firebase.db.collection("POSTS").addSnapshotListener { snapshot, error in
             guard let snapshot = snapshot else {
                 print("Error fetching post updates: \(error!)")
@@ -225,6 +225,7 @@ class PostFirebase: ObservableObject {
             DispatchQueue.main.async {
                 self.objectWillChange.send()
                 for change in snapshot.documentChanges {
+                    let allFilteredPosts: [String] = user.myViews + user.myResponses + user.myNextPosts + user.myPosts
                     let newPostData = change.document.data()
                     guard let postId = newPostData["postId"] as? String else { return }
 
