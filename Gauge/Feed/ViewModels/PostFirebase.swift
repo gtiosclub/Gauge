@@ -42,7 +42,7 @@ class PostFirebase: ObservableObject {
             DispatchQueue.main.async {
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
-                        print("New comment: \(diff.document.data())")
+//                        print("New comment: \(diff.document.data())")
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
@@ -60,10 +60,10 @@ class PostFirebase: ObservableObject {
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         self.feedPosts[0].comments.append(newComment)
                     } else if diff.type == .removed {
-                        print("Comment removed: \(diff.document.documentID)")
+//                        print("Comment removed: \(diff.document.documentID)")
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                     } else if diff.type == .modified {
-                        print("Comment modified: \(diff.document.documentID)")
+//                        print("Comment modified: \(diff.document.documentID)")
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
@@ -98,7 +98,7 @@ class PostFirebase: ObservableObject {
                 self.objectWillChange.send()
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
-                        print("New Response: \(diff.document.data())")
+//                        print("New Response: \(diff.document.data())")
                         let newResponseDoc = diff.document.data()
                         let id = diff.document.documentID
                         let newResponse = Response(
@@ -166,7 +166,7 @@ class PostFirebase: ObservableObject {
                                 favoritedBy: data["favoritedBy"] as? [String] ?? []
                             )
                             
-                            print("post categories: \(post.categories)")
+//                            print("post categories: \(post.categories)")
                             return (postId, post)
 
 
