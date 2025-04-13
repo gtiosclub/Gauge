@@ -79,51 +79,52 @@ struct SliderFeedResults: View {
     }
 }
 
-//#Preview {
-//    let responses = [
-//        ///Option 1, 2/10 = 20%
-//        Response(responseId: "1", userId: "", responseOption: "1"),
-//        Response(responseId: "2", userId: "", responseOption: "1"),
-//
-//        ///Option 2, 0/10 = 0%
-//        
-//        ///Option 3, 1/10 = 10%
-//        Response(responseId: "hi", userId: "hi", responseOption: "3"),
-//
-//        ///Option 4, 1/10 = 10%
-//        Response(responseId: "7", userId: "", responseOption: "4"),
-//
-//        ///Option 4, 5/10 = 50%
-//        Response(responseId: "9", userId: "", responseOption: "5"),
-//        Response(responseId: "10", userId: "", responseOption: "5"),
-//        Response(responseId: "11", userId: "", responseOption: "5"),
-//        Response(responseId: "12", userId: "", responseOption: "5"),
-//
-//        ///Option 4, 2/10 = 20%
-//        Response(responseId: "17", userId: "idk", responseOption: "2"),
-//        Response(responseId: "18", userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92", responseOption: "6")
-//    ]
-//
-//    let post = SliderPost(
-//        postId: "1",
-//        userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92",
-//        comments: [Comment(commentType: .text, postId: "idk", userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hi!"), Comment(commentType: .text, postId: "idk", userId: "idk", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hi!"), Comment(commentType: .text, postId: "idk", userId: "hi", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hey!")],
-//        responses: responses,
-//        categories: [.arts(.painting)],
-//        topics: [],
-//        postDateAndTime: Date(),
-//        question: "Picasso is the goat",
-//        lowerBoundLabel: "YES",
-//        upperBoundLabel: "NO",
-//        favoritedBy: []
-//    )
-//
-//    var user = UserFirebase()
-//    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:])
-//    
-//    return SliderFeedResults(
-//        post: post,
-//        optionSelected: 4
-//    )
-//    .environmentObject(user)
-//}
+
+#Preview {
+    let responses = [
+        ///Option 1, 2/10 = 20%
+        Response(responseId: "1", userId: "", responseOption: "1"),
+        Response(responseId: "2", userId: "", responseOption: "1"),
+
+        ///Option 2, 0/10 = 0%
+        
+        ///Option 3, 1/10 = 10%
+        Response(responseId: "hi", userId: "hi", responseOption: "3"),
+
+        ///Option 4, 1/10 = 10%
+        Response(responseId: "7", userId: "", responseOption: "4"),
+
+        ///Option 4, 5/10 = 50%
+        Response(responseId: "9", userId: "", responseOption: "5"),
+        Response(responseId: "10", userId: "", responseOption: "5"),
+        Response(responseId: "11", userId: "", responseOption: "5"),
+        Response(responseId: "12", userId: "", responseOption: "5"),
+
+        ///Option 4, 2/10 = 20%
+        Response(responseId: "17", userId: "idk", responseOption: "2"),
+        Response(responseId: "18", userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92", responseOption: "6")
+    ]
+
+    let post = SliderPost(
+        postId: "1",
+        userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92",
+        comments: [Comment(commentType: .text, postId: "idk", userId: "Rzqik2ISWBezcmBVVaoCbR4rCz92", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hi!"), Comment(commentType: .text, postId: "idk", userId: "idk", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hi!"), Comment(commentType: .text, postId: "idk", userId: "hi", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "hey!")],
+        responses: responses,
+        categories: [.arts(.painting)],
+        topics: [],
+        postDateAndTime: Date(),
+        question: "Picasso is the goat",
+        lowerBoundLabel: "YES",
+        upperBoundLabel: "NO",
+        favoritedBy: []
+    )
+
+    var user = UserFirebase()
+    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:], myTakeTime: [:])
+    
+    return SliderFeedResults(
+        post: post,
+        optionSelected: 4
+    )
+    .environmentObject(user)
+}
