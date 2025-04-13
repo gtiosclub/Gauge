@@ -13,6 +13,9 @@ struct PostCreationView: View {
 
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
+    @Environment(\.modelContext) private var modelContext
+
+    
     @State private var currentStep: Int = 1
     @State private var currentStepTitle: String = "New Post"
     @State private var canMoveNext: Bool = false
@@ -182,8 +185,11 @@ struct PostCreationView: View {
                         Task {
                             if postType == .BinaryPost {
                                 await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, sublabel1: leftCaption, sublabel2: rightCaption)
+                                UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postCategories.map{$0.rawValue})
+
                             } else if postType == .SliderPost {
                                 await postVM.createSliderPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, lowerBoundLabel: slidingOptions[optionsSelectedIndex!].left, upperBoundLabel: slidingOptions[optionsSelectedIndex!].right)
+                                UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postCategories.map{$0.rawValue})
                             }
                             
                         }

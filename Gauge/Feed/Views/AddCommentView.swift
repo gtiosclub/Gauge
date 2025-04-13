@@ -14,6 +14,8 @@ struct CommentSheetView: View {
     @State private var textEditorHeight: CGFloat = 40
     @EnvironmentObject var postVM: PostFirebase
     @EnvironmentObject var userVM: UserFirebase
+    @Environment(\.modelContext) private var modelContext
+
     var post: any Post
 
     var body: some View {
@@ -59,6 +61,7 @@ struct CommentSheetView: View {
                     userId: userVM.user.userId,
                     content: commentText
                 )
+                UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                 commentText = ""
                 showAddComment = false
             } label: {
