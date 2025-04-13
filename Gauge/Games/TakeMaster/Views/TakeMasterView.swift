@@ -39,6 +39,7 @@ struct TakeMasterView: View {
                     case .waitingForQuestions:
                         ZStack {
                             SplashBackgroundView()
+                                .ignoresSafeArea()
                             LoadingView(message: "Waiting for everyone to submit their questions...")
                         }
                     case .roundStart:
@@ -46,6 +47,7 @@ struct TakeMasterView: View {
                     case .waitingForAnswers:
                         ZStack {
                             SplashBackgroundView()
+                                .ignoresSafeArea()
                             LoadingView(message: "Waiting for everyone to answer the question...")
                         }
                     case .guessPhase:
@@ -53,6 +55,7 @@ struct TakeMasterView: View {
                     case .waitingForGuesses:
                             ZStack {
                                 SplashBackgroundView()
+                                    .ignoresSafeArea()
                                 LoadingView(message: "Waiting for everyone to guess...")
                             }
                     case .results:
