@@ -491,6 +491,13 @@ class PostFirebase: ObservableObject {
         let categoryStrings = post.categories.map{$0.rawValue}
         
         let topics = await generatePostKeywords(post: post)
+        
+        let context = """
+        Question: \(question)
+        Response Options: \(sublabel1) or \(sublabel2)
+        Categories: \(categoryStrings.joined(separator: ", "))
+        Topics: \(topics.joined(separator: ", "))
+        """
 
         documentRef.setData([
             "type": PostType.BinaryPost.rawValue,
@@ -504,7 +511,8 @@ class PostFirebase: ObservableObject {
             "responseOption2": post.responseOption2,
             "sublabel1": post.sublabel1,
             "sublabel2": post.sublabel2,
-            "favoritedBy": post.favoritedBy
+            "favoritedBy": post.favoritedBy,
+            "context": context
         ]) { error in
             if let error = error {
                 print("error writing doc: \(error)")
@@ -516,10 +524,6 @@ class PostFirebase: ObservableObject {
     }
     
     func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> [String] {
-        var categoryString: [String] = []
-        for cat in categories {
-            categoryString.append(cat.rawValue)
-        }
         
         // Create post instance
         let post = SliderPost(
@@ -532,8 +536,14 @@ class PostFirebase: ObservableObject {
             upperBoundLabel: upperBoundLabel
         )
         
+        let categoryStrings = post.categories.map{$0.rawValue}
         let topics = await generatePostKeywords(post: post)
         
+        let context = """
+        Question: \(question)
+        Categories: \(categoryStrings.joined(separator: ", "))
+        Topics: \(topics.joined(separator: ", "))
+        """
         // Create document in Firebase
         let documentRef = Firebase.db.collection("POSTS").document(post.postId)
 
@@ -541,13 +551,14 @@ class PostFirebase: ObservableObject {
             "type": PostType.SliderPost.rawValue,
             "postId": post.postId,
             "userId": post.userId,
-            "categories": categoryString,
+            "categories": categoryStrings,
             "topics": topics,
             "postDateAndTime": DateConverter.convertDateToString(post.postDateAndTime),
             "question": post.question,
             "lowerBoundLabel": post.lowerBoundLabel,
             "upperBoundLabel": post.upperBoundLabel,
-            "favoritedBy": post.favoritedBy
+            "favoritedBy": post.favoritedBy,
+            "context": context
         ]) { error in
             if let error = error {
                 print("error writing doc: \(error)")

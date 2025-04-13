@@ -82,8 +82,9 @@ struct ProfileView: View {
                                                     startPoint: .topLeading,
                                                     endPoint: .bottomTrailing
                                                 ),
-                                                lineWidth: 4
+                                                lineWidth: 3
                                             )
+                                            .opacity(userVM.user.myTakeTime.isEmpty ? 0 : 1)
                                     )
                             }.disabled(userVM.user.myTakeTime.isEmpty)
                         }
