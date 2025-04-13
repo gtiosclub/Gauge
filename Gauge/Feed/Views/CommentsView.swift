@@ -158,14 +158,13 @@ struct CommentsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
         .sheet(isPresented: $showAddComment) {
-            ZStack {
-                    CommentSheetView(showAddComment: $showAddComment, post: post)
-                        .padding()
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .shadow(radius: 8)
-                }
-                .presentationDetents([.height(200)])
+            CommentSheetView(showAddComment: $showAddComment, post: post)
+                .presentationDetents([.height(220)]) // Optional: or use `.medium` / `.large`
+                .presentationBackground(.clear)
+                .background(
+                    RoundedRectangle(cornerRadius: 36, style: .continuous)
+                        .fill(Color.white)
+                )
         }
     }
 }
