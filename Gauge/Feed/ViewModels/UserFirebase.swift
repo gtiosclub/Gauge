@@ -152,8 +152,6 @@ class UserFirebase: ObservableObject {
             "myPostSearches": user.myPostSearches,
             "myAccessedProfiles": user.myAccessedProfiles,
             "attributes": user.attributes,
-            "numUserResponses": user.numUserResponses,
-            "numUserViews": user.numUserViews,
             "myTakeTime": user.myTakeTime
         ] as [String : Any]
         
