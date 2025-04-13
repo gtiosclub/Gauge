@@ -257,5 +257,6 @@ struct ProfileView_Previews: PreviewProvider {
         ProfileView(userVM: UserFirebase(), isCurrentUser: false)
             .environmentObject(PostFirebase())
             .environmentObject(AuthenticationVM())
+            .environmentObject(UserFirebase())
     }
 }

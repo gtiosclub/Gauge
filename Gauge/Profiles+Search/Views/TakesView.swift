@@ -88,7 +88,7 @@ struct TakeCard: View {
 
             HStack {
                 ForEach(tags, id: \.self) { tag in
-                    Text("#\(tag)")
+                    Text("\(tag)")
                         .padding(.horizontal, 8)
                         .padding(.vertical, 5)
                         .font(.caption)
