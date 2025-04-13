@@ -34,8 +34,8 @@ struct CategorySelectionView: View {
     @State private var showMaxAlert = false
 
     private let gridColumns = [GridItem(.adaptive(minimum: 160), spacing: 16)]
-    private let chipColumns = [GridItem(.adaptive(minimum: 110), spacing: 8, alignment: .leading)]
-    private let cardHeight: CGFloat = 200
+    private let chipColumns = [GridItem(.adaptive(minimum: 70), spacing: 8, alignment: .leading)]
+    private let cardHeight: CGFloat = 100
     private let maxSelection = 20
 
     private var filteredGroups: [CategoryGroup] {
@@ -161,26 +161,33 @@ private struct CollapsedGroupCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(group.title).font(.headline)
+            HStack(alignment: .top) {
+                Text(group.title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
                 Spacer()
                 Image(systemName: "chevron.right").foregroundColor(.gray)
             }
-
-            LazyVGrid(columns: chipColumns, alignment: .leading, spacing: 8) {
-                ForEach(group.subcategories.prefix(12), id: \ .self) { chip in
-                    CategoryChip(title: chip,
-                                 isSelected: selected.contains(chip)) {
-                        toggle(chip)
+            .padding(.horizontal, 15)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(group.subcategories.prefix(12), id: \ .self) { chip in
+                        CategoryChip(title: chip,
+                                     isSelected: selected.contains(chip)) {
+                            toggle(chip)
+                        }
                     }
                 }
             }
+            .padding(.leading, 10)
+
         }
-        .padding()
-        .frame(maxWidth: .infinity, minHeight: cardHeight, maxHeight: cardHeight)
+        .frame(height: cardHeight)
         .background(Color.gray.opacity(0.1))
         .cornerRadius(12)
         .onTapGesture(perform: onExpand)
+        
     }
 
     private func toggle(_ chip: String) {
@@ -212,7 +219,7 @@ private struct ExpandedGroupCard: View {
                 }
             }
 
-            LazyVGrid(columns: chipColumns, alignment: .leading, spacing: 8) {
+            FlowLayout(verticalSpacing: 4, horizontalSpacing: 4) {
                 ForEach(group.subcategories, id: \ .self) { chip in
                     CategoryChip(title: chip,
                                  isSelected: selected.contains(chip)) {
