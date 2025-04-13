@@ -203,7 +203,7 @@ struct SliderResultView: View {
     )
     
     var user = UserFirebase()
-    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:])
+    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:], myTakeTime: [:])
     
     return SliderFeedResults(
         post: post,
