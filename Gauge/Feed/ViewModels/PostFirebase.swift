@@ -524,11 +524,6 @@ class PostFirebase: ObservableObject {
     }
     
     func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> [String] {
-        var categoryString: [String] = []
-        for cat in categories {
-            categoryString.append(cat.rawValue)
-        }
-    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async {
         
         // Create post instance
         let post = SliderPost(
