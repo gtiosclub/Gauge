@@ -148,6 +148,7 @@ struct SliderResultView: View {
     }
 }
 
+
 #Preview {
     let responses = [
         ///Option 1, 2/10 = 20%
