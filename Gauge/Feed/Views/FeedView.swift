@@ -301,9 +301,9 @@ struct FeedView: View {
                                         try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
                                     }
                                 }
-                                withAnimation() {
+//                                withAnimation() {
                                     dragOffset = .zero
-                                }
+//                                }
                                 hasSkipped = false
                             }
                     )
