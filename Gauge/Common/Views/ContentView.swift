@@ -155,41 +155,36 @@ struct ContentView: View {
             .task {
                 do {
                     let userResponse: UserResponses
-                    if let existing = userResponses.first {
-                        userResponse = existing
+                    if !userResponses.isEmpty {
+                        print("📱 Found existing UserResponses: \(userResponses.count)")
+                        userResponse = userResponses.first!
                     } else {
                         print("⚠️ No UserResponses found. Creating one.")
                         let newResponse = UserResponses()
                         modelContext.insert(newResponse)
+                        try modelContext.save()
                         userResponse = newResponse
                     }
                     
+                    // Reorder categories based on session data
                     let newCategories = try await userVM.reorderUserCategory(
                         latest: userResponse.userCategoryResponses,
                         currentInterestList: userResponse.currentUserCategories
                     )
-                    
+                    print(newCategories)
                     userResponse.currentUserCategories = newCategories.isEmpty
-                    ? userResponse.currentUserCategories
-                    : newCategories
-                    
+                        ? userResponse.currentUserCategories
+                        : newCategories
                     userResponse.userCategoryResponses = [:]
                     
-                    /*
-                     let newTopics = try await userVM.reorderUserTopics(
-                     latest: userResponse.userTopicResponses,
-                     currentInterestList: userResponse.currentUserTopics
-                     )
-                     
-                     userResponse.currentUserTopics = newTopics.isEmpty
-                     ? userResponse.currentUserTopics
-                     : newTopics
-                     
-                     userResponse.userTopicResponses = [:]
-                     */
+                    //Reorder topics
+                    
+                    
+                    // After modification, save again
+                    try modelContext.save()
                     
                 } catch {
-                    print("❌ Error reordering categories: \(error)")
+                    print("❌ Error handling UserResponses: \(error)")
                 }
             }
             .environmentObject(authVM)

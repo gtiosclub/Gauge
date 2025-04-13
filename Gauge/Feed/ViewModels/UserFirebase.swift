@@ -464,6 +464,7 @@ class UserFirebase: ObservableObject {
     }
 
     func reorderUserCategory(latest: [String: Int], currentInterestList: [String]) async throws -> [String] {
+        print("redordering categories now!!")
         let latestSorted = latest.sorted { $0.value > $1.value }
 
         let prompt = """
