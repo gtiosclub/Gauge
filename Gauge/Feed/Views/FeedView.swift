@@ -51,6 +51,7 @@ struct FeedView: View {
                         Button {
                             if postVM.skippedPost != nil {
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
+                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postVM.skippedPost!.topics)
                             }
                             postVM.undoSkipPost(userId: userVM.user.userId)
                             
@@ -229,12 +230,16 @@ struct FeedView: View {
                                                         let responseChosen = (optionSelected == 1) ? binaryPost.responseOption1 : binaryPost.responseOption2
                                                         postVM.addResponse(postId: binaryPost.postId, userId: user.userId, responseOption: responseChosen)
                                                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                                                        UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+
+                                                        
                                                     }
                                                 } else if let sliderPost = post as? SliderPost {
                                                     shouldSubmit = optionSelected != 3
                                                     if shouldSubmit && !isConfirmed {
                                                         postVM.addResponse(postId: sliderPost.postId, userId: user.userId, responseOption: (optionSelected < 3 ? String(optionSelected + 1) : String(optionSelected)))
                                                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                                                        UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
                                                     }
                                                 } else {
                                                     shouldSubmit = false
@@ -285,6 +290,7 @@ struct FeedView: View {
                                         postVM.skippedPost = postVM.skipPost(user: userVM.user)
                                         if postVM.skippedPost != nil {
                                             UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
+                                            UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: postVM.skippedPost!.topics)
 
                                         }
                                     }

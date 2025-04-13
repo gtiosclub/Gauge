@@ -92,6 +92,7 @@ struct CommentView: View {
         if userStatus != "liked" {
             postVM.likeComment(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+            UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
             
             if userStatus == "disliked" {
                 postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
@@ -100,6 +101,8 @@ struct CommentView: View {
         } else {
             postVM.removeLike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+            UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: post.topics)
+
             userStatus = "none"
         }
     }
@@ -114,11 +117,16 @@ struct CommentView: View {
             
             userStatus = "disliked"
             UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+            UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+
+            
 
         } else {
             postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             userStatus = "none"
             UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+            UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: post.topics)
+
         }
     }
 }

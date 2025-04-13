@@ -110,6 +110,8 @@ struct CommentsView: View {
                     }
                     postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
                     UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                    UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+
                 }) {
                     Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                         .font(.system(size: 18))

@@ -62,6 +62,8 @@ struct CommentSheetView: View {
                     content: commentText
                 )
                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+
                 commentText = ""
                 showAddComment = false
             } label: {

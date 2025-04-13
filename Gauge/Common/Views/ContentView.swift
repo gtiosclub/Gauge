@@ -108,11 +108,11 @@ struct ContentView: View {
                                     try modelContext.save()
                                 }
                                 
-//                                let newTopics = userVM.user.myTopics
-//                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
-//                                    userResponse.currentUserTopics = newTopics
-//                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
-//                                }
+                                let newTopics = userVM.user.myTopics
+                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
+                                    userResponse.currentUserTopics = newTopics
+                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
+                                }
                             }
                                                         
                             await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
@@ -173,10 +173,32 @@ struct ContentView: View {
                             
                             userResponse.userCategoryResponses = [:]
                             
+                            
+                            
                             try modelContext.save()
                             print("✅ Processed and cleared category responses")
                         } else {
                             print("⚠️ No category interactions to process")
+                        }
+                        // Process topic interactions if there are any
+                        if !userResponse.userTopicResponses.isEmpty {
+                            // Process and reorder based on existing data
+                            let newTopics = try await userVM.reorderUserTopics(
+                                latest: userResponse.userTopicResponses,
+                                currentInterestList: userResponse.currentUserTopics
+                            )
+                            
+                            userResponse.currentUserTopics = newTopics.isEmpty
+                                ? userResponse.currentUserTopics
+                                : newTopics
+                            
+                            userResponse.userTopicResponses = [:]
+                            
+                            
+                            try modelContext.save()
+                            print("✅ Processed and cleared topic responses")
+                        } else {
+                            print("⚠️ No topic interactions to process")
                         }
                     } else {
                         print("⚠️ No UserResponses found. Creating one.")
