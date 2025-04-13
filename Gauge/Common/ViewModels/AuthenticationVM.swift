@@ -179,8 +179,8 @@ class AuthenticationVM: ObservableObject {
                     if document.exists {
                         self.currentUser = User(userId: userId, username: username, email: email)
                     } else {
-                        self.errorMessage = "User not found. Creating record."
-                        Task { try await Firebase.db.collection("USERS").document(userId).setData(["email": email, "username": username]) }
+                        self.errorMessage = "User not found."
+//                        Task { try await Firebase.db.collection("USERS").document(userId).setData(["email": email, "username": username]) }
                     }
                 }
             } catch {
