@@ -102,8 +102,18 @@ struct FeedView: View {
                                     .frame(width: max(0, geo.size.width - 6 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 20.0, 6.0) : 6.0) : 0.0)))
                                     .offset(y: 10 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0))
                                     .mask(RoundedRectangle(cornerRadius: 20.0).offset(y: 10))
+                            } else if postVM.feedPosts.indices.contains(1), let post = postVM.feedPosts[1] as? SliderPost {
+                                SliderFeedPost(post: post, optionSelected: $optionSelected, dragAmount: $dragOffset)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 20.0)
+                                            .fill(Color(red: (min(255.0, 209.0 + dragOffset.height) / 255),
+                                                        green: (min(255.0, 209.0 + dragOffset.height) / 255),
+                                                        blue: (min(255.0, 209.0 + dragOffset.height) / 255)))
+                                    )
+                                    .frame(width: max(0, geo.size.width - 6 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 20.0, 6.0) : 6.0) : 0.0)))
+                                    .offset(y: 10 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 10.0, 10.0) : 10.0) : 0.0))
+                                    .mask(RoundedRectangle(cornerRadius: 20.0).offset(y: 10))
                             }
-                            
                         }
                     }
                     
@@ -198,7 +208,7 @@ struct FeedView: View {
                                             }
                                         } else {
                                             withAnimation(.smooth(duration: 0.5)) {
-                                                dragOffset = CGSize(width: 0.0, height: 800.0)
+                                                dragOffset = CGSize(width: 0.0, height: geo.size.height)
                                             }
                                         }
                                         
@@ -223,9 +233,7 @@ struct FeedView: View {
                                                 }
 
                                                 if shouldSubmit {
-                                                    withAnimation {
-                                                        isConfirmed = true
-                                                    }
+                                                    isConfirmed = true
                                                 }
                                             }
                                             
@@ -257,31 +265,30 @@ struct FeedView: View {
                                 }
                             }
                             .onEnded { gesture in
-                                if dragOffset.height > 150 && hasSkipped {
-                                    if isConfirmed {
-                                        // Next post logic
-                                        postVM.feedPosts.removeFirst()
-                                        postVM.findNextPost(user: userVM.user)
-                                        postVM.skippedPost = nil
-                                    } else {
-                                        // Skip logic
-                                        postVM.skippedPost = postVM.skipPost(user: userVM.user)
-                                    }
-                                    withAnimation {
-                                        isConfirmed = false
-                                    }
-                                    Task {
-                                        try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
-                                    }
-                                }
                                 
-                                //                            withAnimation(.none) {
-//                                if postVM.feedPosts.count > 0 && postVM.feedPosts.first! is SliderPost {
-//                                } else {
+                                if dragOffset.height > 150 && hasSkipped {
+//                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        if isConfirmed {
+                                            // Next post logic
+                                            postVM.feedPosts.removeFirst()
+                                            postVM.findNextPost(user: userVM.user)
+                                            postVM.skippedPost = nil
+                                        } else {
+                                            // Skip logic
+                                            postVM.skippedPost = postVM.skipPost(user: userVM.user)
+                                        }
+                                        withAnimation {
+                                            isConfirmed = false
+                                        }
+                                        Task {
+                                            try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
+                                        }
+//                                    }
+                                }
+                                withAnimation() {
                                     dragOffset = .zero
-//                                }
+                                }
                                 hasSkipped = false
-                                //                            }
                             }
                     )
                     .opacity(hasSkipped ? 0.0 : 1.0)

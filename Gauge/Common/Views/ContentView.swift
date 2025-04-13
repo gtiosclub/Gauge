@@ -175,7 +175,6 @@ struct ContentView: View {
                     
                     userResponse.userCategoryResponses = [:]
                     
-                    /*
                      let newTopics = try await userVM.reorderUserTopics(
                      latest: userResponse.userTopicResponses,
                      currentInterestList: userResponse.currentUserTopics
@@ -186,8 +185,6 @@ struct ContentView: View {
                      : newTopics
                      
                      userResponse.userTopicResponses = [:]
-                     */
-                    
                 } catch {
                     print("❌ Error reordering categories: \(error)")
                 }
