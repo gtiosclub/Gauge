@@ -399,6 +399,8 @@ class UserFirebase: ObservableObject {
 
             do {
                 let decoded = try JSONDecoder().decode([String].self, from: data)
+                print("decoded topics :")
+                print(decoded)
                 return decoded
             } catch {
                 print("⚠️ Failed to decode JSON: \(error)")

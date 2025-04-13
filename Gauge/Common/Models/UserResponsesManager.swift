@@ -51,14 +51,45 @@ class UserResponsesManager {
         }
     }
     
-    // Get the current user responses (useful for other operations)
-    static func getCurrentUserResponses(modelContext: ModelContext) -> UserResponses? {
+    static func addTopicsToUserResponses(modelContext: ModelContext, topics: [String]) {
         let descriptor = FetchDescriptor<UserResponses>()
+        
         do {
-            return try modelContext.fetch(descriptor).first
+            if let userResponse = try modelContext.fetch(descriptor).first {
+                userResponse.addToUserTopics(topics: topics)
+                try modelContext.save()
+                print("✅ Added topics to UserResponses: \(topics)")
+            } else {
+                let newResponse = UserResponses()
+                newResponse.addToUserTopics(topics: topics)
+                modelContext.insert(newResponse)
+                try modelContext.save()
+                print("✅ Created new UserResponses with topics: \(topics)")
+            }
         } catch {
-            print("❌ Error fetching UserResponses: \(error)")
-            return nil
+            print("❌ Error updating UserResponses: \(error)")
         }
     }
+    
+    static func removeTopicsFromUserResponses(modelContext: ModelContext, topics: [String]) {
+        let descriptor = FetchDescriptor<UserResponses>()
+        
+        do {
+            if let userResponse = try modelContext.fetch(descriptor).first {
+                userResponse.removeFromUserTopics(topics: topics)
+                try modelContext.save()
+                print("✅ Removed topics from UserResponses: \(topics)")
+            } else {
+                let newResponse = UserResponses()
+                newResponse.removeFromUserTopics(topics: topics)
+                modelContext.insert(newResponse)
+                try modelContext.save()
+                print("✅ Created new UserResponses with negative categories: \(topics)")
+            }
+        } catch {
+            print("❌ Error updating UserResponses: \(error)")
+        }
+    }
+    
+
 }

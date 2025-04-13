@@ -184,12 +184,15 @@ struct PostCreationView: View {
                         
                         Task {
                             if postType == .BinaryPost {
-                                await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, sublabel1: leftCaption, sublabel2: rightCaption)
+                                let postTopics = await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, sublabel1: leftCaption, sublabel2: rightCaption)
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postCategories.map{$0.rawValue})
+                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics)
+
 
                             } else if postType == .SliderPost {
-                                await postVM.createSliderPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, lowerBoundLabel: slidingOptions[optionsSelectedIndex!].left, upperBoundLabel: slidingOptions[optionsSelectedIndex!].right)
+                                let postTopics = await postVM.createSliderPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, lowerBoundLabel: slidingOptions[optionsSelectedIndex!].left, upperBoundLabel: slidingOptions[optionsSelectedIndex!].right)
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postCategories.map{$0.rawValue})
+                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics)
                             }
                             
                         }

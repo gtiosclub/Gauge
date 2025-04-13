@@ -472,7 +472,7 @@ class PostFirebase: ObservableObject {
         }
     }
   
-    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) async {
+    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) async -> [String]  {
         // Create post instance
         let post = BinaryPost(
             postId: UUID().uuidString,
@@ -512,9 +512,10 @@ class PostFirebase: ObservableObject {
                 print("added new post to POSTS with topics \(topics)")
             }
         }
+        return topics 
     }
     
-    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async {
+    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> [String] {
         var categoryString: [String] = []
         for cat in categories {
             categoryString.append(cat.rawValue)
@@ -554,6 +555,7 @@ class PostFirebase: ObservableObject {
                 print("added new slider post to POSTS")
             }
         }
+        return topics 
     }
     
     func deletePost(postId: String){
