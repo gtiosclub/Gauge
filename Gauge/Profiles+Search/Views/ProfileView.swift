@@ -14,6 +14,7 @@ struct ProfileView: View {
 
     let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
     @State private var profileImage: UIImage?
+    let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
 
     var body: some View {
         NavigationView {
@@ -99,55 +100,71 @@ struct ProfileView: View {
                                     )
                             }.disabled(userVM.user.myTakeTime.isEmpty)
                         }
+                        .padding(.leading, 16)
 
                         VStack(alignment: .leading) {
                             // Display the username from the environment user.
                             Text(userVM.user.username)
-                                .font(.title2)
-                                .fontWeight(.bold)
-
+                                .font(.system(size: 30))
+                                .fontWeight(.medium)
+                            
                             NavigationLink(destination: FriendsView()) {
-                                Image(systemName: "person.2.fill")
-                                    .foregroundColor(.gray)
                                 Text("27")
                                     .foregroundColor(.black)
+                                Text("Friends")
+                                    .foregroundColor(Color(.systemGray))
                             }
-
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 20) {
-                                    ForEach(userTags, id: \.self) { tag in
-                                        Text(tag)
-                                            .padding(.horizontal, 15)
-                                            .padding(.vertical, 6)
-                                            .font(.system(size: 14))
-                                            .background(Color.gray.opacity(0.2))
-                                            .foregroundColor(.black)
-                                            .cornerRadius(10)
-                                    }
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.top, isCurrentUser ? 0 : 15)
+                    
+                    // User Tags
+                    HStack {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(userTags, id: \.self) { tag in
+                                    Text(tag)
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 6)
+                                        .font(.system(size: 14))
+                                        .background(Color.gray.opacity(0.2))
+                                        .foregroundColor(.black)
+                                        .cornerRadius(15)
                                 }
                             }
                         }
+                        .padding(.leading, 20)
+                        .padding(.top, 10)
                     }
-                    .padding()
-
-
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            TabButton(title: "Takes", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Votes", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Comments", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Badges", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Statistics", selectedTab: $selectedTab)
-                            Spacer()
-                            TabButton(title: "Favorites", selectedTab: $selectedTab)
-                        }
-                        .padding(.horizontal)
+                    
+                    //Bio
+                    
+                    HStack {
+                        Text("a short bio that describes the user")
+                            .padding(.leading, 20)
+                        Spacer()
                     }
                     .padding(.top, 10)
+                    
+                    // Tabs
+                    VStack (spacing: 0) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                ForEach(tabs, id: \.self) { tab in
+                                    TabButton(title: tab, selectedTab: $selectedTab)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .padding(.top, 5)
+                        
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(Color(.systemGray))
+                            .ignoresSafeArea(.container, edges: .horizontal)
+                    }
 
                     // Content based on the selected tab.
                     if selectedTab == "Badges" {
@@ -346,17 +363,23 @@ struct TabButton: View {
         }) {
             VStack(spacing: 0) {
                 Text(title)
-                    .font(.system(size: 25))
+                    .font(.system(size: 20))
                     .foregroundColor(selectedTab == title ? .black : .gray)
                     .fontWeight(selectedTab == title ? .bold : .regular)
-                Rectangle()
-                    .frame(height: 2)
-                    .foregroundColor(selectedTab == title ? .blue : .gray)
-                    .edgesIgnoringSafeArea(.horizontal)
+                    .padding(.bottom, 6)
+                
+                if (selectedTab == title) {
+                    Rectangle()
+                        .frame(height: 4)
+                        .cornerRadius(4)
+                        .foregroundColor(.blue)
+                        .edgesIgnoringSafeArea(.horizontal)
+                }
             }
-            .padding(.vertical, 8)
+            .padding(.top, 8)
         }
-        .frame(minWidth: 100)
+        .padding(.horizontal, 5)
+//        .frame(minWidth: 100)
     }
 }
 
