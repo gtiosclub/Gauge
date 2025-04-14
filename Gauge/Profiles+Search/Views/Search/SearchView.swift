@@ -1,7 +1,15 @@
+//
+//  SearchView.swift
+//  Gauge
+//
+//  Created by Datta Kansal on 2/6/25.
+//
+
 import SwiftUI
 
 struct SearchView: View {
     @EnvironmentObject var userVM: UserFirebase
+    @EnvironmentObject var authVM: AuthenticationVM
     @StateObject private var searchVM = SearchViewModel()
     @StateObject var profileVM = ProfileViewModel()
     @StateObject var searchedUserVM = UserFirebase()
@@ -16,161 +24,174 @@ struct SearchView: View {
     @State private var errorMessage: String? = nil
     @State private var showResults: Bool = false
     @State private var isSearchActive: Bool = false
-    
+
     @State private var selectedCategory: Category? = nil
-    @State private var navigateToCategory: Bool = false
     
     @State private var navigateToSearchedUser: Bool = false
-    @State private var searchedUserIsCurrUser: Bool = false
+    
+    
+    private var searchBar: some View {
+        HStack {
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(Color(.systemGray))
+                
+                TextField("Search", text: $searchText)
+                    .foregroundColor(Color(.black))
+                    .focused($isSearchFieldFocused)
+                    .submitLabel(.search)
+                    .onChange(of: isSearchFieldFocused) { _, focused in
+                        if focused {
+                            isSearchActive = true
+                            selectedCategory = nil
+                        }
+                    }
+                    .onChange(of: searchText) { newValue in
+                        if selectedTab == "Users" {
+                            if !newValue.isEmpty {
+                                performUserSearch()
+                            } else {
+                                showResults = false
+                            }
+                        }
+                    }
+                    .onSubmit {
+                        if !searchText.isEmpty {
+                            if selectedTab == "Topics" {
+                                performTopicSearch()
+                            } else if selectedTab == "Users" {
+                                performUserSearch()
+                            }
+                        }
+                    }
+                
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                        showResults = false
+                        postSearchResults = []
+                        selectedCategory = nil
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color(.systemGray))
+                    }
+                }
+            }
+            .padding(.horizontal, 4)
+            .padding(.vertical, 5)
+            .background(Color(.systemGray5))
+            .cornerRadius(12)
+            
+            if isSearchActive {
+                Button("Cancel") {
+                    isSearchActive = false
+                    isSearchFieldFocused = false
+                    searchText = ""
+                    postSearchResults = []
+                    userSearchResults = []
+                    showResults = false
+                    selectedCategory = nil
+                }
+                .foregroundColor(.blue)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 1)
+        .padding(.bottom, 10)
+    }
+    
+    private var searchContent: some View {
+        Group {
+            if isSearchActive {
+                if showResults {
+                    SearchResultsView(
+                        searchedUserVM: searchedUserVM,
+                        selectedTab: $selectedTab,
+                        isLoading: $isLoading,
+                        errorMessage: $errorMessage,
+                        postSearchResults: $postSearchResults,
+                        userSearchResults: $userSearchResults,
+                        userSearchProfileImages: $userSearchProfileImages,
+                        navigateToSearchedUser: $navigateToSearchedUser
+                    )
+                } else {
+                    RecentSearchesView(
+                        isSearchFieldFocused: $isSearchFieldFocused,
+                        searchText: $searchText,
+                        selectedTab: $selectedTab
+                    )
+                }
+            } else {
+                CategoriesView(
+                    selectedCategory: $selectedCategory,
+                    isLoading: $isLoading,
+                    postSearchResults: $postSearchResults,
+                    errorMessage: $errorMessage
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+    
+    private var categoryDestination: some View {
+        Group {
+            if let category = selectedCategory {
+                CategoryResultsView(category: category, onDismiss: {
+                    self.selectedCategory = nil
+                })
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    private var categoryNavigationLink: some View {
+        NavigationLink(destination: categoryDestination,
+                       isActive: Binding(
+            get: { selectedCategory != nil },
+            set: { active in
+                if !active { selectedCategory = nil }
+            }
+        )) {
+            EmptyView()
+        }
+    }
+    
+    private var userNavigationLink: some View {
+        NavigationLink(
+            destination: Group {
+                if searchedUserVM.user.userId == userVM.user.userId {
+                    ProfileView()
+                        .environmentObject(searchedUserVM)
+                        .environmentObject(authVM)
+                } else {
+                    ProfileVisitView(user: searchedUserVM.user)
+                }
+            },
+            isActive: $navigateToSearchedUser
+        ) {
+            EmptyView()
+        }
+        .hidden()
+    }
+    
     
     var body: some View {
         NavigationStack {
             VStack {
                 if selectedCategory == nil {
-                    HStack {
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(Color(.systemGray))
-                            
-                            TextField("Search", text: $searchText)
-                                .foregroundColor(Color(.black))
-                                .focused($isSearchFieldFocused)
-                                .submitLabel(.search)
-                                .onChange(of: isSearchFieldFocused, initial: false) { _, focused in
-                                    if focused {
-                                        isSearchActive = true
-                                        selectedCategory = nil
-                                    }
-                                }
-                                .onChange(of: searchText, initial: false) { _, text in
-                                    if selectedTab == "Users" {
-                                        if !text.isEmpty {
-                                            performUserSearch()
-                                        } else {
-                                            showResults = false
-                                        }
-                                    }
-                                }
-                                .onSubmit {
-                                    if !searchText.isEmpty {
-                                        if selectedTab == "Topics" {
-                                            performTopicSearch()
-                                        } else if selectedTab == "Users" {
-                                            performUserSearch()
-                                        }
-                                    }
-                                }
-                            
-                            
-                            if !searchText.isEmpty {
-                                Button {
-                                    searchText = ""
-                                    showResults = false
-                                    postSearchResults = []
-                                    selectedCategory = nil
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(Color(.systemGray))
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 5)
-                        .background(Color(.systemGray5))
-                        .cornerRadius(12)
-                        
-                        if isSearchActive {
-                            Button("Cancel") {
-                                isSearchActive = false
-                                isSearchFieldFocused = false
-                                searchText = ""
-                                postSearchResults = []
-                                showResults = false
-                                selectedCategory = nil
-                            }
-                            .foregroundColor(.blue)
-                        }
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 1)
-                    .padding(.bottom, 10)
-                }
-                
-                Group {
-                    if selectedCategory == nil {
-                        if isSearchActive {
-                            if showResults {
-                                SearchResultsView(
-                                    searchedUserVM: searchedUserVM,
-                                    selectedTab: $selectedTab,
-                                    isLoading: $isLoading,
-                                    errorMessage: $errorMessage,
-                                    postSearchResults: $postSearchResults,
-                                    userSearchResults: $userSearchResults,
-                                    userSearchProfileImages: $userSearchProfileImages,
-                                    navigateToSearchedUser: $navigateToSearchedUser,
-                                    searchedUserIsCurrUser: $searchedUserIsCurrUser
-                                )
-                            } else {
-                                RecentSearchesView(
-                                    isSearchFieldFocused: $isSearchFieldFocused,
-                                    searchText: $searchText,
-                                    selectedTab: $selectedTab
-                                )
-                            }
-                        } else {
-                            // Show CategoriesView.
-                            CategoriesView(
-                                selectedCategory: $selectedCategory,
-                                isLoading: $isLoading,
-                                postSearchResults: $postSearchResults,
-                                errorMessage: $errorMessage
-                            )
-                        }
-                    } else {
-                        EmptyView()
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            }
-            .background(
-                NavigationLink(
-                    destination: ProfileView(userVM: searchedUserVM, isCurrentUser: searchedUserIsCurrUser),
-                    isActive: $navigateToSearchedUser
-                ) {
+                    searchBar
+                    searchContent
+                } else {
                     EmptyView()
                 }
-                .hidden()
-            )
-            .background(
-                NavigationLink(
-                    destination: Group {
-                        if let category = selectedCategory {
-                            CategoryResultsView(category: category, onDismiss: {
-                                selectedCategory = nil
-                            })
-                        } else {
-                            EmptyView()
-                        }
-                    },
-                    isActive: Binding(
-                        get: { selectedCategory != nil },
-                        set: { newValue in
-                            if !newValue { selectedCategory = nil }
-                        }
-                    )
-                ) {
-                    EmptyView()
-                }
-                .hidden()
-            )
-            .onChange(of: selectedCategory) { newValue in
-                navigateToCategory = (newValue != nil)
             }
+            .background(categoryNavigationLink)
+            .background(userNavigationLink)
             .navigationTitle(
                 selectedCategory != nil
-                    ? selectedCategory!.rawValue
-                    : (isSearchActive ? "" : "Explore")
+                ? selectedCategory!.rawValue
+                : (isSearchActive ? "" : "Explore")
             )
             .toolbar {
                 if selectedCategory != nil {
@@ -183,9 +204,6 @@ struct SearchView: View {
                         }
                     }
                 }
-            }
-            .navigationDestination(for: Category.self) { category in
-                CategoryResultsView(category: category)
             }
         }
     }

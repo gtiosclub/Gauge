@@ -16,7 +16,6 @@ struct SearchResultsView: View {
     @Binding var userSearchResults: [UserResult]
     @Binding var userSearchProfileImages: [String: UIImage]
     @Binding var navigateToSearchedUser: Bool
-    @Binding var searchedUserIsCurrUser: Bool
 
     var body: some View {
         if isLoading {

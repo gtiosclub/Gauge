@@ -58,8 +58,10 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-                        ProfileView(userVM: userVM, isCurrentUser: true)
+                        ProfileView()
+                            .environmentObject(userVM)
                             .environmentObject(authVM)
+                            .environmentObject(postVM)
                             .tabItem {
                                   Image(systemName: "person.crop.circle")
                                   Text("Profile")
