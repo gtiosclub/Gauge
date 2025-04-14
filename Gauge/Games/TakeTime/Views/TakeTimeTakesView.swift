@@ -123,6 +123,7 @@ struct TakeTimeTakesView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var userVM: UserFirebase
     @StateObject var scheduler: Scheduler
+    @State private var showResults: Bool = false
 
     var body: some View {
         if showBackgroundView {
@@ -420,57 +421,6 @@ struct TakeTimeTakesView: View {
                             }
                     )
                     .opacity(hasSkipped ? 0.0 : 1.0)
-
-                    if takeVM.binaryposts.isEmpty {
-                        ZStack {
-                            GeometryReader { _ in
-                                    VStack {
-                                        Text("Summary of your responses:")
-                                            .font(.headline)
-                                            .padding()
-                                        ForEach(
-                                            Array(takeVM.userResponses.enumerated()),
-                                            id: \.offset
-                                        ) { index, entry in
-                                            let (id, selectedOption) = entry
-                                            let question = takeVM.takes.first(where: { $0.id == id })?.question ?? "Unknown question"
-                                            VStack(alignment: .leading, spacing: 8) {
-                                                Text("Question \(index + 1)")
-                                                    .font(.subheadline)
-                                                    .fontWeight(.semibold)
-                                                    .foregroundColor(.gray)
-                                                Text(question)
-                                                    .font(.body)
-                                                    .foregroundColor(.primary)
-                                                let choiceText = selectedOption == 1
-                                                ? (takeVM.takes.first(where: { $0.id == id })?.responseOption1 ?? "Option 1")
-                                                : (takeVM.takes.first(where: { $0.id == id })?.responseOption2 ?? "Option 2")
-
-                                                Text("Your choice: \(choiceText)")
-                                                    .font(.footnote)
-                                                    .foregroundColor(.blue)
-                                                Divider()
-                                            }
-                                            .padding(.vertical, 6)
-                                        }
-                                        Spacer()
-                                    }
-                                    .padding()
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                    .background(Color.white)
-                                }
-                        }
-                        .contentShape(Rectangle())
-                        .allowsHitTesting(true)
-                        .gesture(
-                            DragGesture().onEnded { value in
-                                if value.translation.height > 100 {
-                                    scheduler.shouldInterrupt = false
-                                    dismiss()
-                                }
-                            }
-                        )
-                    }
                 }
                 .onAppear {
                     userVM.user.myTakeTime = [:]
@@ -478,11 +428,17 @@ struct TakeTimeTakesView: View {
                 }
                 .frame(width: min(geo.size.width, UIScreen.main.bounds.width))
                 .background(.black)
+                .sheet(isPresented: $showResults, onDismiss: {
+                    dismiss()
+                }) {
+                    TakeTimeResultsView(user: userVM.user, myResponses: userVM.user.myTakeTime)
+                }
             }
             .onChange(of: takeVM.binaryposts.isEmpty) {
                 if takeVM.binaryposts.isEmpty {
                     userVM.user.myTakeTime = takeVM.userResponses
                     userVM.updateUserFields(user: userVM.user)
+                    showResults = true
                 }
             }
         }

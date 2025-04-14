@@ -8,6 +8,7 @@ import SwiftUI
 import FirebaseFirestore
 
 struct TakeTimeResultsView: View {
+    var user: User
     let myResponses: [String: Int]
     @State private var takes: [Take] = []
 
@@ -15,14 +16,15 @@ struct TakeTimeResultsView: View {
         List {
             ForEach(myResponses.sorted(by: { $0.key < $1.key }), id: \.key) { id, selectedOption in
                 if let take = takes.first(where: { $0.id == id }) {
-                    VStack(alignment: .leading) {
-                        Text(take.question)
-                            .font(.headline)
-                        Text("Your choice: \(selectedOption == 1 ? take.responseOption1 : take.responseOption2)")
-                        .font(.subheadline)
-                        .foregroundColor(.blue)
-                    }
-                    .padding(.vertical, 6)
+//                    VStack(alignment: .leading) {
+//                        Text(take.question)
+//                            .font(.headline)
+//                        Text("Your choice: \(selectedOption == 1 ? take.responseOption1 : take.responseOption2)")
+//                        .font(.subheadline)
+//                        .foregroundColor(.blue)
+//                    }
+//                    .padding(.vertical, 6)
+                    VoteCard(profilePhotoURL: user.profilePhoto, username: user.username, timeAgo: "", tags: [take.topic], vote: (selectedOption == 1 ? take.responseOption1 : take.responseOption2), content: take.question, comments: nil, views: nil, votes: nil)
                 }
             }
         }
