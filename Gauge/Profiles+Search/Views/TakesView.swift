@@ -46,8 +46,97 @@ struct TakesView: View {
                 .presentationBackground(Color.white)
         }
     }
-}
-
+    
+    func fetchMyPosts() {
+        myPosts = []
+        let postIds = userVM.user.myPosts
+        
+        for id in postIds {
+            Firebase.db.collection("POSTS").document(id).getDocument(completion: { doc, error in
+                guard let data = doc?.data(), error == nil else {
+                    print("❌ Failed to fetch post \(id): \(error?.localizedDescription ?? "Unknown")")
+                    return
+                }
+                
+                if let type = data["type"] as? String, type == PostType.BinaryPost.rawValue {
+                    var post = BinaryPost(
+                        postId: id,
+                        userId: data["userId"] as? String ?? "",
+                        categories: Category.mapStringsToCategories(returnedStrings: data["categories"] as? [String] ?? []),
+                        topics: data["topics"] as? [String] ?? [],
+                        postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
+                        ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "") ?? Date(),
+                        question: data["question"] as? String ?? "",
+                        responseOption1: data["responseOption1"] as? String ?? "",
+                        responseOption2: data["responseOption2"] as? String ?? "",
+                        sublabel1: data["sublabel1"] as? String ?? "",
+                        sublabel2: data["sublabel2"] as? String ?? "",
+                        favoritedBy: data["favoritedBy"] as? [String] ?? []
+                    )
+                    
+                    let group = DispatchGroup()
+                    
+                    // Fetch responses
+                    group.enter()
+                    Firebase.db.collection("POSTS").document(id).collection("RESPONSES").getDocuments { snapshot, error in
+                        if let snapshot = snapshot {
+                            let responses: [Response] = snapshot.documents.compactMap { doc in
+                                let d = doc.data()
+                                return Response(
+                                    responseId: doc.documentID,
+                                    userId: d["userId"] as? String ?? "",
+                                    responseOption: d["responseOption"] as? String ?? ""
+                                )
+                            }
+                            post.responses = responses
+                        }
+                        group.leave()
+                    }
+                    
+                    // Fetch comments
+                    group.enter()
+                    Firebase.db.collection("POSTS").document(id).collection("COMMENTS").getDocuments { snapshot, error in
+                        if let snapshot = snapshot {
+                            let comments: [Comment] = snapshot.documents.compactMap { doc in
+                                let d = doc.data()
+                                return Comment(
+                                    commentType: .text,
+                                    postId: id,
+                                    userId: d["userId"] as? String ?? "",
+                                    username: "",
+                                    profilePhoto: "",
+                                    date: DateConverter.convertStringToDate(d["date"] as? String ?? "") ?? Date(),
+                                    commentId: doc.documentID,
+                                    likes: d["likes"] as? [String] ?? [],
+                                    dislikes: d["dislikes"] as? [String] ?? [],
+                                    content: d["content"] as? String ?? ""
+                                )
+                            }
+                            post.comments = comments
+                        }
+                        group.leave()
+                    }
+                    
+                    // Fetch views
+                    group.enter()
+                    Firebase.db.collection("POSTS").document(id).collection("VIEWS").getDocuments { snapshot, error in
+                        if let snapshot = snapshot {
+                            post.viewCounter = snapshot.documents.count
+                        }
+                        group.leave()
+                    }
+                    
+                    group.notify(queue: .main) {
+                        myPosts.append(post)
+                        myPosts.sort { $0.postDateAndTime > $1.postDateAndTime }
+                    }
+                }
+            })
+        }
+    }
+    
+    
+    
     struct SwipeableSheetWrapper: View {
         @ObservedObject var post: BinaryPost
         @EnvironmentObject var postVM: PostFirebase
@@ -169,20 +258,20 @@ struct TakesView: View {
                     Text("\(votes) votes")
                         .foregroundColor(.gray)
                         .font(.subheadline)
-
+                    
                     Spacer()
-
+                    
                     HStack(spacing: 16) {
                         HStack(spacing: 4) {
                             Image(systemName: "bubble.left")
                             Text("\(comments)")
                         }
-
+                        
                         HStack(spacing: 4) {
                             Image(systemName: "eye")
                             Text("\(views)")
                         }
-
+                        
                         Image(systemName: "bookmark")
                         Image(systemName: "square.and.arrow.up")
                     }
@@ -196,4 +285,5 @@ struct TakesView: View {
             .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
         }
     }
-
+    
+}

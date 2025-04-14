@@ -619,25 +619,39 @@ class PostFirebase: ObservableObject {
     
     func addResponse(postId: String, userId: String, responseOption: String) {
         let responseId = UUID().uuidString
-        
-        //The postId is used to query the correct document in the POST collection.
-        let correctPost = Firebase.db.collection("POSTS").document(postId)
-        
-        //The Response should be added to a POST's RESPONSE collection.
+
+        // Reference for the specific post and its RESPONSES collection
         let responseLocation = Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").document(responseId)
         
- 
-        //The two attributes are the userId and responseOption. Both strings
+        // Add the response to the POST
         let response = ["userId": userId, "responseOption": responseOption]
-        
         responseLocation.setData(response) { err in
             if let err = err {
                 print("Error writing document: \(err)")
             } else {
-                print("Response added succesfully")
+                print("Response added successfully")
+                // After successfully adding the response to the post, update the user's myResponses
+                self.updateUserResponses(postId: postId, userId: userId)
             }
         }
     }
+
+    func updateUserResponses(postId: String, userId: String) {
+        // Reference to the user's document
+        let userRef = Firebase.db.collection("USERS").document(userId)
+        
+        // Add the postId to the user's myResponses array
+        userRef.updateData([
+            "myResponses": FieldValue.arrayUnion([postId])
+        ]) { error in
+            if let error = error {
+                print("Error adding postId to user's responses: \(error)")
+            } else {
+                print("Successfully added postId to user's myResponses")
+            }
+        }
+    }
+
     
     func removeFirstPostInNext(postId: String, userId: String) {
         let documentRef = Firebase.db.collection("USERS").document(userId)
@@ -700,10 +714,28 @@ class PostFirebase: ObservableObject {
                 print("Error adding Comment: \(error)")
             } else {
                 print("added new comment to COMMENTS")
+                
+                self.updateUserComments(postId: postId, userId: userId)
             }
         }
         
         return commentId
+    }
+    
+    func updateUserComments(postId: String, userId: String) {
+        // Reference to the user's document
+        let userRef = Firebase.db.collection("USERS").document(userId)
+        
+        // Add the postId to the user's myComments array
+        userRef.updateData([
+            "myComments": FieldValue.arrayUnion([postId])
+        ]) { error in
+            if let error = error {
+                print("Error adding postId to user's myComments: \(error)")
+            } else {
+                print("Successfully added postId to user's myComments")
+            }
+        }
     }
     
     func getComments(postId: String, completion: @escaping ([Comment]) -> Void) {
