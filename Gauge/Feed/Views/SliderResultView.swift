@@ -18,7 +18,7 @@ struct SliderResultView: View {
         let total = max(responses.reduce(0, +), 1)
         let percentages = responses.map { Double($0) / Double(total) }
         
-        let minHeight: CGFloat = 30  // minimum bar height even for 0%
+        let minHeight: CGFloat = 20  // minimum bar height even for 0%
         let maxHeight: CGFloat = 150
 
         // Find the min non-zero value to scale relative to it
@@ -35,7 +35,7 @@ struct SliderResultView: View {
                     ZStack(alignment: .bottom) {
                         let barHeight = normalizedHeights[index]
                         let percentText = String(format: "%.1f%%", percentages[index] * 100)
-                        let isTooSmall = percentages[index] < 0.04
+                        let isTooSmall = percentages[index] < 0.06
 
                         ZStack(alignment: .top) {
                             Rectangle()
@@ -83,11 +83,13 @@ struct SliderResultView: View {
                     
                     StackedProfiles(
                         userIds: Array(post.responses
-                            .filter { userVM.user.friends.contains($0.userId) && Int($0.responseOption) ?? 7 == (Int(index) - 1)}
-                            .map { $0.userId }.shuffled().prefix(3)),
+                            .filter { userVM.user.friends.contains($0.userId) && Int($0.responseOption) ?? 7 == (Int(index) + 1)}
+                            .map { $0.userId }.shuffled().prefix(2)),
                         sideOnTop: .right
                     )
                     .frame(height: 30.0)
+                    .frame(width: 45.0)
+                    .offset(x: 3)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -157,7 +159,7 @@ struct SliderResultView: View {
         Response(responseId: "2", userId: "", responseOption: "1"),
         Response(responseId: "1", userId: "", responseOption: "1"),
         Response(responseId: "1", userId: "", responseOption: "1"),
-        Response(responseId: "2", userId: "", responseOption: "1"),
+        Response(responseId: "2", userId: "i9", responseOption: "2"),
 
         ///Option 2, 0/10 = 0%
         
@@ -170,23 +172,22 @@ struct SliderResultView: View {
         Response(responseId: "7", userId: "", responseOption: "4"),
 
         ///Option 4, 5/10 = 50%
-        Response(responseId: "9", userId: "", responseOption: "5"),
+        Response(responseId: "9", userId: "i10", responseOption: "5"),
         Response(responseId: "10", userId: "", responseOption: "5"),
         Response(responseId: "9", userId: "", responseOption: "5"),
         Response(responseId: "10", userId: "", responseOption: "5"),
         Response(responseId: "11", userId: "", responseOption: "5"),
         Response(responseId: "12", userId: "", responseOption: "5"),
         Response(responseId: "10", userId: "", responseOption: "5"),
-        Response(responseId: "11", userId: "", responseOption: "5"),
-        Response(responseId: "12", userId: "", responseOption: "5"),
-
+        Response(responseId: "11", userId: "i8", responseOption: "1"),
+        Response(responseId: "12", userId: "i7", responseOption: "1"),
         ///Option 4, 2/10 = 20%
-        Response(responseId: "17", userId: "", responseOption: "6"),
-        Response(responseId: "18", userId: "", responseOption: "6"),
-        Response(responseId: "18", userId: "", responseOption: "2"),
-        Response(responseId: "18", userId: "", responseOption: "3"),
-        Response(responseId: "18", userId: "", responseOption: "4"),
-        Response(responseId: "18", userId: "", responseOption: "6")
+        Response(responseId: "17", userId: "i6", responseOption: "4"),
+        Response(responseId: "18", userId: "i5", responseOption: "6"),
+        Response(responseId: "18", userId: "i4", responseOption: "6"),
+        Response(responseId: "18", userId: "i3", responseOption: "3"),
+        Response(responseId: "18", userId: "i2", responseOption: "4"),
+        Response(responseId: "18", userId: "i", responseOption: "6")
     ]
 
     let post = SliderPost(
@@ -204,7 +205,7 @@ struct SliderResultView: View {
     )
     
     var user = UserFirebase()
-    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:], myTakeTime: [:])
+    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92", "i", "i2", "i3", "i4", "i5", "i6", "i7", "i8", "i9", "i10"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:], myTakeTime: [:])
     
     return SliderFeedResults(
         post: post,

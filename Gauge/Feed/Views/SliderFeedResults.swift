@@ -54,6 +54,7 @@ struct SliderFeedResults: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .frame(height: 200)
                     .padding(.top, 8)
+                    .padding(.bottom, 10)
                 
                 // Profile photos here
                 
@@ -67,7 +68,7 @@ struct SliderFeedResults: View {
             // Comments
             CommentsView(post: post)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 12)
+                .padding(.top, 4)
                 .padding(.horizontal, 0)
                 .onChange(of: post.comments) {old, new in
                     print("recognized comments changed")
@@ -84,7 +85,7 @@ struct SliderFeedResults: View {
     let responses = [
         ///Option 1, 2/10 = 20%
         Response(responseId: "1", userId: "", responseOption: "1"),
-        Response(responseId: "2", userId: "", responseOption: "1"),
+        Response(responseId: "2", userId: "idk6", responseOption: "1"),
 
         ///Option 2, 0/10 = 0%
         
@@ -96,9 +97,9 @@ struct SliderFeedResults: View {
 
         ///Option 4, 5/10 = 50%
         Response(responseId: "9", userId: "", responseOption: "5"),
-        Response(responseId: "10", userId: "", responseOption: "5"),
-        Response(responseId: "11", userId: "", responseOption: "5"),
-        Response(responseId: "12", userId: "", responseOption: "5"),
+        Response(responseId: "10", userId: "idk4", responseOption: "5"),
+        Response(responseId: "11", userId: "idk3", responseOption: "5"),
+        Response(responseId: "12", userId: "idk2", responseOption: "5"),
 
         ///Option 4, 2/10 = 20%
         Response(responseId: "17", userId: "idk", responseOption: "2"),
@@ -120,7 +121,7 @@ struct SliderFeedResults: View {
     )
 
     var user = UserFirebase()
-    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:], myTakeTime: [:])
+    user.user = User(userId: "", username: "", phoneNumber: "", email: "", friendIn: [], friendOut: [], friends: ["Rzqik2ISWBezcmBVVaoCbR4rCz92","idk","idk2","idk3","idk4","idk5","idk6"], myNextPosts: [], myResponses: [], myFavorites: [], myPostSearches: [], myProfileSearches: [], myComments: [], myCategories: [], myTopics: [], badges: [], streak: 1, profilePhoto: "", myAccessedProfiles: [], lastLogin: Date.now, lastFeedRefresh: Date.now, attributes: [:], myTakeTime: [:])
     
     return SliderFeedResults(
         post: post,

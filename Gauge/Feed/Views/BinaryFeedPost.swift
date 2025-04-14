@@ -59,6 +59,7 @@ struct BinaryFeedPost: View {
                 .multilineTextAlignment(.leading)
                 .foregroundStyle(.black)
                 .padding(.horizontal)
+                .frame(height: 100)
             
             VStack {
                 Spacer()
@@ -81,7 +82,7 @@ struct BinaryFeedPost: View {
                                 .fontWeight(.bold)
                                 .font(.system(size: optionSelected == 1 ? 20 : 10))
                                 .font(.subheadline)
-                                .opacity(max(0.0, (optionSelected == 1 && dragAmount.width == 0.0 ? 1.0 : 0.8) - (dragAmount.width / 125.0).magnitude))
+                                .opacity(max(0.0, (optionSelected == 1 ? 1.0 : (dragAmount.width == 0.0 ? (0.8) : (0.3 - (dragAmount.width / 125.0).magnitude)))))
                                 .frame(width: 150.0, alignment: .leading)
                                 .minimumScaleFactor(0.50)
                                 .lineLimit(1)
@@ -114,7 +115,7 @@ struct BinaryFeedPost: View {
                                 .fontWeight(.bold)
                                 .font(.system(size: optionSelected == 2 ? 20 : 10))
                                 .font(.subheadline)
-                                .opacity(max(0.0, (optionSelected == 2 && dragAmount.width == 0.0 ? 1.0 : 0.8) - (dragAmount.width / 125.0).magnitude))
+                                .opacity(max(0.0, (optionSelected == 2 ? 1.0 : (dragAmount.width == 0.0 ? (0.8) : (0.3 - (dragAmount.width / 125.0).magnitude)))))
                                 .frame(width: 150.0, alignment: .trailing)
                                 .minimumScaleFactor(0.50)
                                 .lineLimit(1)
@@ -194,7 +195,7 @@ struct BinaryFeedPost: View {
                             ))
             )
             
-            Spacer(minLength: 150.0)
+            Spacer(minLength: 50.0)
             
             HStack {
                 Spacer()
@@ -240,6 +241,9 @@ struct BinaryFeedPost: View {
 //        .padding()
         .frame(width: UIScreen.main.bounds.width)
         .gradientBorder(borderWidth: 40, color: optionSelected == 1 ? .darkRed : .darkGreen, cornerRadius: 20, opacity: computedOpacity)
+        .onAppear() {
+            optionSelected = 0
+        }
     }
 }
 

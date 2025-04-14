@@ -99,21 +99,6 @@ struct ContentView: View {
                         async let userNumResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
                         do {
                             _ = try await userData
-                            
-                            if let userResponse = userResponses.first {
-                                let newCategories = userVM.user.myCategories
-                                if Set(newCategories) != Set(userResponse.currentUserCategories) {
-                                    userResponse.currentUserCategories = newCategories
-                                    print("Replaced UserResponses current categories with: " + String(describing: newCategories))
-                                    try modelContext.save()
-                                }
-                                
-                                let newTopics = userVM.user.myTopics
-                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
-                                    userResponse.currentUserTopics = newTopics
-                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
-                                }
-                            }
                                                         
                             await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
                             postVM.watchForCurrentFeedPostChanges()
@@ -167,16 +152,19 @@ struct ContentView: View {
                                 currentInterestList: userResponse.currentUserCategories
                             )
                             
+                            print("Categories updated to \(newCategories) from \(userResponse.currentUserCategories)")
+                            
                             userResponse.currentUserCategories = newCategories.isEmpty
                                 ? userResponse.currentUserCategories
                                 : newCategories
                             
                             userResponse.userCategoryResponses = [:]
                             
-                            
+                            if !newCategories.isEmpty {
+                                userVM.user.myCategories = newCategories
+                            }
                             
                             try modelContext.save()
-                            print("✅ Processed and cleared category responses")
                         } else {
                             print("⚠️ No category interactions to process")
                         }
@@ -188,15 +176,19 @@ struct ContentView: View {
                                 currentInterestList: userResponse.currentUserTopics
                             )
                             
+                            print("Topics updated to \(newTopics) from \(userResponse.currentUserTopics)")
+                            
                             userResponse.currentUserTopics = newTopics.isEmpty
                                 ? userResponse.currentUserTopics
                                 : newTopics
                             
                             userResponse.userTopicResponses = [:]
                             
+                            if !newTopics.isEmpty {
+                                userVM.user.myTopics = newTopics
+                            }
                             
                             try modelContext.save()
-                            print("✅ Processed and cleared topic responses")
                         } else {
                             print("⚠️ No topic interactions to process")
                         }
