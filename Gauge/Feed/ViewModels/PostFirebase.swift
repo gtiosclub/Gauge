@@ -37,12 +37,14 @@ class PostFirebase: ObservableObject {
         // Setup listener for new index 0 subcollections
         let postRef = Firebase.db.collection("POSTS").document(feedPosts[0].postId)
         currentFeedPostCommentsListener = postRef.collection("COMMENTS").addSnapshotListener { snapshot, error in
-            guard let snapshot = snapshot else { return }
+            guard let snapshot = snapshot else {
+                print("comments do not exist")
+                return }
             
             DispatchQueue.main.async {
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
-                        print("New comment: \(diff.document.data())")
+//                        print("New comment: \(diff.document.data())")
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
                         let date = DateConverter.convertStringToDate(newCommentDoc["date"] as? String ?? "") ?? Date()
@@ -60,10 +62,10 @@ class PostFirebase: ObservableObject {
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         self.feedPosts[0].comments.append(newComment)
                     } else if diff.type == .removed {
-                        print("Comment removed: \(diff.document.documentID)")
+//                        print("Comment removed: \(diff.document.documentID)")
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                     } else if diff.type == .modified {
-                        print("Comment modified: \(diff.document.documentID)")
+//                        print("Comment modified: \(diff.document.documentID)")
                         self.feedPosts[0].comments.removeAll { $0.commentId == diff.document.documentID }
                         let newCommentDoc = diff.document.data()
                         let id = diff.document.documentID
@@ -81,7 +83,7 @@ class PostFirebase: ObservableObject {
                         
                         self.feedPosts[0].comments.append(newComment)
                     }
-//                    self.objectWillChange.send()
+                    self.objectWillChange.send()
                     self.feedPosts = self.feedPosts
                 }
             }
@@ -98,7 +100,7 @@ class PostFirebase: ObservableObject {
                 self.objectWillChange.send()
                 for diff in snapshot.documentChanges {
                     if diff.type == .added {
-                        print("New Response: \(diff.document.data())")
+//                        print("New Response: \(diff.document.data())")
                         let newResponseDoc = diff.document.data()
                         let id = diff.document.documentID
                         let newResponse = Response(
@@ -166,7 +168,7 @@ class PostFirebase: ObservableObject {
                                 favoritedBy: data["favoritedBy"] as? [String] ?? []
                             )
                             
-                            print("post categories: \(post.categories)")
+//                            print("post categories: \(post.categories)")
                             return (postId, post)
 
 
@@ -473,10 +475,12 @@ class PostFirebase: ObservableObject {
         }
     }
   
-    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) async -> [String]  {
+    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) async -> (String, [String]) {
         // Create post instance
+        let postId = UUID().uuidString
+        
         let post = BinaryPost(
-            postId: UUID().uuidString,
+            postId: postId,
             userId: userId,
             categories: categories,
             postDateAndTime: Date(),
@@ -521,14 +525,14 @@ class PostFirebase: ObservableObject {
                 print("added new post to POSTS with topics \(topics)")
             }
         }
-        return topics 
+        return (postId, topics)
     }
     
-    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> [String] {
-        
+    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> (String, [String]) {
+        let postId = UUID().uuidString
         // Create post instance
         let post = SliderPost(
-            postId: UUID().uuidString,
+            postId: postId,
             userId: userId,
             categories: categories,
             postDateAndTime: Date(),
@@ -567,7 +571,7 @@ class PostFirebase: ObservableObject {
                 print("added new slider post to POSTS")
             }
         }
-        return topics 
+        return (postId, topics)
     }
     
     func deletePost(postId: String){
@@ -635,6 +639,20 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    func removeFirstPostInNext(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("USERS").document(userId)
+        
+        documentRef.updateData([
+            "myNextPosts": FieldValue.arrayRemove([postId])
+        ]) { error in
+            if let error = error {
+                print("Error removing first post from my next posts array: \(error)")
+            } else {
+                print("Removed \(postId) from my next posts array: \(postId).")
+            }
+        }
+    }
+    
     func addUserToFavoritedBy(postId: String, userId: String) {
         let documentRef = Firebase.db.collection("POSTS").document(postId)
         
@@ -663,7 +681,7 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func addComment(postId: String, commentType: CommentType, userId: String, content: String){
+    func addComment(postId: String, commentType: CommentType, userId: String, content: String) -> String {
         let commentId = UUID().uuidString
         let newCommentRef = Firebase.db.collection("POSTS")
             .document(postId).collection("COMMENTS").document(commentId)
@@ -684,6 +702,8 @@ class PostFirebase: ObservableObject {
                 print("added new comment to COMMENTS")
             }
         }
+        
+        return commentId
     }
     
     func getComments(postId: String, completion: @escaping ([Comment]) -> Void) {
@@ -1103,36 +1123,6 @@ class PostFirebase: ObservableObject {
 
     func getUserResponseForCurrentPost(userId: String) -> String? {
         let current_post = feedPosts[0]
-//        var post_responses : [String: Int] = [:]
-//        getResponses(postId: current_post.postId) { result in
-//            post_responses = result
-//            print("RESULTS")
-//            print(result)
-//        }
-        //        for user in post_responses {
-        //            if user.userId == userId {
-        //                return user.responseOption
-        //            }
-        //        }
-        //        return nil
-        
-        
-//        Firebase.db.collection("POSTS").document(current_post.postId).collection("RESPONSES").getDocuments { (snapshot, error) in
-//            if let error = error{
-//                print("Error getting Post data: \(error)")
-//            } else {
-//                for document in snapshot!.documents {
-//                    let data = document.data()
-//                    print("DATA")
-//                    print(data)
-//                    let data_user = data["userId"] as? String ?? "CANT GET USERID"
-////                    print("\(data_user) is a \(type(of: data_user))")
-//                    if String(data_user) == userId {
-//                        response = data["responseOption"] as? String ?? "CANT GET RESPONSE"
-//                    }
-//                }
-//            }
-//        
         var response: String = ""
         let responses = current_post.responses
         print("Responses within the method: \n\(responses)")
@@ -1145,5 +1135,47 @@ class PostFirebase: ObservableObject {
         return response
     }
 
+    func resetPostsForAllUsers(postIds: [String], shouldUpdateMyNextPosts: Bool) async {
+        let db = Firebase.db
 
+        for postId in postIds {
+            // Delete COMMENTS
+            let commentsSnapshot = try? await db.collection("POSTS").document(postId).collection("COMMENTS").getDocuments()
+            commentsSnapshot?.documents.forEach { doc in
+                db.collection("POSTS").document(postId).collection("COMMENTS").document(doc.documentID).delete()
+            }
+
+            // Delete RESPONSES
+            let responsesSnapshot = try? await db.collection("POSTS").document(postId).collection("RESPONSES").getDocuments()
+            responsesSnapshot?.documents.forEach { doc in
+                db.collection("POSTS").document(postId).collection("RESPONSES").document(doc.documentID).delete()
+            }
+
+            // Delete VIEWS
+            let viewsSnapshot = try? await db.collection("POSTS").document(postId).collection("VIEWS").getDocuments()
+            viewsSnapshot?.documents.forEach { doc in
+                db.collection("POSTS").document(postId).collection("VIEWS").document(doc.documentID).delete()
+            }
+
+            print("🗑️ Deleted data for post \(postId)")
+        }
+
+        if shouldUpdateMyNextPosts {
+            // Get all users and update their myNextPosts
+            let usersSnapshot = try? await db.collection("USERS").getDocuments()
+            usersSnapshot?.documents.forEach { userDoc in
+                let userId = userDoc.documentID
+                Task {
+                    do {
+                        try await Firebase.db.collection("USERS").document(userId).updateData([
+                            "myNextPosts": postIds
+                        ])
+                        print("✅ Updated myNextPosts for user \(userId)")
+                    } catch {
+                        print("❌ Failed to update myNextPosts for user \(userId): \(error)")
+                    }
+                }
+            }
+        }
+    }
 }

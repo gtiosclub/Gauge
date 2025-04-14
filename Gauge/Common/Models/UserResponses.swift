@@ -36,10 +36,12 @@ class UserResponses {
     
     func addToUserCategories(categories: [String]) {
         for category in categories {
-            if let currentCount = userCategoryResponses[category] {
-                userCategoryResponses[category] = currentCount + 1
-            } else {
-                userCategoryResponses[category] = 1
+            if currentUserCategories.contains(category) {
+                if let currentCount = userCategoryResponses[category] {
+                    userCategoryResponses[category] = currentCount + 1
+                } else {
+                    userCategoryResponses[category] = 1
+                }
             }
         }
     }
@@ -56,10 +58,12 @@ class UserResponses {
     
     func removeFromUserCategories(categories: [String]) {
         for category in categories {
-            if let currentCount = userCategoryResponses[category] {
-                userCategoryResponses[category] = currentCount - 1
-            } else {
-                userCategoryResponses[category] = -1
+            if currentUserCategories.contains(category) {
+                if let currentCount = userCategoryResponses[category] {
+                    userCategoryResponses[category] = currentCount - 1
+                } else {
+                    userCategoryResponses[category] = -1
+                }
             }
         }
     }

@@ -55,7 +55,7 @@ struct CommentSheetView: View {
             }
 
             Button {
-                postVM.addComment(
+                let commentId = postVM.addComment(
                     postId: post.postId,
                     commentType: .text,
                     userId: userVM.user.userId,
@@ -63,7 +63,8 @@ struct CommentSheetView: View {
                 )
                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                 UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
-
+                userVM.user.myComments.append(post.postId)
+                
                 commentText = ""
                 showAddComment = false
             } label: {

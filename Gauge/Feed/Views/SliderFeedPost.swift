@@ -56,8 +56,9 @@ struct SliderFeedPost: View {
                 .multilineTextAlignment(.leading)
                 .foregroundStyle(.black)
                 .padding(.horizontal)
+                .frame(height: 100)
 
-            Spacer(minLength: 150.0)
+            Spacer(minLength: 50.0)
 
             OptionSliderView(
                 currentIndex: $optionSelected, dragAmount: $dragAmount
