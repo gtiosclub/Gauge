@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-struct SwipeableTakeSheetView: View {
+struct SwipeableSheetView: View {
     let post: BinaryPost
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
