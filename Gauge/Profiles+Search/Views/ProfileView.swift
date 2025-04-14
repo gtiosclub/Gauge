@@ -184,51 +184,52 @@ struct ProfileView: View {
                     .environmentObject(authVM)
             }
             .sheet(isPresented: $showingTakeTimeResults) {
-                TakeTimeResultsView(myResponses: userVM.user.myTakeTime)
+                TakeTimeResultsView(user: userVM.user, myResponses: userVM.user.myTakeTime)
             }
         }
     }
     
-    struct TakeTimeResultsView: View {
-        let myResponses: [String: Int]
-        @State private var takes: [Take] = []
+//    struct TakeTimeResultsView: View {
+//        let myResponses: [String: Int]
+//        @State private var takes: [Take] = []
+//        
+//        var body: some View {
+//            List {
+//                ForEach(myResponses.sorted(by: { $0.key < $1.key }), id: \.key) { id, selectedOption in
+//                    if let take = takes.first(where: { $0.id == id }) {
+//                        VStack(alignment: .leading) {
+//                            Text(take.question)
+//                                .font(.headline)
+//                            Text("Your choice: \(selectedOption == 1 ? take.responseOption1 : take.responseOption2)")
+//                                .font(.subheadline)
+//                                .foregroundColor(.blue)
+//                        }
+//                        .padding(.vertical, 6)
+//                        TakeCard(username: user.username, profilePhotoURL: user.profilePhoto, timeAgo: "", tags: take.topic, content: take.question, votes: 0, comments: 0, views: 0)
+//                    }
+//                }
+//            }
+//            .navigationTitle("My TakeTime Results")
+//            .onAppear {
+//                fetchTakes()
+//            }
+//        }
         
-        var body: some View {
-            List {
-                ForEach(myResponses.sorted(by: { $0.key < $1.key }), id: \.key) { id, selectedOption in
-                    if let take = takes.first(where: { $0.id == id }) {
-                        VStack(alignment: .leading) {
-                            Text(take.question)
-                                .font(.headline)
-                            Text("Your choice: \(selectedOption == 1 ? take.responseOption1 : take.responseOption2)")
-                                .font(.subheadline)
-                                .foregroundColor(.blue)
-                        }
-                        .padding(.vertical, 6)
-                    }
-                }
-            }
-            .navigationTitle("My TakeTime Results")
-            .onAppear {
-                fetchTakes()
-            }
-        }
-        
-        func fetchTakes() {
-            let ids = Array(myResponses.keys)
-            
-            for id in ids {
-                Firebase.db.collection("TakeTime").document(id).getDocument { document, error in
-                    if let document = document,
-                       let take = try? document.data(as: Take.self) {
-                        DispatchQueue.main.async {
-                            takes.append(take)
-                        }
-                    }
-                }
-            }
-        }
-    }
+//        func fetchTakes() {
+//            let ids = Array(myResponses.keys)
+//            
+//            for id in ids {
+//                Firebase.db.collection("TakeTime").document(id).getDocument { document, error in
+//                    if let document = document,
+//                       let take = try? document.data(as: Take.self) {
+//                        DispatchQueue.main.async {
+//                            takes.append(take)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
     
     struct ProfileTabButton: View {
         let title: String

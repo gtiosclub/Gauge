@@ -211,7 +211,7 @@ struct ProfileVisitView: View {
                 }
             }
             .sheet(isPresented: $showingTakeTimeResults) {
-                TakeTimeResultsView(myResponses: user.myTakeTime)
+                TakeTimeResultsView(user: user, myResponses: user.myTakeTime)
             }
         }
     }

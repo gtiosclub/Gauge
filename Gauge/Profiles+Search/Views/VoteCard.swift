@@ -14,9 +14,9 @@ struct VoteCard: View {
     var tags: [String]
     var vote: String // "Yes" or "No"
     var content: String
-    var comments: Int
-    var views: Int
-    var votes: Int
+    var comments: Int?
+    var views: Int?
+    var votes: Int?
 
     var voteColor: Color {
         let greenResponses = ["yes", "love", "cool"]
@@ -77,21 +77,26 @@ struct VoteCard: View {
 
             // Stats
             HStack {
-                Text("\(votes) votes")
-                    .foregroundColor(.gray)
-                    .font(.subheadline)
+                if ((votes) != nil) {
+                    Text("\(votes ?? 0) votes")
+                        .foregroundColor(.gray)
+                        .font(.subheadline)
+                }
 
                 Spacer()
 
                 HStack(spacing: 16) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "bubble.left")
-                        Text("\(comments)")
+                    if ((comments) != nil) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "bubble.left")
+                            Text("\(comments ?? 0)")
+                        }
                     }
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "eye")
-                        Text("\(views)")
+                    if ((views) != nil) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "eye")
+                            Text("\(views ?? 0)")
+                        }
                     }
 
                     Image(systemName: "bookmark")
