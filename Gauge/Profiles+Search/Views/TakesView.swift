@@ -165,26 +165,30 @@ struct TakesView: View {
                 Text(content)
                     .font(.system(size: 16))
                     .foregroundColor(.black)
-                HStack(spacing: 16) {
+                HStack {
                     Text("\(votes) votes")
-                        .font(.subheadline)
                         .foregroundColor(.gray)
-                    HStack(spacing: 4) {
-                        Image(systemName: "message")
-                        Text("\(comments)")
-                    }
-                    HStack(spacing: 4) {
-                        Image(systemName: "eye")
-                        Text("\(views)")
-                    }
+                        .font(.subheadline)
+
                     Spacer()
+
                     HStack(spacing: 16) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "bubble.left")
+                            Text("\(comments)")
+                        }
+
+                        HStack(spacing: 4) {
+                            Image(systemName: "eye")
+                            Text("\(views)")
+                        }
+
                         Image(systemName: "bookmark")
                         Image(systemName: "square.and.arrow.up")
                     }
+                    .foregroundColor(.gray)
+                    .font(.subheadline)
                 }
-                .font(.subheadline)
-                .foregroundColor(.gray)
             }
             .padding()
             .background(Color.white)

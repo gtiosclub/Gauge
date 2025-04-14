@@ -8,97 +8,102 @@
 import SwiftUI
 
 struct VoteCard: View {
+    var profilePhotoURL: String
     var username: String
     var timeAgo: String
     var tags: [String]
-    var vote: String
+    var vote: String // "Yes" or "No"
     var content: String
     var comments: Int
     var views: Int
-    var votes: Int // Number of votes
+    var votes: Int
+
+    var voteColor: Color {
+        let greenResponses = ["yes", "love", "cool"]
+        return greenResponses.contains(vote.lowercased()) ? .green : .red
+    }
+
+    var voteText: String {
+        "voted \(vote.lowercased())"
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Username and Time Ago
-            HStack {
+        VStack(alignment: .leading, spacing: 12) {
+            // voted by user
+            HStack(spacing: 6) {
+                AsyncImage(url: URL(string: profilePhotoURL)) { image in
+                    image.resizable()
+                } placeholder: {
+                    Circle().fill(Color(.systemGray3))
+                }
+                .frame(width: 28, height: 28)
+                .clipShape(Circle())
+
                 Text(username)
-                    .font(.headline)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+
+                Text("·")
+                    .foregroundColor(.gray)
+
+                Text(voteText)
+                    .foregroundColor(voteColor)
+                    .font(.subheadline)
+
                 Spacer()
+
                 Text(timeAgo)
-                    .font(.caption)
+                    .font(.footnote)
                     .foregroundColor(.gray)
             }
 
             // Tags
-            HStack {
+            HStack(spacing: 6) {
                 ForEach(tags, id: \.self) { tag in
-                    Text("#\(tag)")
+                    Text(tag)
                         .font(.caption)
-                        .foregroundColor(.blue)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color.gray.opacity(0.15))
+                        .foregroundColor(.black)
+                        .cornerRadius(20)
                 }
             }
 
             // Content
             Text(content)
                 .font(.body)
-                .padding(.vertical, 8)
+                .fixedSize(horizontal: false, vertical: true)
 
-            // Comments, Views, Votes, and Actions (Save, Share)
+            // Stats
             HStack {
-                // Comments
-                HStack {
-                    Image(systemName: "message.fill")
-                        .foregroundColor(.gray)
-                    Text("\(comments)")
-                        .font(.caption)
-                }
-
-                // Views
-                HStack {
-                    Image(systemName: "eye.fill")
-                        .foregroundColor(.gray)
-                    Text("\(views)")
-                        .font(.caption)
-                }
+                Text("\(votes) votes")
+                    .foregroundColor(.gray)
+                    .font(.subheadline)
 
                 Spacer()
 
-                // Votes
-                Text("\(votes) Votes")
-                    .font(.caption)
-                    .padding(8)
-                    .background(Color.white)
-                    .foregroundColor(.black)
-                    .cornerRadius(8)
+                HStack(spacing: 16) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "bubble.left")
+                        Text("\(comments)")
+                    }
 
-                // Vote (Yes/No)
-                Text(vote)
-                    .font(.caption)
-                    .padding(8)
-                    .background(vote == "Yes" ? Color.green : Color.red)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                    HStack(spacing: 4) {
+                        Image(systemName: "eye")
+                        Text("\(views)")
+                    }
 
-                // Save Icon
-                Button(action: {
-                    // Action for saving
-                }) {
-                    Image(systemName: "bookmark.fill")
-                        .foregroundColor(.gray)
+                    Image(systemName: "bookmark")
+                    Image(systemName: "square.and.arrow.up")
                 }
-
-                // Share Icon
-                Button(action: {
-                    // Action for sharing
-                }) {
-                    Image(systemName: "square.and.arrow.up.fill")
-                        .foregroundColor(.gray)
-                }
+                .foregroundColor(.gray)
+                .font(.subheadline)
             }
         }
         .padding()
         .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 2)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
     }
 }
