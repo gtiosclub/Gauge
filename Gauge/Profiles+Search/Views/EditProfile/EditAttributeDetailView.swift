@@ -1,3 +1,12 @@
+//
+//  EditAttributeDetailView.swift
+//  Gauge
+//
+//  Created by Datta Kansal on 4/14/25.
+//
+
+import SwiftUI
+
 struct EditAttributeDetailView: View {
     let attributeKey: String
     let attributeTitle: String

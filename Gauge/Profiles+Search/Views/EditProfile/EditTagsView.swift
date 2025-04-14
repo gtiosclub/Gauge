@@ -1,3 +1,12 @@
+//
+//  EditTagsView.swift
+//  Gauge
+//
+//  Created by Datta Kansal on 4/14/25.
+//
+
+import SwiftUI
+
 struct EditTagsView: View {
     @ObservedObject var profileViewModel: ProfileViewModel
     // An array of tuples with the attribute key and the title.

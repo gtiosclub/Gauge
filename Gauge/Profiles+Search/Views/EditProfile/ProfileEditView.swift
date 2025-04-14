@@ -5,24 +5,26 @@
 ////  Created by Sam Orouji on 2/25/25.
 ////
 ////
-
 import SwiftUI
 
 struct ProfileEditView: View {
     @StateObject var profileViewModel = ProfileViewModel()
-    @EnvironmentObject var userVM: UserFirebase  // Shared environment object for user data
-    @Environment(\.dismiss) var dismiss          // To dismiss the view
+    @EnvironmentObject var userVM: UserFirebase  // Shared user data
+    @Environment(\.dismiss) var dismiss
     
-    // Local states
+    // Local states for fields on the main screen:
     @State private var username: String = ""
-    @State private var showingPhotoOptions = false
+    @State private var pronouns: String = ""
+    @State private var bio: String = ""
+    
+    // Profile picture states:
     @State private var showingImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var profileImage: UIImage?
     
     var body: some View {
         VStack {
-            // Profile Image and Photo Options
+            // Profile picture section.
             ZStack {
                 if let profileImage = profileImage {
                     Image(uiImage: profileImage)
@@ -38,7 +40,7 @@ struct ProfileEditView: View {
             }
             .overlay(
                 Button {
-                    showingPhotoOptions = true
+                    showingImagePicker = true
                 } label: {
                     ZStack {
                         Circle()
@@ -52,24 +54,10 @@ struct ProfileEditView: View {
                 .padding(8),
                 alignment: .bottomTrailing
             )
-            .confirmationDialog(
-                "Do you want to change your profile picture?",
-                isPresented: $showingPhotoOptions,
-                titleVisibility: .visible
-            ) {
-                Button("Choose from library") {
-                    showingImagePicker = true
-                }
-                Button("Remove current picture", role: .destructive) {
-                    profileImage = nil
-                    selectedImage = nil
-                }
-                Button("Cancel", role: .cancel) { }
-            }
             .sheet(isPresented: $showingImagePicker) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: .photoLibrary)
             }
-            .onChange(of: selectedImage) { oldImage, newImage in
+            .onChange(of: selectedImage) { newImage in
                 if let newImage = newImage {
                     profileImage = newImage
                 }
@@ -77,81 +65,55 @@ struct ProfileEditView: View {
             
             Spacer().frame(height: 50)
             
-            // Form Content
+            // Main form fields.
             VStack(alignment: .leading, spacing: 10) {
-                // Username Field
-                HStack(spacing: 20) {
-                    Text("Username")
-                        .frame(width: 80, alignment: .leading)
-                    TextField("new username", text: $username)
+                HStack {
+                    Text("Username").frame(width: 80, alignment: .leading)
+                    TextField("Enter username", text: $username)
                         .textFieldStyle(PlainTextFieldStyle())
-                        .foregroundColor(.primary)
                 }
-                .padding(.leading, 20)
-                .padding(.vertical, 5)
                 Divider()
-                // Pronouns Field
-                HStack(spacing: 20) {
-                    Text("Pronouns")
-                        .frame(width: 80, alignment: .leading)
-                    TextField("Pronouns", text: $username)
+                HStack {
+                    Text("Pronouns").frame(width: 80, alignment: .leading)
+                    TextField("Enter pronouns", text: $pronouns)
                         .textFieldStyle(PlainTextFieldStyle())
-                        .foregroundColor(.primary)
                 }
-                .padding(.leading, 20)
-                .padding(.vertical, 5)
                 Divider()
-                // Bio Field
-                HStack(spacing: 20) {
-                    Text("Bio")
-                        .frame(width: 80, alignment: .leading)
-                    TextField("a short bio that describes the user", text: $username)
+                HStack {
+                    Text("Bio").frame(width: 80, alignment: .leading)
+                    TextField("Enter your bio", text: $bio)
                         .textFieldStyle(PlainTextFieldStyle())
-                        .foregroundColor(.primary)
                 }
-                .padding(.leading, 20)
-                .padding(.vertical, 5)
                 Divider()
-                // User Tags NavigationLink
+            }
+            .padding(.horizontal, 20)
+            
+            // Navigation link to EditTagsView.
+            NavigationLink(destination: EditTagsView(profileViewModel: profileViewModel)) {
                 HStack {
                     Text("User Tags")
                     Spacer()
-                    NavigationLink(destination: Text("User Tags Screen")) {
-                        HStack {
-                            Text("4")
-                            Image(systemName: "chevron.right")
-                        }
-                    }
+                    Image(systemName: "chevron.right")
                 }
                 .padding(.horizontal, 20)
-                .padding(.vertical, 5)
-                Divider()
-                // Badges NavigationLink
-                HStack {
-                    Text("Badges")
-                    Spacer()
-                    NavigationLink(destination: Text("Badges Screen")) {
-                        HStack {
-                            Text("5")
-                            Image(systemName: "chevron.right")
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 5)
+                .padding(.vertical, 10)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer()
-            
-            
         }
-        .task {
-            profileImage = await profileViewModel.getProfilePicture(userID: userVM.user.userId)
+        .onAppear {
+            // Prepopulate fields from current user data.
+             let currentUser = userVM.user
+                username = currentUser.username
+                pronouns = currentUser.attributes["pronouns"] ?? ""
+                bio = currentUser.attributes["bio"] ?? ""
+                Task {
+                    profileImage = await profileViewModel.getProfilePicture(userID: currentUser.userId)
+                }
         }
-
         .navigationBarBackButtonHidden(true)
         .toolbar {
+            // Cancel button.
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
                     dismiss()
@@ -162,18 +124,19 @@ struct ProfileEditView: View {
                     }
                 }
             }
-
+            // Save button.
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Save") {
                     Task {
-                        if profileImage == nil {
-                            let _ = await profileViewModel.removeProfilePicture(userID: userVM.user.userId)
-                        } else if let newImage = selectedImage {
-                            if let newPhotoURL = await profileViewModel.updateProfilePicture(userID: userVM.user.userId, image: newImage) {
-                                userVM.user.profilePhoto = newPhotoURL
-                            }
+                        let userID = userVM.user.userId
+                        let success = await profileViewModel.updateProfilePhotoAndAttributes(userID: userID,
+                                                                                            username: username,
+                                                                                            bio: bio,
+                                                                                            pronouns: pronouns,
+                                                                                            profileImage: selectedImage)
+                        if success {
+                            dismiss()
                         }
-                        dismiss()
                     }
                 }
             }
@@ -185,8 +148,6 @@ struct ProfileEditView: View {
     ProfileEditView()
         .environmentObject(UserFirebase())
 }
-
-
 
 
 struct ImagePicker: UIViewControllerRepresentable {
