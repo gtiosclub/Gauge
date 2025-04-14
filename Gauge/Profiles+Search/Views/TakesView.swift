@@ -53,12 +53,11 @@ struct TakesView: View {
     }
     
     func fetchMyPosts() {
-        let db = Firestore.firestore()
         myPosts = []
         let postIds = userVM.user.myPosts
 
         for id in postIds {
-            db.collection("POSTS").document(id).getDocument(completion: { doc, error in
+            Firebase.db.collection("POSTS").document(id).getDocument(completion: { doc, error in
                 guard let data = doc?.data(), error == nil else {
                     print("❌ Failed to fetch post \(id): \(error?.localizedDescription ?? "Unknown")")
                     return
@@ -84,7 +83,7 @@ struct TakesView: View {
 
                     // Fetch responses
                     group.enter()
-                    db.collection("POSTS").document(id).collection("RESPONSES").getDocuments { snapshot, error in
+                    Firebase.db.collection("POSTS").document(id).collection("RESPONSES").getDocuments { snapshot, error in
                         if let snapshot = snapshot {
                             let responses: [Response] = snapshot.documents.compactMap { doc in
                                 let d = doc.data()
@@ -101,7 +100,7 @@ struct TakesView: View {
 
                     // Fetch comments
                     group.enter()
-                    db.collection("POSTS").document(id).collection("COMMENTS").getDocuments { snapshot, error in
+                    Firebase.db.collection("POSTS").document(id).collection("COMMENTS").getDocuments { snapshot, error in
                         if let snapshot = snapshot {
                             let comments: [Comment] = snapshot.documents.compactMap { doc in
                                 let d = doc.data()
@@ -125,7 +124,7 @@ struct TakesView: View {
 
                     // Fetch views
                     group.enter()
-                    db.collection("POSTS").document(id).collection("VIEWS").getDocuments { snapshot, error in
+                    Firebase.db.collection("POSTS").document(id).collection("VIEWS").getDocuments { snapshot, error in
                         if let snapshot = snapshot {
                             post.viewCounter = snapshot.documents.count
                         }

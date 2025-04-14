@@ -181,6 +181,13 @@ struct ProfileView: View {
                         StatisticsView()
                             .environmentObject(userVM)
                             .environmentObject(postVM)
+                    } else if selectedTab == "Comments" {
+                        CommentsTabView()
+                            .environmentObject(userVM)
+                    } else if selectedTab == "Favorites" {
+                        FavoritesTabView()
+                            .environmentObject(userVM)
+                            .environmentObject(postVM)
                     } else {
                         VStack {
                             Text("\(selectedTab) Content Here")
@@ -229,11 +236,10 @@ struct TakeTimeResultsView: View {
     }
 
     func fetchTakes() {
-        let db = Firestore.firestore()
         let ids = Array(myResponses.keys)
 
         for id in ids {
-            db.collection("TakeTime").document(id).getDocument { document, error in
+            Firebase.db.collection("TakeTime").document(id).getDocument { document, error in
                 if let document = document,
                    let take = try? document.data(as: Take.self) {
                     DispatchQueue.main.async {

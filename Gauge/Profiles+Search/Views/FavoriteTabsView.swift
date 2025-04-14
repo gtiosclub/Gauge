@@ -1,56 +1,46 @@
 //
-//  VotesTabView.swift
+//  FavoriteTabsView.swift
 //  Gauge
 //
 //  Created by amber verma on 4/14/25.
 //
 
 import SwiftUI
-import Firebase
+import FirebaseFirestore
 
-struct VotesTabView: View {
-    @EnvironmentObject var postVM: PostFirebase
+struct FavoritesTabView: View {
     @EnvironmentObject var userVM: UserFirebase
-    @State private var respondedPosts: [BinaryPost] = []
+    @EnvironmentObject var postVM: PostFirebase
+    @State private var favoritedPosts: [BinaryPost] = []
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(respondedPosts, id: \.postId) { post in
-                    if let userResponse = post.responses.first(where: { $0.userId == userVM.user.userId }) {
-                        VoteCard(
-                            profilePhotoURL: userVM.user.profilePhoto,
-                            username: userVM.user.username,
-                            timeAgo: DateConverter.timeAgo(from: post.postDateAndTime),
-                            tags: post.categories.map { $0.rawValue },
-                            vote: userResponse.responseOption,
-                            content: post.question,
-                            comments: post.comments.count,
-                            views: post.viewCounter,
-                            votes: post.calculateResponses().reduce(0, +)
-                        )
-                    }
+                ForEach(favoritedPosts, id: \.postId) { post in
+                    FavoriteCard(post: post, onUnfavorite: {
+                        favoritedPosts.removeAll { $0.postId == post.postId }
+                    })
                 }
             }
             .padding()
         }
         .onAppear {
-            fetchRespondedPosts()
+            fetchFavorites()
         }
     }
 
-    func fetchRespondedPosts() {
-        let ids = userVM.user.myResponses
-        respondedPosts = []
+    private func fetchFavorites() {
+        Task {
+            do {
+                let favoriteIDs = try await userVM.getUserFavorites(userId: userVM.user.userId)
+                favoritedPosts = []
 
-        for id in ids {
-            Firebase.db.collection("POSTS").document(id).getDocument { doc, error in
-                guard let data = doc?.data(), error == nil else {
-                    print("Failed to fetch post \(id): \(error?.localizedDescription ?? "Unknown")")
-                    return
-                }
+                for id in favoriteIDs {
+                    let doc = try await Firebase.db.collection("POSTS").document(id).getDocument()
+                    guard let data = doc.data(),
+                          let type = data["type"] as? String,
+                          type == PostType.BinaryPost.rawValue else { continue }
 
-                if let type = data["type"] as? String, type == PostType.BinaryPost.rawValue {
                     var post = BinaryPost(
                         postId: id,
                         userId: data["userId"] as? String ?? "",
@@ -69,25 +59,14 @@ struct VotesTabView: View {
                     post.username = data["username"] as? String ?? "Unknown"
                     post.profilePhoto = data["profilePhoto"] as? String ?? ""
 
-                    let group = DispatchGroup()
-
-                    // Responses
-                    group.enter()
-                    Firebase.db.collection("POSTS").document(id).collection("RESPONSES").getDocuments { snapshot, _ in
-                        if let docs = snapshot?.documents {
-                            post.responses = docs.map { d in
-                                let d = d.data()
-                                return Response(
-                                    responseId: d["responseId"] as? String ?? UUID().uuidString,
-                                    userId: d["userId"] as? String ?? "",
-                                    responseOption: d["responseOption"] as? String ?? ""
-                                )
-                            }
-                        }
-                        group.leave()
+                    try await userVM.populateUsernameAndProfilePhoto(userId: post.userId)
+                    if let patch = userVM.useridsToPhotosAndUsernames[post.userId] {
+                        post.username = patch.username
+                        post.profilePhoto = patch.photoURL
                     }
 
-                    // Comments
+                    let group = DispatchGroup()
+
                     group.enter()
                     Firebase.db.collection("POSTS").document(id).collection("COMMENTS").getDocuments { snapshot, _ in
                         if let docs = snapshot?.documents {
@@ -110,7 +89,6 @@ struct VotesTabView: View {
                         group.leave()
                     }
 
-                    // Views
                     group.enter()
                     Firebase.db.collection("POSTS").document(id).collection("VIEWS").getDocuments { snapshot, _ in
                         post.viewCounter = snapshot?.documents.count ?? 0
@@ -118,12 +96,13 @@ struct VotesTabView: View {
                     }
 
                     group.notify(queue: .main) {
-                        respondedPosts.append(post)
-                        respondedPosts.sort { $0.postDateAndTime > $1.postDateAndTime }
+                        favoritedPosts.append(post)
+                        favoritedPosts.sort { $0.postDateAndTime > $1.postDateAndTime }
                     }
                 }
+            } catch {
+                print("❌ Failed to fetch favorites: \(error.localizedDescription)")
             }
         }
     }
 }
-
