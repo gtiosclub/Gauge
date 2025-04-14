@@ -167,13 +167,6 @@ class UserFirebase: ObservableObject {
         guard !user.myResponses.contains(postId) else { return }
 
         user.myResponses.append(postId)
-        Firebase.db.collection("USERS").document(user.userId).updateData([
-            "myResponses": user.myResponses
-        ]) { error in
-            if let error = error {
-                print("Failed to update myResponses: \(error.localizedDescription)")
-            }
-        }
     }
     
     func getUserPosts(userId: String, setCurrentUserData: Bool = false) async throws -> [String] {
@@ -224,6 +217,7 @@ class UserFirebase: ObservableObject {
             DispatchQueue.main.async {
                 self.useridsToPhotosAndUsernames[userId] = (photoURL: "", username: userId)
             }
+            objectWillChange.send()
             return
         }
         
