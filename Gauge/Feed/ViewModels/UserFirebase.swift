@@ -163,6 +163,19 @@ class UserFirebase: ObservableObject {
         }
     }
     
+    func addResponseToMyResponses(postId: String) {
+        guard !user.myResponses.contains(postId) else { return }
+
+        user.myResponses.append(postId)
+        Firebase.db.collection("USERS").document(user.userId).updateData([
+            "myResponses": user.myResponses
+        ]) { error in
+            if let error = error {
+                print("Failed to update myResponses: \(error.localizedDescription)")
+            }
+        }
+    }
+    
     func getUserPosts(userId: String, setCurrentUserData: Bool = false) async throws -> [String] {
         let snapshot = try await Firebase.db.collection("POSTS")
             .whereField("userId", isEqualTo: userId)
