@@ -339,6 +339,20 @@ class UserFirebase: ObservableObject {
             }
         }
     }
+    
+    
+    func setUserTopics(userId: String, topics: [String]) {
+        print("The function is being called")
+        Firebase.db.collection("USERS").document(userId).updateData([
+            "myTopics": topics
+        ]) { error in
+            if let error = error {
+                print("Error settting user topics: \(error)")
+            } else {
+                print("successfully set the user topics")
+            }
+        }
+    }
 
     func addUserPostSearch(search: String) {
         // Update user var
