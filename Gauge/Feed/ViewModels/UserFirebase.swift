@@ -171,10 +171,10 @@ class UserFirebase: ObservableObject {
         var postIds: [String] = []
         
         for document in snapshot.documents {
-            print("processing doc")
+//            print("processing doc")
             postIds.append(document.documentID)
         }
-        
+
         if setCurrentUserData {
             user.myPosts = postIds
         }

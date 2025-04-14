@@ -475,10 +475,12 @@ class PostFirebase: ObservableObject {
         }
     }
   
-    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) async -> [String]  {
+    func createBinaryPost(userId: String, categories: [Category], question: String, responseOption1: String, responseOption2: String, sublabel1: String, sublabel2: String) async -> (String, [String]) {
         // Create post instance
+        let postId = UUID().uuidString
+        
         let post = BinaryPost(
-            postId: UUID().uuidString,
+            postId: postId,
             userId: userId,
             categories: categories,
             postDateAndTime: Date(),
@@ -523,14 +525,14 @@ class PostFirebase: ObservableObject {
                 print("added new post to POSTS with topics \(topics)")
             }
         }
-        return topics 
+        return (postId, topics)
     }
     
-    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> [String] {
-        
+    func createSliderPost(userId: String, categories: [Category], question: String, lowerBoundLabel: String, upperBoundLabel: String) async -> (String, [String]) {
+        let postId = UUID().uuidString
         // Create post instance
         let post = SliderPost(
-            postId: UUID().uuidString,
+            postId: postId,
             userId: userId,
             categories: categories,
             postDateAndTime: Date(),
@@ -569,7 +571,7 @@ class PostFirebase: ObservableObject {
                 print("added new slider post to POSTS")
             }
         }
-        return topics 
+        return (postId, topics)
     }
     
     func deletePost(postId: String){
@@ -679,7 +681,7 @@ class PostFirebase: ObservableObject {
         }
     }
     
-    func addComment(postId: String, commentType: CommentType, userId: String, content: String){
+    func addComment(postId: String, commentType: CommentType, userId: String, content: String) -> String {
         let commentId = UUID().uuidString
         let newCommentRef = Firebase.db.collection("POSTS")
             .document(postId).collection("COMMENTS").document(commentId)
@@ -700,6 +702,8 @@ class PostFirebase: ObservableObject {
                 print("added new comment to COMMENTS")
             }
         }
+        
+        return commentId
     }
     
     func getComments(postId: String, completion: @escaping ([Comment]) -> Void) {

@@ -190,11 +190,13 @@ struct PostCreationView: View {
                             if postType == .BinaryPost {
                                 let postTopics = await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, sublabel1: leftCaption, sublabel2: rightCaption)
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postCategories.map{$0.rawValue})
-                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics)
+                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics.1)
+                                userVM.user.myPosts.append(postTopics.0)
                             } else if postType == .SliderPost {
                                 let postTopics = await postVM.createSliderPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, lowerBoundLabel: slidingOptions[optionsSelectedIndex!].left, upperBoundLabel: slidingOptions[optionsSelectedIndex!].right)
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postCategories.map{$0.rawValue})
-                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics)
+                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics.1)
+                                userVM.user.myPosts.append(postTopics.0)
                             }
                             
                         }
