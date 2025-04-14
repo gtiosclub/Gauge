@@ -1062,6 +1062,7 @@ class PostFirebase: ObservableObject {
     func findNextPost(user: User) -> Bool {
         // load the next post in the feed
         if allQueriedPosts.isEmpty {
+            watchForCurrentFeedPostChanges()
             return false
         }
         
