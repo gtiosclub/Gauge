@@ -15,30 +15,8 @@ struct CommentCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // User Info
-            HStack(spacing: 6) {
-                AsyncImage(url: URL(string: comment.profilePhoto)) { image in
-                    image.resizable()
-                } placeholder: {
-                    Circle().fill(Color(.systemGray3))
-                }
-                .frame(width: 28, height: 28)
-                .clipShape(Circle())
-
-                Text(comment.username)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-
-                Text("·")
-                    .foregroundColor(.gray)
-
-                Text(DateConverter.timeAgo(from: comment.date))
-                    .font(.footnote)
-                    .foregroundColor(.gray)
-
-                Spacer()
-            }
-
+            ProfileUsernameDateView(dateTime: comment.date, userId: comment.userId)
+            
             // Content
             Text(comment.content)
                 .font(.body)

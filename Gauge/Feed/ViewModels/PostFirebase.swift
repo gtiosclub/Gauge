@@ -631,28 +631,10 @@ class PostFirebase: ObservableObject {
             } else {
                 print("Response added successfully")
                 // After successfully adding the response to the post, update the user's myResponses
-                self.updateUserResponses(postId: postId, userId: userId)
             }
         }
     }
 
-    func updateUserResponses(postId: String, userId: String) {
-        // Reference to the user's document
-        let userRef = Firebase.db.collection("USERS").document(userId)
-        
-        // Add the postId to the user's myResponses array
-        userRef.updateData([
-            "myResponses": FieldValue.arrayUnion([postId])
-        ]) { error in
-            if let error = error {
-                print("Error adding postId to user's responses: \(error)")
-            } else {
-                print("Successfully added postId to user's myResponses")
-            }
-        }
-    }
-
-    
     func removeFirstPostInNext(postId: String, userId: String) {
         let documentRef = Firebase.db.collection("USERS").document(userId)
         
@@ -662,7 +644,7 @@ class PostFirebase: ObservableObject {
             if let error = error {
                 print("Error removing first post from my next posts array: \(error)")
             } else {
-                print("Removed \(postId) from my next posts array: \(postId).")
+                print("Removed \(userId) from my next posts array: \(postId).")
             }
         }
     }
@@ -714,28 +696,10 @@ class PostFirebase: ObservableObject {
                 print("Error adding Comment: \(error)")
             } else {
                 print("added new comment to COMMENTS")
-                
-                self.updateUserComments(postId: postId, userId: userId)
             }
         }
         
         return commentId
-    }
-    
-    func updateUserComments(postId: String, userId: String) {
-        // Reference to the user's document
-        let userRef = Firebase.db.collection("USERS").document(userId)
-        
-        // Add the postId to the user's myComments array
-        userRef.updateData([
-            "myComments": FieldValue.arrayUnion([postId])
-        ]) { error in
-            if let error = error {
-                print("Error adding postId to user's myComments: \(error)")
-            } else {
-                print("Successfully added postId to user's myComments")
-            }
-        }
     }
     
     func getComments(postId: String, completion: @escaping ([Comment]) -> Void) {
