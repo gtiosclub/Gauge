@@ -84,8 +84,14 @@ struct CommentsView: View {
                     showAddComment = true
                 }) {
                     HStack {
-                        Image(systemName: "bubble.left")
-                            .font(.system(size: 12))
+                        ZStack {
+                            Image(systemName: "bubble.left")
+                                .font(.system(size: 12))
+                            
+                            Text("+")
+                                .font(.system(size: 10))
+                                .offset(x: 0, y: -1.5)
+                        }
                         
                         Text("\(post.comments.count)")
                             .font(.system(size: 12, weight: .medium))
@@ -105,16 +111,16 @@ struct CommentsView: View {
                     
                     if isBookmarked {
                         postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
+                        UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                        UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
                     } else {
                         postVM.removeUserFromFavoritedBy(postId: post.postId, userId: userVM.user.id)
+                        UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
+                        UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: post.topics)
                     }
-                    postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
-                    UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
-                    UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
-
                 }) {
                     Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                        .font(.system(size: 18))
+                        .font(.system(size: 12))
                         .foregroundColor(isBookmarked ? .blue : .black)
                         .padding(10)
                         .background(

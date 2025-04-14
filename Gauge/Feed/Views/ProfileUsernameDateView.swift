@@ -90,12 +90,27 @@ struct ProfilePictureView: View {
                     .scaledToFill()
             } placeholder: {
                 ProgressView() // Placeholder until the image is loaded
-                    .frame(width: max(30, 30))
+                    .frame(width: 30, height: 30)
                     .clipShape(Circle())
             }
             )
             .alignmentGuide(.leading) { d in d[.leading] }
         }
+    }
+}
+
+class ImageCache {
+    static let shared = ImageCache()
+    private init() {}
+
+    private let cache = NSCache<NSString, UIImage>()
+
+    func image(for url: String) -> UIImage? {
+        return cache.object(forKey: url as NSString)
+    }
+
+    func set(_ image: UIImage, for url: String) {
+        cache.setObject(image, forKey: url as NSString)
     }
 }
 

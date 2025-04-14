@@ -37,7 +37,9 @@ class PostFirebase: ObservableObject {
         // Setup listener for new index 0 subcollections
         let postRef = Firebase.db.collection("POSTS").document(feedPosts[0].postId)
         currentFeedPostCommentsListener = postRef.collection("COMMENTS").addSnapshotListener { snapshot, error in
-            guard let snapshot = snapshot else { return }
+            guard let snapshot = snapshot else {
+                print("comments do not exist")
+                return }
             
             DispatchQueue.main.async {
                 for diff in snapshot.documentChanges {
@@ -81,7 +83,7 @@ class PostFirebase: ObservableObject {
                         
                         self.feedPosts[0].comments.append(newComment)
                     }
-//                    self.objectWillChange.send()
+                    self.objectWillChange.send()
                     self.feedPosts = self.feedPosts
                 }
             }
@@ -635,6 +637,20 @@ class PostFirebase: ObservableObject {
         }
     }
     
+    func removeFirstPostInNext(postId: String, userId: String) {
+        let documentRef = Firebase.db.collection("USERS").document(userId)
+        
+        documentRef.updateData([
+            "myNextPosts": FieldValue.arrayRemove([postId])
+        ]) { error in
+            if let error = error {
+                print("Error removing first post from my next posts array: \(error)")
+            } else {
+                print("Removed \(postId) from my next posts array: \(postId).")
+            }
+        }
+    }
+    
     func addUserToFavoritedBy(postId: String, userId: String) {
         let documentRef = Firebase.db.collection("POSTS").document(postId)
         
@@ -1103,36 +1119,6 @@ class PostFirebase: ObservableObject {
 
     func getUserResponseForCurrentPost(userId: String) -> String? {
         let current_post = feedPosts[0]
-//        var post_responses : [String: Int] = [:]
-//        getResponses(postId: current_post.postId) { result in
-//            post_responses = result
-//            print("RESULTS")
-//            print(result)
-//        }
-        //        for user in post_responses {
-        //            if user.userId == userId {
-        //                return user.responseOption
-        //            }
-        //        }
-        //        return nil
-        
-        
-//        Firebase.db.collection("POSTS").document(current_post.postId).collection("RESPONSES").getDocuments { (snapshot, error) in
-//            if let error = error{
-//                print("Error getting Post data: \(error)")
-//            } else {
-//                for document in snapshot!.documents {
-//                    let data = document.data()
-//                    print("DATA")
-//                    print(data)
-//                    let data_user = data["userId"] as? String ?? "CANT GET USERID"
-////                    print("\(data_user) is a \(type(of: data_user))")
-//                    if String(data_user) == userId {
-//                        response = data["responseOption"] as? String ?? "CANT GET RESPONSE"
-//                    }
-//                }
-//            }
-//        
         var response: String = ""
         let responses = current_post.responses
         print("Responses within the method: \n\(responses)")
@@ -1145,5 +1131,47 @@ class PostFirebase: ObservableObject {
         return response
     }
 
+    func resetPostsForAllUsers(postIds: [String], shouldUpdateMyNextPosts: Bool) async {
+        let db = Firebase.db
 
+        for postId in postIds {
+            // Delete COMMENTS
+            let commentsSnapshot = try? await db.collection("POSTS").document(postId).collection("COMMENTS").getDocuments()
+            commentsSnapshot?.documents.forEach { doc in
+                db.collection("POSTS").document(postId).collection("COMMENTS").document(doc.documentID).delete()
+            }
+
+            // Delete RESPONSES
+            let responsesSnapshot = try? await db.collection("POSTS").document(postId).collection("RESPONSES").getDocuments()
+            responsesSnapshot?.documents.forEach { doc in
+                db.collection("POSTS").document(postId).collection("RESPONSES").document(doc.documentID).delete()
+            }
+
+            // Delete VIEWS
+            let viewsSnapshot = try? await db.collection("POSTS").document(postId).collection("VIEWS").getDocuments()
+            viewsSnapshot?.documents.forEach { doc in
+                db.collection("POSTS").document(postId).collection("VIEWS").document(doc.documentID).delete()
+            }
+
+            print("🗑️ Deleted data for post \(postId)")
+        }
+
+        if shouldUpdateMyNextPosts {
+            // Get all users and update their myNextPosts
+            let usersSnapshot = try? await db.collection("USERS").getDocuments()
+            usersSnapshot?.documents.forEach { userDoc in
+                let userId = userDoc.documentID
+                Task {
+                    do {
+                        try await Firebase.db.collection("USERS").document(userId).updateData([
+                            "myNextPosts": postIds
+                        ])
+                        print("✅ Updated myNextPosts for user \(userId)")
+                    } catch {
+                        print("❌ Failed to update myNextPosts for user \(userId): \(error)")
+                    }
+                }
+            }
+        }
+    }
 }
