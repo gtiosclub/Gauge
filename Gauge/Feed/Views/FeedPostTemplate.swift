@@ -21,12 +21,24 @@ struct FeedPostWrapperView: View {
                 optionSelected: $optionSelected,
                 skipping: $skipping
             )
+            .onAppear {
+                optionSelected = 0
+            }
+            .onChange(of: binaryPost.postId) { _, _ in
+                optionSelected = 0
+            }
         } else if let sliderPost = post as? SliderPost {
             SliderFeedPost(
                 post: sliderPost,
                 optionSelected: $optionSelected,
                 dragAmount: $dragAmount
             )
+            .onAppear {
+                optionSelected = 3
+            }
+            .onChange(of: sliderPost.postId) { _, _ in
+                optionSelected = 3
+            }
         } else {
             Text("Unsupported post type")
         }

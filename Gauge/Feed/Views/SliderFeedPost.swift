@@ -56,9 +56,9 @@ struct SliderFeedPost: View {
                 .multilineTextAlignment(.leading)
                 .foregroundStyle(.black)
                 .padding(.horizontal)
-                .frame(height: 100)
+                .frame(height: 150)
 
-            Spacer(minLength: 50.0)
+            Spacer(minLength: 0.0)
 
             OptionSliderView(
                 currentIndex: $optionSelected, dragAmount: $dragAmount
@@ -132,9 +132,9 @@ struct SliderFeedPost: View {
         }
         .frame(width: UIScreen.main.bounds.width)
         .gradientBorder(borderWidth: 40, color: optionSelected < 3 ? .darkRed : .darkGreen, cornerRadius: 20, opacity: computedOpacity)
-        .onAppear {
-            optionSelected = 3
-        }
+//        .onAppear {
+//            optionSelected = 3
+//        }
     }
 }
 
