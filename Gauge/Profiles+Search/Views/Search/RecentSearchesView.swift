@@ -7,86 +7,118 @@
 import SwiftUI
 
 struct RecentSearchesView: View {
+    @EnvironmentObject var userVM: UserFirebase
     @FocusState.Binding var isSearchFieldFocused: Bool
     @Binding var searchText: String
     @Binding var selectedTab: String
     
-    @State private var recentTopics = ["SwiftUI", "Firebase", "iOS", "Combine", "Xcode"]
-    @State private var recentUsers = ["Datta", "Amber", "Austin", "Akshat", "Shreeya"]
+    @State private var isUpdating: Bool = false
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Recent")
-                .font(.headline)
-                .padding(.leading)
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    if selectedTab == "Topics" {
-                        ForEach(Array(recentTopics.enumerated()), id: \.element) { index, topic in
+        ZStack {
+            VStack(alignment: .leading) {
+                Text("Recent")
+                    .font(.headline)
+                    .padding(.leading)
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        let recentSearches: [String] = {
+                            if selectedTab == "Topics" {
+                                return Array(userVM.user.myPostSearches.prefix(5))
+                            } else {
+                                return Array(userVM.user.myProfileSearches.prefix(5))
+                            }
+                        }()
+                        
+                        ForEach(Array(recentSearches.enumerated()), id: \.element) { index, search in
                             HStack {
-                                Image(systemName: "number")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.black)
-                                    .padding(8)
-                                    .background(Color(.systemGray5))
-                                    .clipShape(Circle())
+                                if selectedTab == "Topics" {
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.black)
+                                        .padding(8)
+                                        .background(Color(.systemGray5))
+                                        .clipShape(Circle())
+                                } else {
+                                    Image(systemName: "person")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.black)
+                                        .padding(8)
+                                        .background(Color(.systemGray5))
+                                        .clipShape(Circle())
+                                }
                                 
-                                Text(topic)
+                                Text(search)
                                     .padding(5)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(Color.white)
                                     .cornerRadius(10)
                                 
-                                Button(action: {
-                                    recentTopics.remove(at: index)
-                                }) {
+                                Button {
+                                    Task {
+                                        isUpdating = true
+                                        do {
+                                            if selectedTab == "Topics" {
+                                                try await userVM.deleteRecentPostSearch(search)
+                                            } else {
+                                                try await userVM.deleteRecentProfileSearch(search)
+                                            }
+                                        } catch {
+                                            print("Error deleting recent search: \(error.localizedDescription)")
+                                        }
+                                        isUpdating = false
+                                    }
+                                } label: {
                                     Image(systemName: "xmark")
                                         .font(.system(size: 12, weight: .regular))
                                         .foregroundColor(Color(.systemGray))
                                         .padding()
                                 }
                             }
-                        }
-                    } else {
-                        ForEach(Array(recentUsers.enumerated()), id: \.element) { index, user in
-                            HStack {
-                                Circle()
-                                    .fill(Color(.systemGray))
-                                    .frame(width: 40, height: 40)
-                                
-                                Text(user)
-                                    .padding(5)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color.white)
-                                    .cornerRadius(10)
-                                
-                                Button(action: {
-                                    recentUsers.remove(at: index)
-                                }) {
-                                    Image(systemName: "xmark")
-                                        .font(.system(size: 12, weight: .regular))
-                                        .foregroundColor(Color(.systemGray))
-                                        .padding()
+                            .onTapGesture {
+                                searchText = search
+                                Task {
+                                    isUpdating = true
+                                    do {
+                                        if selectedTab == "Topics" {
+                                            try await userVM.updateRecentPostSearch(with: search)
+                                        } else {
+                                            try await userVM.updateRecentProfileSearch(with: search)
+                                        }
+                                    } catch {
+                                        print("Error updating recent search: \(error.localizedDescription)")
+                                    }
+                                    isUpdating = false
                                 }
                             }
                         }
                     }
+                    .padding()
                 }
+                
+                HStack {
+                    Picker(selection: $selectedTab, label: Text("")) {
+                        ForEach(["Topics", "Users"], id: \.self) { tab in
+                            Text(tab).tag(tab)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .frame(width: 300)
+                }
+                .frame(maxWidth: .infinity)
                 .padding()
             }
             
-            HStack {
-                Picker(selection: $selectedTab, label: Text("")) {
-                    ForEach(["Topics", "Users"], id: \.self) { tab in
-                        Text(tab).tag(tab)
-                    }
+            if isUpdating {
+                ZStack {
+                    Color.black.opacity(0.25).ignoresSafeArea()
+                    ProgressView("Updating...")
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
                 }
-                .pickerStyle(SegmentedPickerStyle())
-                .frame(width: 300)
             }
-            .frame(maxWidth: .infinity)
-            .padding()
         }
     }
 }

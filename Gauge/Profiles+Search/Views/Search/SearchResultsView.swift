@@ -66,6 +66,7 @@ struct SearchResultsView: View {
                                     searchedUserVM.user = fetchedUser
                                     navigateToSearchedUser = true
                                 }
+                                try await userVM.updateRecentProfileSearch(with: user.username)
                             } catch {
                                 print("Error fetching user data: \(error.localizedDescription)")
                             }

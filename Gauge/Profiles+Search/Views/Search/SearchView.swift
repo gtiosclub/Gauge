@@ -42,11 +42,6 @@ struct SearchView: View {
                                         selectedCategory = nil
                                     }
                                 }
-                                .onSubmit {
-                                    if selectedTab == "Topics", !searchText.isEmpty {
-                                        performTopicSearch()
-                                    }
-                                }
                                 .onChange(of: searchText, initial: false) { _, text in
                                     if selectedTab == "Users" {
                                         if !text.isEmpty {
@@ -56,6 +51,16 @@ struct SearchView: View {
                                         }
                                     }
                                 }
+                                .onSubmit {
+                                    if !searchText.isEmpty {
+                                        if selectedTab == "Topics" {
+                                            performTopicSearch()
+                                        } else if selectedTab == "Users" {
+                                            performUserSearch()
+                                        }
+                                    }
+                                }
+                            
                             
                             if !searchText.isEmpty {
                                 Button {
@@ -195,6 +200,7 @@ struct SearchView: View {
                     postSearchResults = results
                     isLoading = false
                 }
+                try await userVM.updateRecentPostSearch(with: searchText)
             } catch {
                 await MainActor.run {
                     errorMessage = "Search failed: \(error.localizedDescription)"
@@ -218,6 +224,9 @@ struct SearchView: View {
                 await MainActor.run {
                     userSearchResults = users
                     isLoading = false
+                }
+                if users.isEmpty {
+                    try await userVM.updateRecentProfileSearch(with: searchText)
                 }
             } catch {
                 await MainActor.run {
