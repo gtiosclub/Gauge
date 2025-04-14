@@ -53,6 +53,7 @@ struct FeedView: View {
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
                                 UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postVM.skippedPost!.topics)
                             }
+                            
                             postVM.undoSkipPost(userId: userVM.user.userId)
                             
                             Task {
@@ -70,6 +71,8 @@ struct FeedView: View {
                     .bold()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .padding(.bottom, 10)
+//                    .transition(.move(edge: .top))
+                    .animation(.easeIn, value: isConfirmed)
                 }
                 
                 ZStack {
@@ -96,7 +99,7 @@ struct FeedView: View {
                     }
                     .frame(maxWidth: geo.size.width - 24 + (dragOffset.height > 0 ? (dragOffset.height != 800.0 ? min(dragOffset.height / 8, 12.0) : 12.0) : 0.0))
                     
-                    withAnimation(.none) {
+//                    withAnimation(.none) {
                         HStack {
                             if postVM.feedPosts.indices.contains(1), let post = postVM.feedPosts[1] as? BinaryPost {
                                 BinaryFeedPost(post: post, dragAmount: .constant(CGSize(width: 0.0, height: 0.0)), optionSelected: .constant(0), skipping: $hasSkipped)
@@ -122,7 +125,7 @@ struct FeedView: View {
                                     .mask(RoundedRectangle(cornerRadius: 20.0).offset(y: 10))
                             }
                         }
-                    }
+//                    }
                     
                     VStack {
                         if let post = postVM.feedPosts.first {
@@ -214,8 +217,10 @@ struct FeedView: View {
                                                 dragOffset = CGSize(width: 0.0, height: gesture.translation.height)
                                             }
                                         } else {
-                                            withAnimation(.smooth(duration: 0.5)) {
-                                                dragOffset = CGSize(width: 0.0, height: geo.size.height)
+                                            if geo.size.height != dragOffset.height {
+                                                withAnimation(.smooth(duration: 0.5)) {
+                                                    dragOffset = CGSize(width: 0.0, height: geo.size.height)
+                                                }
                                             }
                                         }
                                         
@@ -229,15 +234,15 @@ struct FeedView: View {
                                                     if shouldSubmit && !isConfirmed {
                                                         let responseChosen = (optionSelected == 1) ? binaryPost.responseOption1 : binaryPost.responseOption2
                                                         postVM.addResponse(postId: binaryPost.postId, userId: user.userId, responseOption: responseChosen)
+                                                        postVM.removeFirstPostInNext(postId: binaryPost.postId, userId: user.userId)
                                                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                                                         UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
-
-                                                        
                                                     }
                                                 } else if let sliderPost = post as? SliderPost {
                                                     shouldSubmit = optionSelected != 3
                                                     if shouldSubmit && !isConfirmed {
                                                         postVM.addResponse(postId: sliderPost.postId, userId: user.userId, responseOption: (optionSelected < 3 ? String(optionSelected + 1) : String(optionSelected)))
+                                                        postVM.removeFirstPostInNext(postId: sliderPost.postId, userId: user.userId)
                                                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                                                         UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
                                                     }
@@ -278,9 +283,12 @@ struct FeedView: View {
                                 }
                             }
                             .onEnded { gesture in
-                                
                                 if dragOffset.height > 150 && hasSkipped {
                                     if isConfirmed {
+//                                        withAnimation {
+                                            isConfirmed = false
+//                                        }
+                                        
                                         // Next post logic
                                         postVM.feedPosts.removeFirst()
                                         postVM.findNextPost(user: userVM.user)
@@ -294,16 +302,17 @@ struct FeedView: View {
                                             
                                         }
                                     }
-                                    withAnimation {
-                                        isConfirmed = false
-                                    }
+                                    
+                                    dragOffset = .zero
+                                    
                                     Task {
                                         try await userVM.updateUserNextPosts(userId: userVM.user.userId, postIds: postVM.feedPosts.map { $0.postId })
                                     }
+                                } else {
+                                    withAnimation() {
+                                        dragOffset = .zero
+                                    }
                                 }
-//                                withAnimation() {
-                                    dragOffset = .zero
-//                                }
                                 hasSkipped = false
                             }
                     )

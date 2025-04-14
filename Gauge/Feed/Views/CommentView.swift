@@ -33,7 +33,8 @@ struct CommentView: View {
                         )
                 
                 let (isFirstLabel, responseOption) = findUserResponse(post: post, userId: comment.userId)
-                let color = SliderResultView.colorForIndex((Int(responseOption) ?? 1) - 1, (Int(responseOption) ?? 1) - 1)
+                let color = (post as? SliderPost) != nil ? SliderResultView.colorForIndex((Int(responseOption) ?? 1) - 1, (Int(responseOption) ?? 1) - 1) : (responseOption == (post as! BinaryPost).responseOption1 ? Color.darkRed : Color.darkGreen)
+                
                 Text(responseOption)
                     .font(.system(size: 14))
                     .foregroundColor(color)
@@ -118,15 +119,11 @@ struct CommentView: View {
             userStatus = "disliked"
             UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
             UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
-
-            
-
         } else {
             postVM.removeDislike(postId: comment.postId, commentId: comment.commentId, userId: userVM.user.id)
             userStatus = "none"
             UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
             UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: post.topics)
-
         }
     }
 }
