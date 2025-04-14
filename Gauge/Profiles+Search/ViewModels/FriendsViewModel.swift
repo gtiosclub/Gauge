@@ -183,11 +183,9 @@ class FriendsViewModel: ObservableObject {
             let friendOut = data["friendOut"] as? [String] ?? []
             let friends = data["friends"] as? [String] ?? []
             let myNextPosts = data["myNextPosts"] as? [String] ?? []
-            let myResponses = data["myResponses"] as? [String] ?? []
             let myFavorites = data["myFavorites"] as? [String] ?? []
             let myPostSearches = data["myPostSearches"] as? [String] ?? []
             let myProfileSearches = data["myProfileSearches"] as? [String] ?? []
-            let myComments = data["myComments"] as? [String] ?? []
             let myCategories = data["myCategories"] as? [String] ?? []
             let myTopics = data["myTopics"] as? [String] ?? []
             let badges = data["badges"] as? [String] ?? []
@@ -205,11 +203,9 @@ class FriendsViewModel: ObservableObject {
                 friendOut: data["friendOut"] as? [String] ?? [],
                 friends: data["friends"] as? [String] ?? [],
                 myNextPosts: data["myNextPosts"] as? [String] ?? [],
-                myResponses: data["myResponses"] as? [String] ?? [],
                 myFavorites: data["myFavorites"] as? [String] ?? [],
                 myPostSearches: data["myPostSearches"] as? [String] ?? [],
                 myProfileSearches: data["myProfileSearches"] as? [String] ?? [],
-                myComments: data["myComments"] as? [String] ?? [],
                 myCategories: data["myCategories"] as? [String] ?? [],
                 myTopics: data["myTopics"] as? [String] ?? [],
                 badges: data["badges"] as? [String] ?? [],

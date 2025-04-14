@@ -57,7 +57,7 @@ struct ProfilePictureView: View {
                         .lineLimit(1)
                 }
                 .frame(width: 30, height: 30)
-                .padding(.trailing, 6)
+//                .padding(.trailing, 6)
                     
             )
             .alignmentGuide(.leading) { d in d[.leading] }
@@ -77,7 +77,7 @@ struct ProfilePictureView: View {
                         .foregroundColor(.white)
                 }
                 .frame(width: 30, height: 30)
-                .padding(.trailing, 6)
+//                .padding(.trailing, 6)
                    
             )
             .alignmentGuide(.leading) { d in d[.leading] }
@@ -89,28 +89,25 @@ struct ProfilePictureView: View {
                     .clipShape(Circle())
                     .scaledToFill()
             } placeholder: {
-                ProgressView() // Placeholder until the image is loaded
-                    .frame(width: 30, height: 30)
-                    .clipShape(Circle())
+                ZStack {
+                    Circle()
+                        .stroke(Color.white, lineWidth: 1)
+                        .background(
+                            Circle().fill(Color.lightGray)
+                        )
+
+                    Image(systemName: "person")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
+                        .foregroundColor(.white)
+                }
+                .frame(width: 30, height: 30)
+//                .padding(.trailing, 6)
             }
             )
             .alignmentGuide(.leading) { d in d[.leading] }
         }
-    }
-}
-
-class ImageCache {
-    static let shared = ImageCache()
-    private init() {}
-
-    private let cache = NSCache<NSString, UIImage>()
-
-    func image(for url: String) -> UIImage? {
-        return cache.object(forKey: url as NSString)
-    }
-
-    func set(_ image: UIImage, for url: String) {
-        cache.setObject(image, forKey: url as NSString)
     }
 }
 

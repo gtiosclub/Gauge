@@ -16,25 +16,7 @@ struct FavoriteCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Profile + Time
-            HStack(spacing: 8) {
-                AsyncImage(url: URL(string: post.profilePhoto)) { image in
-                    image.resizable()
-                } placeholder: {
-                    Circle().fill(Color(.systemGray3))
-                }
-                .frame(width: 30, height: 30)
-                .clipShape(Circle())
-
-                Text(post.username)
-                    .font(.system(size: 15, weight: .semibold))
-
-                Text("• \(DateConverter.timeAgo(from: post.postDateAndTime))")
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
-
-                Spacer()
-            }
+            ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
 
             // Tags
             HStack(spacing: 6) {
