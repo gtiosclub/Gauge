@@ -165,7 +165,7 @@ struct SearchView: View {
                         .environmentObject(searchedUserVM)
                         .environmentObject(authVM)
                 } else {
-                    ProfileVisitView(user: searchedUserVM.user)
+                    ProfileVisitView(user: searchedUserVM.user, friendsViewModel: FriendsViewModel(user: userVM.user))
                 }
             },
             isActive: $navigateToSearchedUser

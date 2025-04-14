@@ -14,10 +14,28 @@ struct ProfileVisitView: View {
     @State private var selectedTab: String = "Takes"
     @State private var selectedBadge: BadgeModel? = nil
     @State private var showingTakeTimeResults = false
+    @State private var isSendingRequest: Bool = false
     let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
 
     let userTags = ["📏5'9", "📍New York", "🔒Single", "🎓Alumni"]
+    
+    @ObservedObject var friendsViewModel: FriendsViewModel
 
+        // Define the possible friend states.
+    enum FriendStatus {
+        case none, pending, friends
+    }
+        
+    var currentFriendStatus: FriendStatus {
+        if friendsViewModel.friends.contains(user.userId) {
+            return .friends
+        } else if friendsViewModel.outgoingRequests.contains(user.userId) {
+            return .pending
+        } else {
+            return .none
+        }
+    }
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -78,29 +96,54 @@ struct ProfileVisitView: View {
                             Text(user.username)
                                 .font(.system(size: 26))
                                 .fontWeight(.medium)
-                            HStack {
-                                Button(action: {
-
-                                }) {
-                                    Text("+ Add Friend")
-                                        .font(.subheadline)
-                                        .foregroundColor(.blue)
-                                }
-                                Spacer()
-                                HStack(spacing: 4) {
-                                    Image(systemName: "person.2.fill")
-                                        .font(.headline)
-                                    Text("\(user.friends.count)")
-                                        .font(.headline)
-                                }
-                                .foregroundColor(.gray)
-                            }
-                        }
-                        .padding(.leading, 8)
-                        Spacer()
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 15)
+                        HStack {
+                             // Display different UI based on friend request state.
+                             if currentFriendStatus == .none {
+                                 Button(action: {
+                                     Task {
+                                         isSendingRequest = true
+                                         do {
+                                             // Send friend request using the FriendsViewModel.
+                                             try await friendsViewModel.sendFriendRequest(to: user)
+                                         } catch {
+                                             print("Error sending friend request: \(error)")
+                                         }
+                                         isSendingRequest = false
+                                     }
+                                 }) {
+                                     if isSendingRequest {
+                                         ProgressView()
+                                             .progressViewStyle(CircularProgressViewStyle())
+                                     } else {
+                                         Text("+ Add Friend")
+                                             .font(.subheadline)
+                                             .foregroundColor(.blue)
+                                     }
+                                 }
+                             } else if currentFriendStatus == .pending {
+                                 Text("Friend Request Sent")
+                                     .font(.subheadline)
+                                     .foregroundColor(.gray)
+                             } else if currentFriendStatus == .friends {
+                                 Text("Friends")
+                                     .font(.subheadline)
+                                     .foregroundColor(.green)
+                             }
+                             Spacer()
+                             HStack(spacing: 4) {
+                                 Image(systemName: "person.2.fill")
+                                     .font(.headline)
+                                 Text("\(user.friends.count)")
+                                     .font(.headline)
+                             }
+                             .foregroundColor(.gray)
+                         }
+                     }
+                     .padding(.leading, 8)
+                     Spacer()
+                 }
+                 .padding(.horizontal, 16)
+                 .padding(.top, 15)
                     
                     HStack {
                         ScrollView(.horizontal, showsIndicators: false) {
