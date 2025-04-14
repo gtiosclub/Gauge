@@ -172,121 +172,15 @@ struct ProfileView: View {
                             selectedBadge = badge
                         })
                     } else if selectedTab == "Votes" {
-                        VoteCardsView()
+                        VotesTabView()
+                            .environmentObject(userVM)
+                            .environmentObject(postVM)
                     } else if selectedTab == "Takes" {
                         TakesView()
-                    }
-                    else if selectedTab == "Statistics" {
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text("Username Statistics")
-                                .font(.system(size:21))
-                                .fontWeight(.bold)
-                                .padding(.vertical, 20)
-                                .padding(.horizontal)
-                                .frame(maxWidth: .infinity, alignment: .center)
-
-                            VStack(spacing: 0) {
-                                // Total Votes Made
-                                HStack {
-                                    Text("Total Votes Made")
-                                        .font(.system(size: 17))
-                                        .fontWeight(.regular)
-                                    Spacer()
-                                    HStack {
-                                        Text("100 Votes")
-                                            .font(.system(size: 17))
-                                            .foregroundColor(.gray)
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                            .font(.system(size: 14))
-                                    }
-                                }
-                                .padding(.vertical, 15)
-                                .padding(.horizontal)
-
-                                Divider().padding(.horizontal)
-
-                                // Total Takes Made
-                                HStack {
-                                    Text("Total Takes Made")
-                                        .font(.system(size: 17))
-                                        .fontWeight(.regular)
-                                    Spacer()
-                                    HStack {
-                                        Text("25 Takes")
-                                            .font(.system(size: 17))
-                                            .foregroundColor(.gray)
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                            .font(.system(size: 14))
-                                    }
-                                }
-                                .padding(.vertical, 15)
-                                .padding(.horizontal)
-
-                                Divider().padding(.horizontal)
-
-                                // Total Votes Collected
-                                HStack {
-                                    Text("Total Votes Collected")
-                                        .font(.system(size: 17))
-                                        .fontWeight(.regular)
-                                    Spacer()
-                                    HStack {
-                                        Text("275 Votes")
-                                            .font(.system(size: 17))
-                                            .foregroundColor(.gray)
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                            .font(.system(size: 14))
-                                    }
-                                }
-                                .padding(.vertical, 15)
-                                .padding(.horizontal)
-
-                                Divider().padding(.horizontal)
-
-                                HStack {
-                                    Text("Total Comments Made")
-                                        .font(.system(size: 17))
-                                        .fontWeight(.regular)
-                                    Spacer()
-                                    HStack {
-                                        Text("110 Comments")
-                                            .font(.system(size: 17))
-                                            .foregroundColor(.gray)
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                            .font(.system(size: 14))
-                                    }
-                                }
-                                .padding(.vertical, 15)
-                                .padding(.horizontal)
-
-                                Divider().padding(.horizontal)
-
-                                HStack {
-                                    Text("Ratio View/Response")
-                                        .font(.system(size: 17))
-                                        .fontWeight(.regular)
-                                    Spacer()
-                                    HStack {
-                                        Text("0.75")
-                                            .font(.system(size: 17))
-                                            .foregroundColor(.gray)
-                                        Image(systemName: "chevron.right")
-                                            .foregroundColor(.gray)
-                                            .font(.system(size: 14))
-                                    }
-                                }
-                                .padding(.vertical, 15)
-                                .padding(.horizontal)
-                            }
-                            Spacer()
-                        }
-                        .background(Color.white)
-                        .cornerRadius(10)
-                        .padding([.horizontal, .bottom])
+                    } else if selectedTab == "Statistics" {
+                        StatisticsView()
+                            .environmentObject(userVM)
+                            .environmentObject(postVM)
                     } else {
                         VStack {
                             Text("\(selectedTab) Content Here")
@@ -380,19 +274,6 @@ struct TabButton: View {
         }
         .padding(.horizontal, 5)
 //        .frame(minWidth: 100)
-    }
-}
-
-
-struct VoteCardsView: View {
-    var body: some View {
-        ScrollView {
-            VStack {
-                VoteCard(username: "User1", timeAgo: "1 hour ago", tags: ["swiftui", "ios"], vote: "Yes", content: "This is a sample vote card content.", comments: 10, views: 100, votes: 25)
-                VoteCard(username: "User2", timeAgo: "2 hours ago", tags: ["programming", "swift"], vote: "No", content: "Another vote card example.", comments: 5, views: 50, votes: 10)
-            }
-            .padding()
-        }
     }
 }
 
