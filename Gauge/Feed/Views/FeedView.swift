@@ -263,7 +263,6 @@ struct FeedView: View {
                                         
                                         if dragOffset.height > 150 && !hasSkipped {
                                             hasSkipped = true
-                                            optionSelected = 0
                                         }
                                     } else {
                                         if let post = postVM.feedPosts.first, post is SliderPost {

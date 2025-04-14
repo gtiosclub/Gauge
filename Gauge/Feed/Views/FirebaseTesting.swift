@@ -19,7 +19,7 @@ struct FirebaseTesting: View {
                     Section(header: Text("Write Data")) {
                         Button("Reset Posts for Users") {
                             Task {
-                                await postVM.resetPostsForAllUsers(postIds: ["A24400DB-19FE-4A10-A254-FB88C2FF94D9", "B47816E8-D73F-4233-9317-D6FC6D6E27A2", "48487828-F695-4D0F-857F-CE3A2A0A44C2", "5F9EC4E9-3D56-41BF-9150-E8D65E98B7C5"], shouldUpdateMyNextPosts: true)
+                                await postVM.resetPostsForAllUsers(postIds: ["767CB589-223D-45F1-AB33-609FBED2F1C5", "5EE89B67-4F19-4E82-8EE8-80C35A04970B", "A24400DB-19FE-4A10-A254-FB88C2FF94D9", "5F9EC4E9-3D56-41BF-9150-E8D65E98B7C5"], shouldUpdateMyNextPosts: true)
                             }
                         }
                         
