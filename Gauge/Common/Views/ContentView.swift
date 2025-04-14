@@ -170,13 +170,14 @@ struct ContentView: View {
                             
                             print("Categories updated to \(newCategories) from \(userResponse.currentUserCategories)")
                             
-                            userResponse.currentUserCategories = newCategories.isEmpty
+                            let isValid = userVM.isValidCategoryReordering(old: userResponse.currentUserCategories, new: newCategories)
+                            userResponse.currentUserCategories = isValid
                                 ? userResponse.currentUserCategories
                                 : newCategories
                             
                             userResponse.userCategoryResponses = [:]
                             
-                            if !newCategories.isEmpty {
+                            if isValid {
                                 userVM.user.myCategories = newCategories
                                 userVM.setUserCategories(userId: userVM.user.id, category: Category.mapStringsToCategories(returnedStrings: newCategories))
                             }

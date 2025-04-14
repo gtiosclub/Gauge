@@ -481,6 +481,15 @@ class UserFirebase: ObservableObject {
         }
     }
     
+    func isValidCategoryReordering(old: [String], new: [String]) -> Bool {
+        if new.isEmpty{
+            return false
+        }
+        if (new.count != old.count) {
+            return false
+        }
+        return (new.sorted() == old.sorted())
+    }
     func updateUserStreakAndLastLogin(user: User) async throws {
         let hoursSinceLastLogin = Date().timeIntervalSince(user.lastLogin) / 3600
         
