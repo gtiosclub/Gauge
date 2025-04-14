@@ -52,6 +52,7 @@ struct FeedView: View {
                             if postVM.skippedPost != nil {
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
                                 UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postVM.skippedPost!.topics)
+                                userVM.user.myViews.removeAll(where: {$0 == postVM.skippedPost!.postId})
                             }
                             
                             postVM.undoSkipPost(userId: userVM.user.userId)
@@ -237,6 +238,7 @@ struct FeedView: View {
                                                         postVM.removeFirstPostInNext(postId: binaryPost.postId, userId: user.userId)
                                                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                                                         UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+                                                        userVM.user.myResponses.append(post.postId)
                                                     }
                                                 } else if let sliderPost = post as? SliderPost {
                                                     shouldSubmit = optionSelected != 3
@@ -245,6 +247,7 @@ struct FeedView: View {
                                                         postVM.removeFirstPostInNext(postId: sliderPost.postId, userId: user.userId)
                                                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                                                         UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+                                                        userVM.user.myResponses.append(post.postId)
                                                     }
                                                 } else {
                                                     shouldSubmit = false
@@ -299,6 +302,7 @@ struct FeedView: View {
                                         if postVM.skippedPost != nil {
                                             UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: postVM.skippedPost!.categories.map{$0.rawValue})
                                             UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: postVM.skippedPost!.topics)
+                                            userVM.user.myViews.append(postVM.skippedPost!.postId)
                                             
                                         }
                                     }

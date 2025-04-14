@@ -113,10 +113,12 @@ struct CommentsView: View {
                         postVM.addUserToFavoritedBy(postId: post.postId, userId: userVM.user.id)
                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                         UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
+                        userVM.user.myFavorites.append(post.postId)
                     } else {
                         postVM.removeUserFromFavoritedBy(postId: post.postId, userId: userVM.user.id)
                         UserResponsesManager.removeCategoriesFromUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                         UserResponsesManager.removeTopicsFromUserResponses(modelContext: modelContext, topics: post.topics)
+                        userVM.user.myFavorites.removeAll(where: { $0 == post.postId } )
                     }
                 }) {
                     Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
