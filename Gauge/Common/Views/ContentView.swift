@@ -101,6 +101,20 @@ struct ContentView: View {
                         async let userNumResponses = userVM.getUserNumResponses(userId: signedInUser.userId, setCurrentUserData: true)
                         do {
                             _ = try await userData
+                            if let userResponse = userResponses.first {
+                                let newCategories = userVM.user.myCategories
+                                if Set(newCategories) != Set(userResponse.currentUserCategories) {
+                                    userResponse.currentUserCategories = newCategories
+                                    print("Replaced UserResponses current categories with: " + String(describing: newCategories))
+                                    try modelContext.save()
+                                }
+
+                                let newTopics = userVM.user.myTopics
+                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
+                                    userResponse.currentUserTopics = newTopics
+                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
+                                }
+                            }
                                                         
                             await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
                             postVM.watchForCurrentFeedPostChanges()
@@ -164,6 +178,7 @@ struct ContentView: View {
                             
                             if !newCategories.isEmpty {
                                 userVM.user.myCategories = newCategories
+                                userVM.setUserCategories(userId: userVM.user.id, category: Category.mapStringsToCategories(returnedStrings: newCategories))
                             }
                             
                             try modelContext.save()
@@ -188,6 +203,8 @@ struct ContentView: View {
                             
                             if !newTopics.isEmpty {
                                 userVM.user.myTopics = newTopics
+                                userVM.setUserTopics(userId: userVM.user.id, topics: newTopics)
+
                             }
                             
                             try modelContext.save()
