@@ -38,11 +38,11 @@ class DateConverter {
         if(diffInDays == 30) {
             return 1
         }
-        print(diffInHours)
+//        print(diffInHours)
         if (diffInHours < 24) {
             let diffInMins = Calendar.current.dateComponents([.minute], from: postDate, to: Date()).minute ?? 60
             //let diffInHours = Calendar.current.dateComponents([.hour], from: postDate, to: Date()).day ?? 24
-            print(diffInMins)
+//            print(diffInMins)
             if(diffInMins < 5) {
                 return 30;
             }

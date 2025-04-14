@@ -152,8 +152,6 @@ class UserFirebase: ObservableObject {
             "myPostSearches": user.myPostSearches,
             "myAccessedProfiles": user.myAccessedProfiles,
             "attributes": user.attributes,
-            "numUserResponses": user.numUserResponses,
-            "numUserViews": user.numUserViews,
             "myTakeTime": user.myTakeTime
         ] as [String : Any]
         
@@ -173,10 +171,10 @@ class UserFirebase: ObservableObject {
         var postIds: [String] = []
         
         for document in snapshot.documents {
-            print("processing doc")
+//            print("processing doc")
             postIds.append(document.documentID)
         }
-        
+
         if setCurrentUserData {
             user.myPosts = postIds
         }
@@ -209,7 +207,11 @@ class UserFirebase: ObservableObject {
         
         let document = try await docRef.getDocument()
         guard let data = document.data() else {
-            throw NSError(domain: "No user data found for \(userId)", code: 404)
+            print("No user data found for \(userId)")
+            DispatchQueue.main.async {
+                self.useridsToPhotosAndUsernames[userId] = (photoURL: "", username: userId)
+            }
+            return
         }
         
         let username = data["username"] as? String ?? ""

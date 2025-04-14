@@ -122,19 +122,23 @@ struct PostCreationView: View {
                     Button(action: {
                         withAnimation {
                             if (currentStep == 5) {
-                                currentStep = 4
-                                currentStepTitle = "Type Captions"
-                                modalSize = 300
-                                if (rightCaption.count > 0) {
-                                    isRight = true
+                                if postType == .SliderPost {
+                                    currentStep = 4
                                 } else {
-                                    isRight = false
-                                    skippable = leftCaption.isEmpty
+                                    currentStep = 4
+                                    currentStepTitle = "Type Captions"
+                                    modalSize = 300
+                                    if (rightCaption.count > 0) {
+                                        isRight = true
+                                    } else {
+                                        isRight = false
+                                        skippable = leftCaption.isEmpty
+                                    }
+                                    return
                                 }
-                                return
                             }
                             
-                            if (currentStep != 4) {
+                            if (currentStep != 4 || postType == .SliderPost) {
                                 currentStep = max(currentStep - 1, 1)
                             } else {
                                 if (!isRight) {
@@ -186,11 +190,13 @@ struct PostCreationView: View {
                             if postType == .BinaryPost {
                                 let postTopics = await postVM.createBinaryPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, responseOption1: slidingOptions[optionsSelectedIndex!].left, responseOption2: slidingOptions[optionsSelectedIndex!].right, sublabel1: leftCaption, sublabel2: rightCaption)
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postCategories.map{$0.rawValue})
-                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics)
+                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics.1)
+                                userVM.user.myPosts.append(postTopics.0)
                             } else if postType == .SliderPost {
                                 let postTopics = await postVM.createSliderPost(userId: userVM.user.userId, categories: postCategories, question: postQuestion, lowerBoundLabel: slidingOptions[optionsSelectedIndex!].left, upperBoundLabel: slidingOptions[optionsSelectedIndex!].right)
                                 UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: postCategories.map{$0.rawValue})
-                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics)
+                                UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: postTopics.1)
+                                userVM.user.myPosts.append(postTopics.0)
                             }
                             
                         }
@@ -265,6 +271,9 @@ struct PostCreationView: View {
             .padding(.horizontal)
             .padding(.top, 20)
         }
+        .onAppear(perform: {
+            modalSize = 380
+        })
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .cornerRadius(30)
@@ -388,7 +397,7 @@ struct BinaryPostPreview: View {
                                 .font(.system(size: 14))
                                 .foregroundColor(.black)
                                 .fontWeight(.medium)
-                                .frame(maxWidth: 150.0)
+                                .frame(maxWidth: 150.0, alignment: .leading)
                                 .lineLimit(1)
                             
                             Spacer()
@@ -397,7 +406,7 @@ struct BinaryPostPreview: View {
                                 .font(.system(size: 14))
                                 .foregroundColor(.black)
                                 .fontWeight(.medium)
-                                .frame(maxWidth: 150.0)
+                                .frame(maxWidth: 150.0, alignment: .trailing)
                                 .lineLimit(1)
                         }
                         .padding(.horizontal)
