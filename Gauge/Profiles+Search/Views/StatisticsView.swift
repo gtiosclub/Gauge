@@ -8,120 +8,56 @@
 import SwiftUI
 
 struct StatisticsView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Username Statistics")
-                .font(.system(size:21))
-                .fontWeight(.bold)
-                .padding(.vertical, 20)
-                .padding(.horizontal)
-                .frame(maxWidth: .infinity, alignment: .center)
-            
-            VStack(spacing: 0) {
-                // Total Votes Made
-                HStack {
-                    Text("Total Votes Made")
-                        .font(.system(size: 17))
-                        .fontWeight(.regular)
-                    Spacer()
-                    HStack {
-                        Text("100 Votes")
-                            .font(.system(size: 17))
-                            .foregroundColor(.gray)
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
-                            .font(.system(size: 14))
-                    }
-                }
-                .padding(.vertical, 15)
-                .padding(.horizontal)
-                
-                Divider().padding(.horizontal)
-                
-                // Total Takes Made
-                HStack {
-                    Text("Total Takes Made")
-                        .font(.system(size: 17))
-                        .fontWeight(.regular)
-                    Spacer()
-                    HStack {
-                        Text("25 Takes")
-                            .font(.system(size: 17))
-                            .foregroundColor(.gray)
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
-                            .font(.system(size: 14))
-                    }
-                }
-                .padding(.vertical, 15)
-                .padding(.horizontal)
-                
-                Divider().padding(.horizontal)
-                
-                // Total Votes Collected
-                HStack {
-                    Text("Total Votes Collected")
-                        .font(.system(size: 17))
-                        .fontWeight(.regular)
-                    Spacer()
-                    HStack {
-                        Text("275 Votes")
-                            .font(.system(size: 17))
-                            .foregroundColor(.gray)
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
-                            .font(.system(size: 14))
-                    }
-                }
-                .padding(.vertical, 15)
-                .padding(.horizontal)
-                
-                Divider().padding(.horizontal)
-                
-                HStack {
-                    Text("Total Comments Made")
-                        .font(.system(size: 17))
-                        .fontWeight(.regular)
-                    Spacer()
-                    HStack {
-                        Text("110 Comments")
-                            .font(.system(size: 17))
-                            .foregroundColor(.gray)
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
-                            .font(.system(size: 14))
-                    }
-                }
-                .padding(.vertical, 15)
-                .padding(.horizontal)
-                
-                Divider().padding(.horizontal)
-                
-                HStack {
-                    Text("Ratio View/Response")
-                        .font(.system(size: 17))
-                        .fontWeight(.regular)
-                    Spacer()
-                    HStack {
-                        Text("0.75")
-                            .font(.system(size: 17))
-                            .foregroundColor(.gray)
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.gray)
-                            .font(.system(size: 14))
-                    }
-                }
-                .padding(.vertical, 15)
-                .padding(.horizontal)
-            }
-            Spacer()
-        }
-        .background(Color.white)
-        .cornerRadius(10)
-        .padding([.horizontal, .bottom])
-    }
-}
+    @EnvironmentObject var userVM: UserFirebase
+    @EnvironmentObject var postVM: PostFirebase
 
-#Preview {
-    StatisticsView()
+    let gridColumns = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("\(userVM.user.username)'s Statistics")
+                .font(.title2)
+                .fontWeight(.bold)
+                .padding(.top)
+
+            LazyVGrid(columns: gridColumns, spacing: 16) {
+                statCard(title: "Total Votes", value: "\(userVM.user.myResponses.count)", footer: "Votes", gradient: [.orange.opacity(0.2), .white])
+                statCard(title: "Total Comments", value: "\(userVM.user.myComments.count)", footer: "Comments", gradient: [.blue.opacity(0.2), .white])
+                statCard(title: "Total Take Time", value: "\(userVM.user.myTakeTime.count)", footer: "Take Time", gradient: [.purple.opacity(0.2), .white])
+                statCard(title: "Total Takes", value: "\(userVM.user.myPosts.count)", footer: "Takes", gradient: [.red.opacity(0.2), .white])
+            }
+            .padding(.horizontal)
+        }
+        .padding(.bottom, 20)
+    }
+
+    func statCard(title: String, value: String, footer: String, gradient: [Color]) -> some View {
+        VStack(spacing: 4) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .minimumScaleFactor(0.75)
+
+            Text(value)
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            Text(footer)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+        }
+        .padding()
+        .frame(minHeight: 140)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing))
+                .shadow(radius: 2)
+        )
+    }
 }
