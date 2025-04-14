@@ -159,13 +159,15 @@ struct ProfileView: View {
                             selectedBadge = badge
                         })
                     } else if selectedTab == "Votes" {
-                        VoteCardsView()
+                        VotesTabView(visitedUser: userVM.user)
                     } else if selectedTab == "Takes" {
                         TakesView(visitedUser: userVM.user, profileVM: profileViewModel)
                     } else if selectedTab == "Statistics" {
-                        StatisticsView()
-                            .environmentObject(userVM)
-                            .environmentObject(postVM)
+                        StatisticsView(visitedUser: userVM.user)
+                    } else if selectedTab == "Comments" {
+                        CommentsTabView(visitedUser: userVM.user)
+                    } else if selectedTab == "Favorites" {
+                        FavoritesTabView(visitedUser: userVM.user)
                     } else {
                         VStack {
                             Text("\(selectedTab) Content Here")
@@ -186,36 +188,77 @@ struct ProfileView: View {
             }
         }
     }
-}
-
-struct ProfileTabButton: View {
-    let title: String
-    @Binding var selectedTab: String
-
-    var body: some View {
-        Button(action: {
-            withAnimation {
-                selectedTab = title
-            }
-        }) {
-            VStack(spacing: 0) {
-                Text(title)
-                    .font(.system(size: 20))
-                    .foregroundColor(selectedTab == title ? .black : .gray)
-                    .fontWeight(selectedTab == title ? .bold : .regular)
-                    .padding(.bottom, 6)
-                
-                if (selectedTab == title) {
-                    Rectangle()
-                        .frame(height: 4)
-                        .cornerRadius(4)
-                        .foregroundColor(.blue)
-                        .edgesIgnoringSafeArea(.horizontal)
+    
+    struct TakeTimeResultsView: View {
+        let myResponses: [String: Int]
+        @State private var takes: [Take] = []
+        
+        var body: some View {
+            List {
+                ForEach(myResponses.sorted(by: { $0.key < $1.key }), id: \.key) { id, selectedOption in
+                    if let take = takes.first(where: { $0.id == id }) {
+                        VStack(alignment: .leading) {
+                            Text(take.question)
+                                .font(.headline)
+                            Text("Your choice: \(selectedOption == 1 ? take.responseOption1 : take.responseOption2)")
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                        }
+                        .padding(.vertical, 6)
+                    }
                 }
             }
-            .padding(.top, 8)
+            .navigationTitle("My TakeTime Results")
+            .onAppear {
+                fetchTakes()
+            }
         }
-        .padding(.horizontal, 5)
-//        .frame(minWidth: 100)
+        
+        func fetchTakes() {
+            let ids = Array(myResponses.keys)
+            
+            for id in ids {
+                Firebase.db.collection("TakeTime").document(id).getDocument { document, error in
+                    if let document = document,
+                       let take = try? document.data(as: Take.self) {
+                        DispatchQueue.main.async {
+                            takes.append(take)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    struct ProfileTabButton: View {
+        let title: String
+        @Binding var selectedTab: String
+        
+        var body: some View {
+            Button(action: {
+                withAnimation {
+                    selectedTab = title
+                }
+            }) {
+                VStack(spacing: 0) {
+                    Text(title)
+                        .font(.system(size: 20))
+                        .foregroundColor(selectedTab == title ? .black : .gray)
+                        .fontWeight(selectedTab == title ? .bold : .regular)
+                        .padding(.bottom, 6)
+                    
+                    if (selectedTab == title) {
+                        Rectangle()
+                            .frame(height: 4)
+                            .cornerRadius(4)
+                            .foregroundColor(.blue)
+                            .edgesIgnoringSafeArea(.horizontal)
+                    }
+                }
+                .padding(.top, 8)
+            }
+            .padding(.horizontal, 5)
+            //        .frame(minWidth: 100)
+        }
     }
 }

@@ -11,7 +11,7 @@ import FirebaseStorage
 import UIKit
 
 class ProfileViewModel: ObservableObject {
-    
+    @Published var tempAttributes: [String:String] = [:]
     @Published var user: User?
     @Published var posts: [BinaryPost] = []
     
@@ -130,16 +130,58 @@ class ProfileViewModel: ObservableObject {
         return nil
     }
     
+    func updateProfilePhotoAndAttributes(userID: String,
+                                         username: String,
+                                         bio: String,
+                                         pronouns: String,
+                                         profileImage: UIImage?) async -> Bool {
+        // If a new profile image was provided, upload it and get its URL.
+        var photoURL: String? = nil
+        if let profileImage = profileImage {
+            photoURL = await storeImageAndReturnURL(userId: userID, image: profileImage)
+        }
+        
+        // Build the attributes dictionary (all keys except profileEmoji are updated).
+        // tempAttributes holds values from the various attribute-detail screens.
+        let userAttributes: [String: String] = [
+            "gender": tempAttributes["gender"] ?? "",
+            "location": tempAttributes["location"] ?? "",
+            "pronouns": pronouns,  // using the value from the main form
+            "age": tempAttributes["age"] ?? "",
+            "height": tempAttributes["height"] ?? "",
+            "relationshipStatus": tempAttributes["relationshipStatus"] ?? "",
+            "workStatus": tempAttributes["workStatus"] ?? "",
+            "bio": bio
+        ]
+        
+        // Build the updates dictionary. If a new photoURL exists, include it.
+        var updates: [String: Any] = [
+            "username": username,
+            "attributes": userAttributes
+        ]
+        if let photoURL = photoURL {
+            updates["profilePhoto"] = photoURL
+        }
+        
+        // Perform one combined update on Firestore.
+        let userDocument = Firebase.db.collection("USERS").document(userID)
+        do {
+            try await userDocument.updateData(updates)
+            print("Profile photo, username, and attributes updated successfully.")
+            return true
+        } catch {
+            print("Error updating profile: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
     func fetchUserPosts(for userId: String) {
             let db = Firestore.firestore()
             DispatchQueue.main.async {
                 self.posts = []
             }
             
-            db.collection("POSTS")
-                .whereField("userId", isEqualTo: userId)
-                .whereField("type", isEqualTo: PostType.BinaryPost.rawValue)
-                .getDocuments { snapshot, error in
+            db.collection("POSTS").whereField("userId", isEqualTo: userId).whereField("type", isEqualTo: PostType.BinaryPost.rawValue).getDocuments { snapshot, error in
                     if let error = error {
                         print("Error fetching posts: \(error.localizedDescription)")
                         return
@@ -217,8 +259,7 @@ class ProfileViewModel: ObservableObject {
                         
                         // Fetch VIEWS
                         group.enter()
-                        db.collection("POSTS").document(postId).collection("VIEWS")
-                            .getDocuments { snapshot, error in
+                        db.collection("POSTS").document(postId).collection("VIEWS").getDocuments { snapshot, error in
                                 if let snapshot = snapshot {
                                     post.viewCounter = snapshot.documents.count
                                 }
