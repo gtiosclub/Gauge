@@ -551,4 +551,14 @@ extension UserFirebase {
             self.user.myProfileSearches = searches
         }
     }
+    
+    func getProfilePhoto(forUsername username: String) async throws -> String? {
+        let snapshot = try await Firebase.db.collection("USERS").whereField("username", isEqualTo: username).getDocuments()
+        if let doc = snapshot.documents.first {
+            try await self.populateUsernameAndProfilePhoto(userId: doc.documentID)
+            return self.useridsToPhotosAndUsernames[doc.documentID]?.photoURL
+        }
+        return nil
+    }
+    
 }

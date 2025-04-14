@@ -4,13 +4,14 @@
 //
 //  Created by Datta Kansal on 3/6/25.
 //
+
 import SwiftUI
 
 // Custom Shape that rounds only specified corners.
 struct RoundedCorners: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners
-    
+
     func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(
             roundedRect: rect,
@@ -23,35 +24,63 @@ struct RoundedCorners: Shape {
 
 struct PostResultRow: View {
     let result: PostResult
-    
+    @EnvironmentObject var userVM: UserFirebase
+
+    private static var userCache: [String: (username: String, profilePhoto: String)] = [:]
+    @State private var posterData: (username: String, profilePhoto: String)? = nil
+
+    @State private var friendInteractors: [String] = []
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 8) {
-                if let url = URL(string: result.profilePhoto), !result.profilePhoto.isEmpty {
-                    AsyncImage(url: url) { phase in
-                        if let image = phase.image {
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 20, height: 20)
-                                .clipShape(Circle())
-                        } else if phase.error != nil {
-                            Circle()
-                                .fill(Color.gray)
-                                .frame(width: 20, height: 20)
-                        } else {
-                            Circle()
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(width: 20, height: 20)
+                Group {
+                    if let data = posterData,
+                       !data.profilePhoto.isEmpty,
+                       let url = URL(string: data.profilePhoto) {
+                        AsyncImage(url: url) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 20, height: 20)
+                                    .clipShape(Circle())
+                            } else if phase.error != nil {
+                                Circle()
+                                    .fill(Color.gray)
+                                    .frame(width: 20, height: 20)
+                            } else {
+                                Circle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(width: 20, height: 20)
+                            }
                         }
+                    } else if let url = URL(string: result.profilePhoto), !result.profilePhoto.isEmpty {
+                        AsyncImage(url: url) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 20, height: 20)
+                                    .clipShape(Circle())
+                            } else if phase.error != nil {
+                                Circle()
+                                    .fill(Color.gray)
+                                    .frame(width: 20, height: 20)
+                            } else {
+                                Circle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(width: 20, height: 20)
+                            }
+                        }
+                    } else {
+                        Circle()
+                            .fill(Color.gray)
+                            .frame(width: 20, height: 20)
                     }
-                } else {
-                    Circle()
-                        .fill(Color.gray)
-                        .frame(width: 20, height: 20)
                 }
-                
-                Text(result.username)
+
+                Text(posterData?.username ?? result.username)
                     .font(.system(size: 16, weight: .regular))
                 Text("·")
                     .font(.system(size: 16, weight: .regular))
@@ -62,7 +91,7 @@ struct PostResultRow: View {
             }
             .padding(.horizontal)
             .padding(.top, 32)
-            
+
             if !result.categories.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
@@ -85,11 +114,54 @@ struct PostResultRow: View {
                 .lineSpacing(4)
                 .padding(.horizontal)
             
-            Text("\(result.voteCount) votes")
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.black)
-                .padding(.horizontal)
-                .padding(.bottom, 32)
+            HStack {
+                Text("\(result.voteCount) votes")
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundColor(.black)
+                Spacer()
+                if !friendInteractors.isEmpty {
+                    HStack(spacing: -8) {
+                        ForEach(friendInteractors, id: \.self) { friendId in
+                            Group {
+                                if let friendData = userVM.useridsToPhotosAndUsernames[friendId],
+                                   !friendData.photoURL.isEmpty,
+                                   let url = URL(string: friendData.photoURL) {
+                                    AsyncImage(url: url) { phase in
+                                        if let image = phase.image {
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 20, height: 20)
+                                                .clipShape(Circle())
+                                        } else if phase.error != nil {
+                                            Circle()
+                                                .fill(Color.gray)
+                                                .frame(width: 20, height: 20)
+                                        } else {
+                                            Circle()
+                                                .fill(Color.gray.opacity(0.3))
+                                                .frame(width: 20, height: 20)
+                                        }
+                                    }
+                                } else {
+                                    Circle()
+                                        .fill(Color.gray)
+                                        .frame(width: 20, height: 20)
+                                        .task {
+                                            do {
+                                                try await userVM.populateUsernameAndProfilePhoto(userId: friendId)
+                                            } catch {
+                                                print("Error preloading friend \(friendId): \(error.localizedDescription)")
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 32)
         }
         .frame(maxWidth: .infinity)
         .background(
@@ -98,7 +170,35 @@ struct PostResultRow: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
         )
         .edgesIgnoringSafeArea(.horizontal)
-        .padding(.vertical, -12) // overlap
+        .padding(.vertical, -12)
+        .onAppear {
+            if let cached = Self.userCache[result.userId] {
+                posterData = cached
+            } else {
+                Task {
+                    do {
+                        let fetchedUser = try await userVM.getUserData(userId: result.userId)
+                        let newData = (username: fetchedUser.username, profilePhoto: fetchedUser.profilePhoto)
+                        await MainActor.run {
+                            Self.userCache[result.userId] = newData
+                            posterData = newData
+                        }
+                    } catch {
+                        print("Error fetching poster data: \(error.localizedDescription)")
+                    }
+                }
+            }
+
+            Task {
+                do {
+                    let interactors = try await SearchViewModel().getFriendInteractors(for: result.id, myFriends: userVM.user.friends)
+                    await MainActor.run {
+                        friendInteractors = interactors
+                    }
+                } catch {
+                    print("Error fetching friend interactions: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 }
-

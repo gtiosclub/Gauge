@@ -13,6 +13,7 @@ struct RecentSearchesView: View {
     @Binding var selectedTab: String
     
     @State private var isUpdating: Bool = false
+    @State private var userProfileCache: [String: String] = [:]
     
     var body: some View {
         ZStack {
@@ -41,12 +42,47 @@ struct RecentSearchesView: View {
                                         .background(Color(.systemGray5))
                                         .clipShape(Circle())
                                 } else {
-                                    Image(systemName: "person")
-                                        .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(.black)
-                                        .padding(8)
-                                        .background(Color(.systemGray5))
-                                        .clipShape(Circle())
+                                    if let profileURL = userProfileCache[search],
+                                       !profileURL.isEmpty,
+                                       let url = URL(string: profileURL) {
+                                        AsyncImage(url: url) { phase in
+                                            if let image = phase.image {
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .frame(width: 30, height: 30)
+                                                    .clipShape(Circle())
+                                            } else if phase.error != nil {
+                                                Image(systemName: "person.crop.circle.fill")
+                                                    .font(.system(size: 12, weight: .bold))
+                                                    .foregroundColor(.black)
+                                                    .padding(8)
+                                                    .background(Color(.systemGray5))
+                                                    .clipShape(Circle())
+                                            } else {
+                                                ProgressView()
+                                                    .frame(width: 30, height: 30)
+                                            }
+                                        }
+                                    } else {
+                                        Image(systemName: "person.crop.circle.fill")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.black)
+                                            .padding(8)
+                                            .background(Color(.systemGray5))
+                                            .clipShape(Circle())
+                                            .task {
+                                                do {
+                                                    if let fetchedProfileURL = try await userVM.getProfilePhoto(forUsername: search) {
+                                                        await MainActor.run {
+                                                            userProfileCache[search] = fetchedProfileURL
+                                                        }
+                                                    }
+                                                } catch {
+                                                    print("Error fetching profile for \(search): \(error.localizedDescription)")
+                                                }
+                                            }
+                                    }
                                 }
                                 
                                 Text(search)
@@ -78,6 +114,7 @@ struct RecentSearchesView: View {
                             }
                             .onTapGesture {
                                 searchText = search
+                                isSearchFieldFocused = true
                                 Task {
                                     isUpdating = true
                                     do {
