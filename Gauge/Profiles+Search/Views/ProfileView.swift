@@ -162,7 +162,7 @@ struct ProfileView: View {
                         } else if selectedTab == "Votes" {
                             VoteCardsView()
                         } else if selectedTab == "Takes" {
-                            TakesView()
+                            TakesView(visitedUser: userVM.user, profileVM: profileViewModel)
                         } else if selectedTab == "Statistics" {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text("Username Statistics")

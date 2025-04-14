@@ -13,6 +13,7 @@ import UIKit
 class ProfileViewModel: ObservableObject {
     
     @Published var user: User?
+    @Published var posts: [BinaryPost] = []
     
     private var storage = Storage.storage()
     
@@ -128,4 +129,108 @@ class ProfileViewModel: ObservableObject {
         }
         return nil
     }
+    
+    func fetchUserPosts(for userId: String) {
+            let db = Firestore.firestore()
+            DispatchQueue.main.async {
+                self.posts = []
+            }
+            
+            db.collection("POSTS")
+                .whereField("userId", isEqualTo: userId)
+                .whereField("type", isEqualTo: PostType.BinaryPost.rawValue)
+                .getDocuments { snapshot, error in
+                    if let error = error {
+                        print("Error fetching posts: \(error.localizedDescription)")
+                        return
+                    }
+                    guard let documents = snapshot?.documents else {
+                        print("No posts found")
+                        return
+                    }
+                    
+                    var fetchedPosts: [BinaryPost] = []
+                    let group = DispatchGroup()
+
+                    for document in documents {
+                        let data = document.data()
+                        let postId = document.documentID
+                        
+                        // Convert Firestore data to a BinaryPost
+                        let postDate = (data["postDateAndTime"] as? Timestamp)?.dateValue() ??
+                            DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "") ?? Date()
+                        
+                        var post = BinaryPost(
+                            postId: postId,
+                            userId: data["userId"] as? String ?? "",
+                            categories: Category.mapStringsToCategories(returnedStrings: data["categories"] as? [String] ?? []),
+                            topics: data["topics"] as? [String] ?? [],
+                            postDateAndTime: postDate,
+                            question: data["question"] as? String ?? "",
+                            responseOption1: data["responseOption1"] as? String ?? "",
+                            responseOption2: data["responseOption2"] as? String ?? "",
+                            sublabel1: data["sublabel1"] as? String ?? "",
+                            sublabel2: data["sublabel2"] as? String ?? "",
+                            favoritedBy: data["favoritedBy"] as? [String] ?? []
+                        )
+                        
+                        // Fetch RESPONSES
+                        group.enter()
+                        db.collection("POSTS").document(postId).collection("RESPONSES").getDocuments { snapshot, error in
+                                if let snapshot = snapshot {
+                                    let responses: [Response] = snapshot.documents.compactMap { doc in
+                                        let d = doc.data()
+                                        return Response(
+                                            responseId: doc.documentID,
+                                            userId: d["userId"] as? String ?? "",
+                                            responseOption: d["responseOption"] as? String ?? ""
+                                        )
+                                    }
+                                    post.responses = responses
+                                }
+                                group.leave()
+                            }
+                        
+                        // Fetch COMMENTS
+                        group.enter()
+                        db.collection("POSTS").document(postId).collection("COMMENTS").getDocuments { snapshot, error in
+                                if let snapshot = snapshot {
+                                    let comments: [Comment] = snapshot.documents.compactMap { doc in
+                                        let d = doc.data()
+                                        return Comment(
+                                            commentType: .text,
+                                            postId: postId,
+                                            userId: d["userId"] as? String ?? "",
+                                            username: "",
+                                            profilePhoto: "",
+                                            date: DateConverter.convertStringToDate(d["date"] as? String ?? "") ?? Date(),
+                                            commentId: doc.documentID,
+                                            likes: d["likes"] as? [String] ?? [],
+                                            dislikes: d["dislikes"] as? [String] ?? [],
+                                            content: d["content"] as? String ?? ""
+                                        )
+                                    }
+                                    post.comments = comments
+                                }
+                                group.leave()
+                            }
+                        
+                        // Fetch VIEWS
+                        group.enter()
+                        db.collection("POSTS").document(postId).collection("VIEWS")
+                            .getDocuments { snapshot, error in
+                                if let snapshot = snapshot {
+                                    post.viewCounter = snapshot.documents.count
+                                }
+                                group.leave()
+                            }
+                        
+                        group.notify(queue: .main) {
+                            fetchedPosts.append(post)
+                            self.posts = fetchedPosts.sorted { $0.postDateAndTime > $1.postDateAndTime }
+                        }
+                    }
+                }
+        }
+    
 }

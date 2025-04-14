@@ -15,13 +15,14 @@ struct ProfileVisitView: View {
     @State private var selectedBadge: BadgeModel? = nil
     @State private var showingTakeTimeResults = false
     @State private var isSendingRequest: Bool = false
+    @StateObject private var profileVM = ProfileViewModel()
+    
     let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
 
     let userTags = ["📏5'9", "📍New York", "🔒Single", "🎓Alumni"]
     
     @ObservedObject var friendsViewModel: FriendsViewModel
 
-        // Define the possible friend states.
     enum FriendStatus {
         case none, pending, friends
     }
@@ -97,13 +98,11 @@ struct ProfileVisitView: View {
                                 .font(.system(size: 26))
                                 .fontWeight(.medium)
                         HStack {
-                             // Display different UI based on friend request state.
                              if currentFriendStatus == .none {
                                  Button(action: {
                                      Task {
                                          isSendingRequest = true
                                          do {
-                                             // Send friend request using the FriendsViewModel.
                                              try await friendsViewModel.sendFriendRequest(to: user)
                                          } catch {
                                              print("Error sending friend request: \(error)")
@@ -194,7 +193,7 @@ struct ProfileVisitView: View {
                         } else if selectedTab == "Votes" {
                             VoteCardsView()
                         } else if selectedTab == "Takes" {
-                            TakesView()
+                            TakesView(visitedUser: user, profileVM: profileVM)
                         } else if selectedTab == "Statistics" {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text("Username Statistics")
