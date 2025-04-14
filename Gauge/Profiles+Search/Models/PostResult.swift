@@ -7,6 +7,7 @@
 
 struct PostResult: Identifiable, Codable {
     let id: String
+    let userId: String
     let question: String
     let timeAgo: String
     let username: String

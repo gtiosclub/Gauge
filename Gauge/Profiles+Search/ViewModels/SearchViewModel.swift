@@ -23,7 +23,7 @@ class SearchViewModel: ObservableObject {
         
         var postIds: [String] = []
         var attempts = 0
-        let maxAttempts = 10
+        let maxAttempts = 15
         
         while attempts < maxAttempts {
             attempts += 1
@@ -87,12 +87,14 @@ class SearchViewModel: ObservableObject {
             let profilePhoto = data["profilePhoto"] as? String ?? ""
             let username = data["username"] as? String ?? "Unknown"
             let categories = data["categories"] as? [String] ?? []
+            let userId = data["userId"] as? String ?? ""
             
             let responsesSnapshot = try await Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").getDocuments()
             let voteCount = responsesSnapshot.documents.count
             let timeAgo = DateConverter.timeAgo(from: date)
             
             return PostResult(id: postId,
+                              userId: userId,
                               question: question,
                               timeAgo: timeAgo,
                               username: username,
@@ -166,5 +168,18 @@ class SearchViewModel: ObservableObject {
             
             return result
         }
+    }
+    
+    func getFriendInteractors(for postId: String, myFriends: [String]) async throws -> [String] {
+        let responsesSnapshot = try await Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").getDocuments()
+        
+        let responseUserIds = responsesSnapshot.documents.compactMap { $0.data()["userId"] as? String }
+    
+        let friendResponses = responseUserIds.filter { myFriends.contains($0) }
+        
+        let uniqueFriendIds = Array(Set(friendResponses)).prefix(2)
+        let friendCount = uniqueFriendIds.count
+//        print("SearchViewModel.getFriendInteractors: found \(friendCount) friend interactors for post \(postId).")
+        return Array(uniqueFriendIds)
     }
 }

@@ -8,21 +8,54 @@
 import Foundation
 import FirebaseFirestore
 class FriendsViewModel: ObservableObject {
+    
+    var currentUser: User
+    
     @Published var friends: [String] = []
     @Published var incomingRequests: [String] = []
     @Published var outgoingRequests: [String] = []
     @Published var loadedFriends: [User] = []
     @Published var loadedRequests: [User] = []
+    
     init(user: User) {
+        self.currentUser = user
         self.friends = user.friends
         self.incomingRequests = user.friendIn
         self.outgoingRequests = user.friendOut
-        
+
         Task {
             await fetchFriendsDetails()
             await fetchIncomingRequestDetails(userId: user.userId)
         }
     }
+    
+    func sendFriendRequest(to targetUser: User) async throws {
+        let currentUserRef = Firebase.db.collection("USERS").document(currentUser.userId)
+        let targetUserRef = Firebase.db.collection("USERS").document(targetUser.userId)
+        
+        let currentSnap = try await currentUserRef.getDocument()
+        let targetSnap = try await targetUserRef.getDocument()
+        
+        var currentFriendOut = currentSnap.data()?["friendOut"] as? [String] ?? []
+        var targetFriendIn = targetSnap.data()?["friendIn"] as? [String] ?? []
+        
+        if !currentFriendOut.contains(targetUser.userId) {
+            currentFriendOut.append(targetUser.userId)
+        }
+        if !targetFriendIn.contains(currentUser.userId) {
+            targetFriendIn.append(currentUser.userId)
+        }
+        
+        let batch = Firebase.db.batch()
+        batch.updateData(["friendOut": currentFriendOut], forDocument: currentUserRef)
+        batch.updateData(["friendIn": targetFriendIn], forDocument: targetUserRef)
+        try await batch.commit()
+        
+        await MainActor.run {
+            self.outgoingRequests.append(targetUser.userId)
+        }
+    }
+    
     func getIncomingRequests(userId: String) async -> [User] {
         var incoming: [User] = []
         do {
