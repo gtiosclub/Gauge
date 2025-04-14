@@ -159,11 +159,9 @@ struct ProfileView: View {
                             selectedBadge = badge
                         })
                     } else if selectedTab == "Votes" {
-                        VotesTabView()
-                            .environmentObject(userVM)
-                            .environmentObject(postVM)
+                        VoteCardsView()
                     } else if selectedTab == "Takes" {
-                        TakesView()
+                        TakesView(visitedUser: userVM.user, profileVM: profileViewModel)
                     } else if selectedTab == "Statistics" {
                         StatisticsView()
                             .environmentObject(userVM)
