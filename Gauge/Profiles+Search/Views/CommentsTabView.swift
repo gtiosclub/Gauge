@@ -2,7 +2,8 @@ import SwiftUI
 import Firebase
 
 struct CommentsTabView: View {
-    @EnvironmentObject var userVM: UserFirebase
+//    @EnvironmentObject var userVM: UserFirebase
+    var visitedUser: User
     @State private var comments: [Comment] = []
     @State private var sortOption: String = "Most votes"
 
@@ -75,7 +76,7 @@ struct CommentsTabView: View {
                 let originalPoster = postData["username"] as? String ?? "unknown"
 
                 Firebase.db.collection("POSTS").document(postId).collection("COMMENTS")
-                    .whereField("userId", isEqualTo: userVM.user.userId)
+                    .whereField("userId", isEqualTo: visitedUser.userId)
                     .getDocuments { snapshot, error in
                         guard let snapshot = snapshot, error == nil else {
                             print("Error fetching comments: \(error?.localizedDescription ?? "Unknown error")")
@@ -89,8 +90,8 @@ struct CommentsTabView: View {
                                 commentType: CommentType(rawValue: data["commentType"] as? String ?? "text") ?? .text,
                                 postId: postId,
                                 userId: data["userId"] as? String ?? "",
-                                username: userVM.user.username,
-                                profilePhoto: userVM.user.profilePhoto,
+                                username: visitedUser.username,
+                                profilePhoto: visitedUser.profilePhoto,
                                 date: DateConverter.convertStringToDate(data["date"] as? String ?? "") ?? Date(),
                                 commentId: doc.documentID,
                                 likes: data["likes"] as? [String] ?? [],

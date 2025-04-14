@@ -9,18 +9,19 @@ import SwiftUI
 import Firebase
 
 struct VotesTabView: View {
-    @EnvironmentObject var postVM: PostFirebase
-    @EnvironmentObject var userVM: UserFirebase
+//    @EnvironmentObject var postVM: PostFirebase
+//    @EnvironmentObject var userVM: UserFirebase
+    var visitedUser: User
     @State private var respondedPosts: [BinaryPost] = []
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 ForEach(respondedPosts, id: \.postId) { post in
-                    if let userResponse = post.responses.first(where: { $0.userId == userVM.user.userId }) {
+                    if let userResponse = post.responses.first(where: { $0.userId == visitedUser.userId }) {
                         VoteCard(
-                            profilePhotoURL: userVM.user.profilePhoto,
-                            username: userVM.user.username,
+                            profilePhotoURL: visitedUser.profilePhoto,
+                            username: visitedUser.username,
                             timeAgo: DateConverter.timeAgo(from: post.postDateAndTime),
                             tags: post.categories.map { $0.rawValue },
                             vote: userResponse.responseOption,
@@ -40,7 +41,7 @@ struct VotesTabView: View {
     }
 
     func fetchRespondedPosts() {
-        let ids = userVM.user.myResponses
+        let ids = visitedUser.myResponses
         respondedPosts = []
 
         for id in ids {

@@ -159,20 +159,15 @@ struct ProfileView: View {
                             selectedBadge = badge
                         })
                     } else if selectedTab == "Votes" {
-                        VoteCardsView()
+                        VotesTabView(visitedUser: userVM.user)
                     } else if selectedTab == "Takes" {
                         TakesView(visitedUser: userVM.user, profileVM: profileViewModel)
                     } else if selectedTab == "Statistics" {
-                        StatisticsView()
-                            .environmentObject(userVM)
-                            .environmentObject(postVM)
+                        StatisticsView(visitedUser: userVM.user)
                     } else if selectedTab == "Comments" {
-                        CommentsTabView()
-                            .environmentObject(userVM)
+                        CommentsTabView(visitedUser: userVM.user)
                     } else if selectedTab == "Favorites" {
-                        FavoritesTabView()
-                            .environmentObject(userVM)
-                            .environmentObject(postVM)
+                        FavoritesTabView(visitedUser: userVM.user)
                     } else {
                         VStack {
                             Text("\(selectedTab) Content Here")

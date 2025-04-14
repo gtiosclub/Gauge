@@ -10,7 +10,8 @@ import FirebaseFirestore
 
 struct FavoritesTabView: View {
     @EnvironmentObject var userVM: UserFirebase
-    @EnvironmentObject var postVM: PostFirebase
+    var visitedUser: User
+//    @EnvironmentObject var postVM: PostFirebase
     @State private var favoritedPosts: [BinaryPost] = []
 
     var body: some View {
@@ -32,7 +33,7 @@ struct FavoritesTabView: View {
     private func fetchFavorites() {
         Task {
             do {
-                let favoriteIDs = try await userVM.getUserFavorites(userId: userVM.user.userId)
+                let favoriteIDs = try await userVM.getUserFavorites(userId: visitedUser.userId)
                 favoritedPosts = []
 
                 for id in favoriteIDs {

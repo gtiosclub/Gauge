@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct StatisticsView: View {
-    @EnvironmentObject var userVM: UserFirebase
-    @EnvironmentObject var postVM: PostFirebase
+//    @EnvironmentObject var userVM: UserFirebase
+    var visitedUser: User
+//    @EnvironmentObject var postVM: PostFirebase
 
     let gridColumns = [
         GridItem(.flexible(), spacing: 16),
@@ -18,16 +19,16 @@ struct StatisticsView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("\(userVM.user.username)'s Statistics")
+            Text("\(visitedUser.username)'s Statistics")
                 .font(.title2)
                 .fontWeight(.bold)
                 .padding(.top)
 
             LazyVGrid(columns: gridColumns, spacing: 16) {
-                statCard(title: "Total Votes", value: "\(userVM.user.myResponses.count)", footer: "Votes", gradient: [.orange.opacity(0.2), .white])
-                statCard(title: "Total Comments", value: "\(userVM.user.myComments.count)", footer: "Comments", gradient: [.blue.opacity(0.2), .white])
-                statCard(title: "Total Take Time", value: "\(userVM.user.myTakeTime.count)", footer: "Take Time", gradient: [.purple.opacity(0.2), .white])
-                statCard(title: "Total Takes", value: "\(userVM.user.myPosts.count)", footer: "Takes", gradient: [.red.opacity(0.2), .white])
+                statCard(title: "Total Votes", value: "\(visitedUser.myResponses.count)", footer: "Votes", gradient: [.orange.opacity(0.2), .white])
+                statCard(title: "Total Comments", value: "\(visitedUser.myComments.count)", footer: "Comments", gradient: [.blue.opacity(0.2), .white])
+                statCard(title: "Total Take Time", value: "\(visitedUser.myTakeTime.count)", footer: "Take Time", gradient: [.purple.opacity(0.2), .white])
+                statCard(title: "Total Takes", value: "\(visitedUser.myPosts.count)", footer: "Takes", gradient: [.red.opacity(0.2), .white])
             }
             .padding(.horizontal)
         }
