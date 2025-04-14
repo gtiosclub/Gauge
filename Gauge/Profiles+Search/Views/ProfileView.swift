@@ -108,8 +108,8 @@ struct ProfileView: View {
                                 .font(.system(size: 30))
                                 .fontWeight(.medium)
                             
-                            NavigationLink(destination: FriendsView()) {
-                                Text("27")
+                            NavigationLink(destination: FriendsView(viewModel: FriendsViewModel( user: userVM.user), currentUser: userVM.user)) {
+                                Text("\(userVM.user.friends.count)")
                                     .foregroundColor(.black)
                                 Text("Friends")
                                     .foregroundColor(Color(.systemGray))
@@ -401,5 +401,6 @@ struct ProfileView_Previews: PreviewProvider {
         ProfileView(userVM: UserFirebase(), isCurrentUser: false)
             .environmentObject(PostFirebase())
             .environmentObject(AuthenticationVM())
+            .environmentObject(UserFirebase())
     }
 }
