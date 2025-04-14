@@ -16,7 +16,6 @@ struct ProfileVisitView: View {
     @State private var showingTakeTimeResults = false
     let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
 
-    // Example tags (optional)
     let userTags = ["📏5'9", "📍New York", "🔒Single", "🎓Alumni"]
 
     var body: some View {
