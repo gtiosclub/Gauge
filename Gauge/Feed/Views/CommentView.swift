@@ -45,6 +45,8 @@ struct CommentView: View {
                             .fill(color.opacity(0.2))
                     )
                     .padding(.leading, 10)
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
