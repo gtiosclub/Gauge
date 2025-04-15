@@ -15,7 +15,7 @@ import MultipeerConnectivity
 //        SplashBackgroundView()
 //        SlidingWordsView(leftWord: "Ready for", rightWord: "Results?")
 //    }
-    GuessView(manager: TMManager(yourName: "Akshat", isHost: "Y"))
+    QuestionSelectView(manager: TMManager(yourName: "Akshat", isHost: "Y"))
 }
 
 struct TakeMasterView: View {
@@ -132,21 +132,33 @@ struct QuestionSelectView: View {
 
     var body: some View {
         VStack {
-            Text("Create a Question and Answer it based on how you feel!")
+            Text("Create a Question for when you're the Take Master!")
                 .font(.title)
                 .multilineTextAlignment(.center)
-            TextField("Question:", text: $question, axis: .vertical)
-                .font(.title)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-                .multilineTextAlignment(.leading)
-                .lineLimit(2, reservesSpace: true)
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.black)
-                )
-            TextField("Answer:", text: $answer, axis: .vertical)
+            ZStack {
+                if question.isEmpty {
+                    Text("Make a question...")
+                        .font(.title)
+                        .foregroundStyle(.gray)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(2, reservesSpace: true)
+                        .padding()
+                }
+                TextField("", text: $question, axis: .vertical)
+                    .font(.title)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2, reservesSpace: true)
+                    .padding()
+
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.black)
+            )
+            TextField("Answer your question...", text: $answer, axis: .vertical)
                 .font(.title)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
                 .multilineTextAlignment(.leading)
@@ -158,7 +170,7 @@ struct QuestionSelectView: View {
                         .stroke(Color.black)
                 )
             Button(action: {
-                manager.submitQuestion(question, answer: answer, from: manager.myPeerID.displayName)
+                manager.submitQuestion(question, answer: answer.lowercased(), from: manager.myPeerID.displayName)
             }) {
                 Text("Submit")
                     .foregroundColor(.white)

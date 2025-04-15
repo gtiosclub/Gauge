@@ -7,8 +7,8 @@
 
 import SwiftUI
 struct VoteCard: View {
-    var profilePhotoURL: String
-    var username: String
+    var profilePhotoURL: String?
+    var username: String?
     var timeAgo: String
     var tags: [String]
     var vote: String
@@ -27,18 +27,23 @@ struct VoteCard: View {
         VStack(alignment: .leading, spacing: 12) {
             // Header: user info and vote
             HStack(spacing: 6) {
-                AsyncImage(url: URL(string: profilePhotoURL)) { image in
-                    image.resizable()
-                } placeholder: {
-                    Circle().fill(Color(.systemGray3))
+                if let profilePhotoURL = profilePhotoURL {
+                    AsyncImage(url: URL(string: profilePhotoURL)) { image in
+                        image.resizable()
+                    } placeholder: {
+                        Circle().fill(Color(.systemGray3))
+                    }
+                    .frame(width: 28, height: 28)
+                    .clipShape(Circle())
                 }
-                .frame(width: 28, height: 28)
-                .clipShape(Circle())
-                Text(username)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Text("·")
-                    .foregroundColor(.gray)
+                if let username = username {
+                    Text(username)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+
+                    Text("·")
+                        .foregroundColor(.gray)
+                }
                 Text(voteText)
                     .foregroundColor(voteColor)
                     .font(.subheadline)
