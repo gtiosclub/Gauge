@@ -227,6 +227,7 @@ class UserFirebase: ObservableObject {
         
         DispatchQueue.main.async {
             self.useridsToPhotosAndUsernames[userId] = (photoURL: profilePhoto.isEmpty ? profilePhoto2 : profilePhoto, username: username)
+            self.objectWillChange.send()
         }
     }
     

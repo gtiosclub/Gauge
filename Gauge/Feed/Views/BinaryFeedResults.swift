@@ -52,7 +52,7 @@ struct BinaryFeedResults: View {
                 // Results
                 BinaryResultView(post: post, optionSelected: optionSelected)
 //                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, 8)
+                    .padding(.top, 4)
                 
                 // Profile Stacks + Vote Count
                 
@@ -72,7 +72,8 @@ struct BinaryFeedResults: View {
                             userIds: Array(post.responses
                                 .filter { userVM.user.friends.contains($0.userId) && $0.responseOption == post.responseOption2 }
                                 .map { $0.userId }.prefix(3)),
-                            sideOnTop: .right
+                            sideOnTop: .right,
+                            changeOffset: false
                         )
                     }
                     
