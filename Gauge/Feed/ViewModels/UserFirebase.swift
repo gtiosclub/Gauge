@@ -216,8 +216,8 @@ class UserFirebase: ObservableObject {
             print("No user data found for \(userId)")
             DispatchQueue.main.async {
                 self.useridsToPhotosAndUsernames[userId] = (photoURL: "", username: userId)
+                self.objectWillChange.send()
             }
-            objectWillChange.send()
             return
         }
         
