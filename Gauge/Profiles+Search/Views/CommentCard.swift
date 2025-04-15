@@ -7,12 +7,10 @@
 
 import SwiftUI
 import Firebase
-
 struct CommentCard: View {
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
     @State var comment: Comment
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ProfileUsernameDateView(dateTime: comment.date, userId: comment.userId)
@@ -20,15 +18,12 @@ struct CommentCard: View {
             // Content
             Text(comment.content)
                 .font(.body)
-
             // Actions: Reply + Triangular Votes
             HStack {
                 Text("Reply")
                     .foregroundColor(.gray)
                     .font(.subheadline)
-
                 Spacer()
-
                 HStack(spacing: 16) {
                     Button(action: {
                         toggleLike()
@@ -36,7 +31,6 @@ struct CommentCard: View {
                         Text("▲ \(comment.likes.count)")
                             .foregroundColor(.gray)
                     }
-
                     Button(action: {
                         toggleDislike()
                     }) {
@@ -52,7 +46,6 @@ struct CommentCard: View {
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
     }
-
     func toggleLike() {
         let userId = userVM.user.userId
         let db = Firestore.firestore()
@@ -60,7 +53,6 @@ struct CommentCard: View {
             .document(comment.postId)
             .collection("COMMENTS")
             .document(comment.commentId)
-
         if comment.likes.contains(userId) {
             // Remove like
             comment.likes.removeAll { $0 == userId }
@@ -75,7 +67,6 @@ struct CommentCard: View {
             comment.dislikes.removeAll { $0 == userId }
         }
     }
-
     func toggleDislike() {
         let userId = userVM.user.userId
         let db = Firestore.firestore()
@@ -83,7 +74,6 @@ struct CommentCard: View {
             .document(comment.postId)
             .collection("COMMENTS")
             .document(comment.commentId)
-
         if comment.dislikes.contains(userId) {
             // Remove dislike
             comment.dislikes.removeAll { $0 == userId }

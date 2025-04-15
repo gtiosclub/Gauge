@@ -7,13 +7,10 @@
 
 import SwiftUI
 import FirebaseFirestore
-
 struct FavoritesTabView: View {
     @EnvironmentObject var userVM: UserFirebase
     var visitedUser: User
-//    @EnvironmentObject var postVM: PostFirebase
     @State private var favoritedPosts: [BinaryPost] = []
-
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
@@ -29,19 +26,16 @@ struct FavoritesTabView: View {
             fetchFavorites()
         }
     }
-
     private func fetchFavorites() {
         Task {
             do {
                 let favoriteIDs = try await userVM.getUserFavorites(userId: visitedUser.userId)
                 favoritedPosts = []
-
                 for id in favoriteIDs {
                     let doc = try await Firebase.db.collection("POSTS").document(id).getDocument()
                     guard let data = doc.data(),
                           let type = data["type"] as? String,
                           type == PostType.BinaryPost.rawValue else { continue }
-
                     var post = BinaryPost(
                         postId: id,
                         userId: data["userId"] as? String ?? "",
@@ -56,18 +50,12 @@ struct FavoritesTabView: View {
                         sublabel2: data["sublabel2"] as? String ?? "",
                         favoritedBy: data["favoritedBy"] as? [String] ?? []
                     )
-
-                    post.username = data["username"] as? String ?? "Unknown"
-                    post.profilePhoto = data["profilePhoto"] as? String ?? ""
-
                     try await userVM.populateUsernameAndProfilePhoto(userId: post.userId)
                     if let patch = userVM.useridsToPhotosAndUsernames[post.userId] {
                         post.username = patch.username
                         post.profilePhoto = patch.photoURL
                     }
-
                     let group = DispatchGroup()
-
                     group.enter()
                     Firebase.db.collection("POSTS").document(id).collection("COMMENTS").getDocuments { snapshot, _ in
                         if let docs = snapshot?.documents {
@@ -89,13 +77,11 @@ struct FavoritesTabView: View {
                         }
                         group.leave()
                     }
-
                     group.enter()
                     Firebase.db.collection("POSTS").document(id).collection("VIEWS").getDocuments { snapshot, _ in
                         post.viewCounter = snapshot?.documents.count ?? 0
                         group.leave()
                     }
-
                     group.notify(queue: .main) {
                         favoritedPosts.append(post)
                         favoritedPosts.sort { $0.postDateAndTime > $1.postDateAndTime }

@@ -6,30 +6,26 @@
 //
 
 import SwiftUI
-
 struct VoteCard: View {
     var profilePhotoURL: String
     var username: String
     var timeAgo: String
     var tags: [String]
-    var vote: String // "Yes" or "No"
+    var vote: String
     var content: String
     var comments: Int?
     var views: Int?
     var votes: Int?
-
     var voteColor: Color {
         let greenResponses = ["yes", "love", "cool"]
         return greenResponses.contains(vote.lowercased()) ? .green : .red
     }
-
     var voteText: String {
         "voted \(vote.lowercased())"
     }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // voted by user
+            // Header: user info and vote
             HStack(spacing: 6) {
                 AsyncImage(url: URL(string: profilePhotoURL)) { image in
                     image.resizable()
@@ -38,25 +34,19 @@ struct VoteCard: View {
                 }
                 .frame(width: 28, height: 28)
                 .clipShape(Circle())
-
                 Text(username)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-
                 Text("·")
                     .foregroundColor(.gray)
-
                 Text(voteText)
                     .foregroundColor(voteColor)
                     .font(.subheadline)
-
                 Spacer()
-
                 Text(timeAgo)
                     .font(.footnote)
                     .foregroundColor(.gray)
             }
-
             // Tags
             HStack(spacing: 6) {
                 ForEach(tags, id: \.self) { tag in
@@ -69,36 +59,31 @@ struct VoteCard: View {
                         .cornerRadius(20)
                 }
             }
-
             // Content
             Text(content)
                 .font(.body)
                 .fixedSize(horizontal: false, vertical: true)
-
             // Stats
             HStack {
-                if ((votes) != nil) {
-                    Text("\(votes ?? 0) votes")
+                if let votes = votes {
+                    Text("\(votes) votes")
                         .foregroundColor(.gray)
                         .font(.subheadline)
                 }
-
                 Spacer()
-
                 HStack(spacing: 16) {
-                    if ((comments) != nil) {
+                    if let comments = comments {
                         HStack(spacing: 4) {
                             Image(systemName: "bubble.left")
-                            Text("\(comments ?? 0)")
+                            Text("\(comments)")
                         }
                     }
-                    if ((views) != nil) {
+                    if let views = views {
                         HStack(spacing: 4) {
                             Image(systemName: "eye")
-                            Text("\(views ?? 0)")
+                            Text("\(views)")
                         }
                     }
-
                     Image(systemName: "bookmark")
                     Image(systemName: "square.and.arrow.up")
                 }

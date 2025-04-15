@@ -13,6 +13,8 @@ struct FriendsView: View {
     var currentUser: User
     @State private var showRemoveAlert = false
     @State private var userToRemove: User?
+    @State private var selectedUser: User? = nil
+    @State private var navigateToUserProfile = false
     var filteredFriends: [User] {
         if searchText.isEmpty {
             return viewModel.loadedFriends
@@ -22,7 +24,6 @@ struct FriendsView: View {
             }
         }
     }
-    
     @Sendable
     func loadInitialData() async {
         if let refreshedUser = await viewModel.getUserFromId(userId: currentUser.userId) {
@@ -36,37 +37,45 @@ struct FriendsView: View {
         }
     }
     var body: some View {
-            VStack(spacing: 0) {
-                CustomSearchBar(text: $searchText)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    .frame(height: 36)
-                Divider()
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        if !viewModel.loadedRequests.isEmpty {
-                            SectionHeader(title: "Requests")
-                                .padding(.top, 16)
-                            ForEach(viewModel.loadedRequests.prefix(2)) { user in
+        VStack(spacing: 0) {
+            CustomSearchBar(text: $searchText)
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .frame(height: 36)
+            Divider()
+                .padding(.horizontal)
+                .padding(.top, 8)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    if !viewModel.loadedRequests.isEmpty {
+                        SectionHeader(title: "Requests")
+                            .padding(.top, 16)
+                        ForEach(viewModel.loadedRequests.prefix(2)) { user in
+                            Button(action: {
+                                selectedUser = user
+                                navigateToUserProfile = true
+                            }) {
                                 RequestRow(user: user, viewModel: viewModel, currentUser: currentUser)
-                            }
-                           
-                            NavigationLink(destination: RequestsView(viewModel: viewModel, currentUser: currentUser)) {
-                                MoreRequestsView(requests: viewModel.loadedRequests)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
-                    
-                        if !filteredFriends.isEmpty {
-                            SectionHeader(title: "\(filteredFriends.count) Friends")
-                                .padding(.top, 16)
+                        NavigationLink(destination: RequestsView(viewModel: viewModel, currentUser: currentUser)) {
+                            MoreRequestsView(requests: viewModel.loadedRequests)
                         }
-                        if filteredFriends.isEmpty {
-                            EmptyFriendsView(searchText: searchText)
-                        } else {
-                            ForEach(filteredFriends) { friend in
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    if !filteredFriends.isEmpty {
+                        SectionHeader(title: "\(filteredFriends.count) Friends")
+                            .padding(.top, 16)
+                    }
+                    if filteredFriends.isEmpty {
+                        EmptyFriendsView(searchText: searchText)
+                    } else {
+                        ForEach(filteredFriends) { friend in
+                            Button(action: {
+                                selectedUser = friend
+                                navigateToUserProfile = true
+                            }) {
                                 HStack(spacing: 10) {
                                     AsyncImage(url: URL(string: friend.profilePhoto)) { image in
                                         image.resizable()
@@ -87,34 +96,52 @@ struct FriendsView: View {
                                 }
                                 .padding(.horizontal)
                             }
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-            }
-            .navigationBarTitle("Friends", displayMode: .inline)
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Profile")
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
                 }
+                .padding(.horizontal)
             }
-
-            .confirmationDialog("Remove this friend?", isPresented: $showRemoveAlert, titleVisibility: .visible) {
-                Button("Remove", role: .destructive) {
-                    if let user = userToRemove {
-                        removeFriend(user)
+        }
+        .navigationBarTitle("Friends", displayMode: .inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    dismiss()
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Profile")
                     }
                 }
-                Button("Cancel", role: .cancel) {}
             }
+        }
+        .confirmationDialog("Remove this friend?", isPresented: $showRemoveAlert, titleVisibility: .visible) {
+            Button("Remove", role: .destructive) {
+                if let user = userToRemove {
+                    removeFriend(user)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .background(
+            NavigationLink(
+                destination: Group {
+                    if selectedUser?.userId == currentUser.userId {
+                        ProfileView()
+                    } else if let user = selectedUser {
+                        ProfileVisitView(user: user, friendsViewModel: FriendsViewModel(user: currentUser))
+                    } else {
+                        EmptyView()
+                    }
+                },
+                isActive: $navigateToUserProfile
+            ) {
+                EmptyView()
+            }
+            .hidden()
+        )
         .task {
             await loadInitialData()
         }
@@ -193,12 +220,24 @@ struct MoreRequestsView: View {
                     ProfileImagePill(profilePhoto: user.profilePhoto)
                 }
             }
-            let othersCount = requests.count - 2
-            if othersCount > 0 {
-                Text("and \(othersCount) others...")
-                    .font(.subheadline)
-                    .foregroundColor(.black)
-                    .padding(.leading, 6)
+            if let first = requests.first {
+                let othersCount = requests.count - 1
+                if othersCount <= 0 {
+                    Text(first.username)
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                        .padding(.leading, 6)
+                } else if othersCount == 1 {
+                    Text("\(first.username) and 1 other...")
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                        .padding(.leading, 6)
+                } else {
+                    Text("\(first.username) and \(othersCount) others...")
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                        .padding(.leading, 6)
+                }
             }
             Spacer()
             Image(systemName: "chevron.right")
