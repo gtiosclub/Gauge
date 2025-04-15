@@ -1136,6 +1136,16 @@ class PostFirebase: ObservableObject {
         let db = Firebase.db
 
         for postId in postIds {
+            let documentRef = Firebase.db.collection("POSTS").document(postId)
+            
+            documentRef.updateData([
+                "favoritedBy": []
+            ]) { error in
+                if let error = error {
+                    print("Error adding user to favoritedBy array: \(error)")
+                }
+            }
+            
             // Delete COMMENTS
             let commentsSnapshot = try? await db.collection("POSTS").document(postId).collection("COMMENTS").getDocuments()
             commentsSnapshot?.documents.forEach { doc in
