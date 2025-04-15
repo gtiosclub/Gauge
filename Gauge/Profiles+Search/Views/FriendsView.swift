@@ -131,7 +131,7 @@ struct FriendsView: View {
                     if selectedUser?.userId == currentUser.userId {
                         ProfileView()
                     } else if let user = selectedUser {
-                        ProfileVisitView(user: user, friendsViewModel: FriendsViewModel(user: currentUser))
+                        ProfileVisitView(user: user, friendsViewModel: viewModel)
                     } else {
                         EmptyView()
                     }
