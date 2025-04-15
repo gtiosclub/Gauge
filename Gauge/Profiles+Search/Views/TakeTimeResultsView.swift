@@ -24,7 +24,7 @@ struct TakeTimeResultsView: View {
 //                        .foregroundColor(.blue)
 //                    }
 //                    .padding(.vertical, 6)
-                    VoteCard(profilePhotoURL: user.profilePhoto, username: user.username, timeAgo: "", tags: [take.topic], vote: (selectedOption == 1 ? take.responseOption1 : take.responseOption2), content: take.question, comments: nil, views: nil, votes: nil)
+                    VoteCard(profilePhotoURL: nil, username: nil, timeAgo: "", tags: [take.topic], vote: (selectedOption == 1 ? take.responseOption1 : take.responseOption2), content: take.question, comments: nil, views: nil, votes: nil)
                 }
             }
         }
