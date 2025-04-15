@@ -21,7 +21,6 @@ struct BinaryFeedResults: View {
                 
                 ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 5)
                 
                 // Categories
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -47,11 +46,12 @@ struct BinaryFeedResults: View {
                     .font(.system(size: 35))
                     .multilineTextAlignment(.leading)
                     .foregroundStyle(.black)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Results
                 BinaryResultView(post: post, optionSelected: optionSelected)
-                    .frame(maxWidth: .infinity, alignment: .center)
+//                    .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 8)
                 
                 // Profile Stacks + Vote Count
@@ -107,7 +107,22 @@ struct BinaryFeedResults: View {
 
 #Preview {
     BinaryFeedResults(
-        post: BinaryPost(postId: "903885747", userId: "coolguy", categories: [.sports(.nfl), .sports(.soccer), .entertainment(.tvShows), .entertainment(.movies)], postDateAndTime: Date(), question: "Insert controversial binary take right here in this box; yeah, incite some intereseting discourse", responseOption1: "bad", responseOption2: "good", sublabel1: "bad", sublabel2: "great"),
+        post: BinaryPost(postId: "903885747", userId: "coolguy", comments: [Comment(commentType: .text, postId: "903885747", userId: "1", date: Date.now, commentId: "1", likes: [], dislikes: [], content: "Hey!")],
+                         responses:
+                            [Response(responseId: "1", userId: "1", responseOption: "Yes"),
+                         Response(responseId: "1", userId: "2", responseOption: "No"),
+                         Response(responseId: "1", userId: "3", responseOption: "No"),
+                         Response(responseId: "1", userId: "4", responseOption: "Yes"),
+                         Response(responseId: "1", userId: "5", responseOption: "No"),
+                         Response(responseId: "1", userId: "6", responseOption: "No"),
+                         Response(responseId: "1", userId: "7", responseOption: "No"),
+                         Response(responseId: "1", userId: "8", responseOption: "No"),
+                         Response(responseId: "1", userId: "9", responseOption: "No"),
+                         Response(responseId: "1", userId: "10", responseOption: "No"),
+                         Response(responseId: "2", userId: "11", responseOption: "No")],
+                         categories: [.sports(.nfl), .sports(.soccer)],
+                        topics: ["art", "picasso"],
+                         postDateAndTime: Date(), question: "Insert controversial binary take right here in this box;", responseOption1: "No", responseOption2: "Yes", sublabel1: "bad", sublabel2: "great", favoritedBy: ["sameer"]),
         optionSelected: 2
     )
     .environmentObject(UserFirebase())
