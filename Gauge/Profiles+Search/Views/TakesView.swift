@@ -8,30 +8,26 @@
 import SwiftUI
 
 struct TakesView: View {
-    @EnvironmentObject var postVM: PostFirebase
-    @EnvironmentObject var userVM: UserFirebase
+    var visitedUser: User
+    @ObservedObject var profileVM: ProfileViewModel
     @State private var selectedPost: BinaryPost?
-
-    var myBinaryPosts: [BinaryPost] {
-        postVM.allQueriedPosts.compactMap { $0 as? BinaryPost }.filter { $0.userId == userVM.user.userId }
-            .sorted { $0.postDateAndTime > $1.postDateAndTime }
-    }
-
+    
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(myBinaryPosts, id: \.postId) { binary in
-                    Button(action: {
-                        selectedPost = binary
-                    }) {
+                ForEach(profileVM.posts, id: \.postId) { post in
+                    Button {
+                        selectedPost = post
+                    } label: {
                         TakeCard(
-                            username: binary.username,
-                            timeAgo: DateConverter.timeAgo(from: binary.postDateAndTime),
-                            tags: binary.categories.map { $0.rawValue },
-                            content: binary.question,
-                            votes: binary.calculateResponses().reduce(0, +),
-                            comments: binary.comments.count,
-                            views: binary.viewCounter
+                            username: visitedUser.username,
+                            profilePhotoURL: visitedUser.profilePhoto,
+                            timeAgo: DateConverter.timeAgo(from: post.postDateAndTime),
+                            tags: post.categories.map { $0.rawValue },
+                            content: post.question,
+                            votes: post.calculateResponses().reduce(0, +),
+                            comments: post.comments.count,
+                            views: post.viewCounter
                         )
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -40,93 +36,165 @@ struct TakesView: View {
             .padding()
         }
         .onAppear {
-            postVM.watchForNewPosts(user: userVM.user)
+            profileVM.fetchUserPosts(for: visitedUser.userId)
         }
-        .sheet(item: $selectedPost) { post in
-            if post.responses.contains(where: { $0.userId == userVM.user.userId }) {
+        .sheet(item: $selectedPost, onDismiss: {
+            profileVM.fetchUserPosts(for: visitedUser.userId)
+        }) { post in
+            SwipeableTakeSheetView(post: post)
+                .presentationDetents([.fraction(0.94)])
+                .presentationBackground(Color.white)
+        }
+    }
+}
+    
+struct SwipeableSheetWrapper: View {
+    @ObservedObject var post: BinaryPost
+    @EnvironmentObject var postVM: PostFirebase
+    @EnvironmentObject var userVM: UserFirebase
+    @State private var dragAmount: CGSize = .zero
+    @State private var optionSelected: Int = 0
+    @State private var skipping: Bool = false
+    @State private var isConfirmed: Bool = false
+    var body: some View {
+        VStack {
+            if isConfirmed || post.responses.contains(where: { $0.userId == userVM.user.userId }) {
                 BinaryFeedResults(
                     post: post,
-                    optionSelected: post.responses.first(where: { $0.userId == userVM.user.userId })?.responseOption == post.responseOption1 ? 1 : 2
+                    optionSelected: optionSelectedFromResponse()
                 )
             } else {
                 BinaryFeedPost(
                     post: post,
-                    dragAmount: .constant(.zero),
-                    optionSelected: .constant(0),
-                    skipping: .constant(false)
+                    dragAmount: $dragAmount,
+                    optionSelected: $optionSelected,
+                    skipping: $skipping
                 )
-                .allowsHitTesting(false)
+                .onChange(of: optionSelected) { _, newValue in
+                    if newValue != 0 {
+                        submitResponse(for: newValue)
+                    }
+                }
             }
         }
+        .padding(.top, 30)
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+    }
+    private func optionSelectedFromResponse() -> Int {
+        if let response = post.responses.first(where: { $0.userId == userVM.user.userId }) {
+            return response.responseOption == post.responseOption1 ? 1 : 2
+        }
+        return 0
+    }
+    private func submitResponse(for selection: Int) {
+        let selectedOption = selection == 1 ? post.responseOption1 : post.responseOption2
+        postVM.addResponse(postId: post.postId, userId: userVM.user.userId, responseOption: selectedOption)
+        isConfirmed = true
+    }
+}
+
+struct SwipeableSheetView: View {
+    @ObservedObject var post: BinaryPost
+    @EnvironmentObject var postVM: PostFirebase
+    @EnvironmentObject var userVM: UserFirebase
+    @State private var dragAmount: CGSize = .zero
+    @State private var optionSelected: Int = 0
+    @State private var skipping: Bool = false
+    @State private var isConfirmed: Bool = false
+    var body: some View {
+        VStack {
+            if isConfirmed || post.responses.contains(where: { $0.userId == userVM.user.userId }) {
+                BinaryFeedResults(post: post, optionSelected: post.responses.first(where: { $0.userId == userVM.user.userId })?.responseOption == post.responseOption1 ? 1 : 2)
+            } else {
+                BinaryFeedPost(
+                    post: post,
+                    dragAmount: $dragAmount,
+                    optionSelected: $optionSelected,
+                    skipping: $skipping
+                )
+                .onChange(of: optionSelected) { _, newValue in
+                    if newValue != 0 {
+                        let selectedOption = newValue == 1 ? post.responseOption1 : post.responseOption2
+                        postVM.addResponse(postId: post.postId, userId: userVM.user.userId, responseOption: selectedOption)
+                        isConfirmed = true
+                    }
+                }
+            }
+        }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }
 
 struct TakeCard: View {
     var username: String
+    var profilePhotoURL: String
     var timeAgo: String
     var tags: [String]
     var content: String
     var votes: Int
     var comments: Int
     var views: Int
-
     var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 30, height: 30)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                AsyncImage(url: URL(string: profilePhotoURL)) { image in
+                    image.resizable()
+                } placeholder: {
+                    Circle().fill(Color(.systemGray3))
+                }
+                .frame(width: 30, height: 30)
+                .clipShape(Circle())
                 Text(username)
-                    .font(.headline)
-                Image(systemName: "diamond")
-                    .foregroundColor(.gray.opacity(0.7))
+                    .font(.system(size: 15, weight: .semibold))
                 Text("• \(timeAgo)")
-                    .font(.subheadline)
+                    .font(.system(size: 14))
                     .foregroundColor(.gray)
+                Spacer()
             }
-            .padding(.bottom, 4)
-
             HStack {
                 ForEach(tags, id: \.self) { tag in
-                    Text("\(tag)")
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
+                    Text(" \(tag) ")
                         .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                         .background(Color.gray.opacity(0.2))
-                        .foregroundColor(.black)
-                        .cornerRadius(8)
+                        .cornerRadius(10)
                 }
                 Spacer()
             }
-            .padding(.bottom, 8)
-
             Text(content)
-                .font(.body)
-                .padding(.bottom, 8)
-
+                .font(.system(size: 16))
+                .foregroundColor(.black)
             HStack {
                 Text("\(votes) votes")
-                Spacer(minLength: 110)
-                Image(systemName: "message")
-                Text("\(comments)")
-                Image(systemName: "eye")
-                Text("\(views)")
+                    .foregroundColor(.gray)
+                    .font(.subheadline)
+                
                 Spacer()
-                Image(systemName: "bookmark")
-                Image(systemName: "square.and.arrow.up")
+                
+                HStack(spacing: 16) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "bubble.left")
+                        Text("\(comments)")
+                    }
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "eye")
+                        Text("\(views)")
+                    }
+                    
+                    Image(systemName: "bookmark")
+                    Image(systemName: "square.and.arrow.up")
+                }
+                .foregroundColor(.gray)
+                .font(.subheadline)
             }
-            .foregroundColor(.gray)
-            .font(.subheadline)
         }
         .padding()
         .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 1)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
-}
-
-#Preview {
-    TakesView()
-        .environmentObject(UserFirebase())
-        .environmentObject(PostFirebase())
 }

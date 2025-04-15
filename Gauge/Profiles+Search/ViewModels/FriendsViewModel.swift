@@ -7,305 +7,222 @@
 
 import Foundation
 import FirebaseFirestore
-
 class FriendsViewModel: ObservableObject {
+    
+    var currentUser: User
+    
     @Published var friends: [String] = []
     @Published var incomingRequests: [String] = []
     @Published var outgoingRequests: [String] = []
+    @Published var loadedFriends: [User] = []
+    @Published var loadedRequests: [User] = []
     
     init(user: User) {
+        self.currentUser = user
         self.friends = user.friends
         self.incomingRequests = user.friendIn
         self.outgoingRequests = user.friendOut
+
+        Task {
+            await fetchFriendsDetails()
+            await fetchIncomingRequestDetails(userId: user.userId)
+        }
     }
     
-    /// Fetches the list of friends for a given user
-    func getConnections() {
-     
+    func sendFriendRequest(to targetUser: User) async throws {
+        let currentUserRef = Firebase.db.collection("USERS").document(currentUser.userId)
+        let targetUserRef = Firebase.db.collection("USERS").document(targetUser.userId)
+        
+        let currentSnap = try await currentUserRef.getDocument()
+        let targetSnap = try await targetUserRef.getDocument()
+        
+        var currentFriendOut = currentSnap.data()?["friendOut"] as? [String] ?? []
+        var targetFriendIn = targetSnap.data()?["friendIn"] as? [String] ?? []
+        
+        if !currentFriendOut.contains(targetUser.userId) {
+            currentFriendOut.append(targetUser.userId)
+        }
+        if !targetFriendIn.contains(currentUser.userId) {
+            targetFriendIn.append(currentUser.userId)
+        }
+        
+        let batch = Firebase.db.batch()
+        batch.updateData(["friendOut": currentFriendOut], forDocument: currentUserRef)
+        batch.updateData(["friendIn": targetFriendIn], forDocument: targetUserRef)
+        try await batch.commit()
+        
+        await MainActor.run {
+            self.outgoingRequests.append(targetUser.userId)
+        }
     }
     
-    /// Fetches incoming friend requests
     func getIncomingRequests(userId: String) async -> [User] {
-        var incomingRequests = [User]()
-
-
-        // 1: Query the 'friendIn' collection for the given userID
-        // 2: implement error handling with if else statement, ?? for fallback value ? when calling function
+        var incoming: [User] = []
         do {
-            //snapshot of the user
             let snapshot = try await Firebase.db.collection("USERS").document(userId).getDocument()
-
-            if let friendsIn = snapshot.data()?["friendIn"] as? [String: [String]] {
-                
-                for friendId in friendsIn.keys {
-                    if let user = await getUserFromId(userId: friendId) {
-                        incomingRequests.append(user)
-                    }
-                }
-            } else {
-                print("No incoming friends found for \(userId)")
-            }
-        } catch {
-            print("Error fetching incoming friend requests \(error.localizedDescription)")
-        }
-        //return the array of incoming friend requests
-        return incomingRequests;
-    }
-    
-    
-    /// Fetches outgoing friend requests
-    func getOutgoingRequests(userId: String) async -> [User]? {
-        do {
-            let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
-            
-            guard let data = document.data() else { return nil }
-            guard let friendsOut = data["friendOut"] as? [String] else { return nil }
-            
-            var outgoingRequests = [User]()
-            for friendId in friendsOut {
-                if let user = await getUserFromId(userId: friendId) {
-                    outgoingRequests.append(user)
-                }
-            }
-            
-            return outgoingRequests
-        } catch{
-            print("Error getting document")
-            return nil
-        }
-    }
-    
-    /// Searches for friends in a user’s list based on a given search string
-    func searchFriends(userId: String, searchString: String) async -> [User]? {
-            do {
-                let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
-                
-                guard let data = document.data(), let friendIds = data["friends"] as? [String] else { return nil }
-                
-                var matchingFriends: [User] = []
-                let querySnapshot = try await Firebase.db.collection("USERS")
-                    .whereField("userId", in: friendIds)
-                    .getDocuments()
-                
-                for document in querySnapshot.documents {
-                    let friendData = document.data()
-                    if let username = friendData["username"] as? String,
-                       username.lowercased().contains(searchString.lowercased()) {
-                        let friendUserId = document.documentID
-                        if let user = await getUserFromId(userId: friendUserId) {
-                            matchingFriends.append(user)
+            let friendIn = snapshot.data()?["friendIn"] as? [String] ?? []
+            for id in friendIn {
+                        let cleanedId = id.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if let user = await getUserFromId(userId: cleanedId) {
+                            incoming.append(user)
+                        } else {
+                            print("❌ Could not find user for incoming request id: \(cleanedId)")
                         }
                     }
+                } catch {
+                    print("Error fetching incoming requests: \(error)")
                 }
-                
-                return matchingFriends
-            } catch {
-                print("Error searching friends: \(error)")
-                return nil
+                return incoming
+            }
+    func getOutgoingRequests(userId: String) async -> [User] {
+        var outgoing: [User] = []
+        do {
+            let snapshot = try await Firebase.db.collection("USERS").document(userId).getDocument()
+            let friendOut = snapshot.data()?["friendOut"] as? [String] ?? []
+            for id in friendOut {
+                if let user = await getUserFromId(userId: id) {
+                    outgoing.append(user)
+                }
+            }
+        } catch {
+            print("Error fetching outgoing requests: \(error)")
+        }
+        return outgoing
+    }
+    func fetchIncomingRequestDetails(userId: String) async {
+        let users = await getIncomingRequests(userId: userId)
+        await MainActor.run {
+            self.incomingRequests = users.map { $0.userId }
+            self.loadedRequests = users
+        }
+        print("📨 Incoming loaded: \(users.map { $0.username })")
+    }
+    func fetchFriendsDetails() async {
+//        print("🔄 BEGIN fetchFriendsDetails with ids: \(friends)")
+        await MainActor.run {
+            self.loadedFriends = []
+        }
+        for id in friends {
+//            print("📡 Fetching friend user for id: \(id)")
+            if let user = await getUserFromId(userId: id) {
+//                print("✅ Got user: \(user.username)")
+                await MainActor.run {
+                    self.loadedFriends.append(user)
+                }
+            } else {
+                print("❌ No user found for id: \(id)")
             }
         }
-    
-    /// Sends a friend request from one user to another
-    func sendFriendRequest(from senderId: String, to receiverId: String) async throws {
-        let senderRef = Firebase.db.collection("USERS").document(senderId)
-        let receiverRef = Firebase.db.collection("USERS").document(receiverId)
-
-        do {
-            // Fetch the receiver’s data
-            let receiverSnapshot = try await receiverRef.getDocument()
-            guard let receiverData = receiverSnapshot.data() else {
-                throw NSError(domain: "sendFriendRequest", code: 404, userInfo: [NSLocalizedDescriptionKey: "Receiver not found"])
-            }
-
-            var friendIn = receiverData["friendIn"] as? [String: [String]] ?? [:]
-            if friendIn[senderId] == nil {
-                friendIn[senderId] = ["Pending"]
-                try await receiverRef.updateData(["friendIn": friendIn])
-            }
-
-            // Fetch the sender’s data
-            let senderSnapshot = try await senderRef.getDocument()
-            guard let senderData = senderSnapshot.data() else {
-                throw NSError(domain: "sendFriendRequest", code: 404, userInfo: [NSLocalizedDescriptionKey: "Sender not found"])
-            }
-
-            var friendOut = senderData["friendOut"] as? [String: [String]] ?? [:]
-            if friendOut[receiverId] == nil {
-                friendOut[receiverId] = ["Pending"]
-                try await senderRef.updateData(["friendOut": friendOut])
-            }
-
-            print("Friend request sent successfully")
-        } catch {
-            throw error
+//        print("🎯 Final loadedFriends: \(loadedFriends.map { $0.username })")
+    }
+    func acceptFriendRequest(friendId: String, hostId: String) async throws {
+        let hostRef = Firebase.db.collection("USERS").document(hostId)
+        let friendRef = Firebase.db.collection("USERS").document(friendId)
+        async let hostSnap = hostRef.getDocument()
+        async let friendSnap = friendRef.getDocument()
+        let (hostDataSnap, friendDataSnap) = try await (hostSnap, friendSnap)
+        var hostIn = hostDataSnap.data()?["friendIn"] as? [String] ?? []
+        var hostFriends = hostDataSnap.data()?["friends"] as? [String] ?? []
+        var friendOut = friendDataSnap.data()?["friendOut"] as? [String] ?? []
+        var friendFriends = friendDataSnap.data()?["friends"] as? [String] ?? []
+        hostIn.removeAll { $0 == friendId }
+        friendOut.removeAll { $0 == hostId }
+        if !hostFriends.contains(friendId) {
+            hostFriends.append(friendId)
+        }
+        if !friendFriends.contains(hostId) {
+            friendFriends.append(hostId)
+        }
+        let batch = Firebase.db.batch()
+        batch.updateData(["friendIn": hostIn, "friends": hostFriends], forDocument: hostRef)
+        batch.updateData(["friendOut": friendOut, "friends": friendFriends], forDocument: friendRef)
+        try await batch.commit()
+    }
+    func rejectFriendRequest(friendId: String, hostId: String) async throws {
+        let hostRef = Firebase.db.collection("USERS").document(hostId)
+        let friendRef = Firebase.db.collection("USERS").document(friendId)
+        async let hostSnap = hostRef.getDocument()
+        async let friendSnap = friendRef.getDocument()
+        let (hostDataSnap, friendDataSnap) = try await (hostSnap, friendSnap)
+        var hostIn = hostDataSnap.data()?["friendIn"] as? [String] ?? []
+        var friendOut = friendDataSnap.data()?["friendOut"] as? [String] ?? []
+        hostIn.removeAll { $0 == friendId }
+        friendOut.removeAll { $0 == hostId }
+        let batch = Firebase.db.batch()
+        batch.updateData(["friendIn": hostIn], forDocument: hostRef)
+        batch.updateData(["friendOut": friendOut], forDocument: friendRef)
+        try await batch.commit()
+    }
+    func removeFriend(friendId: String, hostId: String) async throws {
+        let hostRef = Firebase.db.collection("USERS").document(hostId)
+        let friendRef = Firebase.db.collection("USERS").document(friendId)
+        async let hostSnap = hostRef.getDocument()
+        async let friendSnap = friendRef.getDocument()
+        let (hostDoc, friendDoc) = try await (hostSnap, friendSnap)
+        var hostFriends = hostDoc.data()?["friends"] as? [String] ?? []
+        var friendFriends = friendDoc.data()?["friends"] as? [String] ?? []
+        hostFriends.removeAll { $0 == friendId }
+        friendFriends.removeAll { $0 == hostId }
+        let batch = Firebase.db.batch()
+        batch.updateData(["friends": hostFriends], forDocument: hostRef)
+        batch.updateData(["friends": friendFriends], forDocument: friendRef)
+        try await batch.commit()
+        await MainActor.run {
+            self.loadedFriends.removeAll { $0.userId == friendId }
         }
     }
-
-    
     func getUserFromId(userId: String) async -> User? {
         do {
-            let document = try await Firebase.db.collection("USERS").document(userId).getDocument()
-            guard let userData = document.data() else {return nil}
-            
-            guard let username = userData["username"] as? String else { return nil }
-            guard let email = userData["email"] as? String else { return nil }
-
-            let phoneNumber = userData["phoneNumber"] as? String ?? ""
-            let friendIn = userData["friendIn"] as? [String] ?? []
-            let friendOut = userData["friendOut"] as? [String] ?? []
-            let friends = userData["friends"] as? [String] ?? []
-            let myNextPosts = userData["myNextPosts"] as? [String] ?? []
-            let myResponses = userData["myResponses"] as? [String] ?? []
-            let myFavorites = userData["myFavorites"] as? [String] ?? []
-            let myPostSearches = userData["myPostSearches"] as? [String] ?? []
-            let myProfileSearches = userData["myProfileSearches"] as? [String] ?? []
-            let myComments = userData["myComments"] as? [String] ?? []
-            let myCategories = userData["myCategories"] as? [String] ?? []
-            let myTopics = userData["myTopics"] as? [String] ?? []
-            let myAccessedProfiles = userData["myAccessedProfiles"] as? [String] ?? []
-            let badges = userData["badges"] as? [String] ?? []
-            let streak = userData["streak"] as? Int ?? 0
-            let lastLogin = DateConverter.convertStringToDate(userData["lastLogin"] as? String ?? "") ?? Date()
-            let lastFeedRefresh = DateConverter.convertStringToDate(userData["lastFeedRefresh"] as? String ?? "") ?? Date()
-            let attributes = userData["attributes"] as? [String : String] ?? [:]
-            let profilePhoto = userData["profilePhoto"] as? String ?? ""
-            let myTakeTime = userData["myTakeTime"] as? [String:Int] ?? [:]
-
-            let outputUser = User(
+            let doc = try await Firebase.db.collection("USERS").document(userId).getDocument()
+            guard let data = doc.data() else { return nil }
+            let username = data["username"] as? String ?? "Unknown"
+            let email = data["email"] as? String ?? ""
+            let phone = data["phoneNumber"] as? String ?? ""
+            let profilePhoto = data["profilePhoto"] as? String ?? ""
+            let friendIn = data["friendIn"] as? [String] ?? []
+            let friendOut = data["friendOut"] as? [String] ?? []
+            let friends = data["friends"] as? [String] ?? []
+            let myNextPosts = data["myNextPosts"] as? [String] ?? []
+            let myFavorites = data["myFavorites"] as? [String] ?? []
+            let myPostSearches = data["myPostSearches"] as? [String] ?? []
+            let myProfileSearches = data["myProfileSearches"] as? [String] ?? []
+            let myCategories = data["myCategories"] as? [String] ?? []
+            let myTopics = data["myTopics"] as? [String] ?? []
+            let badges = data["badges"] as? [String] ?? []
+            let streak = data["streak"] as? Int ?? 0
+            let myAccessedProfiles = data["myAccessedProfiles"] as? [String] ?? []
+            let lastLogin = DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date()
+            let lastFeedRefresh = DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date()
+            let attributes = data["attributes"] as? [String: String] ?? [:]
+            return User(
                 userId: userId,
                 username: username,
-                phoneNumber: phoneNumber,
+                phoneNumber: phone,
                 email: email,
-                friendIn: friendIn,
-                friendOut: friendOut,
-                friends: friends,
-                myNextPosts: myNextPosts,
-                myResponses: myResponses,
-                myFavorites: myFavorites,
-                myPostSearches: myPostSearches,
-                myProfileSearches: myProfileSearches,
-                myComments: myComments,
-                myCategories: myCategories,
-                myTopics: myTopics,
-                badges: badges,
-                streak: streak,
+                friendIn: data["friendIn"] as? [String] ?? [],
+                friendOut: data["friendOut"] as? [String] ?? [],
+                friends: data["friends"] as? [String] ?? [],
+                myNextPosts: data["myNextPosts"] as? [String] ?? [],
+                myFavorites: data["myFavorites"] as? [String] ?? [],
+                myPostSearches: data["myPostSearches"] as? [String] ?? [],
+                myProfileSearches: data["myProfileSearches"] as? [String] ?? [],
+                myCategories: data["myCategories"] as? [String] ?? [],
+                myTopics: data["myTopics"] as? [String] ?? [],
+                badges: data["badges"] as? [String] ?? [],
+                streak: data["streak"] as? Int ?? 0,
                 profilePhoto: profilePhoto,
-                myAccessedProfiles: myAccessedProfiles,
-                lastLogin: lastLogin,
-                lastFeedRefresh: lastFeedRefresh,
-                attributes: attributes,
-                myTakeTime: myTakeTime
+                myAccessedProfiles: data["myAccessedProfiles"] as? [String] ?? [],
+                lastLogin: DateConverter.convertStringToDate(data["lastLogin"] as? String ?? "") ?? Date(),
+                lastFeedRefresh: DateConverter.convertStringToDate(data["lastFeedRefresh"] as? String ?? "") ?? Date(),
+                attributes: data["attributes"] as? [String: String] ?? [:],
+                myTakeTime: data["myTakeTime"] as? [String: Int] ?? [:]
             )
-            return outputUser
-                
         } catch {
             return nil
         }
     }
-
     enum FriendRequestError: Error {
         case invalidData(reason: String)
-        case userError(reason:String)
-    }
-    
-    func acceptFriendRequest(friendId: String, hostId: String) async throws {
-        do {
-            let friendDocRef = Firebase.db.collection("USERS").document(friendId)
-            let hostDocRef = Firebase.db.collection("USERS").document(hostId)
-            async let friendDocumentSnapshot = friendDocRef.getDocument()
-            async let hostDocumentSnapshot = hostDocRef.getDocument()
-            
-            let (friendSnapshot, hostSnapshot) = try await (friendDocumentSnapshot, hostDocumentSnapshot)
-            
-            // remove hostId from friend's outgoing requests
-            guard let friendDocument = friendSnapshot.data() else {
-                throw FriendRequestError.invalidData(reason: "Friend document not found")
-            }
-            guard var friendsOut = friendDocument["friendOut"] as? [String: [String]] else { throw FriendRequestError.invalidData(reason: "No outgoing request data for friend")}
-            guard friendsOut.removeValue(forKey: hostId) != nil else {
-                throw FriendRequestError.invalidData(reason: "Host is not in friend's outgoing requests")
-            }
-            // remove friendId from host's incoming requests
-            guard let hostDocument = hostSnapshot.data() else {
-                throw FriendRequestError.invalidData(reason: "Host document not found")
-            }
-            guard var hostIn = hostDocument["friendIn"] as? [String: [String]] else { throw FriendRequestError.invalidData(reason: "No incoming request data for host")}
-            guard hostIn.removeValue(forKey: friendId) != nil else {
-                throw FriendRequestError.invalidData(reason: "Friend is not in host's incoming requests")
-            }
-            
-            // add host to freind's friends
-            var friendFriends = friendDocument["friends"] as? [String: [String]] ?? [:]
-            guard let hostUsername = hostDocument["username"] as? String else { throw FriendRequestError.userError(reason: "Host document does not contain username")}
-            let hostProfilePhoto = hostDocument["profilePhoto"] as? String ?? ""
-            friendFriends[hostId] = [hostUsername, hostProfilePhoto]
-            
-            // add friend to host's friends
-            var hostFriends = hostDocument["friends"] as? [String: [String]] ?? [:]
-            guard let friendUsername = friendDocument["username"] as? String else { throw FriendRequestError.userError(reason: "Friend document does not contain username")}
-            let friendProfilePhoto = friendDocument["profilePhoto"] as? String ?? ""
-            hostFriends[friendId] = [friendUsername, friendProfilePhoto]
-            
-            let batch = Firebase.db.batch()
-            batch.updateData(["friendOut": friendsOut,"friends": friendFriends], forDocument: friendDocRef)
-            batch.updateData(["friendIn": hostIn, "friends": hostFriends], forDocument: hostDocRef)
-
-            try await batch.commit()
-        } catch FriendRequestError.invalidData(let reason) {
-            print("Data Error - \(reason)")
-            throw FriendRequestError.invalidData(reason: reason)
-        } catch FriendRequestError.userError(let reason) {
-            print("User Error - \(reason)")
-            throw FriendRequestError.userError(reason: reason)
-        }
-        catch {
-            print("Unexpected Error")
-            throw error
-        }
-    }
-
-    func rejectFriendRequest(friendId: String, hostId: String) async throws {
-        do {
-            let batch = Firebase.db.batch()
-            let friendDocRef = Firebase.db.collection("USERS").document(friendId)
-            let hostDocRef = Firebase.db.collection("USERS").document(hostId)
-            async let friendDocumentSnapshot = friendDocRef.getDocument()
-            async let hostDocumentSnapshot = hostDocRef.getDocument()
-            
-            let (friendSnapshot, hostSnapshot) = try await (friendDocumentSnapshot, hostDocumentSnapshot)
-            
-            // remove hostId from friend's outgoing requests
-            guard let friendDocument = friendSnapshot.data() else {
-                throw FriendRequestError.invalidData(reason: "Friend document not found")
-            }
-            guard var friendsOut = friendDocument["friendOut"] as? [String: [String]] else { throw FriendRequestError.invalidData(reason: "No outgoing request data for friend")}
-            guard friendsOut.removeValue(forKey: hostId) != nil else {
-                throw FriendRequestError.invalidData(reason: "Host is not in friend's outgoing requests")
-            }
-            batch.updateData(["friendOut": friendsOut], forDocument: friendDocRef)
-            
-            // remove friendId from host's incoming requests
-            guard let hostDocument = hostSnapshot.data() else {
-                throw FriendRequestError.invalidData(reason: "Host document not found")
-            }
-            guard var hostIn = hostDocument["friendIn"] as? [String: [String]] else { throw FriendRequestError.invalidData(reason: "No incoming request data for host")}
-            guard hostIn.removeValue(forKey: friendId) != nil else {
-                throw FriendRequestError.invalidData(reason: "Friend is not in host's incoming requests")
-            }
-            batch.updateData(["friendIn": hostIn], forDocument: hostDocRef)
-
-            try await batch.commit()
-
-        } catch FriendRequestError.invalidData(let reason) {
-            print("Data Error - \(reason)")
-            throw FriendRequestError.invalidData(reason: reason)
-        } catch FriendRequestError.userError(let reason) {
-            print("User Error - \(reason)")
-            throw FriendRequestError.userError(reason: reason)
-        }
-        catch {
-            print("Unexpected Error")
-            throw error
-        }
+        case userError(reason: String)
     }
 }

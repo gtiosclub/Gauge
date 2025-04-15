@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>This app needs access to your local network.</string>
+	<string>Gauge needs access to local networks.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_takematch._tcp</string>

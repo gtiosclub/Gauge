@@ -16,7 +16,6 @@ struct SearchResultsView: View {
     @Binding var userSearchResults: [UserResult]
     @Binding var userSearchProfileImages: [String: UIImage]
     @Binding var navigateToSearchedUser: Bool
-    @Binding var searchedUserIsCurrUser: Bool
 
     var body: some View {
         if isLoading {
@@ -66,6 +65,7 @@ struct SearchResultsView: View {
                                     searchedUserVM.user = fetchedUser
                                     navigateToSearchedUser = true
                                 }
+                                try await userVM.updateRecentProfileSearch(with: user.username)
                             } catch {
                                 print("Error fetching user data: \(error.localizedDescription)")
                             }

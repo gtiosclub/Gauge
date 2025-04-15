@@ -58,8 +58,10 @@ struct ContentView: View {
                             }
                             .tag(2)
                         
-                        ProfileView(userVM: userVM, isCurrentUser: true)
+                        ProfileView()
+                            .environmentObject(userVM)
                             .environmentObject(authVM)
+                            .environmentObject(postVM)
                             .tabItem {
                                   Image(systemName: "person.crop.circle")
                                   Text("Profile")
@@ -105,12 +107,6 @@ struct ContentView: View {
                                     userResponse.currentUserCategories = newCategories
                                     print("Replaced UserResponses current categories with: " + String(describing: newCategories))
                                     try modelContext.save()
-                                }
-
-                                let newTopics = userVM.user.myTopics
-                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
-                                    userResponse.currentUserTopics = newTopics
-                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
                                 }
                             }
                                                         

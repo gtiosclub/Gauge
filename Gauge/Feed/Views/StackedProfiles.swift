@@ -24,21 +24,19 @@ struct StackedProfiles: View {
         ZStack(alignment: .leading) {
             ForEach(userIds.indices, id: \.self) { index in
                 let userId = userIds[index]
-                let profilePhoto = userVM.useridsToPhotosAndUsernames[userId]?.photoURL ?? ""
 
-                ProfilePictureView(profilePhoto: profilePhoto)
+                ProfilePictureView(profilePhoto: userVM.useridsToPhotosAndUsernames[userId]?.photoURL ?? "")
 //                    .overlay(
 //                        Circle()
 //                            .strokeBorder(Color.white, lineWidth: 1)
 //                    )
                     .offset(x: sideOnTop == .left ? -CGFloat(index) * spacing : CGFloat(index) * spacing)
                     .task {
-                        if userVM.useridsToPhotosAndUsernames[userId] == nil {
-                            do {
-                                try await userVM.populateUsernameAndProfilePhoto(userId: userId)
-                            } catch {
-                                print("Failed to load user \(userId): \(error)")
-                            }
+                        do {
+//                                print("getting picture for \(userId)")
+                            try await userVM.populateUsernameAndProfilePhoto(userId: userId)
+                        } catch {
+                            print("Failed to load user \(userId): \(error)")
                         }
                     }
             }

@@ -238,7 +238,7 @@ struct FeedView: View {
                                                         postVM.removeFirstPostInNext(postId: binaryPost.postId, userId: user.userId)
                                                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                                                         UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
-                                                        userVM.user.myResponses.append(post.postId)
+                                                        userVM.addResponseToMyResponses(postId: post.postId)
                                                     }
                                                 } else if let sliderPost = post as? SliderPost {
                                                     shouldSubmit = optionSelected != 3
@@ -247,7 +247,7 @@ struct FeedView: View {
                                                         postVM.removeFirstPostInNext(postId: sliderPost.postId, userId: user.userId)
                                                         UserResponsesManager.addCategoriesToUserResponses(modelContext: modelContext, categories: post.categories.map{$0.rawValue})
                                                         UserResponsesManager.addTopicsToUserResponses(modelContext: modelContext, topics: post.topics)
-                                                        userVM.user.myResponses.append(post.postId)
+                                                        userVM.addResponseToMyResponses(postId: post.postId)
                                                     }
                                                 } else {
                                                     shouldSubmit = false
@@ -263,7 +263,6 @@ struct FeedView: View {
                                         
                                         if dragOffset.height > 150 && !hasSkipped {
                                             hasSkipped = true
-                                            optionSelected = 0
                                         }
                                     } else {
                                         if let post = postVM.feedPosts.first, post is SliderPost {

@@ -163,6 +163,12 @@ class UserFirebase: ObservableObject {
         }
     }
     
+    func addResponseToMyResponses(postId: String) {
+        guard !user.myResponses.contains(postId) else { return }
+
+        user.myResponses.append(postId)
+    }
+    
     func getUserPosts(userId: String, setCurrentUserData: Bool = false) async throws -> [String] {
         let snapshot = try await Firebase.db.collection("POSTS")
             .whereField("userId", isEqualTo: userId)
@@ -210,6 +216,7 @@ class UserFirebase: ObservableObject {
             print("No user data found for \(userId)")
             DispatchQueue.main.async {
                 self.useridsToPhotosAndUsernames[userId] = (photoURL: "", username: userId)
+                self.objectWillChange.send()
             }
             return
         }
@@ -220,6 +227,7 @@ class UserFirebase: ObservableObject {
         
         DispatchQueue.main.async {
             self.useridsToPhotosAndUsernames[userId] = (photoURL: profilePhoto.isEmpty ? profilePhoto2 : profilePhoto, username: username)
+            self.objectWillChange.send()
         }
     }
     
@@ -517,4 +525,57 @@ class UserFirebase: ObservableObject {
         try await Firebase.db.collection("USERS").document(userId).updateData(data)
         print("✅ myNextPosts updated for user \(userId)")
     }
+}
+extension UserFirebase {
+    func updateRecentPostSearch(with search: String) async throws {
+        var searches = self.user.myPostSearches
+        if let index = searches.firstIndex(of: search) {
+            searches.remove(at: index)
+        }
+        searches.insert(search, at: 0)
+        try await Firebase.db.collection("USERS").document(user.userId).updateData(["myPostSearches": searches])
+        await MainActor.run {
+            self.user.myPostSearches = searches
+        }
+    }
+    
+    func updateRecentProfileSearch(with search: String) async throws {
+        var searches = self.user.myProfileSearches
+        if let index = searches.firstIndex(of: search) {
+            searches.remove(at: index)
+        }
+        searches.insert(search, at: 0)
+        try await Firebase.db.collection("USERS").document(user.userId).updateData(["myProfileSearches": searches])
+        await MainActor.run {
+            self.user.myProfileSearches = searches
+        }
+    }
+    
+    func deleteRecentPostSearch(_ search: String) async throws {
+        var searches = self.user.myPostSearches
+        searches.removeAll { $0 == search }
+        try await Firebase.db.collection("USERS").document(user.userId).updateData(["myPostSearches": searches])
+        await MainActor.run {
+            self.user.myPostSearches = searches
+        }
+    }
+    
+    func deleteRecentProfileSearch(_ search: String) async throws {
+        var searches = self.user.myProfileSearches
+        searches.removeAll { $0 == search }
+        try await Firebase.db.collection("USERS").document(user.userId).updateData(["myProfileSearches": searches])
+        await MainActor.run {
+            self.user.myProfileSearches = searches
+        }
+    }
+    
+    func getProfilePhoto(forUsername username: String) async throws -> String? {
+        let snapshot = try await Firebase.db.collection("USERS").whereField("username", isEqualTo: username).getDocuments()
+        if let doc = snapshot.documents.first {
+            try await self.populateUsernameAndProfilePhoto(userId: doc.documentID)
+            return self.useridsToPhotosAndUsernames[doc.documentID]?.photoURL
+        }
+        return nil
+    }
+    
 }

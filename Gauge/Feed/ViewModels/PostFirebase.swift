@@ -619,26 +619,22 @@ class PostFirebase: ObservableObject {
     
     func addResponse(postId: String, userId: String, responseOption: String) {
         let responseId = UUID().uuidString
-        
-        //The postId is used to query the correct document in the POST collection.
-        let correctPost = Firebase.db.collection("POSTS").document(postId)
-        
-        //The Response should be added to a POST's RESPONSE collection.
+
+        // Reference for the specific post and its RESPONSES collection
         let responseLocation = Firebase.db.collection("POSTS").document(postId).collection("RESPONSES").document(responseId)
         
- 
-        //The two attributes are the userId and responseOption. Both strings
+        // Add the response to the POST
         let response = ["userId": userId, "responseOption": responseOption]
-        
         responseLocation.setData(response) { err in
             if let err = err {
                 print("Error writing document: \(err)")
             } else {
-                print("Response added succesfully")
+                print("Response added successfully")
+                // After successfully adding the response to the post, update the user's myResponses
             }
         }
     }
-    
+
     func removeFirstPostInNext(postId: String, userId: String) {
         let documentRef = Firebase.db.collection("USERS").document(userId)
         
@@ -648,7 +644,7 @@ class PostFirebase: ObservableObject {
             if let error = error {
                 print("Error removing first post from my next posts array: \(error)")
             } else {
-                print("Removed \(postId) from my next posts array: \(postId).")
+                print("Removed \(userId) from my next posts array: \(postId).")
             }
         }
     }
@@ -1066,6 +1062,7 @@ class PostFirebase: ObservableObject {
     func findNextPost(user: User) -> Bool {
         // load the next post in the feed
         if allQueriedPosts.isEmpty {
+            watchForCurrentFeedPostChanges()
             return false
         }
         
@@ -1139,6 +1136,16 @@ class PostFirebase: ObservableObject {
         let db = Firebase.db
 
         for postId in postIds {
+            let documentRef = Firebase.db.collection("POSTS").document(postId)
+            
+            documentRef.updateData([
+                "favoritedBy": []
+            ]) { error in
+                if let error = error {
+                    print("Error adding user to favoritedBy array: \(error)")
+                }
+            }
+            
             // Delete COMMENTS
             let commentsSnapshot = try? await db.collection("POSTS").document(postId).collection("COMMENTS").getDocuments()
             commentsSnapshot?.documents.forEach { doc in
