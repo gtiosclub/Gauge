@@ -98,14 +98,14 @@ class FriendsViewModel: ObservableObject {
         print("📨 Incoming loaded: \(users.map { $0.username })")
     }
     func fetchFriendsDetails() async {
-        print("🔄 BEGIN fetchFriendsDetails with ids: \(friends)")
+//        print("🔄 BEGIN fetchFriendsDetails with ids: \(friends)")
         await MainActor.run {
             self.loadedFriends = []
         }
         for id in friends {
-            print("📡 Fetching friend user for id: \(id)")
+//            print("📡 Fetching friend user for id: \(id)")
             if let user = await getUserFromId(userId: id) {
-                print("✅ Got user: \(user.username)")
+//                print("✅ Got user: \(user.username)")
                 await MainActor.run {
                     self.loadedFriends.append(user)
                 }
@@ -113,7 +113,7 @@ class FriendsViewModel: ObservableObject {
                 print("❌ No user found for id: \(id)")
             }
         }
-        print("🎯 Final loadedFriends: \(loadedFriends.map { $0.username })")
+//        print("🎯 Final loadedFriends: \(loadedFriends.map { $0.username })")
     }
     func acceptFriendRequest(friendId: String, hostId: String) async throws {
         let hostRef = Firebase.db.collection("USERS").document(hostId)

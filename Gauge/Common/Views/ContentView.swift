@@ -108,12 +108,6 @@ struct ContentView: View {
                                     print("Replaced UserResponses current categories with: " + String(describing: newCategories))
                                     try modelContext.save()
                                 }
-
-                                let newTopics = userVM.user.myTopics
-                                if Set(newTopics) != Set(userResponse.currentUserTopics) {
-                                    userResponse.currentUserTopics = newTopics
-                                    print("Replaced UserResponses current topics with: " + String(describing: newTopics))
-                                }
                             }
                                                         
                             await postVM.loadFeedPosts(for: userVM.user.myNextPosts)
