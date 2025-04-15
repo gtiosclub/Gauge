@@ -406,9 +406,11 @@ struct GuessView: View {
             .opacity(draggedAnswerID != nil ? 0.5 : 1.0)
 
             Button(action: {
-                if let id = draggedAnswerID,
-                   let answer = manager.roundAnswers.first(where: { $0.playerID == id })?.answer {
-                    manager.submitGuess(answer, from: manager.myPeerID.displayName)
+                if (manager.currentQuestion?.playerID != manager.myPeerID.displayName) {
+                    if let id = draggedAnswerID,
+                       let answer = manager.roundAnswers.first(where: { $0.playerID == id })?.answer {
+                        manager.submitGuess(answer, from: manager.myPeerID.displayName)
+                    }
                 }
             }) {
                 Text("Submit")
