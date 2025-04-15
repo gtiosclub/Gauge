@@ -341,7 +341,7 @@ extension TMManager: MCSessionDelegate {
                     self.questionSubmissions.append(submission)
 
                     if self.questionSubmissions.count >= self.expectedPlayers {
-                        self.currentQuestion = self.questionSubmissions.randomElement()
+                        self.currentQuestion = submission
 //                        let hostID = self.discoveredPeers.first(where: { $0.value.isHost == "Y" })?.key.displayName
 //                        let nonHostSubmissions = self.questionSubmissions.filter { $0.playerID != hostID }
                         //self.currentQuestion = nonHostSubmissions.randomElement()
