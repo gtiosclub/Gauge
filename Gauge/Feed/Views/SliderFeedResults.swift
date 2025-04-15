@@ -20,7 +20,6 @@ struct SliderFeedResults: View {
                 
                 ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 5)
                 
                 // Categories
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -52,9 +51,8 @@ struct SliderFeedResults: View {
                 // Results
                 SliderResultView(post: post, optionSelected: optionSelected > 3 ? optionSelected - 1 : optionSelected)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .frame(height: 200)
-                    .padding(.top, 8)
-                    .padding(.bottom, 10)
+                    .frame(height: 160)
+                    .padding(.bottom, 5)
                 
                 // Profile photos here
                 
@@ -68,14 +66,14 @@ struct SliderFeedResults: View {
             // Comments
             CommentsView(post: post)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 4)
+                .padding(.top, 0)
                 .padding(.horizontal, 0)
                 .onChange(of: post.comments) {old, new in
                     print("recognized comments changed")
                 }
             
-            Spacer()
-                .frame(height: 5.0)
+//            Spacer()
+//                .frame(height: 5.0)
         }
     }
 }

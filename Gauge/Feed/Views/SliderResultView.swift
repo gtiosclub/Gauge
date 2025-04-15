@@ -18,8 +18,8 @@ struct SliderResultView: View {
         let total = max(responses.reduce(0, +), 1)
         let percentages = responses.map { Double($0) / Double(total) }
         
-        let minHeight: CGFloat = 20  // minimum bar height even for 0%
-        let maxHeight: CGFloat = 150
+        let minHeight: CGFloat = 10  // minimum bar height even for 0%
+        let maxHeight: CGFloat = 110
 
         // Find the min non-zero value to scale relative to it
         let maxPercent = percentages.max() ?? 1.0
@@ -35,7 +35,7 @@ struct SliderResultView: View {
                     ZStack(alignment: .bottom) {
                         let barHeight = normalizedHeights[index]
                         let percentText = String(format: "%.1f%%", percentages[index] * 100)
-                        let isTooSmall = percentages[index] < 0.06
+                        let isTooSmall = percentages[index] < 0.08
 
                         ZStack(alignment: .top) {
                             Rectangle()
@@ -57,7 +57,7 @@ struct SliderResultView: View {
                         if isTooSmall {
                             Text(percentText)
                                 .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(textForIndex(index, optionSelected: optionSelected))
+                                .foregroundColor(textForIndex(index, optionSelected: optionSelected + 7))
                                 .offset(y: -barHeight - 2)
                         }
                         
@@ -89,7 +89,7 @@ struct SliderResultView: View {
                     )
                     .frame(height: 30.0)
                     .frame(width: 45.0)
-                    .offset(x: 3)
+                    .offset(x: 1)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -158,7 +158,7 @@ struct SliderResultView: View {
         Response(responseId: "1", userId: "", responseOption: "1"),
         Response(responseId: "2", userId: "", responseOption: "1"),
         Response(responseId: "1", userId: "", responseOption: "1"),
-        Response(responseId: "1", userId: "", responseOption: "1"),
+        Response(responseId: "1", userId: "", responseOption: "4"),
         Response(responseId: "2", userId: "i9", responseOption: "2"),
 
         ///Option 2, 0/10 = 0%
@@ -169,7 +169,7 @@ struct SliderResultView: View {
         Response(responseId: "5", userId: "", responseOption: "3"),
 
         ///Option 4, 1/10 = 10%
-        Response(responseId: "7", userId: "", responseOption: "4"),
+//        Response(responseId: "7", userId: "", responseOption: "4"),
 
         ///Option 4, 5/10 = 50%
         Response(responseId: "9", userId: "i10", responseOption: "5"),
@@ -183,8 +183,8 @@ struct SliderResultView: View {
         Response(responseId: "12", userId: "i7", responseOption: "1"),
         ///Option 4, 2/10 = 20%
         Response(responseId: "17", userId: "i6", responseOption: "4"),
-        Response(responseId: "18", userId: "i5", responseOption: "6"),
-        Response(responseId: "18", userId: "i4", responseOption: "6"),
+//        Response(responseId: "18", userId: "i5", responseOption: "6"),
+//        Response(responseId: "18", userId: "i4", responseOption: "6"),
         Response(responseId: "18", userId: "i3", responseOption: "3"),
         Response(responseId: "18", userId: "i2", responseOption: "4"),
         Response(responseId: "18", userId: "i", responseOption: "6")
@@ -209,7 +209,7 @@ struct SliderResultView: View {
     
     return SliderFeedResults(
         post: post,
-        optionSelected: 4
+        optionSelected: 6
     )
     .environmentObject(user)
 }
