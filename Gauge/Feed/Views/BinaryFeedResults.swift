@@ -53,6 +53,7 @@ struct BinaryFeedResults: View {
                 BinaryResultView(post: post, optionSelected: optionSelected)
 //                    .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, 4)
+                    .frame(height: 62)
                 
                 // Profile Stacks + Vote Count
                 
