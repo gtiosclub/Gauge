@@ -6,46 +6,76 @@
 //
 
 import SwiftUI
+
 struct FavoriteCard: View {
     var post: BinaryPost
     var onUnfavorite: () -> Void
     @EnvironmentObject var userVM: UserFirebase
     @EnvironmentObject var postVM: PostFirebase
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ProfileUsernameDateView(dateTime: post.postDateAndTime, userId: post.userId)
-            // Tags
-            HStack(spacing: 6) {
-                ForEach(post.categories, id: \.self) { tag in
-                    Text(tag.rawValue)
-                        .font(.caption)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(Color.gray.opacity(0.15))
-                        .cornerRadius(20)
+        VStack(alignment: .leading, spacing: 16) {
+            // Top section: Profile image + username/timestamp + tags
+            HStack(alignment: .top, spacing: 10) {
+                AsyncImage(url: URL(string: post.profilePhoto)) { image in
+                    image.resizable()
+                } placeholder: {
+                    Circle().fill(Color(.systemGray3))
                 }
+                .frame(width: 50, height: 50)
+                .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(post.username)
+                            .font(.system(size: 20, weight: .semibold))
+                        Text("• \(DateConverter.timeAgo(from: post.postDateAndTime)) ago")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                    }
+
+                    HStack(spacing: 6) {
+                        ForEach(post.categories, id: \.self) { tag in
+                            Text(tag.rawValue)
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(10)
+                        }
+                    }
+                }
+
+                Spacer()
             }
-            // Question
+
+            // Question content
             Text(post.question)
-                .font(.system(size: 16))
+                .font(.system(size: 22))
                 .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
-            // Stats
+
+            // Stats + unfavorite button
             HStack {
                 Text("\(post.calculateResponses().reduce(0, +)) votes")
                     .foregroundColor(.gray)
                     .font(.subheadline)
+
                 Spacer()
+
                 HStack(spacing: 16) {
                     HStack(spacing: 4) {
                         Image(systemName: "bubble.left")
                         Text("\(post.comments.count)")
                     }
+
                     HStack(spacing: 4) {
                         Image(systemName: "eye")
                         Text("\(post.viewCounter)")
                     }
-                    // Bookmark filled icon
+
                     Button(action: {
                         postVM.removeUserFromFavoritedBy(postId: post.postId, userId: userVM.user.userId)
                         onUnfavorite()
@@ -56,10 +86,10 @@ struct FavoriteCard: View {
                 .foregroundColor(.gray)
                 .font(.subheadline)
             }
+
+            Divider()
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
+        .padding(20)
+        .frame(minHeight: 200)
     }
 }

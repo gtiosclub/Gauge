@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
+
 struct VoteCard: View {
+    var voterName: String?
     var profilePhotoURL: String?
     var username: String?
     var timeAgo: String
@@ -16,66 +18,98 @@ struct VoteCard: View {
     var comments: Int?
     var views: Int?
     var votes: Int?
+
     var voteColor: Color {
         let greenResponses = ["yes", "love", "cool"]
         return greenResponses.contains(vote.lowercased()) ? .green : .red
     }
+
     var voteText: String {
         "voted \(vote.lowercased())"
     }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header: user info and vote
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 16) {
+
+            // Top row: voter + vote
+            if let voterName = voterName {
+                HStack(spacing: 4) {
+                    Text(voterName)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+
+                    Text("·")
+                        .foregroundColor(.gray)
+
+                    Text(voteText)
+                        .foregroundColor(voteColor)
+                        .font(.subheadline)
+
+                    Spacer()
+
+                    Text(timeAgo)
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+                }
+            }
+
+            // Middle row: original post author + tags
+            HStack(alignment: .top, spacing: 10) {
                 if let profilePhotoURL = profilePhotoURL {
                     AsyncImage(url: URL(string: profilePhotoURL)) { image in
                         image.resizable()
                     } placeholder: {
                         Circle().fill(Color(.systemGray3))
                     }
-                    .frame(width: 28, height: 28)
+                    .frame(width: 50, height: 50)
                     .clipShape(Circle())
                 }
-                if let username = username {
-                    Text(username)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
 
-                    Text("·")
-                        .foregroundColor(.gray)
+                VStack(alignment: .leading, spacing: 6) {
+                    if let username = username {
+                        HStack(spacing: 6) {
+                            Text(username)
+                                .font(.system(size: 20, weight: .semibold))
+
+                            Text("• \(timeAgo)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                        }
+                    }
+
+                    HStack(spacing: 6) {
+                        ForEach(tags, id: \.self) { tag in
+                            Text(tag)
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(10)
+                        }
+                    }
                 }
-                Text(voteText)
-                    .foregroundColor(voteColor)
-                    .font(.subheadline)
+
                 Spacer()
-                Text(timeAgo)
-                    .font(.footnote)
-                    .foregroundColor(.gray)
             }
-            // Tags
-            HStack(spacing: 6) {
-                ForEach(tags, id: \.self) { tag in
-                    Text(tag)
-                        .font(.caption)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(Color.gray.opacity(0.15))
-                        .foregroundColor(.black)
-                        .cornerRadius(20)
-                }
-            }
+
             // Content
             Text(content)
-                .font(.body)
+                .font(.system(size: 22))
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
-            // Stats
+
+            // Interaction Row
             HStack {
                 if let votes = votes {
                     Text("\(votes) votes")
                         .foregroundColor(.gray)
                         .font(.subheadline)
                 }
+
                 Spacer()
+
                 HStack(spacing: 16) {
                     if let comments = comments {
                         HStack(spacing: 4) {
@@ -83,22 +117,24 @@ struct VoteCard: View {
                             Text("\(comments)")
                         }
                     }
+
                     if let views = views {
                         HStack(spacing: 4) {
                             Image(systemName: "eye")
                             Text("\(views)")
                         }
                     }
+
                     Image(systemName: "bookmark")
                     Image(systemName: "square.and.arrow.up")
                 }
                 .foregroundColor(.gray)
                 .font(.subheadline)
             }
+
+            Divider()
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
+        .padding(20)
+        .frame(minHeight: 200)
     }
 }
