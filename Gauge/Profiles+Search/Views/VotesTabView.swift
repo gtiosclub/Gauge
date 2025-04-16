@@ -20,8 +20,9 @@ struct VotesTabView: View {
                     ForEach(profileVM.respondedPosts, id: \.postId) { post in
                         if let userResponse = post.responses.first(where: { $0.userId == visitedUser.userId }) {
                             VoteCard(
-                                profilePhotoURL: visitedUser.profilePhoto,
-                                username: visitedUser.username,
+                                voterName: visitedUser.username,
+                                profilePhotoURL: post.profilePhoto,
+                                username: post.username,
                                 timeAgo: DateConverter.timeAgo(from: post.postDateAndTime),
                                 tags: post.categories.map { $0.rawValue },
                                 vote: userResponse.responseOption,

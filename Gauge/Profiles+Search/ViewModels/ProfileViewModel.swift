@@ -308,8 +308,11 @@ class ProfileViewModel: ObservableObject {
                                 sublabel2: data["sublabel2"] as? String ?? "",
                                 favoritedBy: data["favoritedBy"] as? [String] ?? []
                             )
-                            post.username = data["username"] as? String ?? "Unknown"
-                            post.profilePhoto = data["profilePhoto"] as? String ?? ""
+                            let posterUserId = post.userId
+                            if let user = try? await userVM.getUserData(userId: posterUserId) {
+                                post.username = user.username
+                                post.profilePhoto = user.profilePhoto
+                            }
 
                             // ✅ Only get the current user's response
                             let responseSnap = try await Firebase.db.collection("POSTS").document(id).collection("RESPONSES")
