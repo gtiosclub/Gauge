@@ -53,15 +53,20 @@ struct FavoriteCard: View {
             Text(post.question)
                 .font(.system(size: 22))
                 .foregroundColor(.black)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity, alignment: .center)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
+                .padding(.leading, 60)
 
             // Stats + unfavorite button
             HStack {
                 Text("\(post.calculateResponses().reduce(0, +)) votes")
                     .foregroundColor(.gray)
                     .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, 60)
+
 
                 Spacer()
 

@@ -22,7 +22,7 @@ struct ProfileVisitView: View {
     
     let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
 
-    let userTags = ["📏5'9", "📍New York", "🔒Single", "🎓Alumni"]
+    let userTags = ["📏6'5", "📍New York", "🔒Single", "🎓Alumni"]
     
     @ObservedObject var friendsViewModel: FriendsViewModel
 
@@ -44,108 +44,120 @@ struct ProfileVisitView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
-                    HStack(alignment: .center) {
-                        ZStack {
-                            if let emoji = user.attributes["profileEmoji"], !emoji.isEmpty {
-                                Text(emoji)
-                                    .font(.system(size: 60))
-                            } else if let url = URL(string: user.profilePhoto),
-                                      !user.profilePhoto.isEmpty {
-                                AsyncImage(url: url) { phase in
-                                    if let image = phase.image {
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: 80, height: 80)
-                                            .clipShape(Circle())
-                                    } else if phase.error != nil {
-                                        Circle()
-                                            .fill(Color.gray)
-                                            .frame(width: 80, height: 80)
-                                    } else {
-                                        ProgressView()
-                                            .frame(width: 80, height: 80)
+                    ZStack(alignment: .topTrailing) {
+                        HStack(alignment: .center) {
+                            // Profile image
+                            ZStack {
+                                if let emoji = user.attributes["profileEmoji"], !emoji.isEmpty {
+                                    Text(emoji)
+                                        .font(.system(size: 60))
+                                } else if let url = URL(string: user.profilePhoto),
+                                          !user.profilePhoto.isEmpty {
+                                    AsyncImage(url: url) { phase in
+                                        if let image = phase.image {
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 80, height: 80)
+                                                .clipShape(Circle())
+                                        } else if phase.error != nil {
+                                            Circle()
+                                                .fill(Color.gray)
+                                                .frame(width: 80, height: 80)
+                                        } else {
+                                            ProgressView()
+                                                .frame(width: 80, height: 80)
+                                        }
                                     }
+                                } else {
+                                    Circle()
+                                        .frame(width: 80, height: 80)
+                                        .foregroundColor(.gray)
                                 }
-                            } else {
-                                Circle()
-                                    .frame(width: 80, height: 80)
+
+                                Button(action: {
+                                    showingTakeTimeResults = true
+                                }) {
+                                    Circle()
+                                        .foregroundColor(Color.black.opacity(0))
+                                        .frame(width: 80, height: 80)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(
+                                                    LinearGradient(
+                                                        gradient: Gradient(colors: [.blue, .purple]),
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 3
+                                                )
+                                                .opacity(user.myTakeTime.isEmpty ? 0 : 1)
+                                        )
+                                }
+                                .disabled(user.myTakeTime.isEmpty)
+                            }
+
+                            // Username, Add Friend + Friends count
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(user.username)
+                                    .font(.system(size: 26))
+                                    .fontWeight(.medium)
+
+                                HStack(spacing: 12) {
+                                    // Add Friend Button
+                                    if currentFriendStatus == .none {
+                                        Button(action: {
+                                            Task {
+                                                isSendingRequest = true
+                                                do {
+                                                    try await friendsViewModel.sendFriendRequest(to: user)
+                                                } catch {
+                                                    print("Error sending friend request: \(error)")
+                                                }
+                                                isSendingRequest = false
+                                            }
+                                        }) {
+                                            if isSendingRequest {
+                                                ProgressView()
+                                                    .progressViewStyle(CircularProgressViewStyle())
+                                            } else {
+                                                Text("+ Add Friend")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.blue)
+                                            }
+                                        }
+                                    } else if currentFriendStatus == .pending {
+                                        Text("Request Sent")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    } else if currentFriendStatus == .friends {
+                                        Text("Friends")
+                                            .font(.subheadline)
+                                            .foregroundColor(.green)
+                                    }
+
+                                    // 👥 Friends count
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "person.2.fill")
+                                            .font(.subheadline)
+                                        Text("\(user.friends.count)")
+                                            .font(.subheadline)
+                                    }
                                     .foregroundColor(.gray)
+                                }
                             }
-                            
-                            // TakeTime overlay button.
-                            Button(action: {
-                                showingTakeTimeResults = true
-                            }) {
-                                Circle()
-                                    .foregroundColor(Color.black.opacity(0))
-                                    .frame(width: 80, height: 80)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(
-                                                LinearGradient(
-                                                    gradient: Gradient(colors: [.blue, .purple]),
-                                                    startPoint: .topLeading,
-                                                    endPoint: .bottomTrailing
-                                                ),
-                                                lineWidth: 3
-                                            )
-                                            .opacity(user.myTakeTime.isEmpty ? 0 : 1)
-                                    )
-                            }
-                            .disabled(user.myTakeTime.isEmpty)
+
+                            Spacer()
                         }
-                        
-                        VStack(alignment: .leading) {
-                            Text(user.username)
-                                .font(.system(size: 26))
-                                .fontWeight(.medium)
-                        HStack {
-                             if currentFriendStatus == .none {
-                                 Button(action: {
-                                     Task {
-                                         isSendingRequest = true
-                                         do {
-                                             try await friendsViewModel.sendFriendRequest(to: user)
-                                         } catch {
-                                             print("Error sending friend request: \(error)")
-                                         }
-                                         isSendingRequest = false
-                                     }
-                                 }) {
-                                     if isSendingRequest {
-                                         ProgressView()
-                                             .progressViewStyle(CircularProgressViewStyle())
-                                     } else {
-                                         Text("+ Add Friend")
-                                             .font(.subheadline)
-                                             .foregroundColor(.blue)
-                                     }
-                                 }
-                             } else if currentFriendStatus == .pending {
-                                 Text("Friend Request Sent")
-                                     .font(.subheadline)
-                                     .foregroundColor(.gray)
-                             } else if currentFriendStatus == .friends {
-                                 Text("Friends")
-                                     .font(.subheadline)
-                                     .foregroundColor(.green)
-                             }
-                             Spacer()
-                             HStack(spacing: 4) {
-                                 Image(systemName: "person.2.fill")
-                                     .font(.headline)
-                                 Text("\(user.friends.count)")
-                                     .font(.headline)
-                             }
-                             .foregroundColor(.gray)
-                         }
-                     }
-                     .padding(.leading, 8)
-                     Spacer()
-                 }
-                 .padding(.horizontal, 16)
-                 .padding(.top, 15)
+
+                        Image("profilegauge")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
+                            .padding(.trailing, 12)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
                     
                     HStack {
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -165,7 +177,7 @@ struct ProfileVisitView: View {
                     }
                     
                     HStack {
-                        Text("A short bio that describes this user")
+                        Text("Love me some hot takes #teamgauge")
                             .padding(.horizontal, 16)
                         Spacer()
                     }
@@ -221,6 +233,9 @@ struct ProfileVisitView: View {
             }
             .sheet(isPresented: $showingTakeTimeResults) {
                 TakeTimeResultsView(user: user, myResponses: user.myTakeTime)
+            }
+            .sheet(item: $selectedBadge) { badge in
+                BadgeDetailView(badge: badge)
             }
         }
         .task(id: user.userId) {

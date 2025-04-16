@@ -29,7 +29,7 @@ struct StatisticsView: View {
             LazyVGrid(columns: gridColumns, spacing: 16) {
                 statCard(title: "Total Votes", value: "\(totalVotes)", footer: "Votes", gradient: [.orange.opacity(0.2), .white])
                 statCard(title: "Total Comments", value: "\(totalComments)", footer: "Comments", gradient: [.blue.opacity(0.2), .white])
-                statCard(title: "View/Response Ratio", value: String(format: "%.2f", viewResponseRatio), footer: "Views / Votes", gradient: [.purple.opacity(0.2), .white])
+                statCard(title: "Response /View Ratio", value: String(format: "%.2f", viewResponseRatio), footer: "Responses to Views", gradient: [.purple.opacity(0.2), .white])
                 statCard(title: "Total Takes", value: "\(totalTakes)", footer: "Takes", gradient: [.red.opacity(0.2), .white])
             }
             .padding(.horizontal)
