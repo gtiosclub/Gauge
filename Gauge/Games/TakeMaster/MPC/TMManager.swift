@@ -361,13 +361,11 @@ extension TMManager: MCSessionDelegate {
                    let author = message["author"] {
                     let submission = PlayerSubmission(playerID: author, question: "", answer: answer)
                     self.roundAnswers.append(submission)
-                    print(self.roundAnswers)
                     if self.roundAnswers.count >= self.expectedPlayers {
                         self.phase = .guessPhase
                         self.broadcastGuessStart()
                     } else {
-                        if author != self.myPeerID.displayName &&
-                            !self.roundAnswers.contains(where: { $0.playerID == self.myPeerID.displayName }) {
+                        if author != self.myPeerID.displayName && !self.roundAnswers.contains(where: { $0.playerID == self.myPeerID.displayName }) {
                             self.phase = .roundStart
                         } else {
                             self.phase = .waitingForAnswers
@@ -380,7 +378,9 @@ extension TMManager: MCSessionDelegate {
                 if let guess = message["answer"],
                    let author = message["author"] {
                     let submission = PlayerSubmission(playerID: author, question: "", answer: guess)
+                    print(self.roundGuesses)
                     self.roundGuesses.append(submission)
+                    print(self.roundGuesses)
                     if self.roundGuesses.count >= self.expectedPlayers {
                         self.phase = .results
                         self.broadcastResultsStart()
