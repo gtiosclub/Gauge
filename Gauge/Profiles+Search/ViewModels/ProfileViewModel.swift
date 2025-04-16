@@ -14,6 +14,9 @@ class ProfileViewModel: ObservableObject {
     @Published var tempAttributes: [String:String] = [:]
     @Published var user: User?
     @Published var posts: [BinaryPost] = []
+    @Published var respondedPosts: [BinaryPost] = []
+    @Published var visitedStats: (totalVotes: Int, totalComments: Int, totalTakes: Int, viewResponseRatio: Double) =
+        (0, 0, 0, 0.0)
     
     private var storage = Storage.storage()
     
@@ -274,4 +277,101 @@ class ProfileViewModel: ObservableObject {
                 }
         }
     
+    func fetchRespondedPosts(for userId: String, using userVM: UserFirebase) async {
+        do {
+            let (responseIds, _, _) = try await userVM.getUserPostInteractions(userId: userId, setCurrentUserData: false)
+            print("✅ Got \(responseIds.count) response post IDs")
+            
+            let limitedIds = Array(responseIds.prefix(10)) 
+            var tempPosts: [BinaryPost] = []
+            
+            await withTaskGroup(of: BinaryPost?.self) { group in
+                for id in limitedIds {
+                    group.addTask {
+                        do {
+                            let doc = try await Firebase.db.collection("POSTS").document(id).getDocument()
+                            guard let data = doc.data(),
+                                  let type = data["type"] as? String,
+                                  type == PostType.BinaryPost.rawValue else { return nil }
+
+                            var post = BinaryPost(
+                                postId: id,
+                                userId: data["userId"] as? String ?? "",
+                                categories: Category.mapStringsToCategories(returnedStrings: data["categories"] as? [String] ?? []),
+                                topics: data["topics"] as? [String] ?? [],
+                                postDateAndTime: (data["postDateAndTime"] as? Timestamp)?.dateValue()
+                                    ?? DateConverter.convertStringToDate(data["postDateAndTime"] as? String ?? "") ?? Date(),
+                                question: data["question"] as? String ?? "",
+                                responseOption1: data["responseOption1"] as? String ?? "",
+                                responseOption2: data["responseOption2"] as? String ?? "",
+                                sublabel1: data["sublabel1"] as? String ?? "",
+                                sublabel2: data["sublabel2"] as? String ?? "",
+                                favoritedBy: data["favoritedBy"] as? [String] ?? []
+                            )
+                            post.username = data["username"] as? String ?? "Unknown"
+                            post.profilePhoto = data["profilePhoto"] as? String ?? ""
+
+                            // ✅ Only get the current user's response
+                            let responseSnap = try await Firebase.db.collection("POSTS").document(id).collection("RESPONSES")
+                                .whereField("userId", isEqualTo: userId).getDocuments()
+
+                            post.responses = responseSnap.documents.map { d in
+                                let data = d.data()
+                                return Response(
+                                    responseId: data["responseId"] as? String ?? UUID().uuidString,
+                                    userId: data["userId"] as? String ?? "",
+                                    responseOption: data["responseOption"] as? String ?? ""
+                                )
+                            }
+
+                            return post
+                        } catch {
+                            print("⚠️ Failed to fetch post with ID \(id): \(error.localizedDescription)")
+                            return nil
+                        }
+                    }
+                }
+
+                for await post in group {
+                    if let post = post {
+                        tempPosts.append(post)
+                    }
+                }
+            }
+
+            print("✅ Fetched \(tempPosts.count) posts. Sorting and storing...")
+            let sortedPosts = tempPosts.sorted { $0.postDateAndTime > $1.postDateAndTime }
+
+            await MainActor.run {
+                self.respondedPosts = sortedPosts
+            }
+
+        } catch {
+            print("🔥 Failed to fetch responded posts: \(error.localizedDescription)")
+        }
+    }
+    
+    func fetchVisitedStats(for user: User, using userVM: UserFirebase) async {
+        do {
+            async let (responses, comments, _) = userVM.getUserPostInteractions(userId: user.userId, setCurrentUserData: false)
+            async let posts = userVM.getUserPosts(userId: user.userId, setCurrentUserData: false)
+
+            let (res, com, postIds) = try await (responses, comments, posts)
+
+            let viewCount = user.myViews.count
+            let responseCount = res.count
+            let ratio = responseCount == 0 ? 0.0 : Double(viewCount) / Double(responseCount)
+
+            await MainActor.run {
+                self.visitedStats = (
+                    totalVotes: responseCount,
+                    totalComments: com.count,
+                    totalTakes: postIds.count,
+                    viewResponseRatio: ratio
+                )
+            }
+        } catch {
+            print("❌ Failed to load visited user stats: \(error.localizedDescription)")
+        }
+    }
 }

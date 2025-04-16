@@ -159,11 +159,18 @@ struct ProfileView: View {
                             selectedBadge = badge
                         })
                     } else if selectedTab == "Votes" {
-                        VotesTabView(visitedUser: userVM.user)
+                        VotesTabView(visitedUser: userVM.user, profileVM: profileViewModel)
                     } else if selectedTab == "Takes" {
                         TakesView(visitedUser: userVM.user, profileVM: profileViewModel)
                     } else if selectedTab == "Statistics" {
-                        StatisticsView(visitedUser: userVM.user)
+                        StatisticsView(
+                            visitedUser: userVM.user,
+                            totalVotes: userVM.user.myResponses.count,
+                            totalComments: userVM.user.myComments.count,
+                            totalTakes: userVM.user.myPosts.count,
+                            viewResponseRatio: userVM.user.myResponses.count == 0 ? 0.0 :
+                                Double(userVM.user.myViews.count) / Double(userVM.user.myResponses.count)
+                        )
                     } else if selectedTab == "Comments" {
                         CommentsTabView(visitedUser: userVM.user)
                     } else if selectedTab == "Favorites" {
@@ -177,6 +184,11 @@ struct ProfileView: View {
                                 .padding()
                         }
                     }
+                }
+            }
+            .task {
+                if profileViewModel.posts.isEmpty {
+                    await profileViewModel.fetchRespondedPosts(for: userVM.user.userId, using: userVM)
                 }
             }
             .sheet(isPresented: $showingSettings) {
