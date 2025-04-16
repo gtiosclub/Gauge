@@ -926,10 +926,12 @@ class PostFirebase: ObservableObject {
             score += DateConverter.calcDateScore(postDate: post.postDateAndTime)
             
             //Call topics function for topic mathcing score
-            score += topicRanker(user_topics: user.myTopics, post_topics: post.topics)
+            let copiedTopics = user.myTopics
+            score += topicRanker(user_topics: copiedTopics, post_topics: post.topics)
             
             //Call cateogries function for category matching score
-            score += categoryRanker(user_categories: user.myCategories, post_categories: post.categories)
+            let copiedCats = user.myCategories
+            score += categoryRanker(user_categories: copiedCats, post_categories: post.categories)
             
             if score > bestScore {
                 bestScore = score
