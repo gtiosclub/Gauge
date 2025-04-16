@@ -213,7 +213,7 @@ struct TakeCard: View {
             Divider()
         }
         .padding(20)
-        .frame(minHeight: 200)
+        .frame(minHeight: 145)
     }
 }
 

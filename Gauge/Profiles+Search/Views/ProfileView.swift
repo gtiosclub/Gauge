@@ -11,7 +11,7 @@ struct ProfileView: View {
     @State private var selectedBadge: BadgeModel? = nil
     @State private var showingTakeTimeResults = false
     @State private var showingSettings = false
-    let userTags = ["📏5'9", "📍Atlanta", "🔒Single", "🎓College"]
+    let userTags = ["📏 5'9\"", "📍 Atlanta", "🔒 Single", "🎓 College"]
     @State private var profileImage: UIImage?
     let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
     
@@ -97,7 +97,7 @@ struct ProfileView: View {
                         HStack(alignment: .center) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(userVM.user.username)
-                                    .font(.system(size: 30))
+                                    .font(.system(size: 24))
                                     .fontWeight(.medium)
 
                                 NavigationLink(destination: FriendsView(viewModel: FriendsViewModel(user: userVM.user), currentUser: userVM.user)) {
@@ -129,7 +129,7 @@ struct ProfileView: View {
                             HStack {
                                 ForEach(userTags, id: \.self) { tag in
                                     Text(tag)
-                                        .padding(.horizontal, 20)
+                                        .padding(.horizontal, 10)
                                         .padding(.vertical, 6)
                                         .font(.system(size: 14))
                                         .background(Color.gray.opacity(0.2))
@@ -143,7 +143,7 @@ struct ProfileView: View {
                     }
                     
                     HStack {
-                        Text("A short bio that describes you")
+                        Text("Gauge is the best app!! 😎")
                             .padding(.leading, 20)
                         Spacer()
                     }
