@@ -16,6 +16,9 @@ struct ProfileVisitView: View {
     @State private var showingTakeTimeResults = false
     @State private var isSendingRequest: Bool = false
     @StateObject private var profileVM = ProfileViewModel()
+    @EnvironmentObject var userVM: UserFirebase
+    @State private var hasLoadedVotes = false
+
     
     let tabs = ["Takes", "Votes", "Comments", "Badges", "Statistics", "Favorites"]
 
@@ -191,11 +194,17 @@ struct ProfileVisitView: View {
                                 selectedBadge = badge
                             })
                         } else if selectedTab == "Votes" {
-                            VotesTabView(visitedUser: user)
+                            VotesTabView(visitedUser: user, profileVM: profileVM)
                         } else if selectedTab == "Takes" {
                             TakesView(visitedUser: user, profileVM: profileVM)
                         } else if selectedTab == "Statistics" {
-                            StatisticsView(visitedUser: user)
+                            StatisticsView(
+                                visitedUser: user,
+                                totalVotes: profileVM.visitedStats.totalVotes,
+                                totalComments: profileVM.visitedStats.totalComments,
+                                totalTakes: profileVM.visitedStats.totalTakes,
+                                viewResponseRatio: profileVM.visitedStats.viewResponseRatio
+                            )
                         }  else if selectedTab == "Comments" {
                             CommentsTabView(visitedUser: user)
                         } else if selectedTab == "Favorites" {
@@ -214,5 +223,13 @@ struct ProfileVisitView: View {
                 TakeTimeResultsView(user: user, myResponses: user.myTakeTime)
             }
         }
+        .task(id: user.userId) {
+            if !hasLoadedVotes {
+                await profileVM.fetchRespondedPosts(for: user.userId, using: userVM)
+                hasLoadedVotes = true
+            }
+            await profileVM.fetchVisitedStats(for: user, using: userVM)
+        }
     }
 }
+
