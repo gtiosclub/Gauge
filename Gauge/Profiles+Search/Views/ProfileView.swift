@@ -35,7 +35,9 @@ struct ProfileView: View {
                                 .resizable()
                                 .frame(width: 20, height: 15)
                                 .foregroundColor(.black)
-                                .padding(6)
+                                .padding(.trailing, 16)
+                                .padding(.leading, 6) 
+                                .padding(.vertical, 6)
                         }
                     }
                     .padding(.top, 5)
@@ -92,23 +94,33 @@ struct ProfileView: View {
                         }
                         .padding(.leading, 16)
                         
-                        VStack(alignment: .leading) {
-                            Text(userVM.user.username)
-                                .font(.system(size: 30))
-                                .fontWeight(.medium)
-                            
-                            NavigationLink(destination: FriendsView(viewModel: FriendsViewModel(user: userVM.user), currentUser: userVM.user)) {
-                                HStack {
-                                    Text("\(userVM.user.friends.count)")
-                                        .foregroundColor(.black)
-                                        .font(.system(size: 18))
-                                    Text("Friends")
-                                        .foregroundColor(Color(.systemGray))
-                                        .font(.system(size: 18))
+                        HStack(alignment: .center) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(userVM.user.username)
+                                    .font(.system(size: 30))
+                                    .fontWeight(.medium)
+
+                                NavigationLink(destination: FriendsView(viewModel: FriendsViewModel(user: userVM.user), currentUser: userVM.user)) {
+                                    HStack {
+                                        Text("\(userVM.user.friends.count)")
+                                            .foregroundColor(.black)
+                                            .font(.system(size: 18))
+                                        Text("Friends")
+                                            .foregroundColor(Color(.systemGray))
+                                            .font(.system(size: 18))
+                                    }
                                 }
                             }
+
+                            Spacer()
+
+                            Image("currentgauge")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 80, height: 80)
+                                .offset(y: -8)
                         }
-                        Spacer()
+                        .padding(.trailing)
                     }
                     
                     // User Tags
@@ -168,8 +180,11 @@ struct ProfileView: View {
                             totalVotes: userVM.user.myResponses.count,
                             totalComments: userVM.user.myComments.count,
                             totalTakes: userVM.user.myPosts.count,
-                            viewResponseRatio: userVM.user.myResponses.count == 0 ? 0.0 :
-                                Double(userVM.user.myViews.count) / Double(userVM.user.myResponses.count)
+                            viewResponseRatio: {
+                                let responses = Double(userVM.user.myResponses.count)
+                                let views = Double(userVM.user.myViews.count)
+                                return responses + views == 0 ? 0.0 : responses / (responses + views)
+                            }()
                         )
                     } else if selectedTab == "Comments" {
                         CommentsTabView(visitedUser: userVM.user)
@@ -197,6 +212,9 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingTakeTimeResults) {
                 TakeTimeResultsView(user: userVM.user, myResponses: userVM.user.myTakeTime)
+            }
+            .sheet(item: $selectedBadge) { badge in
+                BadgeDetailView(badge: badge)
             }
         }
     }

@@ -2,36 +2,32 @@ import SwiftUI
 
 struct BadgesView: View {
     let badges: [BadgeModel] = [
-        BadgeModel(id: 1, title: "Fire Voter", description: "Voted on 500 takes", emoji: "🔥"),
-        BadgeModel(id: 2, title: "Posting Warrior", description: "Posted 50 takes", emoji: "⚔️"),
-        BadgeModel(id: 3, title: "Rising Star", description: "Gained 25 followers", emoji: "☄️"),
-        BadgeModel(id: 4, title: "Top Rank", description: "Top 1% of Voters", emoji: "👑"),
+        BadgeModel(id: 1, title: "Fire Voter", description: "Voted 100 times", imageName: "firevoter"),
+        BadgeModel(id: 2, title: "Take Master", description: "Posted 50 takes", imageName: "takemaster"),
+        BadgeModel(id: 3, title: "Casual Challenger", description: "Played 10 games", imageName: "game"),
+        BadgeModel(id: 4, title: "Controversial Ratio", description: "Hits 60:40", imageName: "ratio"),
+        BadgeModel(id: 5, title: "Locked", description: "", imageName: "unlocked")
     ]
     
     var onBadgeTap: (BadgeModel) -> Void
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Badges")
-                    .font(.headline)
-                    .padding(.leading)
-                
-                Spacer()
-                
-                Text("total badges: \(badges.count)")
+                Text("Total Badges: \(badges.count)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
-                    .padding(.trailing)
+                    .padding(.leading)
+                Spacer()
             }
             .padding(.top)
-            
+
             ScrollView {
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible()),
                     GridItem(.flexible())
-                ], spacing: 20) {
+                ], spacing: 28) {
                     ForEach(badges) { badge in
                         Button(action: {
                             onBadgeTap(badge)
@@ -40,10 +36,10 @@ struct BadgesView: View {
                         }
                     }
                 }
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.bottom, 10)
             }
         }
-        .background(Color(UIColor.systemBackground))
     }
 }
 
@@ -51,49 +47,28 @@ struct BadgeModel: Identifiable {
     let id: Int
     let title: String
     let description: String
-    let emoji: String
+    let imageName: String
 }
 
 struct BadgeView: View {
     let badge: BadgeModel
     
     var body: some View {
-        VStack {
-            ZStack {
-                Diamond()
-                    .frame(width: 80, height: 80)
-                    .foregroundColor(Color(UIColor.systemGray5))
-                    .shadow(radius: 1)
-                
-                Text(badge.emoji)
-                    .font(.system(size: 30))
-            }
-            
+        VStack(spacing: 8) {
+            Image(badge.imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 70, height: 70)
+                .clipShape(Circle())
+                .shadow(radius: 1)
+
             Text(badge.title)
-                .font(.system(size:16))
+                .font(.system(size: 14))
                 .fontWeight(.medium)
                 .multilineTextAlignment(.center)
-                .frame(height: 40)
+                .frame(height: 38)
                 .foregroundColor(.black)
         }
-        .padding(.bottom, 5)
-    }
-}
-
-struct Diamond: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        
-        let midX = rect.midX
-        let midY = rect.midY
-        
-        path.move(to: CGPoint(x: midX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: midY))
-        path.addLine(to: CGPoint(x: midX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: midY))
-        path.closeSubpath()
-        
-        return path
     }
 }
 
@@ -114,25 +89,23 @@ struct BadgeDetailView: View {
                         .padding()
                 }
             }
-            
-            Circle()
+
+            Image(badge.imageName)
+                .resizable()
                 .frame(width: 150, height: 150)
-                .foregroundColor(Color(UIColor.systemGray5))
-                .overlay(
-                    Text(badge.emoji)
-                        .font(.system(size: 70))
-                )
-            
+                .clipShape(Circle())
+                .shadow(radius: 3)
+
             Text(badge.title)
                 .font(.title)
                 .fontWeight(.bold)
                 .padding(.top)
-            
+
             Text(badge.description)
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
-            
+
             Spacer()
         }
         .padding(.top, 20)
@@ -144,3 +117,4 @@ struct BadgesView_Previews: PreviewProvider {
         BadgesView(onBadgeTap: { _ in })
     }
 }
+

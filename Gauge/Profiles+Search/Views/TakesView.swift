@@ -176,15 +176,19 @@ struct TakeCard: View {
             Text(content)
                 .font(.system(size: 22))
                 .foregroundColor(.black)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity, alignment: .center)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
+                .padding(.leading, 60)
 
             // Interaction Row
             HStack {
                 Text("\(votes) votes")
                     .foregroundColor(.gray)
                     .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, 60)
 
                 Spacer()
 
